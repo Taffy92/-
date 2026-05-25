@@ -1,0 +1,21 @@
+{
+  "name": "万能格式转换器",
+  "short_name": "万能格式转换器",
+  "description": "浏览器本地处理图片、PDF、OCR、音频和视频的格式转换工具。",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#0ea5e9",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

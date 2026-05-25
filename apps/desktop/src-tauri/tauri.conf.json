@@ -1,0 +1,126 @@
+{
+  "build": {
+    "beforeBuildCommand": "pnpm --filter web build:desktop",
+    "beforeDevCommand": "cmd /c set NEXT_PUBLIC_APP_MODE=desktop&& pnpm --filter web dev",
+    "devPath": "http://localhost:3000",
+    "distDir": "../../web/out"
+  },
+  "package": {
+    "productName": "万能格式转换器",
+    "version": "1.0.0"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": false,
+      "dialog": {
+        "all": false,
+        "ask": true,
+        "confirm": true,
+        "message": true,
+        "open": true,
+        "save": true
+      },
+      "fs": {
+        "all": false,
+        "copyFile": false,
+        "createDir": true,
+        "exists": true,
+        "readDir": true,
+        "readFile": true,
+        "removeDir": false,
+        "removeFile": false,
+        "renameFile": false,
+        "scope": [
+          "$HOME/**",
+          "$DESKTOP/**",
+          "$DOCUMENT/**",
+          "$DOWNLOAD/**",
+          "$PICTURE/**",
+          "$VIDEO/**",
+          "$AUDIO/**",
+          "D:/**"
+        ],
+        "writeFile": true
+      },
+      "os": {
+        "all": false
+      },
+      "path": {
+        "all": true
+      },
+      "process": {
+        "all": false,
+        "exit": false,
+        "relaunch": false
+      },
+      "shell": {
+        "all": false,
+        "open": true,
+        "scope": [
+          {
+            "name": "open-output-directory",
+            "cmd": "explorer",
+            "args": true
+          }
+        ]
+      }
+    },
+    "bundle": {
+      "active": true,
+      "category": "Productivity",
+      "copyright": "© 2026 MR.谢. All rights reserved.",
+      "externalBin": [],
+      "icon": [
+        "icons/icon.ico",
+        "icons/icon.png"
+      ],
+      "identifier": "com.mrxie.formatconverter",
+      "longDescription": "万能格式转换器离线专业版由 MR.谢 开发，支持图片裁切、尺寸调整、添加水印、图片压缩、PDF 转图片、Word 转图片、Excel 转图片、视频格式转换、音频格式转换、视频提取音频等本地处理能力。所有用户文件仅在本机处理，不上传服务器，不调用云端转换 API。",
+      "publisher": "MR.谢",
+      "resources": [
+        "resources/ffmpeg"
+      ],
+      "shortDescription": "本地处理的图片、文档和音视频格式转换工具",
+      "targets": [
+        "nsis",
+        "msi"
+      ],
+        "windows": {
+            "certificateThumbprint": null,
+            "digestAlgorithm": "sha256",
+            "webviewInstallMode": {
+                "type": "offlineInstaller",
+                "silent": true
+            },
+            "nsis": {
+                "displayLanguageSelector": true,
+                "installMode": "perMachine",
+                "languages": [
+            "SimpChinese"
+          ]
+        },
+        "wix": {
+          "language": "zh-CN"
+        },
+        "timestampUrl": ""
+      }
+    },
+    "security": {
+      "csp": "default-src 'self' asset: https://asset.localhost; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https://pagead2.googlesyndication.com https://hm.baidu.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: asset: https://asset.localhost https://*.googlesyndication.com https://*.doubleclick.net; font-src 'self' data:; connect-src 'self' blob: data: https://*.google.com https://*.googlesyndication.com https://*.doubleclick.net; worker-src 'self' blob: data:; frame-src 'self' https://googleads.g.doubleclick.net https://*.googlesyndication.com; object-src 'none'; base-uri 'self'; form-action 'self'"
+    },
+    "updater": {
+      "active": false
+    },
+    "windows": [
+      {
+        "fullscreen": false,
+        "height": 820,
+        "minHeight": 720,
+        "minWidth": 1120,
+        "resizable": true,
+        "title": "万能格式转换器",
+        "width": 1280
+      }
+    ]
+  }
+}

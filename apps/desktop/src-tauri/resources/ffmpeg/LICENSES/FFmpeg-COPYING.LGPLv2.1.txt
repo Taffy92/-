@@ -1,0 +1,7 @@
+LGPL placeholder
+
+当前 POC 没有放入 FFmpeg LGPL 构建。
+
+正式使用 LGPL FFmpeg 构建前，请用对应版本的官方 LGPL 文本替换本文件，并保留完整构建参数和源码获取方式。
+
+本占位文件不是正式许可证文本。

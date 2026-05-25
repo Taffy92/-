@@ -1,0 +1,7 @@
+GPL placeholder
+
+当前 POC 没有放入 GPL FFmpeg 构建。
+
+如果未来选择 GPL FFmpeg 构建，请用对应版本的官方 GPL 文本替换本文件，并完整履行 GPL 许可证义务，包括源码获取方式和版权声明。
+
+本占位文件不是正式许可证文本。

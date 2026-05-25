@@ -1,0 +1,31 @@
+{
+  "name": "doctool-platform",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "dev:web": "pnpm --filter web dev",
+    "build:web": "pnpm --filter web build",
+    "export:web": "pnpm --filter web build",
+    "deploy:vercel": "vercel --prod",
+    "deploy:cloudbase": "tcb hosting deploy apps/web/out -e YOUR_ENV_ID",
+    "build:desktop": "pnpm --filter desktop build",
+    "package:desktop": "pnpm --filter desktop package",
+    "check:privacy": "pnpm --filter web check:privacy",
+    "check:network": "pnpm --filter web check:network",
+    "generate:notices": "node scripts/generate-third-party-notices.mjs",
+    "test": "pnpm --filter web test"
+  },
+  "pnpm": {
+    "overrides": {
+      "postcss": "8.5.10",
+      "uuid": "11.1.1"
+    }
+  },
+  "devDependencies": {
+    "@cloudbase/cli": "^3.3.3",
+    "@types/node": "^20.12.12",
+    "typescript": "^5.4.5",
+    "vercel": "^34.2.0"
+  }
+}

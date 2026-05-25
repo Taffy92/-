@@ -1,0 +1,26 @@
+{
+  "version": "2.0",
+  "envId": "YOUR_ENV_ID",
+  "framework": {
+    "name": "doctool-platform-web",
+    "plugins": {
+      "client": {
+        "use": "@cloudbase/framework-plugin-website",
+        "inputs": {
+          "outputPath": "out",
+          "cloudPath": "/",
+          "ignore": [".git", "node_modules", "cloudbaserc.json"],
+          "commands": {
+            "build": "pnpm build:web"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "source": "out",
+    "target": "/",
+    "cdn": true,
+    "customDomain": true
+  }
+}

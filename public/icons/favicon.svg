@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="图片PDF工具">
+  <rect width="64" height="64" rx="18" fill="#0891b2"/>
+  <path d="M18 14h20l8 8v28H18z" fill="#fff"/>
+  <path d="M38 14v10h10" fill="#cffafe"/>
+  <path d="M23 36l6-7 5 5 4-4 7 9H23z" fill="#16a34a"/>
+  <circle cx="27" cy="25" r="3" fill="#f97316"/>
+</svg>

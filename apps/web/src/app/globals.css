@@ -1,0 +1,74 @@
+@import "cropperjs/dist/cropper.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  background: #050b14;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(14, 165, 233, 0.18), transparent 32rem),
+    radial-gradient(circle at 78% 8%, rgba(34, 211, 238, 0.14), transparent 30rem),
+    linear-gradient(135deg, #050b14 0%, #071627 44%, #06101d 100%);
+  color: #dbeafe;
+  font-family: Arial, "Microsoft YaHei", "PingFang SC", sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.tool-card {
+  @apply rounded-2xl border border-cyan-300/15 bg-slate-950/70 p-5 text-slate-100 shadow-[0_18px_60px_rgba(0,0,0,0.28)] backdrop-blur;
+}
+
+.form-label {
+  @apply text-sm font-semibold text-cyan-100;
+}
+
+.form-input {
+  @apply min-h-11 w-full rounded-xl border border-cyan-300/20 bg-slate-950/80 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-cyan-300 focus:ring-4 focus:ring-cyan-400/15;
+}
+
+.notice {
+  @apply rounded-2xl border border-cyan-300/20 bg-cyan-950/30 p-4 text-sm leading-6 text-cyan-50;
+}
+
+.tab {
+  @apply inline-flex shrink-0 items-center justify-center rounded-full border border-cyan-300/15 bg-slate-950/70 px-4 py-2 text-sm font-semibold text-slate-300 transition hover:border-cyan-300/40 hover:bg-cyan-950/40 hover:text-cyan-100 active:scale-95;
+}
+
+.tab-active {
+  @apply inline-flex shrink-0 items-center justify-center rounded-full border border-cyan-300/70 bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 shadow-[0_0_28px_rgba(34,211,238,0.28)] transition active:scale-95;
+}
+
+.btn-primary {
+  @apply rounded-xl border border-cyan-300/40 bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 shadow-[0_0_28px_rgba(34,211,238,0.22)] transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:border-slate-700 disabled:bg-slate-800 disabled:text-slate-500 disabled:shadow-none;
+}
+
+.btn-secondary {
+  @apply rounded-xl border border-cyan-300/20 bg-slate-950/70 px-4 py-2.5 text-sm font-semibold text-slate-200 transition hover:border-cyan-300/50 hover:bg-cyan-950/30;
+}
+
+.tech-panel {
+  @apply border border-cyan-300/15 bg-slate-950/70 text-slate-100 shadow-[0_18px_60px_rgba(0,0,0,0.28)] backdrop-blur;
+}
+
+.tech-muted-panel {
+  @apply border border-cyan-300/10 bg-slate-900/60 text-slate-200;
+}

@@ -1,0 +1,7 @@
+FFmpeg license placeholder
+
+当前 POC 没有放入 ffmpeg.exe / ffprobe.exe。
+
+正式加入 FFmpeg sidecar 二进制后，应将对应版本和构建的许可证文本放入本目录，并在 THIRD_PARTY_NOTICES.md、FFMPEG_LICENSE_NOTICE.md 和 OPEN_SOURCE_LICENSES.md 中同步说明。
+
+本占位文件不是正式许可证文本。

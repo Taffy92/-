@@ -1,0 +1,121 @@
+# Dependencies
+node_modules/
+**/node_modules/
+.pnpm-home/
+
+# Environment files
+.env
+.env.*
+!.env.example
+*.local
+
+# Next.js / web build outputs
+.next/
+apps/web/.next/
+apps/web/out/
+out/
+*.tsbuildinfo
+**/*.tsbuildinfo
+
+# Test outputs
+apps/web/test-results/
+apps/web/playwright-report/
+apps/web/playwright-report
+**/playwright-report/
+apps/web/verification/
+
+# Tauri / Rust build outputs
+target/
+apps/desktop/src-tauri/target/
+
+# Sidecar binary artifacts are handled by Git LFS or a private artifact store.
+apps/desktop/src-tauri/resources/ffmpeg/bin/*.exe
+apps/desktop/src-tauri/resources/ffmpeg/bin/*.dll
+apps/desktop/src-tauri/*backup*.json
+
+# Logs and temporary files
+*.log
+*.tmp
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.tmp/
+.icon-tmp/
+.DS_Store
+Thumbs.db
+
+# Local previews and screenshots
+desktop-preview*.png
+preview-*.png
+web-renamed-preview.png
+icon-refined-preview*.png
+
+# Verification transient outputs
+verification/out/
+verification/ffmpeg-binary-candidates/
+verification/**/*.tmp
+verification/**/*.log
+verification/**/*.exe
+verification/**/*.msi
+verification/**/*.dll
+verification/**/*.zip
+verification/**/*.7z
+verification/**/*.png
+verification/**/*.jpg
+verification/**/*.jpeg
+verification/**/*.webp
+verification/**/*.wav
+verification/**/*.mp3
+verification/**/*.aac
+verification/**/*.m4a
+verification/**/*.flac
+verification/**/*.mp4
+verification/**/*.mov
+verification/**/*.avi
+verification/**/*.mkv
+verification/**/*.webm
+verification/**/*.doc
+verification/**/*.docx
+verification/**/*.xls
+verification/**/*.xlsx
+verification/**/*.pdf
+verification/**/*.txt
+verification/**/evidence/
+verification/**/*result*.json
+verification/**/out/
+verification/**/output/
+verification/**/输出 文件夹/
+verification/**/msi-admin-extract/
+
+# Release installers are distributed via CloudBase/COS/Release artifacts.
+release/*/installers/*.exe
+release/*/installers/*.msi
+!release/*/installers/SHA256SUMS.txt
+
+# Release verification: keep Markdown audit records, ignore generated evidence.
+release/*/verification/**/*.log
+release/*/verification/**/*.tmp
+release/*/verification/**/out/
+release/*/verification/**/*.exe
+release/*/verification/**/*.msi
+release/*/verification/**/*.zip
+release/*/verification/**/*.7z
+release/*/verification/**/*.png
+release/*/verification/**/*.jpg
+release/*/verification/**/*.jpeg
+release/*/verification/**/*.webp
+release/*/verification/**/*.dll
+release/*/verification/**/*.wasm
+
+# Local editor/system files
+.agents/
+.codex/
+skills-lock.json
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Keep release documentation and SHA256SUMS tracked by policy.
+# EXE/MSI release artifacts are distributed outside ordinary Git.

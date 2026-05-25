@@ -1,0 +1,13 @@
+{
+  "name": "@doctool/pdf-core",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "dependencies": {
+    "@doctool/shared": "workspace:*",
+    "jszip": "^3.10.1",
+    "pdfjs-dist": "^4.3.136"
+  }
+}

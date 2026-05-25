@@ -1,0 +1,12 @@
+{
+  "name": "@doctool/image-core",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "dependencies": {
+    "@doctool/shared": "workspace:*",
+    "browser-image-compression": "^2.0.2"
+  }
+}

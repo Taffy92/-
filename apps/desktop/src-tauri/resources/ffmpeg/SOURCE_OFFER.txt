@@ -1,0 +1,18 @@
+﻿Source offer and upstream references
+
+This directory contains a candidate FFmpeg sidecar binary set for internal experiment only.
+It is not a final commercial release approval.
+
+Candidate:
+- BtbN FFmpeg-Builds latest n7.1 win64 lgpl shared 7.1
+- Repository: https://github.com/BtbN/FFmpeg-Builds
+- Release: https://github.com/BtbN/FFmpeg-Builds/releases/tag/latest
+- Downloaded asset: ffmpeg-n7.1-latest-win64-lgpl-shared-7.1.zip
+- Asset SHA256: 233E3C0D1E73C4BC2915DA553AA211BEAB75AA902F074CF6A7D6BADE6846F2CC
+
+Upstream FFmpeg:
+- Source: https://ffmpeg.org/download.html
+- Legal: https://ffmpeg.org/legal.html
+
+Commercial release note:
+Before public commercial release, verify redistribution terms, LGPL obligations, all bundled DLL licenses, patent/platform requirements, and whether a self-built LGPL FFmpeg package should replace this candidate.
