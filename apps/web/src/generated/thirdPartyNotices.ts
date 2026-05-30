@@ -2,7 +2,7 @@
 // Do not edit it by hand.
 
 export const thirdPartyNoticeMeta = {
-  "generatedAt": "2026-05-27T17:27:05.253Z",
+  "generatedAt": "2026-05-30T20:46:07.201Z",
   "npmPackageCount": 835,
   "directNpmPackageCount": 33,
   "rustCrateCount": 425,
@@ -22,8 +22,8 @@ export const bundledArtifacts = [
     "label": "Next.js 静态网站产物",
     "path": "apps/web/out",
     "kind": "目录",
-    "files": 275,
-    "sizeBytes": 46428081,
+    "files": 284,
+    "sizeBytes": 47120956,
     "sha256": "",
     "note": "在线版和离线版共用的静态页面、JS、CSS 和静态资源。"
   },
@@ -50,8 +50,8 @@ export const bundledArtifacts = [
     "path": "apps/desktop/src-tauri/target/release/bundle/nsis/万能格式转换器_1.0.0_x64-setup.exe",
     "kind": "文件",
     "files": 1,
-    "sizeBytes": 257629869,
-    "sha256": "797B01FD201BD6D5501220F12B4BF932903549782937C933008F455F39646565",
+    "sizeBytes": 257553905,
+    "sha256": "012417FEF531D0C124035705219D2473E357D46ECAFFA46D75295CEC203F8EDD",
     "note": "离线版 Windows x64 EXE 安装包。"
   },
   {
@@ -59,8 +59,8 @@ export const bundledArtifacts = [
     "path": "apps/desktop/src-tauri/target/release/bundle/msi/万能格式转换器_1.0.0_x64_zh-CN.msi",
     "kind": "文件",
     "files": 1,
-    "sizeBytes": 268967936,
-    "sha256": "AA04807713CEDFD48FE2AAB8F974BFD15871A2AE44169896F79BE7F800466D3E",
+    "sizeBytes": 268886016,
+    "sha256": "B8AF3A4DFCA0E17E954FF4CCC166A76E432BA7F060429C09EA2BA517169E4F26",
     "note": "离线版 Windows x64 MSI 安装包。"
   }
 ] as const;

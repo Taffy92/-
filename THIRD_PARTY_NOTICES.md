@@ -88,8 +88,8 @@ Windows 离线专业版包含一个默认关闭的 sidecar FFmpeg 内部实验�
 | Next.js 静态网站产物 | `apps/web/out` | 目录 | 275 | 44.28 MB | - | 在线版和离线版共用的静态页面、JS、CSS 和静态资源。 |
 | PDF.js 静态资源 | `apps/web/out/pdfjs` | 目录 | 189 | 3.80 MB | - | 来自 pdfjs-dist 的主模块、worker、CMaps 和字体资源。 |
 | FFmpeg WASM 静态资源 | `apps/web/out/ffmpeg` | 目录 | 2 | 30.85 MB | - | 来自 @ffmpeg/core 的 ffmpeg-core.js 和 ffmpeg-core.wasm。 |
-| Windows NSIS 安装包 | `apps/desktop/src-tauri/target/release/bundle/nsis/万能格式转换器_1.0.0_x64-setup.exe` | 文件 | 1 | 245.69 MB | 797B01FD201BD6D5501220F12B4BF932903549782937C933008F455F39646565 | 离线版 Windows x64 EXE 安装包。 |
-| Windows MSI 安装包 | `apps/desktop/src-tauri/target/release/bundle/msi/万能格式转换器_1.0.0_x64_zh-CN.msi` | 文件 | 1 | 256.51 MB | AA04807713CEDFD48FE2AAB8F974BFD15871A2AE44169896F79BE7F800466D3E | 离线版 Windows x64 MSI 安装包。 |
+| Windows NSIS 安装包 | `apps/desktop/src-tauri/target/release/bundle/nsis/万能格式转换器_1.0.0_x64-setup.exe` | 文件 | 1 | 245.62 MB | 012417FEF531D0C124035705219D2473E357D46ECAFFA46D75295CEC203F8EDD | 离线版 Windows x64 EXE 安装包。 |
+| Windows MSI 安装包 | `apps/desktop/src-tauri/target/release/bundle/msi/万能格式转换器_1.0.0_x64_zh-CN.msi` | 文件 | 1 | 256.43 MB | B8AF3A4DFCA0E17E954FF4CCC166A76E432BA7F060429C09EA2BA517169E4F26 | 离线版 Windows x64 MSI 安装包。 |
 
 ## 直接 npm 依赖
 

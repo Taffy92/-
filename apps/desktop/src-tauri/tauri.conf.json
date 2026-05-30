@@ -1,6 +1,6 @@
 {
   "build": {
-    "beforeBuildCommand": "node ../../web/scripts/build-desktop.mjs",
+    "beforeBuildCommand": "node ../web/scripts/build-desktop.mjs",
     "beforeDevCommand": "cmd /c set NEXT_PUBLIC_APP_MODE=desktop&& pnpm --filter web dev",
     "devPath": "http://localhost:3000",
     "distDir": "../../web/out"
