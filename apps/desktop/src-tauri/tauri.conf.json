@@ -1,6 +1,6 @@
 {
   "build": {
-    "beforeBuildCommand": "pnpm --filter web build:desktop",
+    "beforeBuildCommand": "node ../../web/scripts/build-desktop.mjs",
     "beforeDevCommand": "cmd /c set NEXT_PUBLIC_APP_MODE=desktop&& pnpm --filter web dev",
     "devPath": "http://localhost:3000",
     "distDir": "../../web/out"
@@ -106,7 +106,7 @@
       }
     },
     "security": {
-      "csp": "default-src 'self' asset: https://asset.localhost; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https://pagead2.googlesyndication.com https://hm.baidu.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: asset: https://asset.localhost https://*.googlesyndication.com https://*.doubleclick.net; font-src 'self' data:; connect-src 'self' blob: data: https://*.google.com https://*.googlesyndication.com https://*.doubleclick.net; worker-src 'self' blob: data:; frame-src 'self' https://googleads.g.doubleclick.net https://*.googlesyndication.com; object-src 'none'; base-uri 'self'; form-action 'self'"
+      "csp": "default-src 'self' asset: https://asset.localhost; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: asset: https://asset.localhost; font-src 'self' data:; connect-src 'self' blob: data:; worker-src 'self' blob: data:; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
     },
     "updater": {
       "active": false

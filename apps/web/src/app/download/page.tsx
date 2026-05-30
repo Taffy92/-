@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { AdSlot } from "@doctool/ui";
 import { DownloadAuthBox } from "@/components/download/DownloadAuthBox";
 import { adsConfig } from "@/config/ads";
+import { isDesktopApp } from "@/config/appMode";
 import { downloadsConfig } from "@/config/downloads";
 import { createPageMetadata } from "@/lib/seo";
 
@@ -15,12 +16,12 @@ export const metadata: Metadata = createPageMetadata({
 
 export default function DownloadPage() {
   return (
-    <main className="mx-auto max-w-5xl px-4 py-12 text-slate-100 sm:px-6 lg:px-8">
-      <section className="rounded-3xl tech-panel p-6 sm:p-10">
+    <main className="document-page mx-auto max-w-5xl px-4 py-12 text-slate-900 sm:px-6 lg:px-8">
+      <section className="rounded-sm tech-panel p-6 sm:p-10">
         <p className="text-sm font-semibold text-cyan-300">离线专业版</p>
         <h1 className="mt-2 text-3xl font-bold text-slate-50">下载离线安装版</h1>
         <p className="mt-3 text-slate-300">{downloadsConfig.appName}</p>
-        <div className="mt-6 rounded-2xl border border-cyan-300/20 bg-cyan-950/25 p-5 text-sm leading-7 text-cyan-50">
+        <div className="mt-6 rounded-sm border border-cyan-300/20 bg-cyan-950/25 p-5 text-sm leading-7 text-cyan-50">
           <p className="font-semibold text-slate-50">
             离线专业版面向需要批量处理、敏感文件处理和断网办公的用户。
           </p>
@@ -42,7 +43,7 @@ export default function DownloadPage() {
 
       <section className="mt-8 grid gap-5 md:grid-cols-2">
         {downloadsConfig.packages.map((item) => (
-          <div key={item.type} className="rounded-3xl tech-panel p-6">
+          <div key={item.type} className="rounded-sm tech-panel p-6">
             <p className="text-sm font-semibold text-cyan-300">{item.label}</p>
             <h2 className="mt-2 break-words text-xl font-bold text-slate-50">{item.fileName}</h2>
             <p className="mt-3 text-sm leading-6 text-slate-300">{item.note}</p>
@@ -58,7 +59,7 @@ export default function DownloadPage() {
             </dl>
             <a
               href="#authorized-download"
-              className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-cyan-300/50 bg-cyan-400 px-5 text-sm font-semibold text-slate-950 hover:bg-cyan-300"
+              className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-sm border border-cyan-300/50 bg-cyan-400 px-5 text-sm font-semibold text-slate-950 hover:bg-cyan-300"
             >
               获取 {item.type.toUpperCase()} 下载链接
             </a>
@@ -105,7 +106,7 @@ export default function DownloadPage() {
         />
       </section>
 
-      <section className="mt-8 rounded-3xl tech-panel p-6 sm:p-8">
+      <section className="mt-8 rounded-sm tech-panel p-6 sm:p-8">
         <h2 className="text-xl font-bold text-slate-50">更新内容</h2>
         <ul className="mt-4 grid gap-2 text-sm text-slate-300 sm:grid-cols-2">
           {downloadsConfig.changelog.map((item) => (
@@ -114,23 +115,23 @@ export default function DownloadPage() {
         </ul>
       </section>
 
-      <section className="mt-8 rounded-3xl tech-panel p-6 sm:p-8">
+      <section className="mt-8 rounded-sm tech-panel p-6 sm:p-8">
         <h2 className="text-xl font-bold text-slate-50">发布说明与合规入口</h2>
         <p className="mt-2 text-sm leading-7 text-slate-300">
           下载前建议先查看安装说明、隐私说明和开源许可证。安装包未做代码签名时，Windows Defender 或 SmartScreen
           可能出现提示，请核对 SHA256 后再安装。
         </p>
         <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <DocLink href="/release/v1.0.0/docs/RELEASE_NOTES.md" label="发布说明" />
-          <DocLink href="/release/v1.0.0/docs/INSTALL_GUIDE.md" label="安装指南" />
+          <DocLink href="/release/v1.0.0/docs/release-notes" label="发布说明" />
+          <DocLink href="/release/v1.0.0/docs/install-guide" label="安装指南" />
           <DocLink href="/privacy" label="隐私说明" />
           <DocLink href="/licenses" label="开源许可证" />
-          <DocLink href="/release/v1.0.0/docs/THIRD_PARTY_NOTICES.md" label="第三方组件声明" />
-          <DocLink href="/release/v1.0.0/docs/FFMPEG_LICENSE_NOTICE.md" label="FFmpeg 许可证说明" />
+          <DocLink href="/release/v1.0.0/docs/third-party-notices" label="第三方组件声明" />
+          <DocLink href="/release/v1.0.0/docs/ffmpeg-license" label="FFmpeg 许可证说明" />
         </div>
       </section>
 
-      <section id="install-tips" className="mt-8 rounded-3xl tech-panel p-6 sm:p-8">
+      <section id="install-tips" className="mt-8 rounded-sm tech-panel p-6 sm:p-8">
         <h2 className="text-xl font-bold text-slate-50">安装和校验提示</h2>
         <ol className="mt-4 space-y-3 text-sm leading-7 text-slate-300">
           <li>1. 下载 EXE 或 MSI 后，先核对页面展示的 SHA256 与本地文件是否一致。</li>
@@ -141,16 +142,18 @@ export default function DownloadPage() {
         </ol>
       </section>
 
-      <div id="ad-container" className="mt-8">
-        <AdSlot config={adsConfig} name="downloadBottom" />
-      </div>
+      {!isDesktopApp ? (
+        <div id="ad-container" className="mt-8">
+          <AdSlot config={adsConfig} name="downloadBottom" />
+        </div>
+      ) : null}
     </main>
   );
 }
 
 function Info({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-cyan-300/12 bg-slate-900/70 p-4">
+    <div className="rounded-sm border border-cyan-300/12 bg-slate-900/70 p-4">
       <p className="text-xs text-slate-400">{label}</p>
       <p className="mt-1 break-words font-semibold text-slate-100">{value}</p>
     </div>
@@ -159,7 +162,7 @@ function Info({ label, value }: { label: string; value: string }) {
 
 function Card({ title, items }: { title: string; items: string[] }) {
   return (
-    <div className="rounded-3xl tech-panel p-6">
+    <div className="rounded-sm tech-panel p-6">
       <h2 className="text-xl font-bold text-slate-50">{title}</h2>
       <ul className="mt-4 space-y-2 text-sm leading-6 text-slate-300">
         {items.map((item) => (
@@ -172,7 +175,7 @@ function Card({ title, items }: { title: string; items: string[] }) {
 
 function DocLink({ href, label }: { href: string; label: string }) {
   return (
-    <Link href={href} className="rounded-2xl border border-cyan-300/15 bg-slate-900/70 px-4 py-3 text-sm font-semibold text-slate-100 hover:border-cyan-300/40 hover:bg-cyan-400/10">
+    <Link href={href} className="rounded-sm border border-cyan-300/15 bg-slate-900/70 px-4 py-3 text-sm font-semibold text-slate-100 hover:border-cyan-300/40 hover:bg-cyan-400/10">
       {label}
     </Link>
   );

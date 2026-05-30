@@ -29,5 +29,5 @@ export function BaiduAdSlot({ enabled = false, slot, className = "" }: BaiduAdSl
     return <PlaceholderAdSlot className={className} label="百度广告位" />;
   }
 
-  return <div id={`baidu-ad-${id}`} ref={ref} className={`min-h-[100px] w-full rounded-2xl bg-white ${className}`} />;
+  return <div id={`baidu-ad-${id}`} ref={ref} className={`min-h-[100px] w-full rounded-sm bg-white ${className}`} />;
 }

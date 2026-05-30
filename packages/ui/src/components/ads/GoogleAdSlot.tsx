@@ -43,7 +43,7 @@ export function GoogleAdSlot({ client, slot, className = "" }: GoogleAdSlotProps
 
   return (
     <ins
-      className={`adsbygoogle block min-h-[100px] w-full overflow-hidden rounded-2xl bg-white ${className}`}
+      className={`adsbygoogle block min-h-[100px] w-full overflow-hidden rounded-sm bg-white ${className}`}
       data-ad-client={client}
       data-ad-slot={slot}
       data-ad-format="auto"

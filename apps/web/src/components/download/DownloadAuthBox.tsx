@@ -64,10 +64,10 @@ export function DownloadAuthBox() {
   }
 
   return (
-    <section className="mt-8 rounded-3xl border border-cyan-300/15 bg-slate-950/70 p-5 text-slate-100 shadow-[0_18px_60px_rgba(0,0,0,0.28)] sm:p-7">
+    <section className="mt-8 rounded-sm border border-cyan-300/15 bg-slate-950/70 p-5 text-slate-100 sm:p-7">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-200">
+          <p className="inline-flex items-center gap-2 rounded-sm border border-cyan-300/25 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-200">
             <ShieldCheck size={15} />
             授权下载
           </p>
@@ -79,7 +79,7 @@ export function DownloadAuthBox() {
         </div>
         <a
           href={`mailto:${downloadAuthConfig.contactEmail}?subject=申请万能格式转换器离线专业版下载口令`}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-cyan-300/30 bg-slate-900 px-5 text-sm font-semibold text-slate-100 hover:bg-cyan-400/10"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-sm border border-cyan-300/30 bg-slate-900 px-5 text-sm font-semibold text-slate-100 hover:bg-cyan-400/10"
         >
           <Mail size={17} />
           联系作者
@@ -92,7 +92,7 @@ export function DownloadAuthBox() {
             {downloadsConfig.packages.map((item) => (
               <label
                 key={item.type}
-                className={`cursor-pointer rounded-2xl border p-4 transition ${
+                className={`cursor-pointer rounded-sm border p-4 transition ${
                   packageType === item.type ? "border-cyan-300 bg-cyan-400/10 ring-4 ring-cyan-400/10" : "border-cyan-300/12 bg-slate-900/60 hover:border-cyan-300/30"
                 }`}
               >
@@ -117,14 +117,14 @@ export function DownloadAuthBox() {
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder="请输入作者提供的下载口令"
-                className="mt-2 h-12 w-full rounded-xl border border-cyan-300/20 bg-slate-950 px-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-cyan-300 focus:ring-4 focus:ring-cyan-400/15"
+                className="mt-2 h-12 w-full rounded-sm border border-cyan-300/20 bg-slate-950 px-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-cyan-300 focus:ring-4 focus:ring-cyan-400/15"
               />
             </label>
             <button
               type="button"
               onClick={requestDownload}
               disabled={loading}
-              className="mt-5 inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-cyan-300/50 bg-cyan-400 px-6 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:border-slate-700 disabled:bg-slate-800 disabled:text-slate-500 lg:mt-auto"
+              className="mt-5 inline-flex h-12 items-center justify-center gap-2 rounded-sm border border-cyan-300/50 bg-cyan-400 px-6 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:border-slate-700 disabled:bg-slate-800 disabled:text-slate-500 lg:mt-auto"
             >
               <KeyRound size={17} />
               {loading ? "正在校验" : `获取 ${packageType.toUpperCase()} 下载链接`}
@@ -132,7 +132,7 @@ export function DownloadAuthBox() {
           </div>
         </>
       ) : (
-        <div className="mt-6 rounded-2xl border border-cyan-300/12 bg-slate-900/70 p-5 text-sm leading-7 text-slate-300">
+        <div className="mt-6 rounded-sm border border-cyan-300/12 bg-slate-900/70 p-5 text-sm leading-7 text-slate-300">
           当前网站尚未接入自动下载口令接口。请通过邮箱联系作者获取离线安装版授权和下载方式：
           <a className="ml-1 font-semibold text-cyan-200 hover:underline" href={`mailto:${downloadAuthConfig.contactEmail}`}>
             {downloadAuthConfig.contactEmail}
@@ -140,10 +140,10 @@ export function DownloadAuthBox() {
         </div>
       )}
 
-      {error ? <p className="mt-4 rounded-2xl border border-red-400/20 bg-red-950/40 px-4 py-3 text-sm text-red-200">{error}</p> : null}
+      {error ? <p className="mt-4 rounded-sm border border-red-400/20 bg-red-950/40 px-4 py-3 text-sm text-red-200">{error}</p> : null}
 
       {result?.downloadUrl ? (
-        <div className="mt-5 rounded-2xl border border-emerald-300/20 bg-emerald-950/35 p-5">
+        <div className="mt-5 rounded-sm border border-emerald-300/20 bg-emerald-950/35 p-5">
           <p className="font-semibold text-emerald-100">下载口令校验通过</p>
           <p className="mt-1 text-sm text-emerald-100/85">
             下载链接为临时链接，请尽快下载。下载后可复制到 U 盘，在无网络电脑上安装使用。
@@ -153,7 +153,7 @@ export function DownloadAuthBox() {
           ) : null}
           <a
             href={result.downloadUrl}
-            className="mt-4 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-400 px-6 text-sm font-semibold text-slate-950 hover:bg-emerald-300"
+            className="mt-4 inline-flex min-h-12 items-center justify-center gap-2 rounded-sm bg-emerald-400 px-6 text-sm font-semibold text-slate-950 hover:bg-emerald-300"
           >
             <Download size={18} />
             下载 {result.fileName || downloadsConfig.fileName}

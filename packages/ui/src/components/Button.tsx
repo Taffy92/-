@@ -17,7 +17,7 @@ export function Button({ children, className = "", tone = "primary", type = "but
   return (
     <button
       type={type}
-      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl px-5 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${toneClass[tone]} ${className}`}
+      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-sm px-5 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${toneClass[tone]} ${className}`}
       {...props}
     >
       {children}

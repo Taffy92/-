@@ -2,10 +2,10 @@
 
 本文件为“万能格式转换器”在线版和 Windows 离线安装版的第三方开源软件 Notices。内容根据锁文件、本地依赖元数据和最终构建产物生成，用于正式发布前的许可证归档和产品内展示。
 
-- 生成时间：2026-05-23T01:20:54.345Z
+- 生成时间：2026-05-27T17:27:05.253Z
 - npm 依赖数量：835
 - 直接 npm 依赖数量：33
-- Rust crate 数量：415
+- Rust crate 数量：425
 - 构建产物记录数量：5
 - 开发者：MR.谢
 - 联系邮箱：370298218@qq.com
@@ -32,11 +32,11 @@
 
 | 名称 | 路径 | 类型 | 文件数 | 大小 | SHA256 | 说明 |
 | --- | --- | --- | --- | --- | --- | --- |
-| Next.js 静态网站产物 | `apps/web/out` | 目录 | 264 | 43.78 MB | - | 在线版和离线版共用的静态页面、JS、CSS 和静态资源。 |
+| Next.js 静态网站产物 | `apps/web/out` | 目录 | 275 | 44.28 MB | - | 在线版和离线版共用的静态页面、JS、CSS 和静态资源。 |
 | PDF.js 静态资源 | `apps/web/out/pdfjs` | 目录 | 189 | 3.80 MB | - | 来自 pdfjs-dist 的主模块、worker、CMaps 和字体资源。 |
 | FFmpeg WASM 静态资源 | `apps/web/out/ffmpeg` | 目录 | 2 | 30.85 MB | - | 来自 @ffmpeg/core 的 ffmpeg-core.js 和 ffmpeg-core.wasm。 |
-| Windows NSIS 安装包 | `apps/desktop/src-tauri/target/release/bundle/nsis/万能格式转换器_1.0.0_x64-setup.exe` | 文件 | 1 | 207.37 MB | D4116F2381CC43E9CD06528654B20C788C0E32EF11BD02FB935AA1F256FE58ED | 离线版 Windows x64 EXE 安装包。 |
-| Windows MSI 安装包 | `apps/desktop/src-tauri/target/release/bundle/msi/万能格式转换器_1.0.0_x64_zh-CN.msi` | 文件 | 1 | 205.85 MB | 577B82E93898E0CDB37208FFBDF4644264ED8BB50760F86B28417F87AF84A6A3 | 离线版 Windows x64 MSI 安装包。 |
+| Windows NSIS 安装包 | `apps/desktop/src-tauri/target/release/bundle/nsis/万能格式转换器_1.0.0_x64-setup.exe` | 文件 | 1 | 245.69 MB | 797B01FD201BD6D5501220F12B4BF932903549782937C933008F455F39646565 | 离线版 Windows x64 EXE 安装包。 |
+| Windows MSI 安装包 | `apps/desktop/src-tauri/target/release/bundle/msi/万能格式转换器_1.0.0_x64_zh-CN.msi` | 文件 | 1 | 256.51 MB | AA04807713CEDFD48FE2AAB8F974BFD15871A2AE44169896F79BE7F800466D3E | 离线版 Windows x64 MSI 安装包。 |
 
 ## 直接 npm 依赖
 

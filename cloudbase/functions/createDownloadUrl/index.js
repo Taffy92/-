@@ -18,6 +18,7 @@ const LOG_COLLECTION = process.env.LOG_COLLECTION || "download_authorization_log
 const DOWNLOAD_PASSWORD = process.env.DOWNLOAD_PASSWORD || "";
 const ALLOWED_ORIGINS = parseAllowedOrigins(process.env.ALLOWED_ORIGIN || process.env.ALLOWED_ORIGINS || "");
 const DEFAULT_MAX_AGE = Number(process.env.DOWNLOAD_URL_MAX_AGE || 600);
+const MAX_REQUEST_BODY_BYTES = Number(process.env.DOWNLOAD_REQUEST_MAX_BYTES || 2048);
 const DEFAULT_FILE_ID = process.env.INSTALLER_FILE_ID || "";
 const DEFAULT_FILE_NAME =
   process.env.INSTALLER_FILE_NAME ||
@@ -94,7 +95,31 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    const body = await readJsonBody(req);
+    const contentType = String(req.headers["content-type"] || "");
+    if (!/application\/json/i.test(contentType)) {
+      await writeLog({ allowed: false, reason: "invalid_content_type", req });
+      sendJson(res, 415, {
+        error: "\u4e0b\u8f7d\u6388\u6743\u63a5\u53e3\u53ea\u63a5\u53d7 JSON \u8bf7\u6c42\u3002"
+      }, buildCorsHeaders(req));
+      return;
+    }
+
+    let body;
+    try {
+      body = await readJsonBody(req, MAX_REQUEST_BODY_BYTES);
+    } catch (error) {
+      const statusCode = Number(error && error.statusCode) || 400;
+      await writeLog({
+        allowed: false,
+        reason: statusCode === 413 ? "request_too_large" : "invalid_json",
+        req
+      });
+      sendJson(res, statusCode, {
+        error: error && error.message ? error.message : "\u8bf7\u6c42 JSON \u683c\u5f0f\u4e0d\u6b63\u786e\uff0c\u8bf7\u4f7f\u7528\u6709\u6548 JSON \u5185\u5bb9\u3002"
+      }, buildCorsHeaders(req));
+      return;
+    }
+
     const password = String(body.password || body.code || "").trim();
     const packageType = normalizePackageType(body.packageType || body.type || "exe");
     if (!packageType) {
@@ -161,13 +186,26 @@ if (require.main === module) {
   server.listen(9000);
 }
 
-function readJsonBody(req) {
+function readJsonBody(req, maxBytes = MAX_REQUEST_BODY_BYTES) {
   return new Promise((resolve, reject) => {
     let raw = "";
+    let totalBytes = 0;
+    let overflow = false;
     req.on("data", (chunk) => {
+      if (overflow) return;
       raw += chunk;
+      totalBytes += Buffer.byteLength(chunk);
+      if (totalBytes > maxBytes) {
+        overflow = true;
+      }
     });
     req.on("end", () => {
+      if (overflow) {
+        const error = new Error("\u8bf7\u6c42\u4f53\u8fc7\u5927\uff0c\u8bf7\u51cf\u5c11\u63d0\u4ea4\u5185\u5bb9\u540e\u91cd\u8bd5\u3002");
+        error.statusCode = 413;
+        reject(error);
+        return;
+      }
       if (!raw) {
         resolve({});
         return;
@@ -175,7 +213,9 @@ function readJsonBody(req) {
       try {
         resolve(JSON.parse(raw));
       } catch {
-        resolve({});
+        const error = new Error("\u8bf7\u6c42 JSON \u683c\u5f0f\u4e0d\u6b63\u786e\uff0c\u8bf7\u4f7f\u7528\u6709\u6548 JSON \u5185\u5bb9\u3002");
+        error.statusCode = 400;
+        reject(error);
       }
     });
     req.on("error", reject);

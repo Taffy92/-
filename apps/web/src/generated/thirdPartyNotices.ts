@@ -2,10 +2,10 @@
 // Do not edit it by hand.
 
 export const thirdPartyNoticeMeta = {
-  "generatedAt": "2026-05-23T01:20:54.345Z",
+  "generatedAt": "2026-05-27T17:27:05.253Z",
   "npmPackageCount": 835,
   "directNpmPackageCount": 33,
-  "rustCrateCount": 415,
+  "rustCrateCount": 425,
   "bundledArtifactCount": 5,
   "sources": [
     "pnpm-lock.yaml",
@@ -22,8 +22,8 @@ export const bundledArtifacts = [
     "label": "Next.js 静态网站产物",
     "path": "apps/web/out",
     "kind": "目录",
-    "files": 264,
-    "sizeBytes": 45904843,
+    "files": 275,
+    "sizeBytes": 46428081,
     "sha256": "",
     "note": "在线版和离线版共用的静态页面、JS、CSS 和静态资源。"
   },
@@ -50,8 +50,8 @@ export const bundledArtifacts = [
     "path": "apps/desktop/src-tauri/target/release/bundle/nsis/万能格式转换器_1.0.0_x64-setup.exe",
     "kind": "文件",
     "files": 1,
-    "sizeBytes": 257626830,
-    "sha256": "0C86FC2BFDA97297A2858337E7BA67AD7AD275F063D8095D7CCD841A82F8F0D1",
+    "sizeBytes": 257629869,
+    "sha256": "797B01FD201BD6D5501220F12B4BF932903549782937C933008F455F39646565",
     "note": "离线版 Windows x64 EXE 安装包。"
   },
   {
@@ -60,7 +60,7 @@ export const bundledArtifacts = [
     "kind": "文件",
     "files": 1,
     "sizeBytes": 268967936,
-    "sha256": "A4F42391A8272AB4041FFEC34015BFED90D606531011BC62ABB3F91F63623C0D",
+    "sha256": "AA04807713CEDFD48FE2AAB8F974BFD15871A2AE44169896F79BE7F800466D3E",
     "note": "离线版 Windows x64 MSI 安装包。"
   }
 ] as const;
@@ -13592,6 +13592,15 @@ export const rustCrates = [
     "checksum": "c92d4ddb4bd7b50d730c215ff871754d0da6b2178849f8a2a2ab69712d0c073b"
   },
   {
+    "name": "objc-foundation",
+    "version": "0.1.1",
+    "license": "未在本地 Cargo manifest 中声明",
+    "repository": "",
+    "homepage": "",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "checksum": "1add1b659e36c9607c7aab864a76c7a4c2760cd0cd2e120f3fb8b952c7e22bf9"
+  },
+  {
     "name": "once_cell",
     "version": "1.21.4",
     "license": "MIT OR Apache-2.0",
@@ -14076,6 +14085,15 @@ export const rustCrates = [
     "homepage": "https://github.com/rust-lang/regex/tree/master/regex-syntax",
     "source": "registry+https://github.com/rust-lang/crates.io-index",
     "checksum": "dc897dd8d9e8bd1ed8cdad82b5966c3e0ecae09fb1907d58efaa013543185d0a"
+  },
+  {
+    "name": "rfd",
+    "version": "0.10.0",
+    "license": "MIT",
+    "repository": "https://github.com/PolyMeilex/rfd",
+    "homepage": "",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "checksum": "0149778bd99b6959285b0933288206090c50e2327f47a9c463bfdbf45c8823ea"
   },
   {
     "name": "rustc_version",
@@ -14960,6 +14978,15 @@ export const rustCrates = [
     "checksum": "49ace1d07c165b0864824eee619580c4689389afa9dc9ed3a4c75040d82e6790"
   },
   {
+    "name": "wasm-bindgen-futures",
+    "version": "0.4.71",
+    "license": "未在本地 Cargo manifest 中声明",
+    "repository": "",
+    "homepage": "",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "checksum": "96492d0d3ffba25305a7dc88720d250b1401d7edca02cc3bcd50633b424673b8"
+  },
+  {
     "name": "wasm-bindgen-macro",
     "version": "0.2.121",
     "license": "未在本地 Cargo manifest 中声明",
@@ -15012,6 +15039,15 @@ export const rustCrates = [
     "homepage": "",
     "source": "registry+https://github.com/rust-lang/crates.io-index",
     "checksum": "47b807c72e1bac69382b3a6fb3dbe8ea4c0ed87ff5629b8685ae6b9a611028fe"
+  },
+  {
+    "name": "web-sys",
+    "version": "0.3.98",
+    "license": "未在本地 Cargo manifest 中声明",
+    "repository": "",
+    "homepage": "",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "checksum": "4b572dff8bcf38bad0fa19729c89bb5748b2b9b1d8be70cf90df697e3a8f32aa"
   },
   {
     "name": "webkit2gtk",
@@ -15096,6 +15132,15 @@ export const rustCrates = [
   },
   {
     "name": "windows",
+    "version": "0.37.0",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/microsoft/windows-rs",
+    "homepage": "",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "checksum": "57b543186b344cc61c85b5aab0d2e3adf4e0f99bc076eff9aa5927bcc0b8a647"
+  },
+  {
+    "name": "windows",
     "version": "0.39.0",
     "license": "MIT OR Apache-2.0",
     "repository": "https://github.com/microsoft/windows-rs",
@@ -15132,6 +15177,15 @@ export const rustCrates = [
   },
   {
     "name": "windows_aarch64_msvc",
+    "version": "0.37.0",
+    "license": "未在本地 Cargo manifest 中声明",
+    "repository": "",
+    "homepage": "",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "checksum": "2623277cb2d1c216ba3b578c0f3cf9cdebeddb6e66b1b218bb33596ea7769c3a"
+  },
+  {
+    "name": "windows_aarch64_msvc",
     "version": "0.39.0",
     "license": "未在本地 Cargo manifest 中声明",
     "repository": "",
@@ -15156,6 +15210,15 @@ export const rustCrates = [
     "homepage": "",
     "source": "registry+https://github.com/rust-lang/crates.io-index",
     "checksum": "dc35310971f3b2dbbf3f0690a219f40e2d9afcf64f9ab7cc1be722937c26b4bc"
+  },
+  {
+    "name": "windows_i686_gnu",
+    "version": "0.37.0",
+    "license": "未在本地 Cargo manifest 中声明",
+    "repository": "",
+    "homepage": "",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "checksum": "d3925fd0b0b804730d44d4b6278c50f9699703ec49bcd628020f46f4ba07d9e1"
   },
   {
     "name": "windows_i686_gnu",
@@ -15186,6 +15249,15 @@ export const rustCrates = [
   },
   {
     "name": "windows_i686_msvc",
+    "version": "0.37.0",
+    "license": "未在本地 Cargo manifest 中声明",
+    "repository": "",
+    "homepage": "",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "checksum": "ce907ac74fe331b524c1298683efbf598bb031bc84d5e274db2083696d07c57c"
+  },
+  {
+    "name": "windows_i686_msvc",
     "version": "0.39.0",
     "license": "未在本地 Cargo manifest 中声明",
     "repository": "",
@@ -15210,6 +15282,15 @@ export const rustCrates = [
     "homepage": "",
     "source": "registry+https://github.com/rust-lang/crates.io-index",
     "checksum": "8f55c233f70c4b27f66c523580f78f1004e8b5a8b659e05a4eb49d4166cca406"
+  },
+  {
+    "name": "windows_x86_64_gnu",
+    "version": "0.37.0",
+    "license": "未在本地 Cargo manifest 中声明",
+    "repository": "",
+    "homepage": "",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "checksum": "2babfba0828f2e6b32457d5341427dcbb577ceef556273229959ac23a10af33d"
   },
   {
     "name": "windows_x86_64_gnu",
@@ -15255,6 +15336,15 @@ export const rustCrates = [
     "homepage": "",
     "source": "registry+https://github.com/rust-lang/crates.io-index",
     "checksum": "0b7b52767868a23d5bab768e390dc5f5c55825b6d30b86c844ff2dc7414044cc"
+  },
+  {
+    "name": "windows_x86_64_msvc",
+    "version": "0.37.0",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/microsoft/windows-rs",
+    "homepage": "",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "checksum": "f4dd6dc7df2d84cf7b33822ed5b86318fb1781948e9663bacd047fc9dd52259d"
   },
   {
     "name": "windows_x86_64_msvc",

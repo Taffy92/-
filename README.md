@@ -8,7 +8,7 @@
 
 ## 功能范围
 
-在线版和离线版保持一致：
+在线版和离线版共用以下核心处理能力：
 
 - 图片裁切
 - 图片尺寸调整
@@ -20,6 +20,8 @@
 - 视频格式转换：MP4、MOV、AVI、MKV、WebM
 - 音频格式转换：MP3、WAV、AAC、M4A、FLAC
 - 视频提取音频：MP3、WAV、M4A、AAC
+
+在线版面向大众用户的轻量单文件处理；离线专业版面向批量处理、敏感文件和断网办公场景。涉及大量文件、敏感材料或批量音视频任务时，应优先使用 Windows 离线专业版。
 
 本项目不包含 PDF 编辑功能，不提供 PDF 文字修改、PDF 涂销、PDF 签名盖章、PDF 批注标注，也不适合用于修改合同、发票、证件、财务票据等文件内容。
 
@@ -55,19 +57,19 @@ DocToolPlatform/
 安装依赖：
 
 ```bash
-pnpm install
+.\.pnpm-home\pnpm.CMD install
 ```
 
 启动在线版：
 
 ```bash
-pnpm dev:web
+npm run dev:web
 ```
 
 构建在线版：
 
 ```bash
-pnpm build:web
+npm run build:web
 ```
 
 构建结果位于 `apps/web/out`，可直接用于 Vercel 或 CloudBase 静态托管。
@@ -82,7 +84,7 @@ NEXT_PUBLIC_DOWNLOAD_AUTH_ENABLED=false
 NEXT_PUBLIC_DOWNLOAD_AUTH_ENDPOINT=
 ```
 
-正式上线前由你自己购买域名，然后把正式域名配置到 `NEXT_PUBLIC_SITE_URL`。所有 canonical、sitemap、Open Graph URL 都从 `apps/web/src/config/site.ts` 的 `siteConfig.url` 读取，不需要在代码里写死真实域名。
+当前默认 CloudBase 域名为 `https://format-converter-prod-x-d71bce41-1434109188.tcloudbaseapp.com`。自定义域名审核通过后，再把正式域名配置到 `NEXT_PUBLIC_SITE_URL`，并重新执行 `npm run build:web` 与部署。所有 canonical、sitemap、Open Graph URL 都从 `apps/web/src/config/site.ts` 的 `siteConfig.url` 读取，不需要在代码里写死真实域名。
 
 离线安装包默认不公开直链。正式启用授权下载时，把 `NEXT_PUBLIC_DOWNLOAD_AUTH_ENABLED` 改为 `true`，把 `NEXT_PUBLIC_DOWNLOAD_AUTH_ENDPOINT` 填成 CloudBase 授权云函数的 HTTP 地址。
 
@@ -95,13 +97,13 @@ NEXT_PUBLIC_DOWNLOAD_AUTH_ENDPOINT=
 - `provider: "baidu"`：启用百度广告
 - `provider: "none"`：关闭广告
 
-开发环境默认建议使用 placeholder，不真实请求广告脚本。离线版断网时显示本地占位，不影响核心功能。
+开发环境默认建议使用 placeholder，不真实请求广告脚本。离线版不渲染在线广告容器，也不强制联网加载广告。
 
 ## Vercel 部署
 
 ```bash
-pnpm build:web
-pnpm deploy:vercel
+npm run build:web
+npm run deploy:vercel
 ```
 
 在 Vercel 环境变量中配置：
@@ -113,11 +115,15 @@ NEXT_PUBLIC_SITE_URL=https://你的域名
 ## CloudBase 部署
 
 ```bash
-pnpm build:web
-pnpm deploy:cloudbase
+npm run build:web
+npm run deploy:cloudbase
 ```
 
-`apps/web/cloudbaserc.json` 使用 `apps/web/out` 作为静态托管目录。部署前把脚本中的 `YOUR_ENV_ID` 换成自己的 CloudBase 环境 ID，并在 CloudBase 控制台配置自定义域名和 CDN。
+`apps/web/cloudbaserc.json` 使用 `apps/web/out` 作为静态托管目录。当前仓库已配置 CloudBase 环境 `format-converter-prod-x-d71bce41`。如果部署到其他环境，再同步修改根目录 `package.json` 的 `deploy:cloudbase` 脚本和 `apps/web/cloudbaserc.json` 的 `envId`。上线时在 CloudBase 控制台配置自定义域名和 CDN。
+
+当前默认访问地址为 `https://format-converter-prod-x-d71bce41-1434109188.tcloudbaseapp.com`。自定义域名未绑定到本仓库配置中，等域名审核通过后再单独配置和验证。
+
+Vercel 安全响应头由 `apps/web/src/config/securityHeaders.js` 生成，修改后执行 `pnpm sync:security` 同步到 `apps/web/vercel.json`。
 
 ## 离线版授权下载
 
@@ -132,7 +138,7 @@ pnpm deploy:cloudbase
 打包命令：
 
 ```bash
-pnpm package:desktop
+npm run package:desktop
 ```
 
 安装包输出目录：
@@ -159,8 +165,8 @@ apps/desktop/src-tauri/target/release/bundle/
 项目内置隐私检查：
 
 ```bash
-pnpm check:privacy
-pnpm check:network
+npm run check:privacy
+npm run check:network
 ```
 
 `networkGuard` 会在开发环境拦截疑似向非本站资源上传 `File`、`Blob`、`ArrayBuffer` 或 `FormData` 的请求。
@@ -171,7 +177,7 @@ PDF 转图片：支持逐页导出和合成一页导出。超大 PDF 建议分�
 
 Word 转图片：支持标准 `.docx` 文档。旧版 `.doc` 请先另存为 `.docx`。复杂浮动对象、艺术字和特殊排版需要人工检查。
 
-Excel 转图片：支持 `.xlsx`、`.xls`、`.csv`。很宽或很长的表格会生成较大的图片，重要数字和日期请人工核对。
+Excel 转图片：支持 `.xlsx`、`.csv`。旧版 `.xls` 请先用 Excel/WPS 另存为 `.xlsx` 后再转换。很宽或很长的表格会生成较大的图片，重要数字和日期请人工核对。
 
 音视频转换：依赖浏览器或离线版内置 WebView 的本地解码与编码能力，不同环境支持的输出格式不同。长视频通常需要按播放时长等待。
 
@@ -179,9 +185,9 @@ Excel 转图片：支持 `.xlsx`、`.xls`、`.csv`。很宽或很长的表格会
 
 1. 更新 `apps/web/src/config/downloads.ts` 的版本号、文件名、大小、日期和 SHA256。
 2. 更新 `apps/web/src/app/changelog/page.tsx`。
-3. 运行 `pnpm test`。
-4. 运行 `pnpm build:web`。
-5. 运行 `pnpm package:desktop`。
+3. 运行 `npm test`。
+4. 运行 `npm run build:web`。
+5. 运行 `npm run package:desktop`。
 6. 上传安装包到 CloudBase 私有云存储。
 7. 更新授权记录里的 `fileID`、版本号和 SHA256。
 8. 重新部署静态网站和授权云函数。

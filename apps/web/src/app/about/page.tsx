@@ -11,8 +11,8 @@ export const metadata: Metadata = createPageMetadata({
 
 export default function AboutPage() {
   return (
-    <main className="mx-auto max-w-4xl px-4 py-12 text-slate-100 sm:px-6 lg:px-8">
-      <article className="rounded-3xl tech-panel p-6 leading-8 sm:p-10">
+    <main className="document-page mx-auto max-w-4xl px-4 py-12 text-slate-900 sm:px-6 lg:px-8">
+      <article className="rounded-sm tech-panel p-6 leading-8 sm:p-10">
         <p className="text-sm font-semibold text-cyan-300">关于我们</p>
         <h1 className="mt-2 text-3xl font-bold text-slate-50">万能格式转换器</h1>
         <p className="mt-6 text-slate-300">
@@ -31,12 +31,12 @@ export default function AboutPage() {
           <li>移动端和桌面端都可以使用。</li>
           <li>对敏感文件、大文件和断网场景，提供离线专业版。</li>
         </ol>
-        <div className="mt-8 rounded-2xl border border-cyan-300/12 bg-slate-900/70 p-5 text-slate-300">
+        <div className="mt-8 rounded-sm border border-cyan-300/12 bg-slate-900/70 p-5 text-slate-300">
           <p>开发者：{siteConfig.developer}</p>
           <p>联系邮箱：{siteConfig.email}</p>
           <p>版权信息：{siteConfig.copyright}</p>
         </div>
-        <Link href={siteConfig.links.download} className="mt-8 inline-flex min-h-11 items-center justify-center rounded-2xl border border-cyan-300/50 bg-cyan-400 px-5 text-sm font-semibold text-slate-950 hover:bg-cyan-300">下载离线专业版</Link>
+        <Link href={siteConfig.links.download} className="mt-8 inline-flex min-h-11 items-center justify-center rounded-sm border border-cyan-300/50 bg-cyan-400 px-5 text-sm font-semibold text-slate-950 hover:bg-cyan-300">下载离线专业版</Link>
       </article>
     </main>
   );

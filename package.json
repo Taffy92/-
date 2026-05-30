@@ -4,17 +4,18 @@
   "private": true,
   "packageManager": "pnpm@9.15.4",
   "scripts": {
-    "dev:web": "pnpm --filter web dev",
-    "build:web": "pnpm --filter web build",
-    "export:web": "pnpm --filter web build",
+    "dev:web": "node scripts/run-pnpm.cjs --filter web dev",
+    "build:web": "node scripts/run-pnpm.cjs --filter web build",
+    "export:web": "node scripts/run-pnpm.cjs --filter web build",
+    "sync:security": "node scripts/run-pnpm.cjs --filter web sync:security",
     "deploy:vercel": "vercel --prod",
-    "deploy:cloudbase": "tcb hosting deploy apps/web/out -e YOUR_ENV_ID",
-    "build:desktop": "pnpm --filter desktop build",
-    "package:desktop": "pnpm --filter desktop package",
-    "check:privacy": "pnpm --filter web check:privacy",
-    "check:network": "pnpm --filter web check:network",
+    "deploy:cloudbase": "tcb hosting deploy apps/web/out -e format-converter-prod-x-d71bce41",
+    "build:desktop": "node scripts/run-pnpm.cjs --filter desktop build",
+    "package:desktop": "node scripts/run-pnpm.cjs --filter desktop package",
+    "check:privacy": "node scripts/run-pnpm.cjs --filter web check:privacy",
+    "check:network": "node scripts/run-pnpm.cjs --filter web check:network",
     "generate:notices": "node scripts/generate-third-party-notices.mjs",
-    "test": "pnpm --filter web test"
+    "test": "node scripts/run-pnpm.cjs --filter web test"
   },
   "pnpm": {
     "overrides": {

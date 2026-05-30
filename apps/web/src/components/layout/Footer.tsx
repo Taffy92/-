@@ -23,23 +23,31 @@ const desktopFooterLinks = [
 ] as const;
 
 export function Footer() {
-  const footerLinks = isDesktopApp ? desktopFooterLinks : webFooterLinks;
+  const desktop = isDesktopApp;
+  const footerLinks = desktop ? desktopFooterLinks : webFooterLinks;
 
   return (
-    <footer className="border-t border-cyan-300/15 bg-slate-950">
+    <footer className={desktop ? "border-t border-cyan-300/15 bg-slate-950" : "border-t border-slate-200 bg-white"}>
       <div className="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[1.3fr_1fr] lg:px-8">
         <div className="space-y-2">
-          <h2 className="text-lg font-bold text-slate-50">{siteConfig.name}</h2>
-          <p className="text-sm text-slate-300">开发者：{siteConfig.developer}</p>
-          <p className="text-sm text-slate-300">联系邮箱：{siteConfig.email}</p>
-          <p className="text-sm text-slate-400">{siteConfig.copyright}</p>
-          <p className="text-xs leading-5 text-slate-500">
+          <h2 className={desktop ? "text-lg font-bold text-slate-50" : "text-lg font-bold text-slate-950"}>{siteConfig.name}</h2>
+          <p className={desktop ? "text-sm text-slate-300" : "text-sm text-slate-600"}>开发者：{siteConfig.developer}</p>
+          <p className={desktop ? "text-sm text-slate-300" : "text-sm text-slate-600"}>联系邮箱：{siteConfig.email}</p>
+          <p className={desktop ? "text-sm text-slate-400" : "text-sm text-slate-500"}>{siteConfig.copyright}</p>
+          <p className={desktop ? "text-xs leading-5 text-slate-500" : "max-w-3xl text-xs leading-5 text-slate-500"}>
             文件处理在本地完成。CloudBase 只用于下载授权，不接触用户处理文件；广告不接收 File、Blob、ArrayBuffer、Canvas 或转换结果。
           </p>
         </div>
         <nav className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
           {footerLinks.map(([label, href]) => (
-            <Link key={href} href={href} className="rounded-xl border border-transparent px-3 py-2 text-sm text-slate-400 hover:border-cyan-300/20 hover:bg-cyan-400/10 hover:text-cyan-100">
+            <Link
+              key={href}
+              href={href}
+              className={desktop
+                ? "rounded-sm border border-transparent px-3 py-2 text-sm text-slate-400 hover:border-cyan-300/20 hover:bg-cyan-400/10 hover:text-cyan-100"
+                : "rounded-sm border border-transparent px-3 py-2 text-sm text-slate-600 hover:border-slate-200 hover:bg-slate-50 hover:text-slate-950"
+              }
+            >
               {label}
             </Link>
           ))}

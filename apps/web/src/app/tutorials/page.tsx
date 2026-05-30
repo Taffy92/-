@@ -181,35 +181,59 @@ const tutorials = [
   }
 ];
 
+const quickGuide = [
+  {
+    title: "先看文件类型",
+    text: "图片就去图片工具，PDF、Word、Excel 去文档工具，视频和音频去音视频工具。不要先纠结格式，先把入口选对。"
+  },
+  {
+    title: "再看最终用途",
+    text: "要上传表单，通常先压缩或改尺寸；要发给别人预览，通常转成图片；要继续剪辑，视频和音频尽量保留较高质量。"
+  },
+  {
+    title: "最后再调参数",
+    text: "第一次处理不要把质量、尺寸、页码一次调到极限。先按推荐值生成一版，看结果，再决定是否压得更小或导出更高清。"
+  }
+];
+
 export default function TutorialsPage() {
   return (
-    <main className="mx-auto max-w-7xl px-4 py-10 text-slate-100 sm:px-6 lg:px-8">
-      <section className="rounded-3xl tech-panel p-6 sm:p-8">
+    <main className="document-page mx-auto max-w-7xl px-4 py-10 text-slate-900 sm:px-6 lg:px-8">
+      <section className="rounded-sm tech-panel p-6 sm:p-8">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-sm font-semibold text-cyan-200">
+            <div className="inline-flex items-center gap-2 border border-[var(--border-soft)] bg-[var(--surface-muted)] px-4 py-2 text-sm font-semibold text-[var(--accent-blue)]">
               <BookOpen size={17} /> 使用教程
             </div>
             <h1 className="mt-5 text-3xl font-bold text-slate-50 sm:text-4xl">常用功能怎么用</h1>
             <p className="mt-3 max-w-3xl text-base leading-7 text-slate-300">
-              下面这些说明按日常使用习惯写，先讲适合什么场景，再讲具体步骤。第一次用时可以照着做，熟悉后直接去“所有功能”里选择对应工具即可。
+              下面这些说明按真实使用顺序写：先判断该选哪个功能，再添加文件，最后调整参数。第一次用可以照着做，熟悉后直接进工具台选择对应入口。
             </p>
           </div>
-          <Link href={siteConfig.links.tools} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-cyan-300/50 bg-cyan-400 px-5 text-sm font-semibold text-slate-950 hover:bg-cyan-300">
+          <Link href={siteConfig.links.tools} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-sm border border-cyan-300/50 bg-cyan-400 px-5 text-sm font-semibold text-slate-950 hover:bg-cyan-300">
             {isDesktopApp ? "打开所有功能" : "进入在线工具"} <ArrowRight size={18} />
           </Link>
         </div>
       </section>
 
+      <section className="mt-6 grid gap-4 md:grid-cols-3">
+        {quickGuide.map((item) => (
+          <div key={item.title} className="border border-[var(--border-soft)] bg-white p-5">
+            <h2 className="text-base font-bold text-slate-950">{item.title}</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600">{item.text}</p>
+          </div>
+        ))}
+      </section>
+
       <div className="mt-6 grid gap-6">
         {tutorials.map((item, index) => (
-          <article key={item.title} className="rounded-3xl tech-panel p-6 sm:p-8">
+          <article key={item.title} className="rounded-sm tech-panel p-6 sm:p-8">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <p className="text-sm font-semibold text-cyan-300">教程 {String(index + 1).padStart(2, "0")}</p>
                 <h2 className="mt-2 text-2xl font-bold text-slate-50">{item.title}</h2>
               </div>
-              <span className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-300/25 bg-emerald-400/10 px-3 py-1.5 text-xs font-semibold text-emerald-200">
+              <span className="inline-flex w-fit items-center gap-2 border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
                 <CheckCircle2 size={15} /> 本地处理
               </span>
             </div>
@@ -219,7 +243,7 @@ export default function TutorialsPage() {
                 <li key={step}>{step}</li>
               ))}
             </ol>
-            <div className="mt-5 rounded-2xl border border-cyan-300/12 bg-slate-950/60 p-4">
+            <div className="mt-5 border border-[var(--border-soft)] bg-[var(--surface-muted)] p-4">
               <p className="text-sm font-semibold text-slate-50">使用时留意</p>
               <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-300">
                 {item.tips.map((tip) => (

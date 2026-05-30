@@ -10,8 +10,8 @@ export const metadata: Metadata = createPageMetadata({
 
 export default function TermsPage() {
   return (
-    <main className="mx-auto max-w-4xl px-4 py-12 text-slate-100 sm:px-6 lg:px-8">
-      <article className="prose prose-invert max-w-none rounded-3xl tech-panel p-6 leading-8 sm:p-10">
+    <main className="document-page mx-auto max-w-4xl px-4 py-12 text-slate-900 sm:px-6 lg:px-8">
+      <article className="prose prose-invert max-w-none rounded-sm tech-panel p-6 leading-8 sm:p-10">
         <h1>使用条款</h1>
         <p className="text-sm text-slate-400">更新时间：2026 年 5 月 17 日</p>
         <p>本网站由开发者 MR.谢 创建和维护。联系邮箱：{siteConfig.email}。</p>

@@ -49,14 +49,16 @@ function listen(app) {
   });
 }
 
-async function request(baseUrl, body, origin = "https://site.example.test", method = "POST") {
+async function request(baseUrl, body, origin = "https://site.example.test", method = "POST", extraHeaders = {}) {
+  const isRawBody = typeof body === "string" || Buffer.isBuffer(body);
   const response = await fetch(baseUrl, {
     method,
     headers: {
-      "Content-Type": "application/json",
-      Origin: origin
+      "Content-Type": isRawBody ? "text/plain" : "application/json",
+      Origin: origin,
+      ...extraHeaders
     },
-    body: method === "POST" ? JSON.stringify(body) : undefined
+    body: method === "POST" ? (isRawBody ? body : JSON.stringify(body)) : undefined
   });
   const text = await response.text();
   return {
@@ -93,6 +95,28 @@ async function request(baseUrl, body, origin = "https://site.example.test", meth
     const invalidOrigin = await request(baseUrl, { password: "MRX-DOWNLOAD-2026", packageType: "exe" }, "https://evil.example.test");
     assert.equal(invalidOrigin.status, 403);
     assert.equal(invalidOrigin.headers.get("access-control-allow-origin"), null);
+
+    const invalidContentType = await request(
+      baseUrl,
+      { password: "MRX-DOWNLOAD-2026", packageType: "exe" },
+      "https://site.example.test",
+      "POST",
+      { "Content-Type": "text/plain" }
+    );
+    assert.equal(invalidContentType.status, 415);
+
+    const oversizedPayload = await request(
+      baseUrl,
+      JSON.stringify({
+        password: "MRX-DOWNLOAD-2026",
+        packageType: "exe",
+        padding: "x".repeat(4096)
+      }),
+      "https://site.example.test",
+      "POST",
+      { "Content-Type": "application/json" }
+    );
+    assert.equal(oversizedPayload.status, 413);
 
     console.log("createDownloadUrl local checks passed");
   } finally {

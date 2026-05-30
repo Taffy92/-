@@ -1,10 +1,11 @@
 ﻿"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { RefObject } from "react";
 import { AdSlot } from "@doctool/ui";
 import Cropper from "cropperjs";
 import JSZip from "jszip";
-import { CheckCircle2, Copy, Crop, Download, ExternalLink, FileImage, FileText, Files, FolderOpen, Image, Loader2, Maximize2, Music, Play, RotateCcw, Scissors, Square, Table2, Trash2, Type, Video } from "lucide-react";
+import { CheckCircle2, ChevronDown, Copy, Crop, Download, ExternalLink, FileImage, FileText, Files, FolderOpen, Gauge, HardDrive, Image, ListChecks, Loader2, Maximize2, Music, Play, RotateCcw, Scissors, ShieldCheck, SlidersHorizontal, Square, Table2, Trash2, Type, Video, Zap } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { addImageWatermark, addTextWatermark, canvasToBlob, compressImage, loadImageElement, resizeImage } from "@doctool/image-core";
 import { combineImagePages, imagePagesToZip, renderDocxToImagePages, renderExcelToImagePages } from "@doctool/export-core";
@@ -54,6 +55,106 @@ const desktopTabs: ToolTab[] = [
   { id: "batch", label: "离线批量处理", description: "多文件打包导出", kind: "batch", icon: Files, featured: true }
 ];
 
+const desktopNavSections = [
+  {
+    title: "图片工具",
+    description: "裁剪 / 水印 / 压缩 / 尺寸",
+    icon: Image,
+    items: [
+      { id: "crop", label: "裁剪", note: "适合头像和取景", badge: "裁" },
+      { id: "watermark", label: "加水印", note: "文字 / 图片", badge: "水" },
+      { id: "compress", label: "压缩", note: "JPG / 质量控制", badge: "压" },
+      { id: "resize", label: "尺寸调整", note: "像素 / 百分比", badge: "尺" }
+    ]
+  },
+  {
+    title: "文档工具",
+    description: "PDF / Word / Excel",
+    icon: FileText,
+    items: [
+      { id: "pdf-images", label: "PDF 转图片", note: "逐页 / 合成", badge: "PDF" },
+      { id: "word-images", label: "Word 转图片", note: "DOCX", badge: "Word" },
+      { id: "excel-images", label: "Excel 转图片", note: "XLSX / CSV", badge: "Excel" }
+    ]
+  },
+  {
+    title: "音视频工具",
+    description: "视频转换 / 提取 / 音频转换",
+    icon: Video,
+    items: [
+      { id: "video-convert", label: "视频格式转换", note: "MP4 / MOV", badge: "视频" },
+      { id: "video-audio", label: "视频提取音频", note: "导出音轨", badge: "提取" },
+      { id: "audio-convert", label: "音频格式转换", note: "MP3 / WAV", badge: "音频" }
+    ]
+  },
+  {
+    title: "批量处理",
+    description: "离线队列 / 历史 / 导出",
+    icon: Files,
+    items: [
+      { id: "batch", label: "批量队列", note: "多文件顺序处理", badge: "队列" }
+    ]
+  }
+] as const;
+
+const onlineNavSections = [
+  {
+    title: "图片工具",
+    description: "裁剪 / 水印 / 压缩 / 尺寸",
+    icon: Image,
+    items: [
+      { id: "crop", label: "图片裁切", note: "适合头像和取景", badge: "裁" },
+      { id: "watermark", label: "添加水印", note: "文字 / 图片", badge: "水" },
+      { id: "compress", label: "图片压缩", note: "JPG / 质量控制", badge: "压" },
+      { id: "resize", label: "尺寸调整", note: "像素 / 百分比", badge: "尺" }
+    ]
+  },
+  {
+    title: "文档工具",
+    description: "PDF / Word / Excel",
+    icon: FileText,
+    items: [
+      { id: "pdf-images", label: "PDF 转图片", note: "逐页 / 合成", badge: "PDF" },
+      { id: "word-images", label: "Word 转图片", note: "DOCX", badge: "Word" },
+      { id: "excel-images", label: "Excel 转图片", note: "XLSX / CSV", badge: "Excel" }
+    ]
+  },
+  {
+    title: "音视频工具",
+    description: "格式转换 / 音频提取",
+    icon: Video,
+    items: [
+      { id: "video-convert", label: "视频格式转换", note: "MP4 / MOV", badge: "视频" },
+      { id: "video-audio", label: "视频提取音频", note: "导出音轨", badge: "提取" },
+      { id: "audio-convert", label: "音频格式转换", note: "MP3 / WAV", badge: "音频" }
+    ]
+  },
+  {
+    title: "离线与批量",
+    description: "批量处理 / 离线安装版",
+    icon: Files,
+    items: [
+      { id: "batch-gate", label: "批量处理", note: "离线专业版功能", badge: "批量" },
+      { id: "download", label: "下载离线版", note: "断网可用", badge: "离线" }
+    ]
+  }
+] as const;
+
+const workbenchCapabilities = [
+  { label: "支持 200+ 格式", icon: Files },
+  { label: "高速转换引擎", icon: Zap },
+  { label: "批量处理能力", icon: ListChecks },
+  { label: "本地安全保障", icon: ShieldCheck },
+  { label: "专业参数控制", icon: SlidersHorizontal }
+];
+
+const assuranceItems = [
+  { label: "文件仅本地处理", detail: "不上传服务器", icon: ShieldCheck },
+  { label: "转换引擎", detail: "浏览器 / 桌面本地运行", icon: Gauge },
+  { label: "批量能力", detail: "离线版任务队列", icon: ListChecks },
+  { label: "输出保存", detail: "本机目录或浏览器下载", icon: HardDrive }
+];
+
 const cropRatioOptions = [
   { value: "free", label: "自由裁切" },
   { value: "avatar", label: "头像 1:1" },
@@ -96,6 +197,12 @@ const onlineFileSizeLimits = {
   media: 200 * 1024 * 1024
 };
 
+type DocumentPreviewState = {
+  url: string;
+  title: string;
+  message: string;
+};
+
 function getOnlineFileSizeLimit(file: File) {
   if (isImageFile(file)) return { bytes: onlineFileSizeLimits.image, label: "图片" };
   if (isPdfFile(file)) return { bytes: onlineFileSizeLimits.document, label: "PDF" };
@@ -134,6 +241,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   const [resultName, setResultName] = useState("");
   const [previewUrl, setPreviewUrl] = useState("");
   const [previewMessage, setPreviewMessage] = useState("");
+  const [documentPreview, setDocumentPreview] = useState<DocumentPreviewState>({ url: "", title: "", message: "" });
   const [compressionStats, setCompressionStats] = useState("");
 
   const [cropFormat, setCropFormat] = useState<ExportImageFormat>("jpg");
@@ -187,6 +295,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   const [batchHistoryFilter, setBatchHistoryFilter] = useState<BatchHistoryFilter>("all");
   const [sidecarExperimentEnabled, setSidecarExperimentEnabled] = useState(false);
   const [sidecarStatus, setSidecarStatus] = useState<SidecarCheckResult | null>(null);
+  const [expandedSections, setExpandedSections] = useState<string[]>(["图片工具"]);
 
   const activeKind = tabs.find((tab) => tab.id === activeTab)?.kind;
   const accept = useMemo(() => {
@@ -212,6 +321,10 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   useEffect(() => () => {
     if (previewUrl) URL.revokeObjectURL(previewUrl);
   }, [previewUrl]);
+
+  useEffect(() => () => {
+    if (documentPreview.url) URL.revokeObjectURL(documentPreview.url);
+  }, [documentPreview.url]);
 
   useEffect(() => {
     if (!isDesktopSurface) return;
@@ -356,6 +469,104 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     summary?.image?.height
   ]);
 
+  useEffect(() => {
+    const previewMode = activeTab === "batch" ? batchMode : activeTab;
+    const canPreviewDocument = file && (
+      (previewMode === "pdf-images" && isPdfFile(file)) ||
+      (previewMode === "word-images" && isWordFile(file)) ||
+      (previewMode === "excel-images" && isExcelFile(file))
+    );
+
+    if (!canPreviewDocument || !file) {
+      setDocumentPreview((current) => {
+        if (current.url) URL.revokeObjectURL(current.url);
+        return { url: "", title: "", message: "" };
+      });
+      return;
+    }
+
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      void (async () => {
+        setDocumentPreview((current) => {
+          if (current.url) URL.revokeObjectURL(current.url);
+          return {
+            url: "",
+            title: previewMode === "pdf-images" ? "PDF 首页预览" : previewMode === "word-images" ? "Word 首页预览" : "Excel 首表预览",
+            message: "正在本地生成预览..."
+          };
+        });
+
+        try {
+          let blob: Blob;
+          let title = "";
+          let message = "";
+
+          if (previewMode === "pdf-images") {
+            const pages = await selectedPdfPages(file);
+            const pageNumber = pages[0] || 1;
+            const previewScale = pdfScale === "ultra" ? 1.6 : pdfScale === "high" ? 1.25 : 1;
+            blob = await renderPdfPageToBlob(file, pageNumber, "png", previewScale);
+            title = `PDF 第 ${pageNumber} 页预览`;
+            message = "预览只渲染首个选中页，正式转换仍按页码设置导出。";
+          } else if (previewMode === "word-images") {
+            const pages = await renderDocxToImagePages(file, {
+              format: "png",
+              onProgress: (_value, progressMessage) => {
+                if (!cancelled && progressMessage) {
+                  setDocumentPreview((current) => ({ ...current, message: progressMessage }));
+                }
+              }
+            });
+            if (!pages[0]) throw new Error("Word 文档没有可预览页面。");
+            blob = pages[0].blob;
+            title = "Word 第 1 页预览";
+            message = pages.length > 1 ? `共解析 ${pages.length} 页，预览显示第 1 页。` : "预览显示第 1 页。";
+          } else {
+            const pages = await renderExcelToImagePages(file, {
+              format: "png",
+              onProgress: (_value, progressMessage) => {
+                if (!cancelled && progressMessage) {
+                  setDocumentPreview((current) => ({ ...current, message: progressMessage }));
+                }
+              }
+            });
+            if (!pages[0]) throw new Error("Excel 文件没有可预览工作表。");
+            blob = pages[0].blob;
+            title = "Excel 首个工作表预览";
+            message = pages.length > 1 ? `共解析 ${pages.length} 个工作表，预览显示第 1 个。` : "预览显示首个工作表。";
+          }
+
+          const nextUrl = URL.createObjectURL(blob);
+          if (cancelled) {
+            URL.revokeObjectURL(nextUrl);
+            return;
+          }
+          setDocumentPreview((current) => {
+            if (current.url) URL.revokeObjectURL(current.url);
+            return { url: nextUrl, title, message };
+          });
+        } catch {
+          if (!cancelled) {
+            setDocumentPreview((current) => {
+              if (current.url) URL.revokeObjectURL(current.url);
+              return {
+                url: "",
+                title: previewMode === "pdf-images" ? "PDF 预览" : previewMode === "word-images" ? "Word 预览" : "Excel 预览",
+                message: "预览生成失败，仍可点击开始转换；如文件较大，建议使用离线专业版。"
+              };
+            });
+          }
+        }
+      })();
+    }, 260);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [activeTab, batchMode, file, pdfPages, pdfScale, summary?.pdf?.pages]);
+
   async function handleFile(nextFile?: File) {
     if (!nextFile) return;
     setError("");
@@ -410,6 +621,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
       setError("没有找到当前批量功能支持的文件，请重新选择。");
       return;
     }
+    void handleFile(nextFiles[0]);
     appendBatchFiles(nextFiles, "files");
     setImportSummary(buildImportSummary(allFiles.length, nextFiles.length, "files"));
     setProgressMessage(`已添加 ${nextFiles.length} 个文件，点击开始处理后会按顺序执行。`);
@@ -689,12 +901,6 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
       completedAt,
       error: "用户取消处理"
     } : task));
-  }
-
-  function clearCompletedBatchTasks() {
-    setBatchTasks((current) => current.filter((task) => task.status !== "success"));
-    setBatchFiles((current) => current.filter((file) => !batchTasks.some((task) => task.status === "success" && task.file === file)));
-    setProgressMessage("已清空已完成任务。");
   }
 
   function clearAllBatchTasks() {
@@ -1224,235 +1430,306 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
       batchMode={batchMode} setBatchMode={setBatchMode} batchFiles={batchFiles}
     />
   );
+  const desktopPreviewMode = activeTab === "batch" ? batchMode : activeTab;
+  const navigationSections = isDesktopSurface ? desktopNavSections : onlineNavSections;
+  const shouldRenderAds = !isDesktopSurface;
+  const toggleNavSection = (title: string) => {
+    setExpandedSections((current) => (
+      current.includes(title)
+        ? current.filter((item) => item !== title)
+        : [...current, title]
+    ));
+  };
+  const selectTool = (tabId: TabId) => {
+    setActiveTab(tabId);
+  };
+  const onlineTaskActionBar = (
+    <div className="mt-4 rounded-sm border border-[#e2e8f0] bg-white p-3">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold text-slate-500">任务操作</p>
+          <p className="mt-1 truncate text-sm text-slate-600">
+            {file ? `${summary?.name || file.name} · 输出 ${outputFormat}` : "先添加文件，再开始本地转换"}
+          </p>
+        </div>
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:w-auto">
+          <button
+            className="btn-primary inline-flex min-h-11 items-center justify-center gap-2 px-5"
+            type="button"
+            disabled={!canStartTask}
+            onClick={() => void runCurrentTask()}
+            title={canStartTask ? undefined : "请先添加文件后再开始转换"}
+          >
+            {status === "running" ? <Loader2 className="h-5 w-5 animate-spin" /> : <Play className="h-5 w-5 fill-current" />}
+            开始转换
+          </button>
+          <button
+            className="btn-danger inline-flex min-h-11 items-center justify-center gap-2 px-5"
+            type="button"
+            disabled={status !== "running"}
+            onClick={cancelTask}
+          >
+            <Square className="h-4 w-4 fill-current" />
+            停止任务
+          </button>
+          {resultName ? (
+            <button
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-sm border border-emerald-700/20 bg-emerald-600 px-5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-200 disabled:text-slate-500"
+              type="button"
+              disabled={!resultBlob}
+              onClick={handleDownload}
+            >
+              <Download className="h-4 w-4" />
+              下载结果
+            </button>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
 
   if (isDesktopSurface) {
-    const navGroups = [
-      { label: "首页工作台", tab: "crop" as TabId },
-      { label: "图片工具", tab: "compress" as TabId },
-      { label: "文档工具", tab: "pdf-images" as TabId },
-      { label: "音视频工具", tab: "video-convert" as TabId },
-      { label: "批量任务", tab: "batch" as TabId },
-      { label: "结果管理", href: "#results-panel" },
-      { label: "使用教程", href: "/tutorials" },
-      { label: "隐私政策", href: "/privacy" },
-      { label: "开源许可证", href: "/licenses" },
-      { label: "设置中心", href: "#settings-panel" },
-      { label: "关于我们", href: "/about" }
-    ];
-
     return (
-      <main className="min-h-[calc(100vh-64px)] bg-[#050b14] text-slate-100">
-        <div className="grid min-h-[calc(100vh-64px)] grid-cols-1 md:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[236px_minmax(0,1fr)_340px]">
-          <aside className="border-b border-cyan-300/15 bg-slate-950 px-4 py-4 md:border-b-0 md:border-r md:py-6">
-            <div className="mb-5 hidden md:block">
-              <p className="text-xs font-semibold text-cyan-300">离线专业版</p>
-              <h1 className="mt-1 text-xl font-bold text-slate-50">万能格式转换器</h1>
-              <p className="mt-2 text-xs leading-5 text-slate-400">断网可用，文件不上传服务器。</p>
-            </div>
-            <nav className="grid grid-flow-col auto-cols-max gap-2 overflow-x-auto pb-1 md:grid-flow-row md:auto-cols-auto md:overflow-visible md:pb-0">
-              {navGroups.map((item) => {
-                const active = "tab" in item && item.tab === activeTab;
-                if ("href" in item) {
-                  return (
-                    <a key={item.label} href={item.href} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-400 hover:bg-cyan-400/10 hover:text-cyan-100">
-                      {item.label}
-                    </a>
-                  );
-                }
-                return (
-                  <button
-                    key={item.label}
-                    type="button"
-                    className={`rounded-xl px-3 py-2 text-left text-sm font-semibold transition ${active ? "bg-cyan-400 text-slate-950 shadow-[0_0_22px_rgba(34,211,238,0.22)]" : "text-slate-300 hover:bg-cyan-400/10 hover:text-cyan-100"}`}
-                    onClick={() => setActiveTab(item.tab)}
-                  >
-                    {item.label}
-                  </button>
-                );
-              })}
-            </nav>
-          </aside>
+      <main className="office-workbench min-h-[calc(100vh-64px)] bg-[#f4f7fb] text-slate-900">
+        <section className="mx-auto max-w-[1760px] px-4 py-4 sm:px-6 lg:px-7">
+          <DesktopOfficeChrome
+            statusText={desktopStatusText}
+            taskCount={taskCount}
+            successCount={successCount}
+            failureCount={failureCount}
+            outputDirectory={outputDirectory}
+            onPickFile={() => inputRef.current?.click()}
+            onPickFolder={() => void importFolder()}
+            onSelectOutput={() => void selectOutputDirectory()}
+            onStart={() => void runCurrentTask()}
+            onStop={cancelTask}
+            onClearCompleted={clearAllBatchTasks}
+            onOpenOutput={() => void openOutputDirectory()}
+            onExportLog={() => void exportBatchLog()}
+            canStart={canStartTask}
+            canStop={status === "running"}
+            isRunning={status === "running"}
+          />
 
-          <section className="min-w-0 px-4 py-5 sm:px-6 lg:px-7">
-            <div className="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              <DesktopMetric label="任务总数" value={taskCount} />
-              <DesktopMetric label="成功" value={successCount} tone="success" />
-              <DesktopMetric label="失败" value={failureCount} tone="danger" />
-              <DesktopMetric label="当前功能" value={currentTab.label} />
-            </div>
-
-            <div className="rounded-xl tech-panel p-4">
-              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="text-xl font-bold text-slate-50">专业工作台</h2>
-                  <p className="mt-1 text-sm text-slate-400">添加文件后按任务队列处理，所有文件仅在本机运行，不调用云端转换 API。</p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <button className="btn-primary inline-flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 disabled:shadow-none" type="button" disabled={!canStartTask} onClick={() => void runCurrentTask()} title={taskCount ? undefined : "请先添加文件后再开始处理"}>
-                    {status === "running" ? <Loader2 className="h-5 w-5 animate-spin" /> : <Play className="h-5 w-5 fill-current" />}
-                    开始处理
-                  </button>
-                  <button className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 hover:bg-red-100" type="button" onClick={cancelTask}>
-                    <Square className="h-4 w-4 fill-current" />
-                    取消
-                  </button>
-                  <button className="inline-flex items-center justify-center gap-2 rounded-xl border border-cyan-300/20 bg-slate-900 px-4 py-3 text-sm font-semibold text-slate-200 hover:bg-cyan-400/10" type="button" onClick={() => void selectOutputDirectory()}>
-                    <FolderOpen className="h-4 w-4" />
-                    输出目录
-                  </button>
-                  <button className="inline-flex items-center justify-center gap-2 rounded-xl border border-cyan-300/20 bg-slate-900 px-4 py-3 text-sm font-semibold text-slate-200 hover:bg-cyan-400/10" type="button" onClick={clearCompletedBatchTasks}>
-                    <Trash2 className="h-4 w-4" />
-                    清空完成
-                  </button>
-                  <button className="inline-flex items-center justify-center rounded-xl border border-cyan-300/20 bg-slate-900 px-4 py-3 text-sm font-semibold text-slate-200 hover:bg-cyan-400/10" type="button" onClick={clearAllBatchTasks}>
-                    清空全部
-                  </button>
-                </div>
+          <div className="mt-4 grid gap-4 xl:grid-cols-[292px_minmax(0,1fr)_344px]">
+            <aside className="tech-shell h-fit p-3 xl:sticky xl:top-4">
+              <div className="rounded-sm border border-slate-700/80 bg-slate-950/60 px-3 py-2.5">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-300/80">分类导航</p>
+                <p className="mt-1 text-xs leading-5 text-slate-400">按实际办公任务拆分，直接进入图片、文档、音视频和批量队列。</p>
               </div>
-              {!taskCount ? <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">请先添加文件后再开始处理。</p> : null}
-
-              <div
-                className="flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-cyan-300/35 bg-cyan-950/20 px-4 text-center transition hover:border-cyan-300 hover:bg-cyan-400/10"
-                onClick={() => inputRef.current?.click()}
-                onDragOver={(event) => event.preventDefault()}
-                onDrop={(event) => {
-                  event.preventDefault();
-                  if (activeTab === "batch") handleBatchFiles(event.dataTransfer.files);
-                  else void handleFile(event.dataTransfer.files[0]);
-                }}
-              >
-                <input
-                  ref={inputRef}
-                  className="hidden"
-                  type="file"
-                  accept={accept}
-                  multiple={activeTab === "batch"}
-                  onChange={(event) => activeTab === "batch" ? handleBatchFiles(event.target.files) : void handleFile(event.target.files?.[0])}
-                />
-                <input
-                  ref={folderInputRef}
-                  className="hidden"
-                  type="file"
-                  multiple
-                  onChange={(event) => handleFolderInputFiles(event.target.files)}
-                  {...({ webkitdirectory: "", directory: "" } as Record<string, string>)}
-                />
-                <p className="text-lg font-semibold text-slate-50">{activeTab === "batch" ? "添加一组文件到批量任务队列" : "添加文件到当前任务"}</p>
-                <p className="mt-2 text-sm text-slate-400">支持拖拽或点击选择。断网状态下核心功能仍可使用。</p>
+              <div className="mt-3 space-y-3">
+                {navigationSections.map((section) => (
+                  <DesktopTreeSection
+                    key={section.title}
+                    section={section}
+                    activeTab={activeTab}
+                    expanded={expandedSections.includes(section.title)}
+                    onToggle={() => toggleNavSection(section.title)}
+                    onSelectTab={selectTool}
+                  />
+                ))}
               </div>
-
-              <div className="mt-4 overflow-x-auto rounded-xl border border-cyan-300/15">
-                <div className="grid min-w-[900px] grid-cols-[minmax(180px,1.4fr)_100px_90px_110px_96px_minmax(150px,1fr)_130px] bg-slate-900 px-4 py-3 text-xs font-semibold text-slate-400">
-                  <span>文件名</span>
-                  <span>类型</span>
-                  <span>大小</span>
-                  <span>输出格式</span>
-                  <span>状态</span>
-                  <span>失败原因</span>
-                  <span>操作</span>
-                </div>
-                <div className="divide-y divide-cyan-300/10 bg-slate-950/50">
-                  {activeTab === "batch" && batchTasks.length ? batchTasks.map((task) => (
-                    <DesktopBatchTaskRow
-                      key={task.id}
-                      task={task}
-                      active={activeTaskId === task.id}
-                      onRetry={() => retryBatchTask(task.id)}
-                      onCancel={() => cancelBatchTask(task.id)}
-                      onOpenResult={() => void openResultFile(task)}
-                      onCopy={() => void copyText(task.outputPath || task.resultName)}
-                    />
-                  )) : file && summary ? (
-                    <DesktopTaskRow name={summary.name} type={currentTab.label} size={formatBytes(summary.size)} outputFormat={outputFormat} status={status} error={error} />
-                  ) : (
-                    <DesktopEmptyQueue onPickFile={() => inputRef.current?.click()} onPickFolder={() => void importFolder()} onPickOutputDirectory={() => void selectOutputDirectory()} />
-                  )}
-                </div>
+              <div className="mt-3 rounded-sm border border-slate-700/80 bg-slate-950/60 p-3 text-xs leading-5 text-slate-400">
+                <p className="font-semibold text-emerald-300">离线承诺</p>
+                <p className="mt-1">文件仅在本机处理，不上传服务器。适合内网、办公室和政府单位。</p>
               </div>
+            </aside>
 
-              <div className="mt-4 rounded-xl border border-cyan-300/10 bg-slate-900/70 p-4">
-                <div className="h-3 overflow-hidden rounded-full bg-slate-950">
-                  <div className="h-full rounded-full bg-cyan-400 transition-all shadow-[0_0_18px_rgba(34,211,238,0.45)]" style={{ width: `${Math.round(progress * 100)}%` }} />
-                </div>
-                <div className="mt-3 flex flex-col gap-2 text-sm text-slate-300 sm:flex-row sm:items-center sm:justify-between">
-                  <span>{progressText}</span>
-                  <StatusBadge status={status} />
-                </div>
-                {error ? <p className="mt-3 rounded-xl bg-red-50 p-3 text-sm text-red-700">处理失败：{error}。下一步：请检查文件格式、降低文件大小或重新添加文件后再试。</p> : null}
-                {resultName ? (
-                  <div className="mt-3 flex flex-col gap-2 rounded-xl bg-emerald-50 p-3 text-sm font-semibold text-emerald-700 sm:flex-row sm:items-center sm:justify-between">
-                    <span className="inline-flex items-center gap-2"><CheckCircle2 className="h-5 w-5" />已生成：{resultName}</span>
-                    <button className="rounded-lg bg-emerald-600 px-4 py-2 text-white" type="button" onClick={handleDownload}>下载结果</button>
+            <section className="min-w-0 space-y-3">
+              <section className="w-full min-w-0 rounded-sm border border-slate-700/80 bg-slate-950/72 p-4">
+                <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+                  <div>
+                    <p className="text-xs font-semibold text-cyan-300">任务队列</p>
+                    <h3 className="mt-1 text-lg font-semibold text-slate-50">{activeTab === "batch" ? batchModeLabel(batchMode) : currentTab.label}</h3>
+                    <p className="mt-1 text-sm text-slate-400">拖拽文件到这里，或者通过顶部命令栏导入。</p>
                   </div>
-                ) : null}
-              </div>
-
-              <div id="results-panel" className="mt-4 grid scroll-mt-24 gap-4 xl:grid-cols-2">
-                {activeTab !== "batch" && summary ? <FileSummaryView summary={summary} /> : <BatchSummaryView files={batchFiles} mode={batchMode} importSummary={importSummary} />}
-                <div className="rounded-xl border border-cyan-300/10 bg-slate-900/70 p-4 text-sm leading-6 text-slate-300">
-                  <p className="font-semibold text-slate-50">结果管理</p>
-                  <p className="mt-2">成功 {successCount} 个，失败 {failureCount} 个。失败任务可在队列中查看原因并重试。</p>
-                  <p className="mt-2">当前输出目录：{outputDirectory.label}</p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <button className="rounded-lg border border-cyan-300/20 bg-slate-950 px-3 py-2 font-semibold text-slate-200 hover:bg-cyan-400/10" type="button" onClick={() => void openOutputDirectory()}>打开输出目录</button>
-                    <button className="rounded-lg border border-cyan-300/20 bg-slate-950 px-3 py-2 font-semibold text-slate-200 hover:bg-cyan-400/10" type="button" onClick={() => void copyText(outputDirectory.kind === "tauri" ? outputDirectory.path : outputDirectory.label)}>复制输出路径</button>
-                    <button className="rounded-lg border border-cyan-300/20 bg-slate-950 px-3 py-2 font-semibold text-slate-200 hover:bg-cyan-400/10" type="button" onClick={() => void exportBatchLog()}>导出处理日志</button>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-sm border border-slate-700/80 bg-slate-950/70 px-3 py-2 text-xs font-semibold text-slate-300">{progressText}</span>
+                    <StatusBadge status={status} />
                   </div>
-                  {batchLogMessage ? <p className="mt-2 text-cyan-300">{batchLogMessage}</p> : null}
                 </div>
-              </div>
-              <BatchHistoryPanel history={batchHistory} filter={batchHistoryFilter} onFilterChange={setBatchHistoryFilter} onClear={clearBatchHistory} />
-            </div>
-          </section>
 
-          <aside id="settings-panel" className="scroll-mt-24 border-t border-cyan-300/15 bg-slate-950 px-4 py-5 md:col-start-2 xl:col-start-auto xl:border-l xl:border-t-0">
-            <div className="mb-4">
-              <p className="text-xs font-semibold text-cyan-300">参数面板</p>
-              <h2 className="mt-1 text-lg font-bold text-slate-50">{currentTab.label}</h2>
-              <p className="mt-1 text-sm text-slate-400">{currentTab.description}</p>
-            </div>
-            <div className="space-y-3">
-              <SettingsSection title="当前参数">
-                {controlPanel}
-              </SettingsSection>
-              <SettingsSection title="导出设置">
-                <DesktopSettingRow label="输出格式" value={outputFormat} />
-                <DesktopSettingRow label="输出目录" value={outputDirectory.label} note="点击顶部“输出目录”可选择本地保存位置" />
-                <DesktopSettingRow label="命名规则" value="原文件名 + 功能后缀" note="已用于批量结果命名" />
-              </SettingsSection>
-              <SettingsSection title="批量设置">
-                <DesktopSettingRow label="并发数量" value="1 个任务" note="顺序处理，降低大文件内存占用" />
-                <DesktopSettingRow label="覆盖策略" value="覆盖同名结果" note="建议为不同批次选择独立输出目录" />
-              </SettingsSection>
-              <SettingsSection title="高级设置">
-                <DesktopSettingRow label="清理 EXIF" value="按功能参数执行" note="音视频元数据按开关处理" />
-                <DesktopSettingRow label="失败处理" value="保留失败原因，可重试" note="失败任务不会影响其他任务继续处理" />
-              </SettingsSection>
-              <SettingsSection title="本地后端">
-                <SidecarExperimentPanel
-                  enabled={sidecarExperimentEnabled}
-                  status={sidecarStatus}
-                  onToggle={toggleSidecarExperiment}
-                  onRefresh={() => void refreshSidecarStatus()}
+                <div
+                  className="mt-4 flex min-h-24 cursor-pointer items-center justify-center rounded-sm border border-dashed border-slate-700/80 bg-slate-950/55 px-4 text-center transition hover:border-cyan-300/40 hover:bg-cyan-400/10"
+                  onClick={() => inputRef.current?.click()}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    if (activeTab === "batch") handleBatchFiles(event.dataTransfer.files);
+                    else void handleFile(event.dataTransfer.files[0]);
+                  }}
+                >
+                  <input
+                    ref={inputRef}
+                    className="hidden"
+                    type="file"
+                    accept={accept}
+                    multiple={activeTab === "batch"}
+                    onChange={(event) => activeTab === "batch" ? handleBatchFiles(event.target.files) : void handleFile(event.target.files?.[0])}
+                  />
+                  <input
+                    ref={folderInputRef}
+                    className="hidden"
+                    type="file"
+                    multiple
+                    onChange={(event) => handleFolderInputFiles(event.target.files)}
+                    {...({ webkitdirectory: "", directory: "" } as Record<string, string>)}
+                  />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-50">{activeTab === "batch" ? "将批量文件拖到这里" : "将单个文件拖到这里"}</p>
+                    <p className="mt-1 text-xs text-slate-500">支持点击导入、拖拽导入和文件夹导入，处理结果仍然只保存在本机。</p>
+                  </div>
+                </div>
+
+                <div className="mt-4 max-w-full overflow-x-auto rounded-sm border border-slate-800/80">
+                  <div className="batch-table-header grid min-w-[900px] grid-cols-[minmax(180px,1.4fr)_100px_90px_110px_96px_minmax(150px,1fr)_130px] items-center bg-slate-900/95 px-3 py-2 text-xs font-semibold text-slate-400">
+                    <span>文件名</span>
+                    <span>类型</span>
+                    <span>大小</span>
+                    <span>输出格式</span>
+                    <span>状态</span>
+                    <span>失败原因</span>
+                    <span>操作</span>
+                  </div>
+                  <div className="divide-y divide-slate-800/80 bg-slate-950/45">
+                    {activeTab === "batch" && batchTasks.length ? batchTasks.map((task) => (
+                      <DesktopBatchTaskRow
+                        key={task.id}
+                        task={task}
+                        active={activeTaskId === task.id}
+                        onRetry={() => retryBatchTask(task.id)}
+                        onCancel={() => cancelBatchTask(task.id)}
+                        onOpenResult={() => void openResultFile(task)}
+                        onCopy={() => void copyText(task.outputPath || task.resultName)}
+                      />
+                    )) : file && summary ? (
+                      <DesktopTaskRow name={summary.name} type={currentTab.label} size={formatBytes(summary.size)} outputFormat={outputFormat} status={status} error={error} />
+                    ) : (
+                      <DesktopEmptyQueue onPickFile={() => inputRef.current?.click()} onPickFolder={() => void importFolder()} onPickOutputDirectory={() => void selectOutputDirectory()} />
+                    )}
+                  </div>
+                </div>
+              </section>
+
+              <div className="grid gap-3 2xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
+                <DesktopPreviewPanel
+                  mode={desktopPreviewMode}
+                  modeLabel={activeTab === "batch" ? batchModeLabel(batchMode) : currentTab.label}
+                  file={file}
+                  fileUrl={fileUrl}
+                  previewUrl={previewUrl}
+                  previewMessage={previewMessage}
+                  documentPreview={documentPreview}
+                  summary={summary}
+                  cropImageRef={cropImageRef}
+                  onImageLoad={() => setCropPreviewKey((value) => value + 1)}
                 />
-              </SettingsSection>
-            </div>
-            <div className="mt-4 rounded-2xl border border-cyan-300/15 bg-cyan-950/20 p-4 text-sm leading-6 text-cyan-50">
-              <p className="font-semibold text-slate-50">本地处理承诺</p>
-              <p className="mt-2">文件仅在本机处理，不上传服务器，不调用云端转换 API。CloudBase 只用于下载授权，不接触用户处理文件。</p>
-            </div>
-          </aside>
-        </div>
 
-        <div className="sticky bottom-0 z-20 border-t border-cyan-300/15 bg-slate-950/95 px-4 py-2 text-xs text-slate-400 backdrop-blur">
-          <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-5 gap-y-1">
-            <span className="font-semibold text-emerald-700">离线可用</span>
+                <section className="rounded-sm border border-slate-700/80 bg-slate-950/72 p-4">
+                  <p className="text-xs font-semibold text-cyan-300">当前工作</p>
+                  <h2 className="mt-1 text-lg font-semibold text-slate-50">{currentTab.label}</h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-400">{currentTab.description}</p>
+                  <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                    <DesktopPropertyRow label="输出格式" value={outputFormat} />
+                    <DesktopPropertyRow label="当前状态" value={desktopStatusText} />
+                    <DesktopPropertyRow label="任务数量" value={String(taskCount)} />
+                    <DesktopPropertyRow label="输出目录" value={outputDirectory.label} note="点击顶部输出目录可选择保存位置" />
+                  </div>
+                </section>
+              </div>
+
+              <div className="grid gap-3 xl:grid-cols-2">
+                <section className="rounded-sm border border-slate-700/80 bg-slate-950/72 p-4">
+                  <div className="h-3 overflow-hidden rounded-sm bg-slate-900/90">
+                    <div className="h-full rounded-sm bg-cyan-400 transition-all" style={{ width: `${Math.round(progress * 100)}%` }} />
+                  </div>
+                  <div className="mt-3 flex flex-col gap-2 text-sm text-slate-300 sm:flex-row sm:items-center sm:justify-between">
+                    <span>{progressText}</span>
+                    <StatusBadge status={status} />
+                  </div>
+                  {error ? <p className="mt-3 rounded-sm border border-rose-300/20 bg-rose-400/10 p-3 text-sm text-rose-100">处理失败：{error}。下一步：请检查文件格式、降低文件大小或重新添加文件后再试。</p> : null}
+                  {resultName ? (
+                    <div className="mt-3 rounded-sm border border-emerald-300/20 bg-emerald-400/10 p-3 text-sm text-emerald-100">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <span className="inline-flex min-w-0 items-center gap-2 font-semibold">
+                          <CheckCircle2 className="h-5 w-5 shrink-0" />
+                          <span className="truncate">已生成：{resultName}</span>
+                        </span>
+                        <button
+                          className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-sm border border-emerald-200/60 bg-emerald-300 px-4 text-sm font-semibold text-slate-950 transition hover:bg-emerald-200 disabled:cursor-not-allowed disabled:border-slate-700 disabled:bg-slate-800 disabled:text-slate-500 sm:w-auto sm:min-w-36"
+                          type="button"
+                          disabled={!resultBlob}
+                          onClick={handleDownload}
+                        >
+                          <Download className="h-4 w-4" />
+                          下载结果
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
+                  <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                    <span>成功 {successCount}</span>
+                    <span>失败 {failureCount}</span>
+                    <span>输出目录：{outputDirectory.label}</span>
+                  </div>
+                </section>
+
+                <section className="min-w-0 space-y-4">
+                  {activeTab !== "batch" && summary ? <FileSummaryView summary={summary} /> : <BatchSummaryView files={batchFiles} mode={batchMode} importSummary={importSummary} />}
+                  <BatchHistoryPanel history={batchHistory} filter={batchHistoryFilter} onFilterChange={setBatchHistoryFilter} onClear={clearBatchHistory} />
+                </section>
+              </div>
+            </section>
+
+            <aside id="settings-panel" className="tech-shell h-fit scroll-mt-24 p-3 xl:sticky xl:top-4">
+              <div className="rounded-sm border border-slate-700/80 bg-slate-950/60 p-3">
+                <p className="text-xs font-semibold text-cyan-300">属性面板</p>
+                <h2 className="mt-1 text-lg font-semibold text-slate-50">{currentTab.label}</h2>
+                <p className="mt-1 text-sm text-slate-400">{currentTab.description}</p>
+              </div>
+              <div className="mt-3 space-y-3">
+                <DesktopPropertySection title="当前参数">
+                  {controlPanel}
+                </DesktopPropertySection>
+                <DesktopPropertySection title="导出设置">
+                  <DesktopPropertyRow label="输出格式" value={outputFormat} />
+                  <DesktopPropertyRow label="输出目录" value={outputDirectory.label} note="点击顶部输出目录可选择保存位置" />
+                  <DesktopPropertyRow label="命名规则" value="原文件名 + 功能后缀" note="用于批量任务命名" />
+                </DesktopPropertySection>
+                <DesktopPropertySection title="任务信息">
+                  <DesktopPropertyRow label="总任务" value={String(taskCount)} />
+                  <DesktopPropertyRow label="成功" value={String(successCount)} />
+                  <DesktopPropertyRow label="失败" value={String(failureCount)} />
+                </DesktopPropertySection>
+                <DesktopPropertySection title="本地后端">
+                  <SidecarExperimentPanel
+                    enabled={sidecarExperimentEnabled}
+                    status={sidecarStatus}
+                    onToggle={toggleSidecarExperiment}
+                    onRefresh={() => void refreshSidecarStatus()}
+                  />
+                </DesktopPropertySection>
+              </div>
+              <div className="mt-3 rounded-sm border border-slate-700/80 bg-slate-950/60 p-3 text-sm leading-6 text-slate-300">
+                <p className="font-semibold text-slate-50">本地处理承诺</p>
+                <p className="mt-2">文件仅在本机处理，不上传服务器，不调用云端转换服务。CloudBase 只用于下载授权，不接触用户处理文件。</p>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <div className="border-t border-slate-800/80 bg-slate-950/96 px-4 py-2 text-xs text-slate-400">
+          <div className="mx-auto flex max-w-[1760px] flex-wrap items-center gap-x-3 gap-y-1">
+            <span className="font-semibold text-emerald-300">离线可用</span>
+            <span className="text-slate-500">|</span>
             <span>状态：{desktopStatusText}</span>
-            <span>版本 1.0.0</span>
+            <span className="text-slate-500">|</span>
             <span>任务 {taskCount}</span>
+            <span className="text-slate-500">|</span>
             <span>成功 {successCount}</span>
+            <span className="text-slate-500">|</span>
             <span>失败 {failureCount}</span>
-            <span>大文件建议分批处理，避免内存占用过高</span>
+            <span className="text-slate-500">|</span>
             <span>输出目录：{outputDirectory.label}</span>
           </div>
         </div>
@@ -1461,152 +1738,229 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   }
 
   return (
-    <main className="bg-transparent text-slate-100">
-      <section className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
-        <div className="rounded-2xl tech-panel p-5 sm:p-7">
-          <div className="inline-flex rounded-full border border-cyan-300/25 bg-cyan-400/10 px-3 py-1.5 text-xs font-semibold text-cyan-200">{isDesktopSurface ? "本机离线处理" : "浏览器本地处理"}</div>
-          <div className="mt-4">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-50 sm:text-5xl">万能格式转换器</h1>
-            <p className="mt-3 max-w-6xl text-base leading-7 text-slate-300 sm:text-lg sm:leading-8">
-              先选功能，再添加文件。所有处理都在当前设备本地完成，文件不上传服务器。
-              <span className="hidden sm:inline"> 支持图片、PDF、Word、Excel、视频和音频的常用格式转换。</span>
-            </p>
-          </div>
-          <div className="mt-4 rounded-xl border border-cyan-300/20 bg-cyan-950/25 p-3 text-sm leading-6 text-cyan-50 sm:p-4">
-            <p>{isDesktopSurface ? "你的文件只在当前电脑中处理，不需要联网，也不会上传服务器。" : privacyNotice}</p>
-            <p className="mt-2">{pdfBoundaryNotice}</p>
-            <p className="mt-2">广告脚本不会接收你正在处理的图片、PDF、Word、Excel、音频、视频或转换结果。</p>
-          </div>
-        </div>
-      </section>
+    <main className="office-workbench min-h-[calc(100vh-64px)] bg-[var(--surface-page)] text-slate-900">
+      <section id="tool-picker" className="mx-auto max-w-[1480px] scroll-mt-24 px-4 py-5 sm:px-6 lg:px-8">
+        <div className="grid gap-5 xl:grid-cols-[280px_minmax(0,1fr)]">
+          <aside className="h-fit border border-[var(--border-soft)] bg-white xl:sticky xl:top-24">
+            <div className="border-b border-[var(--border-soft)] bg-[var(--surface-muted)] p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Tool groups</p>
+              <h2 className="mt-1 text-lg font-bold text-slate-950">功能导航</h2>
+              <p className="mt-1 text-xs leading-5 text-slate-600">按任务类型选择工具，右侧工作台会同步切换参数和预览。</p>
+            </div>
+            <nav className="grid gap-0">
+              {navigationSections.map((section) => {
+                const SectionIcon = section.icon;
+                const expanded = expandedSections.includes(section.title);
+                return (
+                  <section key={section.title} className="border-b border-[var(--border-soft)] last:border-b-0">
+                    <button
+                      className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-[var(--surface-muted)]"
+                      type="button"
+                      aria-expanded={expanded}
+                      onClick={() => toggleNavSection(section.title)}
+                    >
+                      <span className="flex min-w-0 items-center gap-2">
+                        <span className="grid h-9 w-9 place-items-center border border-[var(--border-soft)] bg-white text-slate-800">
+                          <SectionIcon className="h-4 w-4" />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block truncate text-sm font-bold text-slate-950">{section.title}</span>
+                          <span className="block truncate text-xs text-slate-500">{section.description}</span>
+                        </span>
+                      </span>
+                      <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${expanded ? "rotate-180" : ""}`} />
+                    </button>
+                    {expanded ? (
+                      <div className="border-t border-[var(--border-soft)] bg-white">
+                        {section.items.map((item) => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            aria-pressed={activeTab === item.id}
+                            className={`flex w-full items-start gap-3 border-b border-[var(--border-soft)] px-4 py-3 text-left text-sm last:border-b-0 ${
+                              activeTab === item.id
+                                ? "border-l-4 border-l-[var(--accent-blue)] bg-[#e8f3fb] font-semibold text-slate-950"
+                                : "text-slate-700 hover:bg-[var(--surface-muted)] hover:text-slate-950"
+                            }`}
+                            onClick={() => selectTool(item.id)}
+                          >
+                            <span className={activeTab === item.id ? "font-bold text-[var(--accent-blue)]" : "text-slate-500"}>{item.badge}</span>
+                            <span className="min-w-0">
+                              <span className="block truncate">{item.label}</span>
+                              <span className={activeTab === item.id ? "mt-0.5 block truncate text-xs font-medium text-slate-700" : "mt-0.5 block truncate text-xs text-slate-500"}>{item.note}</span>
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    ) : null}
+                  </section>
+                );
+              })}
+            </nav>
+          </aside>
 
-      <section id="tool-picker" className="mx-auto max-w-7xl scroll-mt-24 px-4 pb-12 sm:px-6 lg:px-8">
-        <div className="rounded-xl tech-panel p-4 sm:p-5">
-          <div className="mb-5">
-            <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <h2 className="text-xl font-semibold text-slate-50">选择功能</h2>
-                <p className="mt-1 text-sm text-slate-400">点击下方功能卡片后，再设置参数并开始处理。</p>
+          <div className="min-w-0">
+            <div className="border border-[var(--border-soft)] bg-white p-5">
+              <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+            <div>
+              <div className="inline-flex items-center gap-2 border border-[var(--border-soft)] bg-[var(--surface-muted)] px-3 py-1 text-xs font-semibold text-slate-600">
+                在线版
+                <span className="h-1 w-1 rounded-sm bg-emerald-500" />
+                文件本地处理
               </div>
-              <span className="text-xs font-medium text-cyan-300">第 1 步 · 文件本地处理</span>
+              <h1 className="mt-4 max-w-3xl text-3xl font-bold leading-tight tracking-normal text-slate-950">
+                选择一个转换任务，添加文件后直接导出
+              </h1>
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
+                在线版适合图片、文档、音频和视频的轻量单文件处理。文件仅在本地处理，不上传服务器；大文件、敏感文件和批量任务建议使用 Windows 离线专业版。
+              </p>
             </div>
-            <p className="mb-2 text-xs font-medium text-cyan-300 md:hidden">左右滑动查看更多工具</p>
-            <div className="relative">
-              <div className="grid grid-flow-col auto-cols-[minmax(168px,1fr)] gap-3 overflow-x-auto pb-2 pr-8 md:grid-flow-row md:grid-cols-3 md:pr-0 xl:grid-cols-4">
-                {tabs.map((tab) => (
-                  <ToolTabButton
-                    key={tab.id}
-                    tab={tab}
-                    active={activeTab === tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                  />
-                ))}
+            <div className="border border-emerald-200 bg-emerald-50 p-4">
+              <div className="flex items-start gap-3">
+                <ShieldCheck className="mt-1 h-5 w-5 shrink-0 text-emerald-700" />
+                <div>
+                  <p className="font-semibold text-emerald-950">在线版说明</p>
+                  <p className="mt-1 text-sm leading-6 text-emerald-800">广告脚本不会接收你正在处理的图片、文档、音频、视频或转换结果。</p>
+                </div>
               </div>
-              <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-slate-950/95 to-transparent md:hidden" />
             </div>
           </div>
-          {activeTab === "batch-gate" ? (
-            <BatchGateNotice />
-          ) : (
-          <>
-          <div className="mb-5 rounded-xl border border-cyan-300/15 bg-slate-900/60 p-4 sm:p-5">
-            <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <h2 className="text-xl font-semibold text-slate-50">添加文件</h2>
-                <p className="mt-1 text-sm text-slate-400">
-                  {activeTab === "batch" ? "离线版批量处理支持一次添加多个文件，处理完成后统一打包下载。" : "根据当前选择的功能，上传对应的图片、PDF、Word、Excel、视频或音频文件。"}
-                </p>
-              </div>
-              <span className="text-xs font-medium text-cyan-300">第 2 步</span>
-            </div>
-            <div
-              className="flex min-h-44 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-cyan-300/35 bg-slate-950/60 px-4 text-center transition hover:border-cyan-300 hover:bg-cyan-400/10"
-              onClick={() => inputRef.current?.click()}
-              onDragOver={(event) => event.preventDefault()}
-              onDrop={(event) => {
-                event.preventDefault();
-                if (activeTab === "batch") handleBatchFiles(event.dataTransfer.files);
-                else void handleFile(event.dataTransfer.files[0]);
-              }}
-            >
-              <input
-                ref={inputRef}
-                className="hidden"
-                type="file"
-                accept={accept}
-                multiple={activeTab === "batch"}
-                onChange={(event) => activeTab === "batch" ? handleBatchFiles(event.target.files) : void handleFile(event.target.files?.[0])}
-              />
-              <p className="text-xl font-semibold text-slate-50">{activeTab === "batch" ? "点击添加多个文件，或把一组文件拖到这里" : "点击选择文件，或拖拽文件到这里"}</p>
-              <p className="mt-2 text-sm text-slate-400">文件只在当前设备处理，不上传服务器</p>
-            </div>
-            {activeTab === "batch" ? <BatchSummaryView files={batchFiles} mode={batchMode} importSummary={importSummary} /> : summary ? <FileSummaryView summary={summary} /> : null}
-            {activeTab !== "batch" && fileUrl && file && isImageFile(file) ? (
-              <div className="mt-4">
-                <div className="overflow-hidden rounded-xl border border-cyan-300/10 bg-slate-950">
-                  <img
-                    ref={cropImageRef}
-                    className="max-h-[560px] w-full object-contain"
-                    src={fileUrl}
-                    alt="图片预览"
-                    onLoad={() => setCropPreviewKey((value) => value + 1)}
-                  />
+
+            <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+          <section className="min-w-0">
+            <div className="border border-[var(--border-soft)] bg-white p-4 sm:p-5">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">当前工具</p>
+                  <h2 className="mt-1 text-2xl font-bold text-slate-950">{currentTab.label}</h2>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">{currentTab.description}。文件只在当前设备处理，不上传服务器。</p>
                 </div>
-                {activeTab === "crop" ? (
-                  <p className="mt-2 text-sm text-slate-300">拖动图片上的裁切框边角或边线即可自由裁切；选择固定比例后，裁切框会按比例锁定。</p>
+                <StatusBadge status={status} />
+              </div>
+
+              <div className="mt-4 border border-[var(--border-soft)] bg-[var(--surface-muted)] p-3 text-sm leading-6 text-slate-600 sm:p-4">
+                <p>{privacyNotice}</p>
+                <p className="mt-2">{pdfBoundaryNotice}</p>
+              </div>
+
+              {activeTab === "batch-gate" ? (
+                <BatchGateNotice />
+              ) : activeTab === "download" ? (
+                <DownloadEditionNotice />
+              ) : (
+                <>
+                  <div
+                    className="mt-4 flex min-h-56 cursor-pointer flex-col items-center justify-center border-2 border-dashed border-slate-300 bg-white px-4 text-center transition hover:border-slate-500 hover:bg-[var(--surface-muted)]"
+                    onClick={() => inputRef.current?.click()}
+                    onDragOver={(event) => event.preventDefault()}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      if (activeTab === "batch") handleBatchFiles(event.dataTransfer.files);
+                      else void handleFile(event.dataTransfer.files[0]);
+                    }}
+                  >
+                    <input
+                      ref={inputRef}
+                      className="hidden"
+                      type="file"
+                      accept={accept}
+                      multiple={activeTab === "batch"}
+                      onChange={(event) => activeTab === "batch" ? handleBatchFiles(event.target.files) : void handleFile(event.target.files?.[0])}
+                    />
+                    <input
+                      ref={folderInputRef}
+                      className="hidden"
+                      type="file"
+                      multiple
+                      onChange={(event) => handleFolderInputFiles(event.target.files)}
+                      {...({ webkitdirectory: "", directory: "" } as Record<string, string>)}
+                    />
+                    <span className="grid h-14 w-14 place-items-center border border-slate-950 bg-slate-950 text-white">
+                      <Download className="h-8 w-8" />
+                    </span>
+                    <p className="mt-5 text-xl font-bold text-slate-950">将文件拖拽到此处，或点击上传</p>
+                    <p className="mt-2 max-w-xl text-sm leading-6 text-slate-600">根据当前工具添加对应文件。在线版适合单个轻量文件，大文件建议使用离线专业版。</p>
+                  </div>
+
+                  {onlineTaskActionBar}
+
+                  <div className="mt-4">
+                    <DesktopPreviewPanel
+                      mode={activeTab}
+                      modeLabel={currentTab.label}
+                      file={file}
+                      fileUrl={fileUrl}
+                      previewUrl={previewUrl}
+                      previewMessage={previewMessage}
+                      documentPreview={documentPreview}
+                      summary={summary}
+                      cropImageRef={cropImageRef}
+                      onImageLoad={() => setCropPreviewKey((value) => value + 1)}
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+
+            {activeTab !== "batch-gate" && activeTab !== "download" ? (
+              <div className="mt-5 border border-[var(--border-soft)] bg-white p-4">
+                <div className="h-2 overflow-hidden bg-slate-100">
+                  <div className="h-full bg-slate-950 transition-all" style={{ width: `${Math.round(progress * 100)}%` }} />
+                </div>
+                <div className="mt-3 flex flex-col gap-2 text-sm text-slate-600 sm:flex-row sm:items-center sm:justify-between">
+                  <span>{progressText}</span>
+                  <StatusBadge status={status} />
+                </div>
+                {compressionStats ? <p className="mt-2 text-sm font-medium text-slate-700">{compressionStats}</p> : null}
+                {error ? <p className="mt-3 border border-red-200 bg-red-50 p-3 text-sm text-red-700">处理失败：{error}。下一步：请检查文件格式、降低文件大小或重新添加文件后再试。</p> : null}
+                {resultName ? (
+                  <div className="mt-3 border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <span className="inline-flex min-w-0 items-center gap-2 font-semibold">
+                        <CheckCircle2 className="h-5 w-5 shrink-0" />
+                        <span className="truncate">已生成：{resultName}</span>
+                      </span>
+                      <button
+                        className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-sm bg-emerald-700 px-5 font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 sm:w-auto sm:min-w-40"
+                        type="button"
+                        disabled={!resultBlob}
+                        onClick={handleDownload}
+                      >
+                        <Download className="h-4 w-4" />
+                        下载结果
+                      </button>
+                    </div>
+                  </div>
                 ) : null}
               </div>
             ) : null}
-            {activeTab !== "batch" && fileUrl && file && isVideoFile(file) ? <video className="mt-4 max-h-96 w-full rounded-xl" src={fileUrl} controls /> : null}
-            {activeTab !== "batch" && fileUrl && file && isAudioFile(file) ? <audio className="mt-4 w-full" src={fileUrl} controls /> : null}
-          </div>
-          <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
-            <div className="rounded-xl border border-cyan-300/15 bg-slate-900/70 p-4">
-              {controlPanel}
+          </section>
+
+          <aside className="h-fit border border-[var(--border-soft)] bg-white p-4 xl:sticky xl:top-24">
+            <div className="mb-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">转换参数</p>
+              <h2 className="mt-1 text-lg font-bold text-slate-950">{currentTab.label}</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-600">{currentTab.description}</p>
             </div>
-            <div className="rounded-xl border border-cyan-300/15 bg-slate-900/50 p-4">
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <button className="btn-primary inline-flex items-center justify-center gap-2" type="button" disabled={status === "running"} onClick={() => void runCurrentTask()}>
-                  {status === "running" ? <Loader2 className="h-5 w-5 animate-spin" /> : <Play className="h-5 w-5 fill-current" />}
-                  开始处理
-                </button>
-                <button className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-5 py-3 font-semibold text-red-700 transition hover:bg-red-100" type="button" onClick={cancelTask}>
-                  <Square className="h-5 w-5 fill-current" />
-                  取消任务
-                </button>
-                <button className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-600 px-5 py-3 font-semibold text-white shadow-md shadow-emerald-600/20 transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none" type="button" disabled={!resultBlob} onClick={handleDownload}>
-                  <Download className="h-5 w-5" />
-                  下载结果
-                </button>
-              </div>
-              {!resultBlob ? <p className="mt-2 text-sm text-slate-500">处理完成后可下载。</p> : null}
-              <div className="mt-4 h-3 overflow-hidden rounded-full bg-slate-950"><div className="h-full bg-cyan-400 shadow-[0_0_18px_rgba(34,211,238,0.45)]" style={{ width: `${Math.round(progress * 100)}%` }} /></div>
-              <div className="mt-2 flex flex-col gap-2 text-sm text-slate-300 sm:flex-row sm:items-center sm:justify-between">
-                <span>{progressText}</span>
-                <StatusBadge status={status} />
-              </div>
-              {compressionStats ? <p className="mt-2 text-sm font-medium text-cyan-300">{compressionStats}</p> : null}
-              {error ? <p className="mt-3 rounded-xl bg-red-50 p-3 text-sm text-red-700">处理失败：{error}。下一步：请检查文件格式、降低文件大小或重新添加文件后再试。</p> : null}
-              {resultName ? <p className="mt-3 inline-flex w-full items-center gap-2 rounded-xl bg-green-50 p-3 text-sm font-semibold text-green-700"><CheckCircle2 className="h-5 w-5" />已生成：{resultName}</p> : null}
-              {(activeTab === "resize" || activeTab === "watermark") ? (
-                <div className="mt-5 rounded-2xl border border-cyan-300/15 bg-slate-950/60 p-4">
-                  <div className="mb-3 flex items-center justify-between gap-3">
-                    <h3 className="text-base font-semibold text-slate-50">{activeTab === "resize" ? "尺寸预览" : "水印预览"}</h3>
-                    <span className="text-xs text-slate-400">{previewMessage || "选择图片后自动生成预览"}</span>
-                  </div>
-                  {previewUrl ? <img className="max-h-[420px] w-full rounded-xl object-contain bg-slate-950" src={previewUrl} alt="处理预览" /> : <div className="flex min-h-40 items-center justify-center rounded-xl bg-slate-950 text-sm text-slate-500">暂无预览</div>}
-                </div>
-              ) : null}
-              <div className="mt-6 rounded-2xl border border-cyan-300/10 bg-slate-950/60 p-4 text-sm leading-6 text-slate-300">
-                <p>PDF、Word、Excel 转图片均在本地完成。逐页导出适合后续分开使用，合成一页适合生成长图预览。</p>
-                <p className="mt-2">Word 转图片目前支持标准 .docx 文档；旧版 .doc 请先另存为 .docx 后再处理。</p>
-              </div>
+            <div className="space-y-3">
+              <SettingsSection title="当前参数">
+                {controlPanel}
+              </SettingsSection>
+              <SettingsSection title="任务信息">
+                <DesktopSettingRow label="输出格式" value={outputFormat} />
+                <DesktopSettingRow label="当前状态" value={desktopStatusText} />
+                <DesktopSettingRow label="文件数量" value={String(taskCount)} />
+              </SettingsSection>
+              <SettingsSection title="能力边界">
+                <p className="text-sm leading-6 text-slate-600">Word 支持标准 .docx；Excel 支持 .xlsx 和 .csv，旧版 .xls 请先另存为 .xlsx。多页合成长图会增加内存占用。</p>
+              </SettingsSection>
             </div>
-          </div>
-          </>
-          )}
+          </aside>
         </div>
-        {!isDesktopSurface ? (
+          </div>
+        </div>
+        </div>
+        {shouldRenderAds ? (
           <div id="ad-container" className="mt-8">
             <AdSlot config={adsConfig} name="toolBottom" />
           </div>
@@ -1618,7 +1972,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
 
 function FileSummaryView({ summary }: { summary: FileSummary }) {
   return (
-    <div className="mt-4 grid gap-2 rounded-xl border border-cyan-300/10 bg-slate-950/60 p-4 text-sm text-slate-300 sm:grid-cols-2">
+    <div className="mt-4 grid gap-2 rounded-sm border border-cyan-300/10 bg-slate-950/60 p-4 text-sm text-slate-300 sm:grid-cols-2">
       <p>文件名：{summary.name}</p>
       <p>大小：{formatBytes(summary.size)}</p>
       <p>类型：{summary.type}</p>
@@ -1633,18 +1987,18 @@ function FileSummaryView({ summary }: { summary: FileSummary }) {
 
 function BatchSummaryView({ files, mode, importSummary }: { files: File[]; mode: BatchMode; importSummary?: BatchImportSummary | null }) {
   if (!files.length) {
-    return <div className="mt-4 rounded-xl border border-cyan-300/10 bg-slate-950/60 p-4 text-sm leading-6 text-slate-300">当前为离线版专属批量处理，请先选择批量功能类型，再一次添加多个对应文件。</div>;
+    return <div className="mt-4 rounded-sm border border-cyan-300/10 bg-slate-950/60 p-4 text-sm leading-6 text-slate-300">当前为离线版专属批量处理，请先选择批量功能类型，再一次添加多个对应文件。</div>;
   }
   const totalSize = files.reduce((sum, item) => sum + item.size, 0);
   return (
-    <div className="mt-4 rounded-xl border border-cyan-300/10 bg-slate-950/60 p-4 text-sm text-slate-300">
+    <div className="mt-4 rounded-sm border border-cyan-300/10 bg-slate-950/60 p-4 text-sm text-slate-300">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <p className="font-semibold text-slate-50">已添加 {files.length} 个文件</p>
         <p>总大小：{formatBytes(totalSize)}</p>
       </div>
       <p className="mt-2">批量类型：{batchModeLabel(mode)}</p>
       {importSummary ? <p className="mt-2">最近导入：共扫描 {importSummary.total} 个，导入 {importSummary.imported} 个，跳过 {importSummary.skipped} 个。</p> : null}
-      <div className="mt-3 max-h-32 overflow-auto rounded-lg bg-slate-950 p-3">
+      <div className="mt-3 max-h-32 overflow-auto rounded-sm bg-slate-950 p-3">
         {files.slice(0, 20).map((item) => <p className="truncate" key={`${item.name}-${item.size}`}>{item.name} · {formatBytes(item.size)}</p>)}
         {files.length > 20 ? <p className="text-slate-500">还有 {files.length - 20} 个文件未展开显示。</p> : null}
       </div>
@@ -1654,7 +2008,7 @@ function BatchSummaryView({ files, mode, importSummary }: { files: File[]; mode:
 
 function BatchGateNotice() {
   return (
-    <div className="mb-5 rounded-xl border border-cyan-300/15 bg-cyan-950/25 p-4 sm:p-5" data-testid="online-batch-gate">
+    <div className="mb-5 rounded-sm border border-cyan-300/15 bg-cyan-950/25 p-4 sm:p-5" data-testid="online-batch-gate">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <p className="text-xs font-semibold text-cyan-300">专业版能力</p>
@@ -1674,29 +2028,315 @@ function BatchGateNotice() {
   );
 }
 
-function DesktopEmptyQueue({ onPickFile, onPickFolder, onPickOutputDirectory }: { onPickFile: () => void; onPickFolder: () => void; onPickOutputDirectory: () => void }) {
-  const actions = [
-    { label: "添加文件", icon: Files, onClick: onPickFile, note: "选择单个或多个文件", disabled: false },
-    { label: "添加文件夹", icon: FolderOpen, onClick: onPickFolder, note: "扫描支持格式，自动跳过不支持文件", disabled: false },
-    { label: "选择输出目录", icon: Download, onClick: onPickOutputDirectory, note: "结果将保存到本地目录", disabled: false }
+function DownloadEditionNotice() {
+  return (
+    <div className="rounded-sm border border-cyan-300/15 bg-slate-950/60 p-4 sm:p-5">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <p className="text-xs font-semibold text-cyan-300">离线专业版</p>
+          <h2 className="mt-1 text-xl font-semibold text-slate-50">下载 Windows 离线专业版</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">
+            适合敏感文件、大文件、断网环境和批量队列处理。下载入口保持原有流程，文件仍然只在本地处理。
+          </p>
+        </div>
+        <a className="btn-primary inline-flex shrink-0 items-center justify-center gap-2" href="/download">
+          <Download className="h-5 w-5" />
+          打开下载页
+        </a>
+      </div>
+    </div>
+  );
+}
+
+function DesktopOfficeChrome({
+  statusText,
+  taskCount,
+  successCount,
+  failureCount,
+  outputDirectory,
+  onPickFile,
+  onPickFolder,
+  onSelectOutput,
+  onStart,
+  onStop,
+  onClearCompleted,
+  onOpenOutput,
+  onExportLog,
+  canStart,
+  canStop,
+  isRunning
+}: {
+  statusText: string;
+  taskCount: number;
+  successCount: number;
+  failureCount: number;
+  outputDirectory: BatchOutputDirectory;
+  onPickFile: () => void;
+  onPickFolder: () => void;
+  onSelectOutput: () => void;
+  onStart: () => void;
+  onStop: () => void;
+  onClearCompleted: () => void;
+  onOpenOutput: () => void;
+  onExportLog: () => void;
+  canStart: boolean;
+  canStop: boolean;
+  isRunning: boolean;
+}) {
+  const summaryChips = [
+    { label: "离线可用", value: statusText, tone: "emerald" as const },
+    { label: "任务", value: String(taskCount) },
+    { label: "成功", value: String(successCount), tone: "emerald" as const },
+    { label: "失败", value: String(failureCount), tone: "rose" as const },
+    { label: "输出目录", value: outputDirectory.label }
   ];
 
+  const commandButtonClass = "inline-flex min-h-9 items-center gap-2 rounded-sm border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-slate-500 hover:bg-slate-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-400";
+  const primaryCommandClass = `${commandButtonClass} desktop-command-primary`;
+  const stopCommandClass = `${commandButtonClass} desktop-command-stop`;
+
   return (
-    <div className="min-w-[860px] px-4 py-6">
-      <div className="rounded-xl border border-dashed border-cyan-300/20 bg-slate-950/60 p-4">
-        <p className="text-sm font-semibold text-slate-50">暂无任务</p>
-        <p className="mt-1 text-sm text-slate-400">请先添加文件后再开始处理。批量任务会在这里显示状态、失败原因和操作。</p>
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
-          {actions.map((action) => {
-            const Icon = action.icon;
-            return (
-              <button key={action.label} type="button" onClick={action.onClick} disabled={action.disabled} className="rounded-lg border border-cyan-300/15 bg-slate-900 p-3 text-left transition hover:border-cyan-300/40 hover:bg-cyan-400/10 disabled:cursor-not-allowed disabled:bg-slate-900/50 disabled:opacity-75">
-                <span className="inline-flex items-center gap-2 text-sm font-semibold text-slate-50"><Icon className="h-4 w-4 text-cyan-300" />{action.label}</span>
-                <span className="mt-1 block text-xs text-slate-400">{action.note}</span>
-              </button>
-            );
-          })}
+    <div className="rounded-sm border border-slate-300 bg-white px-3 py-2">
+      <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
+          <img src="/icons/app-icon-64.png" alt="万能格式转换器" className="h-10 w-10 shrink-0 rounded-sm object-cover" />
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="truncate text-lg font-semibold text-slate-950">万能格式转换器</h1>
+              <span className="rounded-sm border border-slate-300 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">离线专业版</span>
+            </div>
+            <p className="mt-1 text-xs leading-5 text-slate-600">本地处理 · 批量高效 · 简洁稳定 · 适合内网办公环境</p>
+          </div>
         </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          {summaryChips.map((item) => (
+            <div key={item.label} className="rounded-sm border border-slate-200 bg-slate-50 px-3 py-1.5">
+              <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">{item.label}</p>
+              <p className={`mt-0.5 truncate text-sm font-semibold ${item.tone === "emerald" ? "text-emerald-700" : item.tone === "rose" ? "text-red-700" : "text-slate-900"}`}>{item.value}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-slate-200 pt-2">
+        <button className={commandButtonClass} type="button" onClick={onPickFile}>
+          <Files className="h-4 w-4 text-slate-600" />
+          添加文件
+        </button>
+        <button className={commandButtonClass} type="button" onClick={onPickFolder}>
+          <FolderOpen className="h-4 w-4 text-slate-600" />
+          添加文件夹
+        </button>
+        <button className={commandButtonClass} type="button" onClick={onSelectOutput}>
+          <Download className="h-4 w-4 text-slate-600" />
+          输出目录
+        </button>
+        <button className={primaryCommandClass} type="button" disabled={!canStart} onClick={onStart}>
+          <Play className="h-4 w-4 fill-current" />
+          开始转换
+        </button>
+        <button className={stopCommandClass} type="button" disabled={!canStop} onClick={onStop}>
+          <Square className="h-4 w-4 fill-current" />
+          停止任务
+        </button>
+        <button className={commandButtonClass} type="button" onClick={onClearCompleted}>
+          <Trash2 className="h-4 w-4 text-slate-600" />
+          清空队列
+        </button>
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          <button className={commandButtonClass} type="button" onClick={onOpenOutput}>
+            <HardDrive className="h-4 w-4 text-slate-600" />
+            打开输出
+          </button>
+          <button className={commandButtonClass} type="button" onClick={onExportLog}>
+            <Copy className="h-4 w-4 text-slate-600" />
+            导出日志
+          </button>
+          <span className={`rounded-sm border px-3 py-1.5 text-xs font-semibold ${isRunning ? "border-cyan-300 bg-cyan-50 text-cyan-800" : "border-slate-300 bg-slate-50 text-slate-600"}`}>
+            {statusText}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DesktopTreeSection({
+  section,
+  activeTab,
+  expanded,
+  onToggle,
+  onSelectTab
+}: {
+  section: {
+    title: string;
+    description: string;
+    icon: LucideIcon;
+    items: ReadonlyArray<{ id: TabId; label: string; note: string; badge: string }>;
+  };
+  activeTab: TabId;
+  expanded: boolean;
+  onToggle: () => void;
+  onSelectTab: (tabId: TabId) => void;
+}) {
+  const SectionIcon = section.icon;
+  return (
+    <section className="rounded-sm border border-slate-700/80 bg-slate-950/72">
+      <button
+        className="flex w-full items-center justify-between gap-3 border-b border-slate-800/90 px-3 py-2.5 text-left transition hover:bg-slate-900/45"
+        type="button"
+        aria-expanded={expanded}
+        onClick={onToggle}
+      >
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="grid h-8 w-8 place-items-center rounded-sm border border-cyan-300/15 bg-cyan-400/10 text-cyan-200">
+            <SectionIcon className="h-4 w-4" />
+          </span>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-slate-50">{section.title}</p>
+            <p className="truncate text-[11px] text-slate-500">{section.description}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="rounded-sm border border-slate-700/80 bg-slate-950 px-2.5 py-1 text-[11px] font-semibold text-slate-400">{section.items.length}</span>
+          <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${expanded ? "rotate-180" : ""}`} />
+        </div>
+      </button>
+      {expanded ? (
+        <div className="space-y-1 p-2">
+          {section.items.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              aria-pressed={activeTab === item.id}
+              className={`group flex w-full items-start gap-3 rounded-sm border px-3 py-2.5 text-left transition ${
+                activeTab === item.id
+                  ? "border-cyan-300/40 bg-cyan-400/10 text-cyan-50"
+                  : "border-transparent bg-slate-950/40 text-slate-200 hover:border-slate-700/70 hover:bg-slate-900/80"
+              }`}
+              onClick={() => onSelectTab(item.id)}
+            >
+              <span className={`mt-0.5 min-w-8 rounded-sm px-2 py-1 text-center text-[11px] font-semibold ${activeTab === item.id ? "bg-cyan-400 text-slate-950" : "bg-slate-900 text-cyan-200 group-hover:bg-cyan-400/10"}`}>
+                {item.badge}
+              </span>
+              <span className="min-w-0">
+                <span className="block text-sm font-semibold leading-5">{item.label}</span>
+                <span className="mt-0.5 block text-[11px] leading-5 text-slate-500">{item.note}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function DesktopPreviewPanel({
+  mode,
+  modeLabel,
+  file,
+  fileUrl,
+  previewUrl,
+  previewMessage,
+  documentPreview,
+  summary,
+  cropImageRef,
+  onImageLoad
+}: {
+  mode: TabId | BatchMode;
+  modeLabel: string;
+  file: File | null;
+  fileUrl: string;
+  previewUrl: string;
+  previewMessage: string;
+  documentPreview: DocumentPreviewState;
+  summary: FileSummary | null;
+  cropImageRef?: RefObject<HTMLImageElement>;
+  onImageLoad?: () => void;
+}) {
+  const isImageMode = mode === "crop" || mode === "resize" || mode === "watermark" || mode === "compress" || mode === "batch";
+  const isDocumentMode = mode === "pdf-images" || mode === "word-images" || mode === "excel-images";
+  const isVideoMode = mode === "video-convert" || mode === "video-audio";
+  const isAudioMode = mode === "audio-convert";
+  const imagePreview = previewUrl && (mode === "resize" || mode === "watermark") ? previewUrl : fileUrl;
+  const previewTitle = mode === "resize" ? "尺寸预览" : mode === "watermark" ? "水印预览" : "当前文件预览";
+
+  let previewBody: React.ReactNode;
+  if (!file) {
+    previewBody = (
+      <div className="flex min-h-56 items-center justify-center rounded-sm border border-dashed border-slate-700/80 bg-slate-950/70 px-6 text-center text-sm text-slate-500">
+        先添加文件，再在这里查看预览。图片、PDF、Word、Excel、视频和音频都会显示对应预览。
+      </div>
+    );
+  } else if (file && isImageFile(file) && isImageMode && imagePreview) {
+    previewBody = (
+      <img
+        ref={mode === "crop" ? cropImageRef : undefined}
+        className="max-h-[460px] w-full rounded-sm bg-slate-950 object-contain"
+        src={imagePreview}
+        alt={`${modeLabel}预览`}
+        onLoad={mode === "crop" ? onImageLoad : undefined}
+      />
+    );
+  } else if (file && (isPdfFile(file) || isWordFile(file) || isExcelFile(file)) && isDocumentMode && documentPreview.url) {
+    previewBody = <img className="max-h-[460px] w-full rounded-sm bg-slate-950 object-contain" src={documentPreview.url} alt={`${modeLabel}预览`} />;
+  } else if (file && isVideoFile(file) && isVideoMode && fileUrl) {
+    previewBody = <video className="max-h-[460px] w-full rounded-sm bg-slate-950" src={fileUrl} controls />;
+  } else if (file && isAudioFile(file) && isAudioMode && fileUrl) {
+    previewBody = <div className="rounded-sm border border-slate-800/80 bg-slate-950/70 p-4"><audio className="w-full" src={fileUrl} controls /></div>;
+  } else {
+    previewBody = (
+      <div className="flex min-h-56 items-center justify-center rounded-sm border border-dashed border-slate-700/80 bg-slate-950/70 px-6 text-center text-sm text-slate-500">
+        <div>
+          <p className="font-semibold text-slate-200">当前模式：{modeLabel}</p>
+          <p className="mt-1">{previewMessage || documentPreview.message || "文件已添加，但当前类型暂不展示图像式预览。"}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <section className="rounded-sm border border-slate-700/80 bg-slate-950/72 p-4">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <p className="text-xs font-semibold text-cyan-300">预览区</p>
+          <h3 className="mt-1 text-lg font-semibold text-slate-50">{previewTitle}</h3>
+          <p className="mt-1 text-sm text-slate-400">{file ? `${file.name} · ${modeLabel}` : "等待选择文件"}</p>
+        </div>
+        <div className="rounded-sm border border-slate-700/80 bg-slate-950 px-3 py-1.5 text-xs font-semibold text-slate-200">
+          {summary ? formatBytes(summary.size) : "未选择文件"}
+        </div>
+      </div>
+      <div className="mt-4 rounded-sm border border-slate-800/90 bg-slate-950/80 p-3">
+        {previewBody}
+      </div>
+      {summary ? (
+        <div className="mt-3 grid gap-2 rounded-sm border border-slate-800/90 bg-slate-950/60 p-3 text-xs text-slate-300 sm:grid-cols-2 2xl:grid-cols-3">
+          <p className="min-w-0 truncate">文件名：{summary.name}</p>
+          <p>大小：{formatBytes(summary.size)}</p>
+          <p>类型：{summary.type}</p>
+          {summary.image ? <p>尺寸：{summary.image.width} x {summary.image.height}</p> : null}
+          {summary.pdf ? <p>PDF 页数：{summary.pdf.pages || "待解析"}</p> : null}
+          {summary.document ? <p>文档类型：{summary.document.kind === "word" ? "Word" : "Excel"}</p> : null}
+          {summary.media ? <p>媒体类型：{summary.media.kind === "video" ? "视频" : "音频"}</p> : null}
+          {summary.media?.duration ? <p>时长：{formatMediaDuration(summary.media.duration)}</p> : null}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function DesktopEmptyQueue({ onPickFile, onPickFolder, onPickOutputDirectory }: { onPickFile: () => void; onPickFolder: () => void; onPickOutputDirectory: () => void }) {
+  void onPickFile;
+  void onPickFolder;
+  void onPickOutputDirectory;
+
+  return (
+    <div className="w-full max-w-full px-3 py-4">
+      <div className="rounded-sm border border-dashed border-slate-700/80 bg-slate-950/55 p-3">
+        <p className="text-sm font-semibold text-slate-50">暂无任务</p>
+        <p className="mt-1 text-xs leading-5 text-slate-500">请使用顶部命令栏添加文件、添加文件夹或选择输出目录。任务状态、失败原因和结果操作会集中显示在这里。</p>
       </div>
     </div>
   );
@@ -1710,7 +2350,7 @@ function DesktopBatchTaskRow({ task, active, onRetry, onCancel, onOpenResult, on
 
   return (
     <div
-      className={`grid min-w-[900px] grid-cols-[minmax(180px,1.4fr)_100px_90px_110px_96px_minmax(150px,1fr)_130px] items-center gap-2 px-4 py-3 text-sm ${active ? "bg-cyan-400/10" : ""}`}
+      className={`batch-table-row grid min-w-[900px] grid-cols-[minmax(180px,1.4fr)_100px_90px_110px_96px_minmax(150px,1fr)_130px] items-center gap-2 px-3 py-1.5 text-xs ${active ? "bg-cyan-400/10" : ""}`}
       data-testid="batch-task-row"
       data-task-id={task.id}
     >
@@ -1721,10 +2361,10 @@ function DesktopBatchTaskRow({ task, active, onRetry, onCancel, onOpenResult, on
       <BatchStatusBadge status={task.status} progress={task.progress} />
       <span className="min-w-0 truncate text-slate-400" title={failureReason}>{failureReason}</span>
       <span className="flex items-center gap-1">
-        {canRetry ? <button type="button" className="rounded-lg border border-cyan-300/15 p-1.5 text-slate-200 hover:bg-cyan-400/10" title="重试" aria-label="重试任务" data-testid="retry-task-button" onClick={onRetry}><RotateCcw className="h-4 w-4" /></button> : null}
-        {canCancel ? <button type="button" className="rounded-lg border border-red-300/20 p-1.5 text-red-200 hover:bg-red-400/10" title="取消" onClick={onCancel}><Square className="h-4 w-4 fill-current" /></button> : null}
-        {canOpen ? <button type="button" className="rounded-lg border border-cyan-300/15 p-1.5 text-slate-200 hover:bg-cyan-400/10" title="打开结果文件" aria-label="打开结果文件" data-testid="open-result-file-button" onClick={onOpenResult}><ExternalLink className="h-4 w-4" /></button> : null}
-        {task.outputPath ? <button type="button" className="rounded-lg border border-cyan-300/15 p-1.5 text-slate-200 hover:bg-cyan-400/10" title="复制输出路径" onClick={onCopy}><Copy className="h-4 w-4" /></button> : null}
+        {canRetry ? <button type="button" className="rounded-sm border border-cyan-300/15 p-1 text-slate-200 hover:bg-cyan-400/10" title="重试" aria-label="重试任务" data-testid="retry-task-button" onClick={onRetry}><RotateCcw className="h-4 w-4" /></button> : null}
+        {canCancel ? <button type="button" className="rounded-sm border border-red-300/20 p-1 text-red-200 hover:bg-red-400/10" title="取消" onClick={onCancel}><Square className="h-4 w-4 fill-current" /></button> : null}
+        {canOpen ? <button type="button" className="rounded-sm border border-cyan-300/15 p-1 text-slate-200 hover:bg-cyan-400/10" title="打开结果文件" aria-label="打开结果文件" data-testid="open-result-file-button" onClick={onOpenResult}><ExternalLink className="h-4 w-4" /></button> : null}
+        {task.outputPath ? <button type="button" className="rounded-sm border border-cyan-300/15 p-1 text-slate-200 hover:bg-cyan-400/10" title="复制输出路径" onClick={onCopy}><Copy className="h-4 w-4" /></button> : null}
       </span>
     </div>
   );
@@ -1740,28 +2380,28 @@ function BatchHistoryPanel({ history, filter, onFilterChange, onClear }: { histo
   ];
 
   return (
-    <section className="mt-4 rounded-xl border border-cyan-300/15 bg-slate-950/70 p-4">
+    <section className="w-full min-w-0 rounded-sm border border-slate-700/80 bg-slate-950/72 p-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="font-semibold text-slate-50">任务历史</p>
-          <p className="mt-1 text-sm text-slate-400">仅保存在本机浏览器存储中，最多保留最近 100 条，不保存文件内容和完整路径。</p>
+          <p className="mt-1 text-xs text-slate-500">仅保存在本机，最多保留最近 100 条，不保存文件内容和完整路径。</p>
         </div>
         <div className="flex flex-wrap gap-2">
           {filters.map((item) => (
             <button
               key={item.value}
               type="button"
-              className={`rounded-lg px-3 py-2 text-sm font-semibold ${filter === item.value ? "bg-cyan-400 text-slate-950" : "border border-cyan-300/15 bg-slate-900 text-slate-200 hover:bg-cyan-400/10"}`}
+              className={`rounded-sm px-3 py-2 text-xs font-semibold ${filter === item.value ? "bg-cyan-400 text-slate-950" : "border border-slate-700/80 bg-slate-900/70 text-slate-200 hover:bg-cyan-400/10"}`}
               onClick={() => onFilterChange(item.value)}
             >
               {item.label}
             </button>
           ))}
-          <button type="button" className="rounded-lg border border-cyan-300/15 bg-slate-900 px-3 py-2 text-sm font-semibold text-slate-200 hover:bg-cyan-400/10" onClick={onClear}>清空历史</button>
+          <button type="button" className="rounded-sm border border-slate-700/80 bg-slate-900/70 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-cyan-400/10" onClick={onClear}>清空历史</button>
         </div>
       </div>
-      <div className="mt-4 overflow-x-auto rounded-xl border border-cyan-300/15">
-        <div className="grid min-w-[940px] grid-cols-[minmax(160px,1.3fr)_120px_90px_110px_100px_120px_minmax(150px,1fr)] bg-slate-900 px-4 py-3 text-xs font-semibold text-slate-400">
+      <div className="mt-4 overflow-x-auto rounded-sm border border-slate-800/80">
+        <div className="batch-table-header grid min-w-[940px] grid-cols-[minmax(160px,1.3fr)_120px_90px_110px_100px_120px_minmax(150px,1fr)] items-center bg-slate-900/95 px-3 py-2 text-xs font-semibold text-slate-400">
           <span>文件名</span>
           <span>类型</span>
           <span>大小</span>
@@ -1770,9 +2410,9 @@ function BatchHistoryPanel({ history, filter, onFilterChange, onClear }: { histo
           <span>耗时</span>
           <span>结果 / 失败原因</span>
         </div>
-        <div className="divide-y divide-cyan-300/10 bg-slate-950/40">
+        <div className="divide-y divide-slate-800/80 bg-slate-950/40">
           {filtered.length ? filtered.map((item) => (
-            <div key={item.id} className="grid min-w-[940px] grid-cols-[minmax(160px,1.3fr)_120px_90px_110px_100px_120px_minmax(150px,1fr)] items-center gap-2 px-4 py-3 text-sm">
+            <div key={item.id} className="batch-table-row grid min-w-[940px] grid-cols-[minmax(160px,1.3fr)_120px_90px_110px_100px_120px_minmax(150px,1fr)] items-center gap-2 px-3 py-1.5 text-xs">
               <span className="truncate font-medium text-slate-50" title={item.fileName}>{item.fileName}</span>
               <span className="truncate text-slate-300">{batchModeLabel(item.mode)}</span>
               <span className="truncate text-slate-300">{formatBytes(item.fileSize)}</span>
@@ -1784,7 +2424,7 @@ function BatchHistoryPanel({ history, filter, onFilterChange, onClear }: { histo
               </span>
             </div>
           )) : (
-            <div className="min-w-[940px] px-4 py-6 text-sm text-slate-400">暂无符合条件的历史记录。</div>
+            <div className="min-w-[940px] px-3 py-4 text-sm text-slate-400">暂无符合条件的历史记录。</div>
           )}
         </div>
       </div>
@@ -1795,7 +2435,7 @@ function BatchHistoryPanel({ history, filter, onFilterChange, onClear }: { histo
 function DesktopMetric({ label, value, tone = "default" }: { label: string; value: string | number; tone?: "default" | "success" | "danger" }) {
   const toneClass = tone === "success" ? "text-emerald-300" : tone === "danger" ? "text-red-300" : "text-slate-50";
   return (
-    <div className="rounded-xl border border-cyan-300/15 bg-slate-950/70 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.22)]">
+    <div className="rounded-sm border border-cyan-300/15 bg-slate-950/70 p-4">
       <p className="text-xs font-medium text-slate-400">{label}</p>
       <p className={`mt-1 truncate text-xl font-bold ${toneClass}`}>{value}</p>
     </div>
@@ -1806,14 +2446,14 @@ function DesktopTaskRow({ name, type, size, outputFormat, status, error }: { nam
   const failureReason = status === "error" ? (error || "处理失败，请检查文件格式后重试") : "—";
 
   return (
-    <div className="grid min-w-[860px] grid-cols-[minmax(180px,1.4fr)_100px_90px_110px_96px_minmax(150px,1fr)_90px] items-center gap-2 px-4 py-3 text-sm">
+    <div className="batch-table-row grid min-w-[860px] grid-cols-[minmax(180px,1.4fr)_100px_90px_110px_96px_minmax(150px,1fr)_90px] items-center gap-2 px-3 py-1.5 text-xs">
       <span className="min-w-0 truncate font-medium text-slate-50" title={name}>{name}</span>
       <span className="truncate text-slate-300">{type}</span>
       <span className="truncate text-slate-300">{size}</span>
       <span className="truncate text-slate-300">{outputFormat}</span>
       <StatusBadge status={status} />
       <span className="min-w-0 truncate text-slate-400" title={failureReason}>{failureReason}</span>
-      <button type="button" className="w-fit rounded-lg border border-cyan-300/15 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-cyan-400/10">
+      <button type="button" className="w-fit rounded-sm border border-cyan-300/15 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-cyan-400/10">
         重试
       </button>
     </div>
@@ -1838,7 +2478,7 @@ function StatusBadge({ status }: { status: ProcessState }) {
           ? "bg-amber-400/12 text-amber-200 ring-1 ring-amber-300/25"
           : "bg-slate-800 text-slate-300 ring-1 ring-slate-700";
 
-  return <span className={`w-fit rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass}`}>{statusText[status]}</span>;
+  return <span className={`w-fit rounded-sm px-2.5 py-1 text-xs font-semibold ${statusClass}`}>{statusText[status]}</span>;
 }
 
 function BatchStatusBadge({ status, progress }: { status: BatchTaskStatus; progress: number }) {
@@ -1852,12 +2492,12 @@ function BatchStatusBadge({ status, progress }: { status: BatchTaskStatus; progr
           ? "bg-amber-400/12 text-amber-200 ring-1 ring-amber-300/25"
           : "bg-slate-800 text-slate-300 ring-1 ring-slate-700";
   const suffix = status === "running" ? ` · ${Math.round(progress * 100)}%` : "";
-  return <span className={`w-fit rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass}`}>{batchTaskStatusLabel(status)}{suffix}</span>;
+  return <span className={`w-fit rounded-sm px-2.5 py-1 text-xs font-semibold ${statusClass}`}>{batchTaskStatusLabel(status)}{suffix}</span>;
 }
 
 function SettingsSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-xl border border-cyan-300/10 bg-slate-900/70 p-4">
+    <section className="rounded-sm border border-cyan-300/10 bg-slate-900/70 p-4">
       <h3 className="text-sm font-semibold text-slate-50">{title}</h3>
       <div className="mt-3 space-y-3">{children}</div>
     </section>
@@ -1866,7 +2506,28 @@ function SettingsSection({ title, children }: { title: string; children: React.R
 
 function DesktopSettingRow({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
-    <div className="rounded-lg border border-cyan-300/10 bg-slate-950/70 p-3 text-sm">
+    <div className="rounded-sm border border-cyan-300/10 bg-slate-950/70 p-3 text-sm">
+      <div className="flex items-start justify-between gap-3">
+        <span className="text-slate-400">{label}</span>
+        <span className="text-right font-semibold text-slate-100">{value}</span>
+      </div>
+      {note ? <p className="mt-1 text-xs text-slate-500">{note}</p> : null}
+    </div>
+  );
+}
+
+function DesktopPropertySection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="rounded-sm border border-slate-700/80 bg-slate-950/60 p-3">
+      <h3 className="border-b border-slate-800/80 pb-2 text-sm font-semibold text-slate-50">{title}</h3>
+      <div className="mt-3 space-y-2.5">{children}</div>
+    </section>
+  );
+}
+
+function DesktopPropertyRow({ label, value, note }: { label: string; value: string; note?: string }) {
+  return (
+    <div className="rounded-sm border border-slate-800/90 bg-slate-950/55 p-3 text-sm">
       <div className="flex items-start justify-between gap-3">
         <span className="text-slate-400">{label}</span>
         <span className="text-right font-semibold text-slate-100">{value}</span>
@@ -1879,7 +2540,7 @@ function DesktopSettingRow({ label, value, note }: { label: string; value: strin
 function SidecarExperimentPanel({ enabled, status, onToggle, onRefresh }: { enabled: boolean; status: SidecarCheckResult | null; onToggle: (enabled: boolean) => void; onRefresh: () => void }) {
   const ready = isSidecarReady(status || undefined);
   return (
-    <div className="rounded-lg border border-cyan-300/10 bg-slate-950/70 p-3 text-sm" data-testid="sidecar-experiment-panel">
+    <div className="rounded-sm border border-cyan-300/10 bg-slate-950/70 p-3 text-sm" data-testid="sidecar-experiment-panel">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-semibold text-slate-50">使用本地 sidecar FFmpeg 优先处理低风险格式</p>
@@ -1900,10 +2561,10 @@ function SidecarExperimentPanel({ enabled, status, onToggle, onRefresh }: { enab
         </label>
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${ready ? "bg-emerald-400/12 text-emerald-200" : status?.status === "sidecar_checksum_failed" ? "bg-red-400/12 text-red-200" : "bg-slate-800 text-slate-300"}`}>
+        <span className={`rounded-sm px-2.5 py-1 text-xs font-semibold ${ready ? "bg-emerald-400/12 text-emerald-200" : status?.status === "sidecar_checksum_failed" ? "bg-red-400/12 text-red-200" : "bg-slate-800 text-slate-300"}`}>
           {sidecarStatusText(status || undefined)}
         </span>
-        <button type="button" className="rounded-lg border border-cyan-300/15 bg-slate-900 px-2.5 py-1 text-xs font-semibold text-slate-200 hover:bg-cyan-400/10" onClick={onRefresh}>
+        <button type="button" className="rounded-sm border border-cyan-300/15 bg-slate-900 px-2.5 py-1 text-xs font-semibold text-slate-200 hover:bg-cyan-400/10" onClick={onRefresh}>
           刷新检测
         </button>
       </div>
@@ -1915,13 +2576,70 @@ function SidecarExperimentPanel({ enabled, status, onToggle, onRefresh }: { enab
   );
 }
 
+function WorkbenchTopBar({ surface, subtitle }: { surface: string; subtitle: string }) {
+  return (
+    <div className="rounded-sm border border-cyan-300/15 bg-slate-950/70 p-4 backdrop-blur">
+      <div className="grid gap-4 xl:grid-cols-[minmax(260px,0.9fr)_minmax(0,1.5fr)_minmax(260px,0.8fr)] xl:items-center">
+        <div>
+          <div className="inline-flex items-center gap-2 rounded-sm border border-cyan-300/25 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-200">
+            <span>{surface}</span>
+            <span className="h-1 w-1 rounded-sm bg-cyan-300" />
+            <span>{subtitle}</span>
+          </div>
+          <h1 className="mt-3 text-3xl font-bold text-slate-50">万能格式转换器</h1>
+          <p className="mt-2 text-sm leading-6 text-slate-400">全能、高效、安全、专业的格式转换解决方案。</p>
+        </div>
+
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+          {workbenchCapabilities.map((item) => {
+            const Icon = item.icon;
+            return (
+              <div key={item.label} className="flex items-center gap-2 rounded-sm border border-cyan-300/12 bg-slate-900/70 px-3 py-2 text-sm font-semibold text-slate-200">
+                <Icon className="h-4 w-4 text-cyan-300" />
+                <span className="truncate">{item.label}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="rounded-sm border border-emerald-300/20 bg-emerald-400/10 p-3">
+          <div className="flex items-start gap-3">
+            <ShieldCheck className="mt-1 h-6 w-6 shrink-0 text-emerald-300" />
+            <div>
+              <p className="font-semibold text-emerald-50">文件仅在本地处理，不上传服务器</p>
+              <p className="mt-1 text-sm leading-6 text-emerald-100/75">保护你的隐私与数据安全。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        {assuranceItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <div key={item.label} className="flex items-center gap-3 rounded-sm border border-cyan-300/10 bg-slate-900/55 p-3">
+              <span className="grid h-9 w-9 place-items-center rounded-sm bg-cyan-400/10 text-cyan-200">
+                <Icon className="h-4 w-4" />
+              </span>
+              <span className="min-w-0">
+                <span className="block truncate text-sm font-semibold text-slate-100">{item.label}</span>
+                <span className="block truncate text-xs text-slate-500">{item.detail}</span>
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function ToolTabButton({ tab, active, onClick }: { tab: ToolTab; active: boolean; onClick: () => void }) {
   const Icon = tab.icon;
   const activeClass = active
-    ? "border-cyan-300 bg-cyan-400/12 text-cyan-100 shadow-[0_0_24px_rgba(34,211,238,0.16)] ring-2 ring-cyan-400/10"
+    ? "border-cyan-300 bg-cyan-400/12 text-cyan-100 ring-2 ring-cyan-400/10"
     : tab.featured
-      ? "border-cyan-300/18 bg-slate-900/75 text-slate-100 hover:-translate-y-0.5 hover:border-cyan-300/45 hover:bg-cyan-400/10 hover:shadow-[0_0_24px_rgba(34,211,238,0.12)]"
-      : "border-cyan-300/12 bg-slate-950/55 text-slate-100 hover:-translate-y-0.5 hover:border-cyan-300/32 hover:bg-slate-900 hover:shadow-[0_0_20px_rgba(34,211,238,0.1)]";
+      ? "border-cyan-300/18 bg-slate-900/75 text-slate-100 hover:-translate-y-0.5 hover:border-cyan-300/45 hover:bg-cyan-400/10"
+      : "border-cyan-300/12 bg-slate-950/55 text-slate-100 hover:-translate-y-0.5 hover:border-cyan-300/32 hover:bg-slate-900";
   const iconClass = active
     ? "bg-cyan-400 text-slate-950"
     : tab.featured
@@ -1932,11 +2650,11 @@ function ToolTabButton({ tab, active, onClick }: { tab: ToolTab; active: boolean
     <button
       type="button"
       aria-pressed={active}
-      className={`group min-h-[104px] rounded-xl border p-4 text-left transition duration-200 active:scale-[0.98] ${activeClass}`}
+      className={`group min-h-[104px] rounded-sm border p-4 text-left transition duration-200 active:scale-[0.98] ${activeClass}`}
       onClick={onClick}
     >
       <div className="flex items-start gap-3">
-        <span className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition ${iconClass}`}>
+        <span className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-sm transition ${iconClass}`}>
           <Icon className="h-5 w-5" />
         </span>
         <span className="min-w-0">
@@ -1944,7 +2662,7 @@ function ToolTabButton({ tab, active, onClick }: { tab: ToolTab; active: boolean
           <span className="mt-1 block text-sm leading-5 text-slate-400">{tab.description}</span>
         </span>
       </div>
-      {tab.featured ? <span className="mt-3 inline-flex rounded-full border border-cyan-300/20 bg-cyan-400/10 px-2.5 py-1 text-xs font-semibold text-cyan-200">常用</span> : null}
+      {tab.featured ? <span className="mt-3 inline-flex rounded-sm border border-cyan-300/20 bg-cyan-400/10 px-2.5 py-1 text-xs font-semibold text-cyan-200">常用</span> : null}
     </button>
   );
 }
@@ -1954,7 +2672,7 @@ type ControlPanelProps = any;
 function ControlPanel(props: ControlPanelProps) {
   if (props.activeTab === "crop") return <Panel title="图片裁切" note="拖动预览图上的裁切框即可自由裁切，也可以选择头像、证件照、横屏封面、竖屏封面等常用比例。"><Select label="裁切比例" value={props.cropRatio} onChange={props.setCropRatio} options={props.cropRatioOptions} /><div className="grid grid-cols-2 gap-2"><button className="btn-secondary" type="button" onClick={() => props.rotateCrop(-90)}>左转 90°</button><button className="btn-secondary" type="button" onClick={() => props.rotateCrop(90)}>右转 90°</button><button className="btn-secondary" type="button" onClick={() => props.flipCrop("x")}>水平翻转</button><button className="btn-secondary" type="button" onClick={() => props.flipCrop("y")}>垂直翻转</button></div><button className="btn-secondary w-full" type="button" onClick={props.resetCrop}>重置裁切框</button><ImageFormat value={props.cropFormat} onChange={props.setCropFormat} /><Range label="导出质量" value={props.cropQuality} min={10} max={100} onChange={props.setCropQuality} /></Panel>;
   if (props.activeTab === "resize") return <Panel title="尺寸调整" note="可按百分比快速缩放，也可以输入像素宽高。右侧会自动显示处理预览。"><Select label="调整方式" value={props.resizeMode} onChange={props.setResizeMode} options={[{ value: "percent", label: "按百分比" }, { value: "pixel", label: "按像素" }]} />{props.resizeMode === "percent" ? <Field label="缩放比例"><select className="form-input" value={String(props.resizePercent)} onChange={(event) => props.setResizePercent(Number(event.target.value))}><option value="25">25%</option><option value="50">50%</option><option value="75">75%</option><option value="100">100%</option><option value="125">125%</option><option value="150">150%</option><option value="200">200%</option></select></Field> : <><NumberField label="宽度（像素）" value={props.resizeWidth} onChange={props.setResizeWidth} /><NumberField label="高度（像素）" value={props.resizeHeight} onChange={props.setResizeHeight} /><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={props.resizeKeepRatio} onChange={(event) => props.setResizeKeepRatio(event.target.checked)} />锁定原图比例</label></>}<ImageFormat value={props.resizeFormat} onChange={props.setResizeFormat} /><Range label="导出质量" value={props.resizeQuality} min={10} max={100} onChange={props.setResizeQuality} /></Panel>;
-  if (props.activeTab === "watermark") return <Panel title="添加水印" note="文字或图片水印均在本地合成，不上传图片。文字水印支持字号、颜色和透明度预览。"><Select label="水印类型" value={props.watermarkMode} onChange={props.setWatermarkMode} options={["text", "image"]} />{props.watermarkMode === "image" ? <Field label="水印图片"><input type="file" accept={imageAccept} onChange={(event) => props.setWatermarkImage(event.target.files?.[0] || null)} /></Field> : <><Field label="水印文字"><input className="form-input" value={props.watermarkText} onChange={(event) => props.setWatermarkText(event.target.value)} /></Field><Range label="文字大小" value={props.watermarkFontSize} min={12} max={160} onChange={props.setWatermarkFontSize} /><Field label="文字颜色"><div className="flex gap-2"><input className="h-11 w-14 rounded-xl border border-cyan-300/20 bg-slate-950 p-1" type="color" value={props.watermarkColor} onChange={(event) => props.setWatermarkColor(event.target.value)} /><input className="form-input" value={props.watermarkColor} onChange={(event) => props.setWatermarkColor(event.target.value)} /></div></Field></>}<Select label="位置" value={props.watermarkPosition} onChange={props.setWatermarkPosition} options={["top-left", "top-right", "bottom-left", "bottom-right", "center", "tile"]} /><Range label="透明度" value={props.watermarkOpacity} min={5} max={100} onChange={props.setWatermarkOpacity} /><ImageFormat value={props.watermarkFormat} onChange={props.setWatermarkFormat} /></Panel>;
+  if (props.activeTab === "watermark") return <Panel title="添加水印" note="文字或图片水印均在本地合成，不上传图片。文字水印支持字号、颜色和透明度预览。"><Select label="水印类型" value={props.watermarkMode} onChange={props.setWatermarkMode} options={["text", "image"]} />{props.watermarkMode === "image" ? <Field label="水印图片"><input type="file" accept={imageAccept} onChange={(event) => props.setWatermarkImage(event.target.files?.[0] || null)} /></Field> : <><Field label="水印文字"><input className="form-input" value={props.watermarkText} onChange={(event) => props.setWatermarkText(event.target.value)} /></Field><Range label="文字大小" value={props.watermarkFontSize} min={12} max={160} onChange={props.setWatermarkFontSize} /><Field label="文字颜色"><div className="flex gap-2"><input className="h-11 w-14 rounded-sm border border-cyan-300/20 bg-slate-950 p-1" type="color" value={props.watermarkColor} onChange={(event) => props.setWatermarkColor(event.target.value)} /><input className="form-input" value={props.watermarkColor} onChange={(event) => props.setWatermarkColor(event.target.value)} /></div></Field></>}<Select label="位置" value={props.watermarkPosition} onChange={props.setWatermarkPosition} options={["top-left", "top-right", "bottom-left", "bottom-right", "center", "tile"]} /><Range label="透明度" value={props.watermarkOpacity} min={5} max={100} onChange={props.setWatermarkOpacity} /><ImageFormat value={props.watermarkFormat} onChange={props.setWatermarkFormat} /></Panel>;
   if (props.activeTab === "compress") return <Panel title="图片压缩" note="固定导出 JPG，目标大小为 200KB、100KB、50KB、25KB。"><Select label="压缩强度" value={props.compressStrength} onChange={props.setCompressStrength} options={["light", "recommended", "extreme"]} /><Field label="目标大小"><select className="form-input" value={props.targetSize} onChange={(event) => props.setTargetSize(event.target.value)}><option value="200KB">200KB</option><option value="100KB">100KB</option><option value="50KB">50KB</option><option value="25KB">25KB</option></select></Field><Range label="质量" value={props.compressQuality} min={10} max={100} onChange={props.setCompressQuality} /><NumberField label="最大宽高" value={props.maxSize} onChange={props.setMaxSize} /><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={props.keepOriginalSize} onChange={(event) => props.setKeepOriginalSize(event.target.checked)} />保留原尺寸</label></Panel>;
   if (props.activeTab === "pdf-images") return <Panel title="PDF 转图片" note="PDF.js 本地渲染，可选择逐页导出 ZIP，也可以把所选页合成为一张长图。"><PdfPageField value={props.pdfPages} onChange={props.setPdfPages} /><Select label="导出方式" value={props.pdfImageMode} onChange={props.setPdfImageMode} options={[{ value: "pages", label: "逐页导出" }, { value: "combined", label: "合成一页导出" }]} /><Select label="图片格式" value={props.pdfImageFormat} onChange={props.setPdfImageFormat} options={["png", "jpg", "webp"]} /><Select label="清晰度" value={props.pdfScale} onChange={props.setPdfScale} options={["normal", "high", "ultra"]} /></Panel>;
   if (props.activeTab === "word-images") return <Panel title="Word 转图片" note="支持标准 .docx 文档，按页面导出图片或合成为一张长图，所有解析和渲染都在本地完成。"><Select label="导出方式" value={props.officeImageMode} onChange={props.setOfficeImageMode} options={[{ value: "pages", label: "逐页导出" }, { value: "combined", label: "合成一页导出" }]} /><ImageFormat value={props.officeImageFormat} onChange={props.setOfficeImageFormat} /></Panel>;
@@ -1963,7 +2681,7 @@ function ControlPanel(props: ControlPanelProps) {
   if (props.activeTab === "audio-convert") return <Panel title="音频格式转换" note="使用本地 FFmpeg WASM，支持 MP3、WAV、AAC、M4A、FLAC，并可选择音频码率。"><MediaCapabilityBox report={props.mediaReport} /><Select label="输出格式" value={props.audioFormat} onChange={props.setAudioFormat} options={[...audioOutputFormats]} /><Quality value={props.mediaQuality} onChange={props.setMediaQuality} /><MediaAdvancedControls {...props} /></Panel>;
   if (props.activeTab === "video-audio") return <Panel title="视频提取音频" note="只读取视频中的音频轨道，导出 MP3、WAV、M4A、AAC。"><MediaCapabilityBox report={props.mediaReport} /><Select label="输出格式" value={props.extractedAudioFormat} onChange={props.setExtractedAudioFormat} options={[...extractedAudioOutputFormats]} /><Quality value={props.mediaQuality} onChange={props.setMediaQuality} /><MediaAdvancedControls {...props} /></Panel>;
   if (props.activeTab === "batch-gate") return <Panel title="批量处理" note="批量处理为离线专业版功能，请下载 Windows 离线专业版使用。"><a className="btn-primary inline-flex items-center justify-center gap-2" href="/download"><Download className="h-5 w-5" />下载离线专业版</a></Panel>;
-  if (props.activeTab === "batch") return <Panel title="离线批量处理" note="批量能力只在离线安装版提供，支持断网环境下顺序处理多个文件，并优先保存到本地输出目录。"><Select label="批量类型" value={props.batchMode} onChange={props.setBatchMode} options={[{ value: "compress", label: "图片批量压缩" }, { value: "watermark", label: "图片批量加水印" }, { value: "word-images", label: "Word 批量转图片" }, { value: "excel-images", label: "Excel 批量转图片" }, { value: "video-convert", label: "视频批量转换" }, { value: "audio-convert", label: "音频批量转换" }, { value: "video-audio", label: "视频批量提取音频" }]} /><div className="rounded-xl border border-cyan-300/10 bg-slate-950/60 p-3 text-sm leading-6 text-slate-300">已添加 {props.batchFiles?.length || 0} 个文件。切换批量类型后，建议重新添加对应格式的文件。</div>{props.batchMode === "compress" ? <><Select label="压缩强度" value={props.compressStrength} onChange={props.setCompressStrength} options={["light", "recommended", "extreme"]} /><Field label="目标大小"><select className="form-input" value={props.targetSize} onChange={(event) => props.setTargetSize(event.target.value)}><option value="200KB">200KB</option><option value="100KB">100KB</option><option value="50KB">50KB</option><option value="25KB">25KB</option></select></Field><Range label="质量" value={props.compressQuality} min={10} max={100} onChange={props.setCompressQuality} /><NumberField label="最大宽高" value={props.maxSize} onChange={props.setMaxSize} /><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={props.keepOriginalSize} onChange={(event) => props.setKeepOriginalSize(event.target.checked)} />保留原尺寸</label></> : null}{props.batchMode === "watermark" ? <><Select label="水印类型" value={props.watermarkMode} onChange={props.setWatermarkMode} options={["text", "image"]} />{props.watermarkMode === "image" ? <Field label="水印图片"><input type="file" accept={imageAccept} onChange={(event) => props.setWatermarkImage(event.target.files?.[0] || null)} /></Field> : <><Field label="水印文字"><input className="form-input" value={props.watermarkText} onChange={(event) => props.setWatermarkText(event.target.value)} /></Field><Range label="文字大小" value={props.watermarkFontSize} min={12} max={160} onChange={props.setWatermarkFontSize} /><Field label="文字颜色"><div className="flex gap-2"><input className="h-11 w-14 rounded-xl border border-cyan-300/20 bg-slate-950 p-1" type="color" value={props.watermarkColor} onChange={(event) => props.setWatermarkColor(event.target.value)} /><input className="form-input" value={props.watermarkColor} onChange={(event) => props.setWatermarkColor(event.target.value)} /></div></Field></>}<Select label="位置" value={props.watermarkPosition} onChange={props.setWatermarkPosition} options={["top-left", "top-right", "bottom-left", "bottom-right", "center", "tile"]} /><Range label="透明度" value={props.watermarkOpacity} min={5} max={100} onChange={props.setWatermarkOpacity} /><ImageFormat value={props.watermarkFormat} onChange={props.setWatermarkFormat} /></> : null}{props.batchMode === "word-images" || props.batchMode === "excel-images" ? <><Select label="导出方式" value={props.officeImageMode} onChange={props.setOfficeImageMode} options={[{ value: "pages", label: "逐页导出" }, { value: "combined", label: "合成一页导出" }]} /><ImageFormat value={props.officeImageFormat} onChange={props.setOfficeImageFormat} /></> : null}{props.batchMode === "video-convert" ? <><MediaCapabilityBox report={props.mediaReport} /><Select label="输出格式" value={props.videoFormat} onChange={props.setVideoFormat} options={[...videoOutputFormats]} /><Quality value={props.mediaQuality} onChange={props.setMediaQuality} /><Select label="视频尺寸" value={props.videoSize} onChange={props.setVideoSize} options={[...videoSizeOptions]} /><MediaAdvancedControls {...props} /></> : null}{props.batchMode === "audio-convert" ? <><MediaCapabilityBox report={props.mediaReport} /><Select label="输出格式" value={props.audioFormat} onChange={props.setAudioFormat} options={[...audioOutputFormats]} /><Quality value={props.mediaQuality} onChange={props.setMediaQuality} /><MediaAdvancedControls {...props} /></> : null}{props.batchMode === "video-audio" ? <><MediaCapabilityBox report={props.mediaReport} /><Select label="输出格式" value={props.extractedAudioFormat} onChange={props.setExtractedAudioFormat} options={[...extractedAudioOutputFormats]} /><Quality value={props.mediaQuality} onChange={props.setMediaQuality} /><MediaAdvancedControls {...props} /></> : null}</Panel>;
+  if (props.activeTab === "batch") return <Panel title="离线批量处理" note="批量能力只在离线安装版提供，支持断网环境下顺序处理多个文件，并优先保存到本地输出目录。"><Select label="批量类型" value={props.batchMode} onChange={props.setBatchMode} options={[{ value: "compress", label: "图片批量压缩" }, { value: "watermark", label: "图片批量加水印" }, { value: "word-images", label: "Word 批量转图片" }, { value: "excel-images", label: "Excel 批量转图片" }, { value: "video-convert", label: "视频批量转换" }, { value: "audio-convert", label: "音频批量转换" }, { value: "video-audio", label: "视频批量提取音频" }]} /><div className="rounded-sm border border-cyan-300/10 bg-slate-950/60 p-3 text-sm leading-6 text-slate-300">已添加 {props.batchFiles?.length || 0} 个文件。切换批量类型后，建议重新添加对应格式的文件。</div>{props.batchMode === "compress" ? <><Select label="压缩强度" value={props.compressStrength} onChange={props.setCompressStrength} options={["light", "recommended", "extreme"]} /><Field label="目标大小"><select className="form-input" value={props.targetSize} onChange={(event) => props.setTargetSize(event.target.value)}><option value="200KB">200KB</option><option value="100KB">100KB</option><option value="50KB">50KB</option><option value="25KB">25KB</option></select></Field><Range label="质量" value={props.compressQuality} min={10} max={100} onChange={props.setCompressQuality} /><NumberField label="最大宽高" value={props.maxSize} onChange={props.setMaxSize} /><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={props.keepOriginalSize} onChange={(event) => props.setKeepOriginalSize(event.target.checked)} />保留原尺寸</label></> : null}{props.batchMode === "watermark" ? <><Select label="水印类型" value={props.watermarkMode} onChange={props.setWatermarkMode} options={["text", "image"]} />{props.watermarkMode === "image" ? <Field label="水印图片"><input type="file" accept={imageAccept} onChange={(event) => props.setWatermarkImage(event.target.files?.[0] || null)} /></Field> : <><Field label="水印文字"><input className="form-input" value={props.watermarkText} onChange={(event) => props.setWatermarkText(event.target.value)} /></Field><Range label="文字大小" value={props.watermarkFontSize} min={12} max={160} onChange={props.setWatermarkFontSize} /><Field label="文字颜色"><div className="flex gap-2"><input className="h-11 w-14 rounded-sm border border-cyan-300/20 bg-slate-950 p-1" type="color" value={props.watermarkColor} onChange={(event) => props.setWatermarkColor(event.target.value)} /><input className="form-input" value={props.watermarkColor} onChange={(event) => props.setWatermarkColor(event.target.value)} /></div></Field></>}<Select label="位置" value={props.watermarkPosition} onChange={props.setWatermarkPosition} options={["top-left", "top-right", "bottom-left", "bottom-right", "center", "tile"]} /><Range label="透明度" value={props.watermarkOpacity} min={5} max={100} onChange={props.setWatermarkOpacity} /><ImageFormat value={props.watermarkFormat} onChange={props.setWatermarkFormat} /></> : null}{props.batchMode === "word-images" || props.batchMode === "excel-images" ? <><Select label="导出方式" value={props.officeImageMode} onChange={props.setOfficeImageMode} options={[{ value: "pages", label: "逐页导出" }, { value: "combined", label: "合成一页导出" }]} /><ImageFormat value={props.officeImageFormat} onChange={props.setOfficeImageFormat} /></> : null}{props.batchMode === "video-convert" ? <><MediaCapabilityBox report={props.mediaReport} /><Select label="输出格式" value={props.videoFormat} onChange={props.setVideoFormat} options={[...videoOutputFormats]} /><Quality value={props.mediaQuality} onChange={props.setMediaQuality} /><Select label="视频尺寸" value={props.videoSize} onChange={props.setVideoSize} options={[...videoSizeOptions]} /><MediaAdvancedControls {...props} /></> : null}{props.batchMode === "audio-convert" ? <><MediaCapabilityBox report={props.mediaReport} /><Select label="输出格式" value={props.audioFormat} onChange={props.setAudioFormat} options={[...audioOutputFormats]} /><Quality value={props.mediaQuality} onChange={props.setMediaQuality} /><MediaAdvancedControls {...props} /></> : null}{props.batchMode === "video-audio" ? <><MediaCapabilityBox report={props.mediaReport} /><Select label="输出格式" value={props.extractedAudioFormat} onChange={props.setExtractedAudioFormat} options={[...extractedAudioOutputFormats]} /><Quality value={props.mediaQuality} onChange={props.setMediaQuality} /><MediaAdvancedControls {...props} /></> : null}</Panel>;
   return <Panel title="下载离线版" note="离线版用于敏感文件、大文件和无网络环境。"><a className="btn-primary" href="/download">打开下载页</a></Panel>;
 }
 
@@ -2013,7 +2731,7 @@ function ImageFormat({ value, onChange }: { value: ExportImageFormat; onChange: 
 function PdfPageField({ value, onChange }: { value: string; onChange: (value: string) => void }) { return <Field label="页码"><input className="form-input" value={value} onChange={(event) => onChange(event.target.value)} placeholder="all 或 1-3,5" /></Field>; }
 function Quality({ value, onChange }: { value: string; onChange: (value: any) => void }) { return <Select label="质量" value={value} onChange={onChange} options={["balanced", "small", "high"]} />; }
 function MediaAdvancedControls(props: ControlPanelProps) { return <><Select label="音频码率" value={props.audioBitrate} onChange={props.setAudioBitrate} options={[...audioBitrateOptions]} /><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={props.stripMetadata} onChange={(event) => props.setStripMetadata(event.target.checked)} />清理原文件元数据</label></>; }
-function MediaCapabilityBox({ report }: { report: MediaCapabilityReport }) { return <div className="rounded-xl border border-cyan-300/10 bg-slate-950/60 p-3 text-sm leading-6 text-slate-300"><p className="font-semibold text-slate-50">可用性检查</p><p>视频输出：{report.videoFormats.join(", ") || "不可用"}</p><p>音频输出：{report.audioFormats.join(", ") || "不可用"}</p><p>提取音频：{report.extractedAudioFormats.join(", ") || "不可用"}</p><p>视频尺寸：{report.videoSizes.join(", ") || "不可用"}</p><p>音频码率：{report.audioBitrates.join(", ") || "不可用"}</p>{report.warnings.map((warning) => <p className="text-orange-300" key={warning}>{warning}</p>)}</div>; }
+function MediaCapabilityBox({ report }: { report: MediaCapabilityReport }) { return <div className="rounded-sm border border-cyan-300/10 bg-slate-950/60 p-3 text-sm leading-6 text-slate-300"><p className="font-semibold text-slate-50">可用性检查</p><p>视频输出：{report.videoFormats.join(", ") || "不可用"}</p><p>音频输出：{report.audioFormats.join(", ") || "不可用"}</p><p>提取音频：{report.extractedAudioFormats.join(", ") || "不可用"}</p><p>视频尺寸：{report.videoSizes.join(", ") || "不可用"}</p><p>音频码率：{report.audioBitrates.join(", ") || "不可用"}</p>{report.warnings.map((warning) => <p className="text-orange-300" key={warning}>{warning}</p>)}</div>; }
 
 function getDesktopStatusText(status: ProcessState) {
   const map: Record<ProcessState, string> = {

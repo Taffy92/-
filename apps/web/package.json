@@ -2,11 +2,13 @@
   "name": "web",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "prepare:static": "node scripts/prepare-static.mjs",
-    "predev": "pnpm prepare:static",
+    "sync:security": "node scripts/sync-vercel-security.mjs",
+    "predev": "npm run prepare:static",
     "dev": "next dev",
-    "prebuild": "pnpm prepare:static",
+    "prebuild": "npm run prepare:static",
     "build": "next build",
     "build:desktop": "node scripts/build-desktop.mjs",
     "start": "next start",
@@ -14,7 +16,7 @@
     "test": "vitest run",
     "check:privacy": "vitest run src/tests/privacy.test.ts",
     "check:network": "vitest run src/tests/networkGuard.test.ts",
-    "check:network:browser": "playwright test"
+    "check:network:browser": "node scripts/run-playwright-static.mjs"
   },
   "dependencies": {
     "@doctool/export-core": "workspace:*",

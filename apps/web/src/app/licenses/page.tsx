@@ -17,8 +17,8 @@ export const metadata: Metadata = createPageMetadata({
 
 export default function LicensesPage() {
   return (
-    <main className="mx-auto max-w-6xl px-4 py-12 text-slate-100 sm:px-6 lg:px-8">
-      <article className="rounded-3xl tech-panel p-6 sm:p-10">
+    <main className="document-page mx-auto max-w-6xl px-4 py-12 text-slate-900 sm:px-6 lg:px-8">
+      <article className="rounded-sm tech-panel p-6 sm:p-10">
         <p className="text-sm font-semibold text-cyan-300">开源许可证</p>
         <h1 className="mt-2 text-3xl font-bold text-slate-50">开源许可证与第三方 Notices</h1>
         <p className="mt-4 leading-8 text-slate-300">
@@ -41,7 +41,7 @@ export default function LicensesPage() {
           <h2 className="text-2xl font-semibold text-slate-50">生成来源</h2>
           <ul className="mt-3 grid gap-2 text-sm text-slate-300 sm:grid-cols-2">
             {thirdPartyNoticeMeta.sources.map((source) => (
-              <li key={source} className="rounded-xl border border-cyan-300/10 bg-slate-900/70 px-3 py-2 font-mono text-xs">
+              <li key={source} className="rounded-sm border border-cyan-300/10 bg-slate-900/70 px-3 py-2 font-mono text-xs">
                 {source}
               </li>
             ))}
@@ -65,7 +65,7 @@ export default function LicensesPage() {
           />
         </section>
 
-        <section id="ffmpeg-notice" className="mt-8 rounded-2xl border border-amber-300/20 bg-amber-950/30 p-5 text-sm leading-7 text-amber-100">
+        <section id="ffmpeg-notice" className="mt-8 rounded-sm border border-amber-300/20 bg-amber-950/30 p-5 text-sm leading-7 text-amber-100">
           <h2 className="text-2xl font-semibold text-slate-50">FFmpeg 许可证说明</h2>
           <p className="mt-3">
             在线版继续使用本地 FFmpeg WASM 静态资源；离线专业版保留 FFmpeg WASM 回退，并在 Windows 离线专业版中仅对
@@ -91,7 +91,7 @@ export default function LicensesPage() {
           />
         </section>
 
-        <details className="mt-8 rounded-2xl border border-cyan-300/15 bg-slate-950/60 p-4">
+        <details className="mt-8 rounded-sm border border-cyan-300/15 bg-slate-950/60 p-4">
           <summary className="cursor-pointer text-lg font-semibold text-slate-50">完整 npm 依赖 Notices</summary>
           <NoticeTable
             headers={["包名", "版本", "许可证", "直接依赖", "锁文件", "仓库/主页", "许可证文件", "NOTICE 文件"]}
@@ -108,7 +108,7 @@ export default function LicensesPage() {
           />
         </details>
 
-        <details className="mt-6 rounded-2xl border border-cyan-300/15 bg-slate-950/60 p-4">
+        <details className="mt-6 rounded-sm border border-cyan-300/15 bg-slate-950/60 p-4">
           <summary className="cursor-pointer text-lg font-semibold text-slate-50">Rust / Tauri 依赖 Notices</summary>
           <NoticeTable
             headers={["crate", "版本", "许可证", "仓库/主页", "来源", "checksum"]}
@@ -123,7 +123,7 @@ export default function LicensesPage() {
           />
         </details>
 
-        <section className="mt-8 rounded-2xl border border-cyan-300/12 bg-slate-900/70 p-4 text-sm leading-6 text-slate-300">
+        <section className="mt-8 rounded-sm border border-cyan-300/12 bg-slate-900/70 p-4 text-sm leading-6 text-slate-300">
           <p>发布归档文件已同步生成到 docs/licenses.md 和 docs/third-party-notices.md。</p>
           <p className="mt-2">
             如果更新依赖、重新打包离线版或替换 WASM、PDF、FFmpeg 静态资源，请重新生成第三方 Notices。
@@ -136,7 +136,7 @@ export default function LicensesPage() {
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-2xl border border-cyan-300/12 bg-slate-900/70 p-4">
+    <div className="rounded-sm border border-cyan-300/12 bg-slate-900/70 p-4">
       <p className="text-sm text-slate-400">{label}</p>
       <p className="mt-1 text-2xl font-bold text-slate-50">{value}</p>
     </div>
@@ -145,7 +145,7 @@ function StatCard({ label, value }: { label: string; value: number }) {
 
 function NoticeTable({ headers, rows }: { headers: string[]; rows: readonly (readonly string[])[] }) {
   return (
-    <div className="mt-4 overflow-x-auto rounded-2xl border border-cyan-300/15">
+    <div className="mt-4 overflow-x-auto rounded-sm border border-cyan-300/15">
       <table className="w-full min-w-[920px] border-collapse text-left text-xs">
         <thead className="bg-slate-900 text-slate-100">
           <tr>

@@ -4,8 +4,22 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
-  background: #050b14;
+  --surface-page: #f3f6fa;
+  --surface-panel: #ffffff;
+  --surface-muted: #eef3f8;
+  --surface-strong: #0f172a;
+  --border-soft: #e2e8f0;
+  --border-strong: #94a3b8;
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --text-soft: #64748b;
+  --action-main: #1e293b;
+  --action-hover: #0f172a;
+  --accent-blue: #0369a1;
+  --success-soft: #ecfdf5;
+  --success-text: #047857;
+  color-scheme: light;
+  background: var(--surface-page);
 }
 
 * {
@@ -14,15 +28,15 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
   margin: 0;
+  overflow-x: clip;
   background:
-    radial-gradient(circle at 18% 0%, rgba(14, 165, 233, 0.18), transparent 32rem),
-    radial-gradient(circle at 78% 8%, rgba(34, 211, 238, 0.14), transparent 30rem),
-    linear-gradient(135deg, #050b14 0%, #071627 44%, #06101d 100%);
-  color: #dbeafe;
+    linear-gradient(180deg, rgba(226, 232, 240, 0.72) 0%, rgba(248, 250, 252, 0.9) 38%, var(--surface-page) 100%);
+  color: var(--text-main);
   font-family: Arial, "Microsoft YaHei", "PingFang SC", sans-serif;
 }
 
@@ -34,7 +48,7 @@ textarea {
 }
 
 .tool-card {
-  @apply rounded-2xl border border-cyan-300/15 bg-slate-950/70 p-5 text-slate-100 shadow-[0_18px_60px_rgba(0,0,0,0.28)] backdrop-blur;
+  @apply rounded-sm border border-[#e2e8f0] bg-slate-950/70 p-5 text-slate-100 backdrop-blur;
 }
 
 .form-label {
@@ -42,33 +56,296 @@ textarea {
 }
 
 .form-input {
-  @apply min-h-11 w-full rounded-xl border border-cyan-300/20 bg-slate-950/80 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-cyan-300 focus:ring-4 focus:ring-cyan-400/15;
+  @apply min-h-11 w-full rounded-sm border border-cyan-300/20 bg-slate-950/80 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-cyan-300 focus:ring-4 focus:ring-cyan-400/15;
 }
 
 .notice {
-  @apply rounded-2xl border border-cyan-300/20 bg-cyan-950/30 p-4 text-sm leading-6 text-cyan-50;
+  @apply rounded-sm border border-cyan-300/20 bg-cyan-950/30 p-4 text-sm leading-6 text-cyan-50;
 }
 
 .tab {
-  @apply inline-flex shrink-0 items-center justify-center rounded-full border border-cyan-300/15 bg-slate-950/70 px-4 py-2 text-sm font-semibold text-slate-300 transition hover:border-cyan-300/40 hover:bg-cyan-950/40 hover:text-cyan-100 active:scale-95;
+  @apply inline-flex shrink-0 items-center justify-center rounded-sm border border-cyan-300/15 bg-slate-950/70 px-4 py-2 text-sm font-semibold text-slate-300 transition hover:border-cyan-300/40 hover:bg-cyan-950/40 hover:text-cyan-100 active:scale-95;
 }
 
 .tab-active {
-  @apply inline-flex shrink-0 items-center justify-center rounded-full border border-cyan-300/70 bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 shadow-[0_0_28px_rgba(34,211,238,0.28)] transition active:scale-95;
+  @apply inline-flex shrink-0 items-center justify-center rounded-sm border border-slate-950 bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition active:scale-95;
 }
 
 .btn-primary {
-  @apply rounded-xl border border-cyan-300/40 bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 shadow-[0_0_28px_rgba(34,211,238,0.22)] transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:border-slate-700 disabled:bg-slate-800 disabled:text-slate-500 disabled:shadow-none;
+  @apply rounded-sm border border-slate-950 bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-200 disabled:text-slate-500;
 }
 
 .btn-secondary {
-  @apply rounded-xl border border-cyan-300/20 bg-slate-950/70 px-4 py-2.5 text-sm font-semibold text-slate-200 transition hover:border-cyan-300/50 hover:bg-cyan-950/30;
+  @apply rounded-sm border border-cyan-300/20 bg-slate-950/70 px-4 py-2.5 text-sm font-semibold text-slate-200 transition hover:border-cyan-300/50 hover:bg-cyan-950/30;
+}
+
+.btn-danger {
+  @apply rounded-sm border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-red-300 hover:bg-red-50 hover:text-red-700 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-400;
 }
 
 .tech-panel {
-  @apply border border-cyan-300/15 bg-slate-950/70 text-slate-100 shadow-[0_18px_60px_rgba(0,0,0,0.28)] backdrop-blur;
+  @apply border border-[#e2e8f0] bg-slate-950/70 text-slate-100 backdrop-blur;
 }
 
 .tech-muted-panel {
   @apply border border-cyan-300/10 bg-slate-900/60 text-slate-200;
+}
+
+.tech-shell {
+  @apply rounded-sm border border-[#e2e8f0] bg-slate-950/75 text-slate-100 backdrop-blur;
+}
+
+.office-workbench {
+  color: var(--text-main);
+}
+
+.office-workbench .tech-shell,
+.office-workbench .tool-card,
+.office-workbench .tech-panel,
+.office-workbench .tech-muted-panel {
+  border-color: var(--border-soft);
+  border-radius: 2px;
+  background: var(--surface-panel);
+  color: var(--text-main);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.office-workbench [class*="bg-slate-950"],
+.office-workbench [class*="bg-slate-900"],
+.office-workbench [class*="bg-cyan-950"] {
+  background-color: var(--surface-muted) !important;
+}
+
+.office-workbench [class*="border-slate-"],
+.office-workbench [class*="border-cyan-"] {
+  border-color: var(--border-soft) !important;
+}
+
+.office-workbench .text-slate-50,
+.office-workbench .text-slate-100,
+.office-workbench .text-slate-200 {
+  color: var(--text-main) !important;
+}
+
+.office-workbench .text-slate-300 {
+  color: #334155 !important;
+}
+
+.office-workbench .text-slate-400,
+.office-workbench .text-slate-500 {
+  color: var(--text-soft) !important;
+}
+
+.office-workbench .text-cyan-50,
+.office-workbench .text-cyan-100,
+.office-workbench .text-cyan-200,
+.office-workbench .text-cyan-300 {
+  color: var(--accent-blue) !important;
+}
+
+.office-workbench .bg-cyan-400,
+.office-workbench .btn-primary {
+  background-color: var(--action-main) !important;
+  border-color: var(--action-main) !important;
+  color: #ffffff !important;
+  border-radius: 2px;
+  box-shadow: none;
+}
+
+.office-workbench .btn-primary:hover {
+  background-color: var(--action-hover) !important;
+}
+
+.office-workbench .btn-primary:disabled {
+  background-color: #dbe3ee !important;
+  border-color: #dbe3ee !important;
+  color: var(--text-soft) !important;
+  box-shadow: none;
+}
+
+.office-workbench .btn-secondary {
+  background-color: var(--surface-panel) !important;
+  border-color: var(--border-soft) !important;
+  border-radius: 2px;
+  color: var(--text-main) !important;
+  box-shadow: none;
+}
+
+.office-workbench .btn-secondary:hover {
+  background-color: var(--surface-muted) !important;
+  border-color: var(--border-strong) !important;
+}
+
+.office-workbench .btn-danger {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  border-radius: 2px;
+  color: #334155 !important;
+}
+
+.office-workbench .btn-danger:disabled {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #94a3b8 !important;
+}
+
+.office-workbench .desktop-command-primary {
+  background-color: #0f172a !important;
+  border-color: #0f172a !important;
+  color: #ffffff !important;
+}
+
+.office-workbench .desktop-command-primary:hover {
+  background-color: #1e293b !important;
+  border-color: #1e293b !important;
+}
+
+.office-workbench .desktop-command-primary:disabled {
+  background-color: #dbe3ee !important;
+  border-color: #dbe3ee !important;
+  color: #64748b !important;
+}
+
+.office-workbench .desktop-command-stop {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #334155 !important;
+}
+
+.office-workbench .desktop-command-stop:hover {
+  background-color: #fff7f7 !important;
+  border-color: #fca5a5 !important;
+  color: #b91c1c !important;
+}
+
+.office-workbench .desktop-command-stop:disabled {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #94a3b8 !important;
+}
+
+.office-workbench .form-input {
+  border-color: var(--border-soft) !important;
+  border-radius: 2px;
+  background-color: var(--surface-panel) !important;
+  color: var(--text-main) !important;
+  box-shadow: none;
+}
+
+.office-workbench .form-input:focus {
+  border-color: var(--accent-blue) !important;
+  box-shadow: none;
+}
+
+.office-workbench [class*="shadow-"] {
+  box-shadow: none !important;
+}
+
+.office-workbench #settings-panel [class*="gap-2"] {
+  gap: 12px !important;
+}
+
+.office-workbench #settings-panel [class*="space-y-2"] > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 12px !important;
+}
+
+.office-workbench [class*="rounded-"] {
+  border-radius: 2px !important;
+}
+
+.office-workbench .batch-table-row {
+  min-height: 34px;
+}
+
+.office-workbench .batch-table-header {
+  min-height: 32px;
+}
+
+.document-page {
+  color: var(--text-main);
+}
+
+.document-page .tech-panel,
+.document-page .tech-shell,
+.document-page .tech-muted-panel {
+  border-color: var(--border-soft);
+  border-radius: 2px;
+  background: var(--surface-panel);
+  color: var(--text-main);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.document-page [class*="bg-slate-950"],
+.document-page [class*="bg-slate-900"],
+.document-page [class*="bg-cyan-950"] {
+  background-color: var(--surface-muted) !important;
+}
+
+.document-page [class*="border-slate-"],
+.document-page [class*="border-cyan-"] {
+  border-color: var(--border-soft) !important;
+}
+
+.document-page .text-slate-50,
+.document-page .text-slate-100,
+.document-page .text-slate-200 {
+  color: var(--text-main) !important;
+}
+
+.document-page .text-slate-300 {
+  color: #334155 !important;
+}
+
+.document-page .text-slate-400,
+.document-page .text-slate-500 {
+  color: var(--text-soft) !important;
+}
+
+.document-page .text-cyan-50,
+.document-page .text-cyan-100,
+.document-page .text-cyan-200,
+.document-page .text-cyan-300 {
+  color: var(--accent-blue) !important;
+}
+
+.document-page .text-amber-100 {
+  color: #92400e !important;
+}
+
+.document-page .bg-amber-950\/30 {
+  background-color: #fffbeb !important;
+}
+
+.document-page .border-amber-300\/20 {
+  border-color: #fcd34d !important;
+}
+
+.document-page .bg-cyan-400,
+.document-page .btn-primary {
+  background-color: var(--action-main) !important;
+  border-color: var(--action-main) !important;
+  color: #ffffff !important;
+  border-radius: 3px;
+  box-shadow: none;
+}
+
+.document-page .prose {
+  --tw-prose-body: #334155;
+  --tw-prose-headings: var(--text-main);
+  --tw-prose-lead: #334155;
+  --tw-prose-links: var(--accent-blue);
+  --tw-prose-bold: var(--text-main);
+  --tw-prose-counters: var(--text-soft);
+  --tw-prose-bullets: var(--text-soft);
+  --tw-prose-hr: var(--border-soft);
+  --tw-prose-quotes: var(--text-main);
+  --tw-prose-quote-borders: var(--border-soft);
+  --tw-prose-captions: var(--text-soft);
+  --tw-prose-code: var(--text-main);
+  --tw-prose-pre-code: var(--text-main);
+  --tw-prose-pre-bg: var(--surface-muted);
+  --tw-prose-th-borders: var(--border-soft);
+  --tw-prose-td-borders: var(--border-soft);
 }

@@ -31,11 +31,11 @@ const changes = [
 
 export default function ChangelogPage() {
   return (
-    <main className="mx-auto max-w-4xl px-4 py-12 text-slate-100 sm:px-6 lg:px-8">
-      <article className="rounded-3xl tech-panel p-6 sm:p-10">
+    <main className="document-page mx-auto max-w-4xl px-4 py-12 text-slate-900 sm:px-6 lg:px-8">
+      <article className="rounded-sm tech-panel p-6 sm:p-10">
         <p className="text-sm font-semibold text-cyan-300">版本记录</p>
         <h1 className="mt-2 text-3xl font-bold text-slate-50">更新日志</h1>
-        <div className="mt-8 rounded-2xl border border-cyan-300/12 bg-slate-950/60 p-5">
+        <div className="mt-8 rounded-sm border border-cyan-300/12 bg-slate-950/60 p-5">
           <h2 className="text-xl font-bold text-slate-50">v1.0.0</h2>
           <p className="mt-2 text-sm text-slate-400">发布日期：2026-05-17</p>
           <h3 className="mt-5 font-bold text-slate-50">新增</h3>

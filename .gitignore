@@ -2,6 +2,7 @@
 node_modules/
 **/node_modules/
 .pnpm-home/
+.pnpm-store/
 
 # Environment files
 .env
@@ -47,6 +48,7 @@ Thumbs.db
 
 # Local previews and screenshots
 desktop-preview*.png
+apps/web/desktop-review*.png
 preview-*.png
 web-renamed-preview.png
 icon-refined-preview*.png
