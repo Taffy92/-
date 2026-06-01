@@ -1,4 +1,4 @@
-export type BatchMode = "compress" | "watermark" | "word-images" | "excel-images" | "video-convert" | "audio-convert" | "video-audio";
+export type BatchMode = "resize" | "compress" | "watermark" | "pdf-images" | "word-images" | "excel-images" | "video-convert" | "audio-convert" | "video-audio";
 
 export type BatchTaskStatus = "queued" | "running" | "success" | "failed" | "cancelled";
 
@@ -59,8 +59,10 @@ export const batchHistoryLimit = 100;
 export const batchHistoryStorageKey = "format-converter.desktop.batch-history.v1";
 
 const modeExtensions: Record<BatchMode, string[]> = {
+  resize: [".jpg", ".jpeg", ".png", ".webp", ".bmp"],
   compress: [".jpg", ".jpeg", ".png", ".webp"],
   watermark: [".jpg", ".jpeg", ".png", ".webp", ".bmp"],
+  "pdf-images": [".pdf"],
   "word-images": [".docx"],
   "excel-images": [".xlsx", ".csv"],
   "video-convert": [".mp4", ".mov", ".avi", ".mkv", ".webm"],
@@ -140,8 +142,10 @@ export function batchTaskStatusLabel(status: BatchTaskStatus) {
 
 export function batchModeLabel(mode: BatchMode) {
   const labels: Record<BatchMode, string> = {
+    resize: "图片批量调整尺寸",
     compress: "图片批量压缩",
     watermark: "图片批量加水印",
+    "pdf-images": "PDF 批量转图片",
     "word-images": "Word 批量转图片",
     "excel-images": "Excel 批量转图片",
     "video-convert": "视频批量转换",

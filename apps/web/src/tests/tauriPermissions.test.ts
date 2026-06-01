@@ -33,11 +33,12 @@ describe("Tauri permission hardening", () => {
     expect(allowlist.fs.renameFile).toBe(false);
   });
 
-  it("removes C drive full-disk scope while retaining required local directories", () => {
+  it("allows any user-selected output folder while retaining required local directories", () => {
     const config = readTauriConfig();
     const scope: string[] = config.tauri.allowlist.fs.scope;
 
     expect(scope).not.toContain("C:/**");
+    expect(scope).toContain("**");
     expect(scope).toEqual(
       expect.arrayContaining([
         "$HOME/**",
@@ -56,6 +57,7 @@ describe("Tauri permission hardening", () => {
     const config = readTauriConfig();
     const allowlist = config.tauri.allowlist;
 
+    expect(config.build.withGlobalTauri).toBe(true);
     expect(allowlist.path.all).toBe(true);
     expect(allowlist.shell.all).toBe(false);
     expect(allowlist.shell.open).toBe(true);
@@ -67,5 +69,13 @@ describe("Tauri permission hardening", () => {
       type: "offlineInstaller",
       silent: true
     });
+  });
+
+  it("allows local blob media previews in the desktop WebView CSP", () => {
+    const config = readTauriConfig();
+    const csp: string = config.tauri.security.csp;
+
+    expect(csp).toContain("media-src");
+    expect(csp).toContain("media-src 'self' blob: data:");
   });
 });

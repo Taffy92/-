@@ -191,14 +191,14 @@ textarea {
 }
 
 .office-workbench .desktop-command-primary {
-  background-color: #0f172a !important;
-  border-color: #0f172a !important;
+  background-color: #1d7df2 !important;
+  border-color: #2f8cff !important;
   color: #ffffff !important;
 }
 
 .office-workbench .desktop-command-primary:hover {
-  background-color: #1e293b !important;
-  border-color: #1e293b !important;
+  background-color: #0f6dde !important;
+  border-color: #1d7df2 !important;
 }
 
 .office-workbench .desktop-command-primary:disabled {
@@ -208,21 +208,69 @@ textarea {
 }
 
 .office-workbench .desktop-command-stop {
-  background-color: #ffffff !important;
-  border-color: #cbd5e1 !important;
-  color: #334155 !important;
+  background-color: #334155 !important;
+  border-color: #475569 !important;
+  color: #f8fafc !important;
 }
 
 .office-workbench .desktop-command-stop:hover {
-  background-color: #fff7f7 !important;
-  border-color: #fca5a5 !important;
-  color: #b91c1c !important;
+  background-color: #3f4f65 !important;
+  border-color: #64748b !important;
+  color: #ffffff !important;
 }
 
 .office-workbench .desktop-command-stop:disabled {
   background-color: #f8fafc !important;
   border-color: #e2e8f0 !important;
   color: #94a3b8 !important;
+}
+
+.office-workbench .desktop-titlebar {
+  background-color: #0f172a !important;
+  border-color: #1e293b !important;
+  color: #e2e8f0 !important;
+}
+
+.office-workbench .desktop-titlebar [class*="bg-slate-900"] {
+  background-color: #1e293b !important;
+}
+
+.office-workbench .desktop-titlebar [class*="border-slate-"] {
+  border-color: #334155 !important;
+}
+
+.office-workbench .desktop-titlebar .text-slate-50,
+.office-workbench .desktop-titlebar .text-slate-100 {
+  color: #f8fafc !important;
+}
+
+.office-workbench .desktop-titlebar .text-slate-200,
+.office-workbench .desktop-titlebar .text-slate-300 {
+  color: #e2e8f0 !important;
+}
+
+.office-workbench .desktop-titlebar .text-slate-400,
+.office-workbench .desktop-titlebar .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+.office-workbench .desktop-titlebar .text-slate-600,
+.office-workbench .desktop-titlebar .text-slate-700 {
+  color: #cbd5e1 !important;
+}
+
+.office-workbench .desktop-titlebar .text-blue-100,
+.office-workbench .desktop-titlebar .text-blue-300 {
+  color: #bfdbfe !important;
+}
+
+.office-workbench .desktop-titlebar .text-emerald-100,
+.office-workbench .desktop-titlebar .text-emerald-300 {
+  color: #bbf7d0 !important;
+}
+
+.office-workbench .desktop-titlebar .text-amber-100 {
+  color: #fde68a !important;
 }
 
 .office-workbench .form-input {
@@ -260,6 +308,273 @@ textarea {
 
 .office-workbench .batch-table-header {
   min-height: 32px;
+}
+
+.desktop-replica {
+  --desktop-bg: #24323b;
+  --desktop-title: #1e2a32;
+  --desktop-panel: #32434d;
+  --desktop-panel-strong: #3a4d58;
+  --desktop-row-dark: #2c3b44;
+  --desktop-row-light: #334750;
+  --desktop-row-active: #436078;
+  --desktop-border: #50646f;
+  --desktop-border-dark: #18242b;
+  --desktop-field: #23313a;
+  --desktop-text: #edf3f7;
+  --desktop-muted: #cad5dc;
+  --desktop-soft: #9facb4;
+  --desktop-blue: #4f81a5;
+  --desktop-green: #76c77d;
+  --desktop-red: #d56a6a;
+  color-scheme: dark;
+  font-family: Arial, "Microsoft YaHei", "PingFang SC", sans-serif;
+}
+
+.desktop-replica button {
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.desktop-replica button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.desktop-replica ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.desktop-replica ::-webkit-scrollbar-track {
+  background: #26353e;
+}
+
+.desktop-replica ::-webkit-scrollbar-thumb {
+  background: #7f939f;
+}
+
+.desktop-nav-menu {
+  border-top: 1px solid #34464f;
+}
+
+.desktop-nav-row {
+  display: flex;
+  width: 100%;
+  height: 43px;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 1px solid #34464f;
+  background: #26353e;
+  padding: 0 12px;
+  text-align: left;
+  font-size: 14px;
+  color: var(--desktop-text);
+}
+
+.desktop-nav-row:hover {
+  background: #30414b;
+}
+
+.desktop-nav-row-active {
+  border-color: #526874;
+  background: #33464f;
+  box-shadow: inset 4px 0 0 var(--desktop-blue);
+}
+
+.desktop-queue-command {
+  display: inline-flex;
+  min-height: 31px;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #5a707c;
+  border-radius: 4px;
+  background: #344852;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--desktop-text);
+}
+
+.desktop-queue-command:hover:not(:disabled) {
+  border-color: #7f98a5;
+  background: #3d5360;
+}
+
+.desktop-table-header > span,
+.desktop-table-row > span,
+.desktop-table-row > button {
+  min-width: 0;
+  padding: 0 10px;
+}
+
+.desktop-table-row {
+  min-height: 33px;
+  border-bottom: 1px solid #1e2b32;
+  color: var(--desktop-muted);
+}
+
+.desktop-table-row:nth-child(odd) {
+  background: var(--desktop-row-dark);
+}
+
+.desktop-table-row:nth-child(even) {
+  background: var(--desktop-row-light);
+}
+
+.desktop-table-row:hover {
+  background: #3b5360;
+}
+
+.desktop-table-row-active,
+.desktop-table-row-active:hover {
+  background: var(--desktop-row-active);
+}
+
+.desktop-row-icon-button {
+  display: inline-grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--desktop-text);
+}
+
+.desktop-row-icon-button:hover {
+  border-color: #60737d;
+  background: #23313a;
+}
+
+.desktop-replica-inspector .desktop-inspector-section {
+  background: #3a4d58;
+  padding: 18px 12px 14px;
+}
+
+.desktop-replica-inspector .desktop-control-panel > div > div:first-child {
+  display: none;
+}
+
+.desktop-replica-inspector .desktop-control-panel .space-y-4 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 9px !important;
+}
+
+.desktop-replica-inspector .desktop-control-panel label.block {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  align-items: center;
+  gap: 0;
+  color: var(--desktop-muted);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.desktop-replica-inspector .desktop-control-panel label.block > span {
+  margin: 0;
+  padding-right: 8px;
+  color: var(--desktop-muted);
+  white-space: nowrap;
+}
+
+.desktop-replica .form-input,
+.desktop-replica-inspector select,
+.desktop-replica-inspector input[type="text"],
+.desktop-replica-inspector input[type="number"] {
+  width: 100%;
+  min-height: 31px;
+  height: 31px;
+  border: 1px solid #60737d !important;
+  border-radius: 4px !important;
+  background: var(--desktop-field) !important;
+  padding: 4px 10px;
+  color: var(--desktop-text) !important;
+  box-shadow: none !important;
+  outline: none;
+}
+
+.desktop-replica-inspector input[type="range"] {
+  accent-color: var(--desktop-blue);
+}
+
+.desktop-replica-inspector input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--desktop-blue);
+}
+
+.desktop-replica-inspector .desktop-backend-toggle {
+  width: 13px;
+  height: 13px;
+}
+
+.desktop-replica-inspector .desktop-control-panel label.flex {
+  min-height: 24px;
+  align-items: center;
+  color: var(--desktop-muted);
+  font-size: 13px;
+}
+
+.desktop-replica .btn-secondary,
+.desktop-replica .btn-primary,
+.desktop-replica .btn-danger {
+  min-height: 31px;
+  border-color: #5a707c !important;
+  border-radius: 4px !important;
+  background: #344852 !important;
+  padding: 6px 10px;
+  color: var(--desktop-text) !important;
+}
+
+.desktop-preview-stage {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 158px;
+  overflow: hidden;
+  border: 1px solid #0d1418;
+  background: #05090b;
+}
+
+.desktop-preview-empty {
+  background: #05090b;
+}
+
+.desktop-preview-sky {
+  height: 55%;
+  background: #b7d1e0;
+}
+
+.desktop-preview-ground {
+  position: absolute;
+  inset: 45% 0 0;
+  background:
+    linear-gradient(171deg, transparent 0 42%, #728662 42% 43%, transparent 43%),
+    linear-gradient(174deg, transparent 0 53%, #31412d 53% 54%, transparent 54%),
+    #586b45;
+}
+
+.desktop-replica .bg-emerald-400\/12,
+.desktop-replica .bg-cyan-400\/12,
+.desktop-replica .bg-red-400\/12,
+.desktop-replica .bg-amber-400\/12,
+.desktop-replica .bg-slate-800 {
+  background: transparent !important;
+}
+
+.desktop-replica .text-emerald-200 {
+  color: var(--desktop-green) !important;
+}
+
+.desktop-replica .text-cyan-200,
+.desktop-replica .text-slate-300 {
+  color: var(--desktop-muted) !important;
+}
+
+.desktop-replica .text-red-200 {
+  color: var(--desktop-red) !important;
+}
+
+.desktop-replica .ring-1 {
+  box-shadow: none !important;
 }
 
 .document-page {

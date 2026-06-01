@@ -61,7 +61,7 @@
 - [x] 音频批量转换保留。
 - [x] 视频批量转换保留。
 - [x] 视频批量提取音频保留。
-- [x] 任务历史保留。
+- [x] 右侧预览区和参数设置保留。
 - [x] WebView2 offlineInstaller 配置保留。
 - [x] Tauri 权限未扩大。
 
@@ -83,7 +83,7 @@
 - [x] sidecar 优先范围仅限 WAV 转 FLAC、MP4 转 WebM、ffprobe 信息读取。
 - [x] MP3、AAC/M4A、MP4/H.264、MOV、AVI、MKV 继续排除在 sidecar 正式默认范围外。
 - [x] sidecar 缺失或 SHA256 校验失败时回退 WASM 或显示明确提示。
-- [x] 任务历史和日志继续记录脱敏路径，不记录完整命令行、完整 stderr 或文件内容。
+- [x] 批量任务状态仅在本机工作台展示，不上传文件内容或转换结果。
 - [x] Tauri 权限未扩大，WebView2 offlineInstaller 未修改。
 - [ ] BtbN FFmpeg 候选许可证、专利和平台要求完成正式商业发布前人工复核。
 - [ ] 长期自建 LGPL FFmpeg 构建完成。

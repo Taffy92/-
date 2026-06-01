@@ -34,6 +34,18 @@ export function Footer() {
           <p className={desktop ? "text-sm text-slate-300" : "text-sm text-slate-600"}>开发者：{siteConfig.developer}</p>
           <p className={desktop ? "text-sm text-slate-300" : "text-sm text-slate-600"}>联系邮箱：{siteConfig.email}</p>
           <p className={desktop ? "text-sm text-slate-400" : "text-sm text-slate-500"}>{siteConfig.copyright}</p>
+          {!desktop ? (
+            <p className="text-sm text-slate-500">
+              <a
+                href={siteConfig.icp.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-500 no-underline hover:text-slate-900"
+              >
+                {siteConfig.icp.text}
+              </a>
+            </p>
+          ) : null}
           <p className={desktop ? "text-xs leading-5 text-slate-500" : "max-w-3xl text-xs leading-5 text-slate-500"}>
             文件处理在本地完成。CloudBase 只用于下载授权，不接触用户处理文件；广告不接收 File、Blob、ArrayBuffer、Canvas 或转换结果。
           </p>

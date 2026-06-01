@@ -21,8 +21,8 @@ describe("privacy and product boundary checks", () => {
     expect(tabBlock).toContain('id: "excel-images"');
     expect(tabBlock).toContain("const desktopTabs: ToolTab[]");
     expect(tabBlock).toContain('tab.id !== "download"');
-    expect(tabBlock).toContain('id: "batch"');
-    expect(tabBlock).toContain("离线批量处理");
+    expect(tabBlock).not.toContain('{ id: "batch"');
+    expect(tabBlock).not.toContain("离线批量处理");
     expect(tabBlock).not.toContain('id: "pdf-word"');
     expect(tabBlock).not.toContain('id: "pdf-excel"');
     expect(tabBlock).not.toContain('id: "image-word"');
@@ -49,12 +49,22 @@ describe("privacy and product boundary checks", () => {
 
   it("keeps batch processing exclusive to the offline desktop surface", () => {
     expect(toolsSource).toContain('const tabs = isDesktopSurface ? desktopTabs : webTabs');
-    expect(toolsSource).toContain('if (!isDesktopSurface) throw new Error("批量处理仅在离线安装版中提供。")');
+    expect(toolsSource).toContain('if (!isDesktopSurface) throw new Error');
+    expect(toolsSource).toContain("function getBatchModeForTab");
+    expect(toolsSource).toContain('case "resize": return "resize"');
+    expect(toolsSource).toContain('case "pdf-images": return "pdf-images"');
+    expect(toolsSource).toContain("runBatch(modeForActiveTool)");
     expect(toolsSource).toContain("handleBatchFiles");
     expect(toolsSource).toContain("runBatch");
     expect(toolsSource).toContain("图片批量压缩");
     expect(toolsSource).toContain("视频批量转换");
     expect(toolsSource).toContain("音频批量转换");
+  });
+
+  it("keeps the desktop titlebar version tied to release configuration", () => {
+    expect(toolsSource).toContain('import { downloadsConfig } from "@/config/downloads"');
+    expect(toolsSource).toContain("离线专业版 v{downloadsConfig.version}");
+    expect(toolsSource).not.toContain("离线专业版 v1.2.0");
   });
 
   it("shows local-processing privacy and capability messaging", () => {

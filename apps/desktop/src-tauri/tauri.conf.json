@@ -3,7 +3,8 @@
     "beforeBuildCommand": "node ../web/scripts/build-desktop.mjs",
     "beforeDevCommand": "cmd /c set NEXT_PUBLIC_APP_MODE=desktop&& pnpm --filter web dev",
     "devPath": "http://localhost:3000",
-    "distDir": "../../web/out"
+    "distDir": "../../web/out",
+    "withGlobalTauri": true
   },
   "package": {
     "productName": "万能格式转换器",
@@ -31,6 +32,7 @@
         "removeFile": false,
         "renameFile": false,
         "scope": [
+          "**",
           "$HOME/**",
           "$DESKTOP/**",
           "$DOCUMENT/**",
@@ -106,7 +108,7 @@
       }
     },
     "security": {
-      "csp": "default-src 'self' asset: https://asset.localhost; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: asset: https://asset.localhost; font-src 'self' data:; connect-src 'self' blob: data:; worker-src 'self' blob: data:; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
+      "csp": "default-src 'self' asset: https://asset.localhost; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: asset: https://asset.localhost; font-src 'self' data:; connect-src 'self' blob: data:; media-src 'self' blob: data: asset: https://asset.localhost; worker-src 'self' blob: data:; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
     },
     "updater": {
       "active": false

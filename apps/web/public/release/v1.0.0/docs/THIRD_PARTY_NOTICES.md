@@ -2,46 +2,13 @@
 
 本文件为“万能格式转换器”在线版和 Windows 离线安装版的第三方开源软件 Notices。内容根据锁文件、本地依赖元数据和最终构建产物生成，用于正式发布前的许可证归档和产品内展示。
 
-- 生成时间：2026-05-27T17:27:05.253Z
-- npm 依赖数量：835
-- 直接 npm 依赖数量：33
+- 生成时间：2026-06-01T10:09:50.777Z
+- npm 依赖数量：728
+- 直接 npm 依赖数量：35
 - Rust crate 数量：425
 - 构建产物记录数量：5
 - 开发者：MR.谢
 - 联系邮箱：370298218@qq.com
-
-## FFmpeg sidecar 实验资源补充（2026-05-24）
-
-Windows 离线专业版包含一个默认关闭的 sidecar FFmpeg 内部实验开关。该资源只打入离线专业版安装包，不进入 `apps/web/public` 或 `apps/web/out`，在线版仍使用本地 FFmpeg WASM。
-
-当前候选资源：
-
-- 名称：BtbN FFmpeg-Builds latest n7.1 win64 lgpl shared 7.1
-- 项目地址：https://github.com/BtbN/FFmpeg-Builds
-- Release：https://github.com/BtbN/FFmpeg-Builds/releases/tag/latest
-- 候选包：ffmpeg-n7.1-latest-win64-lgpl-shared-7.1.zip
-- ZIP SHA256：233E3C0D1E73C4BC2915DA553AA211BEAB75AA902F074CF6A7D6BADE6846F2CC
-- 声明许可证：GNU LGPL v3 or later
-- 初步检查：未发现 `--enable-gpl`，未发现 `--enable-nonfree`，未包含 `libx264` / `libx265`
-
-离线专业版安装包内 sidecar 实验资源位置：
-
-- `resources/ffmpeg/bin/ffmpeg.exe`
-- `resources/ffmpeg/bin/ffprobe.exe`
-- `resources/ffmpeg/bin/*.dll`
-- `resources/ffmpeg/SHA256SUMS.txt`
-- `resources/ffmpeg/BUILD_CONFIG.txt`
-- `resources/ffmpeg/SOURCE_OFFER.txt`
-- `resources/ffmpeg/LICENSES/`
-
-重要限制：
-
-1. sidecar FFmpeg 仅为内部实验功能，默认关闭。
-2. 当前默认音视频处理路径仍为 FFmpeg WASM。
-3. sidecar 实验阶段只允许 WAV 转 FLAC、MP4 转 WebM、ffprobe 信息读取和版本/构建参数检查。
-4. MP3、AAC/M4A、MP4/H.264、MOV、AVI、MKV 输出暂不作为 sidecar 正式能力开放。
-5. 当前候选包含 `libmp3lame`、`libopenh264` 和 AAC 相关能力，正式商业发布前仍需人工复核许可证、专利、平台和地区要求。
-6. 本文件不是法律意见，正式商业发布前建议做法律/许可证复核。
 
 ## 生成来源
 
@@ -61,35 +28,15 @@ Windows 离线专业版包含一个默认关闭的 sidecar FFmpeg 内部实验�
 - 本轮已将 Excel 转图片链路从 xlsx 切换到 ExcelJS，并增加文件大小、工作表数量、行数和单元格数量限制。
 - 本文件不是法律意见。正式商业发布前，建议根据投放地区、应用商店要求和广告平台要求进行最终合规审查。
 
-## FFmpeg / GPL 发布专项补充（2026-05-24）
-
-本项目当前音视频转换、音频格式转换和视频提取音频功能使用 `@ffmpeg/ffmpeg` 调用本地 FFmpeg WASM 资源。当前直接分发的 FFmpeg WASM 静态资源包括：
-
-| 文件 | 大小 | SHA256 |
-| --- | ---: | --- |
-| `apps/web/public/ffmpeg/ffmpeg-core.js` | 112,059 bytes | `B266AB5B952555881DD6310663986994A182ACB2B7FF25CF10A25F7A37AC2B21` |
-| `apps/web/public/ffmpeg/ffmpeg-core.wasm` | 32,232,419 bytes | `9F57947A5BD530D8F00C5B3F2CB2A3492FAA7E5D823315342D6A8656D0A6B7B7` |
-
-当前本地依赖元数据中，`@ffmpeg/core@0.12.10` 的许可证声明为 `GPL-2.0-or-later`，`@ffmpeg/ffmpeg@0.12.15` 和 `@ffmpeg/util@0.12.2` 的许可证声明为 `MIT`。因此，如果在线版或 Windows 离线专业版继续分发 `ffmpeg-core.js` 和 `ffmpeg-core.wasm`，发布方应按 GPL 风险项处理，包括保留 GPL 许可证文本、版权声明、源码获取方式和 FFmpeg / ffmpeg.wasm 上游链接。
-
-源码和上游链接：
-
-- ffmpeg.wasm：`https://github.com/ffmpegwasm/ffmpeg.wasm`
-- FFmpeg 官方网站：`https://ffmpeg.org/`
-- FFmpeg 法律说明：`https://ffmpeg.org/legal.html`
-- npm `@ffmpeg/core`：`https://www.npmjs.com/package/@ffmpeg/core`
-
-当前产品策略是：在线版继续保留音频转换、视频转换、视频提取音频，并继续从本地静态资源加载 FFmpeg WASM；在线版不开放批量音视频处理，批量处理入口只提示“批量处理为离线专业版功能，请下载 Windows 离线专业版使用。”离线专业版继续保留图片、Word、Excel、音频、视频批量处理。长期建议为离线专业版评估 Tauri sidecar FFmpeg 或可证明的 LGPL FFmpeg 构建。由于在线版仍分发 FFmpeg WASM，在线版和离线专业版都必须保留 FFmpeg / GPL 许可证说明和源码获取方式。以上内容不构成法律意见，正式商业发布前必须做法律/许可证复核。
-
 ## 最终构建产物记录
 
 | 名称 | 路径 | 类型 | 文件数 | 大小 | SHA256 | 说明 |
 | --- | --- | --- | --- | --- | --- | --- |
-| Next.js 静态网站产物 | `apps/web/out` | 目录 | 275 | 44.28 MB | - | 在线版和离线版共用的静态页面、JS、CSS 和静态资源。 |
+| Next.js 静态网站产物 | `apps/web/out` | 目录 | 285 | 44.53 MB | - | 在线版和离线版共用的静态页面、JS、CSS 和静态资源。 |
 | PDF.js 静态资源 | `apps/web/out/pdfjs` | 目录 | 189 | 3.80 MB | - | 来自 pdfjs-dist 的主模块、worker、CMaps 和字体资源。 |
 | FFmpeg WASM 静态资源 | `apps/web/out/ffmpeg` | 目录 | 2 | 30.85 MB | - | 来自 @ffmpeg/core 的 ffmpeg-core.js 和 ffmpeg-core.wasm。 |
-| Windows NSIS 安装包 | `apps/desktop/src-tauri/target/release/bundle/nsis/万能格式转换器_1.0.0_x64-setup.exe` | 文件 | 1 | 245.62 MB | 012417FEF531D0C124035705219D2473E357D46ECAFFA46D75295CEC203F8EDD | 离线版 Windows x64 EXE 安装包。 |
-| Windows MSI 安装包 | `apps/desktop/src-tauri/target/release/bundle/msi/万能格式转换器_1.0.0_x64_zh-CN.msi` | 文件 | 1 | 256.43 MB | B8AF3A4DFCA0E17E954FF4CCC166A76E432BA7F060429C09EA2BA517169E4F26 | 离线版 Windows x64 MSI 安装包。 |
+| Windows NSIS 安装包 | `apps/desktop/src-tauri/target/release/bundle/nsis/万能格式转换器_1.0.0_x64-setup.exe` | 文件 | 1 | 245.62 MB | 5DFE1ACD54506DD97B554A02EF09F031D4D1BCF5205AD4A784C82E5B1D410E67 | 离线版 Windows x64 EXE 安装包。 |
+| Windows MSI 安装包 | `apps/desktop/src-tauri/target/release/bundle/msi/万能格式转换器_1.0.0_x64_zh-CN.msi` | 文件 | 1 | 256.43 MB | 5FB61C722D282E9464AE8014B978D04DE5D1AEFFFC80E4EB1C2A6EE5934C5766 | 离线版 Windows x64 MSI 安装包。 |
 
 ## 直接 npm 依赖
 
@@ -99,6 +46,7 @@ Windows 离线专业版包含一个默认关闭的 sidecar FFmpeg 内部实验�
 | @ffmpeg/core | 0.12.10 | GPL-2.0-or-later | git+https://github.com/ffmpegwasm/ffmpeg.wasm.git | - |
 | @ffmpeg/ffmpeg | 0.12.15 | MIT | git+https://github.com/ffmpegwasm/ffmpeg.wasm.git | - |
 | @ffmpeg/util | 0.12.2 | MIT | git+https://github.com/ffmpegwasm/ffmpeg.wasm.git | - |
+| @gsap/react | 2.1.2 | SEE LICENSE AT https://gsap.com/standard-license | git+https://github.com/greensock/react.git | - |
 | @playwright/test | 1.60.0 | Apache-2.0 | git+https://github.com/microsoft/playwright.git | LICENSE |
 | @tauri-apps/api | 1.6.0 | Apache-2.0 OR MIT | git+https://github.com/tauri-apps/tauri.git | - |
 | @tauri-apps/cli | 1.6.3 | Apache-2.0 OR MIT | git+https://github.com/tauri-apps/tauri.git | - |
@@ -115,6 +63,7 @@ Windows 离线专业版包含一个默认关闭的 sidecar FFmpeg 内部实验�
 | eslint-config-next | 15.5.18 | MIT | vercel/next.js | - |
 | exceljs | 4.4.0 | MIT | https://github.com/exceljs/exceljs.git | LICENSE |
 | file-saver | 2.0.5 | MIT | https://github.com/eligrey/FileSaver.js | LICENSE.md |
+| gsap | 3.15.0 | Standard 'no charge' license: https://gsap.com/standard-license. | git+https://github.com/greensock/GSAP.git | - |
 | jsdom | 24.1.3 | MIT | git+https://github.com/jsdom/jsdom.git | LICENSE.txt |
 | jszip | 3.10.1 | (MIT OR GPL-3.0-or-later) | https://github.com/Stuk/jszip.git | LICENSE.markdown |
 | lucide-react | 0.468.0 | ISC | https://github.com/lucide-icons/lucide.git | LICENSE |
@@ -147,31 +96,6 @@ Windows 离线专业版包含一个默认关闭的 sidecar FFmpeg 内部实验�
 | @edge-runtime/ponyfill | 2.4.2 | MPL-2.0 | 否 | 是 | git+https://github.com/vercel/edge-runtime.git | LICENSE.md | - |
 | @edge-runtime/primitives | 4.1.0 | MPL-2.0 | 否 | 是 | git+https://github.com/vercel/edge-runtime.git | LICENSE.md | - |
 | @edge-runtime/vm | 3.2.0 | MPL-2.0 | 否 | 是 | git+https://github.com/vercel/edge-runtime.git | LICENSE.md | - |
-| @emnapi/core | 1.10.0 | MIT | 否 | 是 | git+https://github.com/toyobayashi/emnapi.git | LICENSE | - |
-| @emnapi/runtime | 1.10.0 | MIT | 否 | 是 | git+https://github.com/toyobayashi/emnapi.git | LICENSE | - |
-| @emnapi/wasi-threads | 1.2.1 | MIT | 否 | 是 | git+https://github.com/toyobayashi/emnapi.git | LICENSE | - |
-| @esbuild/aix-ppc64 | 0.21.5 | MIT | 否 | 是 | git+https://github.com/evanw/esbuild.git | - | - |
-| @esbuild/android-arm | 0.21.5 | MIT | 否 | 是 | git+https://github.com/evanw/esbuild.git | - | - |
-| @esbuild/android-arm64 | 0.21.5 | MIT | 否 | 是 | git+https://github.com/evanw/esbuild.git | - | - |
-| @esbuild/android-x64 | 0.21.5 | MIT | 否 | 是 | https://github.com/evanw/esbuild | - | - |
-| @esbuild/darwin-arm64 | 0.21.5 | MIT | 否 | 是 | git+https://github.com/evanw/esbuild.git | - | - |
-| @esbuild/darwin-x64 | 0.21.5 | MIT | 否 | 是 | git+https://github.com/evanw/esbuild.git | - | - |
-| @esbuild/freebsd-arm64 | 0.21.5 | MIT | 否 | 是 | git+https://github.com/evanw/esbuild.git | - | - |
-| @esbuild/freebsd-x64 | 0.21.5 | MIT | 否 | 是 | git+https://github.com/evanw/esbuild.git | - | - |
-| @esbuild/linux-arm | 0.21.5 | MIT | 否 | 是 | git+https://github.com/evanw/esbuild.git | - | - |
-| @esbuild/linux-arm64 | 0.21.5 | MIT | 否 | 是 | git+https://github.com/evanw/esbuild.git | - | - |
-| @esbuild/linux-ia32 | 0.21.5 | MIT | 否 | 是 | git+https://github.com/evanw/esbuild.git | - | - |
-| @esbuild/linux-loong64 | 0.21.5 | MIT | 否 | 是 | git+https://github.com/evanw/esbuild.git | - | - |
-| @esbuild/linux-mips64el | 0.21.5 | MIT | 否 | 是 | git+https://github.com/evanw/esbuild.git | - | - |
-| @esbuild/linux-ppc64 | 0.21.5 | MIT | 否 | 是 | git+https://github.com/evanw/esbuild.git | - | - |
-| @esbuild/linux-riscv64 | 0.21.5 | MIT | 否 | 是 | git+https://github.com/evanw/esbuild.git | - | - |
-| @esbuild/linux-s390x | 0.21.5 | MIT | 否 | 是 | git+https://github.com/evanw/esbuild.git | - | - |
-| @esbuild/linux-x64 | 0.21.5 | MIT | 否 | 是 | git+https://github.com/evanw/esbuild.git | - | - |
-| @esbuild/netbsd-x64 | 0.21.5 | MIT | 否 | 是 | git+https://github.com/evanw/esbuild.git | - | - |
-| @esbuild/openbsd-x64 | 0.21.5 | MIT | 否 | 是 | git+https://github.com/evanw/esbuild.git | - | - |
-| @esbuild/sunos-x64 | 0.21.5 | MIT | 否 | 是 | git+https://github.com/evanw/esbuild.git | - | - |
-| @esbuild/win32-arm64 | 0.21.5 | MIT | 否 | 是 | git+https://github.com/evanw/esbuild.git | - | - |
-| @esbuild/win32-ia32 | 0.21.5 | MIT | 否 | 是 | git+https://github.com/evanw/esbuild.git | - | - |
 | @esbuild/win32-x64 | 0.21.5 | MIT | 否 | 是 | git+https://github.com/evanw/esbuild.git | - | - |
 | @eslint-community/eslint-utils | 4.9.1 | MIT | 否 | 是 | https://github.com/eslint-community/eslint-utils | LICENSE | - |
 | @eslint-community/regexpp | 4.12.2 | MIT | 否 | 是 | https://github.com/eslint-community/regexpp | LICENSE | - |
@@ -184,6 +108,7 @@ Windows 离线专业版包含一个默认关闭的 sidecar FFmpeg 内部实验�
 | @ffmpeg/ffmpeg | 0.12.15 | MIT | 是 | 是 | git+https://github.com/ffmpegwasm/ffmpeg.wasm.git | - | - |
 | @ffmpeg/types | 0.12.4 | MIT | 否 | 是 | git+https://github.com/ffmpegwasm/ffmpeg.wasm.git | - | - |
 | @ffmpeg/util | 0.12.2 | MIT | 是 | 是 | git+https://github.com/ffmpegwasm/ffmpeg.wasm.git | - | - |
+| @gsap/react | 2.1.2 | SEE LICENSE AT https://gsap.com/standard-license | 是 | 是 | git+https://github.com/greensock/react.git | - | - |
 | @humanwhocodes/config-array | 0.13.0 | Apache-2.0 | 否 | 是 | git+https://github.com/humanwhocodes/config-array.git | LICENSE | - |
 | @humanwhocodes/module-importer | 1.0.1 | Apache-2.0 | 否 | 是 | git+https://github.com/humanwhocodes/module-importer.git | LICENSE | - |
 | @humanwhocodes/object-schema | 2.0.3 | BSD-3-Clause | 否 | 是 | git+https://github.com/humanwhocodes/object-schema.git | LICENSE | - |
@@ -197,18 +122,7 @@ Windows 离线专业版包含一个默认关闭的 sidecar FFmpeg 内部实验�
 | @jridgewell/trace-mapping | 0.3.9 | MIT | 否 | 是 | git+https://github.com/jridgewell/trace-mapping.git | LICENSE | - |
 | @mapbox/node-pre-gyp | 1.0.11 | BSD-3-Clause | 否 | 是 | git://github.com/mapbox/node-pre-gyp.git | LICENSE | - |
 | @napi-rs/canvas | 0.1.100 | MIT | 否 | 是 | git+https://github.com/Brooooooklyn/canvas.git | LICENSE | - |
-| @napi-rs/canvas-android-arm64 | 0.1.100 | MIT | 否 | 是 | git+https://github.com/Brooooooklyn/canvas.git | - | - |
-| @napi-rs/canvas-darwin-arm64 | 0.1.100 | MIT | 否 | 是 | git+https://github.com/Brooooooklyn/canvas.git | - | - |
-| @napi-rs/canvas-darwin-x64 | 0.1.100 | MIT | 否 | 是 | git+https://github.com/Brooooooklyn/canvas.git | - | - |
-| @napi-rs/canvas-linux-arm-gnueabihf | 0.1.100 | MIT | 否 | 是 | git+https://github.com/Brooooooklyn/canvas.git | - | - |
-| @napi-rs/canvas-linux-arm64-gnu | 0.1.100 | MIT | 否 | 是 | git+https://github.com/Brooooooklyn/canvas.git | - | - |
-| @napi-rs/canvas-linux-arm64-musl | 0.1.100 | MIT | 否 | 是 | git+https://github.com/Brooooooklyn/canvas.git | - | - |
-| @napi-rs/canvas-linux-riscv64-gnu | 0.1.100 | MIT | 否 | 是 | git+https://github.com/Brooooooklyn/canvas.git | - | - |
-| @napi-rs/canvas-linux-x64-gnu | 0.1.100 | MIT | 否 | 是 | git+https://github.com/Brooooooklyn/canvas.git | - | - |
-| @napi-rs/canvas-linux-x64-musl | 0.1.100 | MIT | 否 | 是 | git+https://github.com/Brooooooklyn/canvas.git | - | - |
-| @napi-rs/canvas-win32-arm64-msvc | 0.1.100 | MIT | 否 | 是 | git+https://github.com/Brooooooklyn/canvas.git | - | - |
 | @napi-rs/canvas-win32-x64-msvc | 0.1.100 | MIT | 否 | 是 | git+https://github.com/Brooooooklyn/canvas.git | - | - |
-| @napi-rs/wasm-runtime | 0.2.12 | MIT | 否 | 是 | git+https://github.com/napi-rs/napi-rs.git | LICENSE | - |
 | @next/env | 15.5.18 | MIT | 否 | 是 | https://github.com/vercel/next.js | - | - |
 | @next/eslint-plugin-next | 15.5.18 | MIT | 否 | 是 | vercel/next.js | - | - |
 | @next/swc-win32-x64-msvc | 15.5.18 | MIT | 否 | 是 | https://github.com/vercel/next.js | - | - |
@@ -218,29 +132,6 @@ Windows 离线专业版包含一个默认关闭的 sidecar FFmpeg 内部实验�
 | @nolyfill/is-core-module | 1.0.39 | MIT | 否 | 是 | https://github.com/SukkaW/nolyfill | LICENSE | - |
 | @playwright/test | 1.60.0 | Apache-2.0 | 是 | 是 | git+https://github.com/microsoft/playwright.git | LICENSE | NOTICE |
 | @rollup/pluginutils | 4.2.1 | MIT | 否 | 是 | rollup/plugins | - | - |
-| @rollup/rollup-android-arm-eabi | 4.60.4 | MIT | 否 | 是 | git+https://github.com/rollup/rollup.git | - | - |
-| @rollup/rollup-android-arm64 | 4.60.4 | MIT | 否 | 是 | git+https://github.com/rollup/rollup.git | - | - |
-| @rollup/rollup-darwin-arm64 | 4.60.4 | MIT | 否 | 是 | git+https://github.com/rollup/rollup.git | - | - |
-| @rollup/rollup-darwin-x64 | 4.60.4 | MIT | 否 | 是 | git+https://github.com/rollup/rollup.git | - | - |
-| @rollup/rollup-freebsd-arm64 | 4.60.4 | MIT | 否 | 是 | git+https://github.com/rollup/rollup.git | - | - |
-| @rollup/rollup-freebsd-x64 | 4.60.4 | MIT | 否 | 是 | git+https://github.com/rollup/rollup.git | - | - |
-| @rollup/rollup-linux-arm-gnueabihf | 4.60.4 | MIT | 否 | 是 | git+https://github.com/rollup/rollup.git | - | - |
-| @rollup/rollup-linux-arm-musleabihf | 4.60.4 | MIT | 否 | 是 | git+https://github.com/rollup/rollup.git | - | - |
-| @rollup/rollup-linux-arm64-gnu | 4.60.4 | MIT | 否 | 是 | git+https://github.com/rollup/rollup.git | - | - |
-| @rollup/rollup-linux-arm64-musl | 4.60.4 | MIT | 否 | 是 | git+https://github.com/rollup/rollup.git | - | - |
-| @rollup/rollup-linux-loong64-gnu | 4.60.4 | MIT | 否 | 是 | git+https://github.com/rollup/rollup.git | - | - |
-| @rollup/rollup-linux-loong64-musl | 4.60.4 | MIT | 否 | 是 | git+https://github.com/rollup/rollup.git | - | - |
-| @rollup/rollup-linux-ppc64-gnu | 4.60.4 | MIT | 否 | 是 | git+https://github.com/rollup/rollup.git | - | - |
-| @rollup/rollup-linux-ppc64-musl | 4.60.4 | MIT | 否 | 是 | git+https://github.com/rollup/rollup.git | - | - |
-| @rollup/rollup-linux-riscv64-gnu | 4.60.4 | MIT | 否 | 是 | git+https://github.com/rollup/rollup.git | - | - |
-| @rollup/rollup-linux-riscv64-musl | 4.60.4 | MIT | 否 | 是 | git+https://github.com/rollup/rollup.git | - | - |
-| @rollup/rollup-linux-s390x-gnu | 4.60.4 | MIT | 否 | 是 | git+https://github.com/rollup/rollup.git | - | - |
-| @rollup/rollup-linux-x64-gnu | 4.60.4 | MIT | 否 | 是 | git+https://github.com/rollup/rollup.git | - | - |
-| @rollup/rollup-linux-x64-musl | 4.60.4 | MIT | 否 | 是 | git+https://github.com/rollup/rollup.git | - | - |
-| @rollup/rollup-openbsd-x64 | 4.60.4 | MIT | 否 | 是 | git+https://github.com/rollup/rollup.git | - | - |
-| @rollup/rollup-openharmony-arm64 | 4.60.4 | MIT | 否 | 是 | git+https://github.com/rollup/rollup.git | - | - |
-| @rollup/rollup-win32-arm64-msvc | 4.60.4 | MIT | 否 | 是 | git+https://github.com/rollup/rollup.git | - | - |
-| @rollup/rollup-win32-ia32-msvc | 4.60.4 | MIT | 否 | 是 | git+https://github.com/rollup/rollup.git | - | - |
 | @rollup/rollup-win32-x64-gnu | 4.60.4 | MIT | 否 | 是 | git+https://github.com/rollup/rollup.git | - | - |
 | @rollup/rollup-win32-x64-msvc | 4.60.4 | MIT | 否 | 是 | git+https://github.com/rollup/rollup.git | - | - |
 | @rtsao/scc | 1.1.0 | MIT | 否 | 是 | rtsao/scc | LICENSE | - |
@@ -250,15 +141,6 @@ Windows 离线专业版包含一个默认关闭的 sidecar FFmpeg 内部实验�
 | @swc/helpers | 0.5.15 | Apache-2.0 | 否 | 是 | git+https://github.com/swc-project/swc.git | LICENSE | - |
 | @tauri-apps/api | 1.6.0 | Apache-2.0 OR MIT | 是 | 是 | git+https://github.com/tauri-apps/tauri.git | - | - |
 | @tauri-apps/cli | 1.6.3 | Apache-2.0 OR MIT | 是 | 是 | git+https://github.com/tauri-apps/tauri.git | - | - |
-| @tauri-apps/cli-darwin-arm64 | 1.6.3 | MIT | 否 | 是 | - | - | - |
-| @tauri-apps/cli-darwin-x64 | 1.6.3 | MIT | 否 | 是 | - | - | - |
-| @tauri-apps/cli-linux-arm-gnueabihf | 1.6.3 | MIT | 否 | 是 | - | - | - |
-| @tauri-apps/cli-linux-arm64-gnu | 1.6.3 | MIT | 否 | 是 | - | - | - |
-| @tauri-apps/cli-linux-arm64-musl | 1.6.3 | MIT | 否 | 是 | - | - | - |
-| @tauri-apps/cli-linux-x64-gnu | 1.6.3 | MIT | 否 | 是 | - | - | - |
-| @tauri-apps/cli-linux-x64-musl | 1.6.3 | MIT | 否 | 是 | - | - | - |
-| @tauri-apps/cli-win32-arm64-msvc | 1.6.3 | MIT | 否 | 是 | - | - | - |
-| @tauri-apps/cli-win32-ia32-msvc | 1.6.3 | MIT | 否 | 是 | - | - | - |
 | @tauri-apps/cli-win32-x64-msvc | 1.6.3 | MIT | 否 | 是 | - | - | - |
 | @tootallnate/once | 2.0.0 | MIT | 否 | 是 | git://github.com/TooTallNate/once.git | LICENSE | - |
 | @ts-morph/common | 0.11.1 | MIT | 否 | 是 | git+https://github.com/dsherret/ts-morph.git | LICENSE | - |
@@ -266,7 +148,6 @@ Windows 离线专业版包含一个默认关闭的 sidecar FFmpeg 内部实验�
 | @tsconfig/node12 | 1.0.11 | MIT | 否 | 是 | https://github.com/tsconfig/bases.git | LICENSE | - |
 | @tsconfig/node14 | 1.0.3 | MIT | 否 | 是 | https://github.com/tsconfig/bases.git | LICENSE | - |
 | @tsconfig/node16 | 1.0.4 | MIT | 否 | 是 | https://github.com/tsconfig/bases.git | LICENSE | - |
-| @tybys/wasm-util | 0.10.2 | MIT | 否 | 是 | https://github.com/toyobayashi/wasm-util.git | - | - |
 | @types/estree | 1.0.8 | MIT | 否 | 是 | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE | - |
 | @types/estree | 1.0.9 | MIT | 否 | 是 | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE | - |
 | @types/file-saver | 2.0.7 | MIT | 是 | 是 | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE | - |
@@ -289,24 +170,6 @@ Windows 离线专业版包含一个默认关闭的 sidecar FFmpeg 内部实验�
 | @typescript-eslint/utils | 8.59.3 | MIT | 否 | 是 | https://github.com/typescript-eslint/typescript-eslint.git | LICENSE | - |
 | @typescript-eslint/visitor-keys | 8.59.3 | MIT | 否 | 是 | https://github.com/typescript-eslint/typescript-eslint.git | LICENSE | - |
 | @ungap/structured-clone | 1.3.1 | ISC | 否 | 是 | git+https://github.com/ungap/structured-clone.git | LICENSE | - |
-| @unrs/resolver-binding-android-arm-eabi | 1.11.1 | MIT | 否 | 是 | git+https://github.com/unrs/unrs-resolver.git | - | - |
-| @unrs/resolver-binding-android-arm64 | 1.11.1 | MIT | 否 | 是 | git+https://github.com/unrs/unrs-resolver.git | - | - |
-| @unrs/resolver-binding-darwin-arm64 | 1.11.1 | MIT | 否 | 是 | git+https://github.com/unrs/unrs-resolver.git | - | - |
-| @unrs/resolver-binding-darwin-x64 | 1.11.1 | MIT | 否 | 是 | git+https://github.com/unrs/unrs-resolver.git | - | - |
-| @unrs/resolver-binding-freebsd-x64 | 1.11.1 | MIT | 否 | 是 | git+https://github.com/unrs/unrs-resolver.git | - | - |
-| @unrs/resolver-binding-linux-arm-gnueabihf | 1.11.1 | MIT | 否 | 是 | git+https://github.com/unrs/unrs-resolver.git | - | - |
-| @unrs/resolver-binding-linux-arm-musleabihf | 1.11.1 | MIT | 否 | 是 | git+https://github.com/unrs/unrs-resolver.git | - | - |
-| @unrs/resolver-binding-linux-arm64-gnu | 1.11.1 | MIT | 否 | 是 | git+https://github.com/unrs/unrs-resolver.git | - | - |
-| @unrs/resolver-binding-linux-arm64-musl | 1.11.1 | MIT | 否 | 是 | git+https://github.com/unrs/unrs-resolver.git | - | - |
-| @unrs/resolver-binding-linux-ppc64-gnu | 1.11.1 | MIT | 否 | 是 | git+https://github.com/unrs/unrs-resolver.git | - | - |
-| @unrs/resolver-binding-linux-riscv64-gnu | 1.11.1 | MIT | 否 | 是 | git+https://github.com/unrs/unrs-resolver.git | - | - |
-| @unrs/resolver-binding-linux-riscv64-musl | 1.11.1 | MIT | 否 | 是 | git+https://github.com/unrs/unrs-resolver.git | - | - |
-| @unrs/resolver-binding-linux-s390x-gnu | 1.11.1 | MIT | 否 | 是 | git+https://github.com/unrs/unrs-resolver.git | - | - |
-| @unrs/resolver-binding-linux-x64-gnu | 1.11.1 | MIT | 否 | 是 | git+https://github.com/unrs/unrs-resolver.git | - | - |
-| @unrs/resolver-binding-linux-x64-musl | 1.11.1 | MIT | 否 | 是 | git+https://github.com/unrs/unrs-resolver.git | - | - |
-| @unrs/resolver-binding-wasm32-wasi | 1.11.1 | MIT | 否 | 是 | git+https://github.com/unrs/unrs-resolver.git | - | - |
-| @unrs/resolver-binding-win32-arm64-msvc | 1.11.1 | MIT | 否 | 是 | git+https://github.com/unrs/unrs-resolver.git | - | - |
-| @unrs/resolver-binding-win32-ia32-msvc | 1.11.1 | MIT | 否 | 是 | git+https://github.com/unrs/unrs-resolver.git | - | - |
 | @unrs/resolver-binding-win32-x64-msvc | 1.11.1 | MIT | 否 | 是 | git+https://github.com/unrs/unrs-resolver.git | - | - |
 | @vercel/build-utils | 8.3.2 | Apache-2.0 | 否 | 是 | https://github.com/vercel/vercel.git | LICENSE | - |
 | @vercel/error-utils | 2.0.2 | Apache-2.0 | 否 | 是 | https://github.com/vercel/vercel.git | LICENSE | - |
@@ -478,26 +341,7 @@ Windows 离线专业版包含一个默认关闭的 sidecar FFmpeg 内部实验�
 | es-to-primitive | 1.3.0 | MIT | 否 | 是 | git://github.com/ljharb/es-to-primitive.git | LICENSE | - |
 | esbuild | 0.14.47 | MIT | 否 | 是 | https://github.com/evanw/esbuild | LICENSE.md | - |
 | esbuild | 0.21.5 | MIT | 否 | 是 | git+https://github.com/evanw/esbuild.git | LICENSE.md | - |
-| esbuild-android-64 | 0.14.47 | MIT | 否 | 是 | https://github.com/evanw/esbuild | - | - |
-| esbuild-android-arm64 | 0.14.47 | MIT | 否 | 是 | https://github.com/evanw/esbuild | - | - |
-| esbuild-darwin-64 | 0.14.47 | MIT | 否 | 是 | https://github.com/evanw/esbuild | - | - |
-| esbuild-darwin-arm64 | 0.14.47 | MIT | 否 | 是 | https://github.com/evanw/esbuild | - | - |
-| esbuild-freebsd-64 | 0.14.47 | MIT | 否 | 是 | https://github.com/evanw/esbuild | - | - |
-| esbuild-freebsd-arm64 | 0.14.47 | MIT | 否 | 是 | https://github.com/evanw/esbuild | - | - |
-| esbuild-linux-32 | 0.14.47 | MIT | 否 | 是 | https://github.com/evanw/esbuild | - | - |
-| esbuild-linux-64 | 0.14.47 | MIT | 否 | 是 | https://github.com/evanw/esbuild | - | - |
-| esbuild-linux-arm | 0.14.47 | MIT | 否 | 是 | https://github.com/evanw/esbuild | - | - |
-| esbuild-linux-arm64 | 0.14.47 | MIT | 否 | 是 | https://github.com/evanw/esbuild | - | - |
-| esbuild-linux-mips64le | 0.14.47 | MIT | 否 | 是 | https://github.com/evanw/esbuild | - | - |
-| esbuild-linux-ppc64le | 0.14.47 | MIT | 否 | 是 | https://github.com/evanw/esbuild | - | - |
-| esbuild-linux-riscv64 | 0.14.47 | MIT | 否 | 是 | https://github.com/evanw/esbuild | - | - |
-| esbuild-linux-s390x | 0.14.47 | MIT | 否 | 是 | https://github.com/evanw/esbuild | - | - |
-| esbuild-netbsd-64 | 0.14.47 | MIT | 否 | 是 | https://github.com/evanw/esbuild | - | - |
-| esbuild-openbsd-64 | 0.14.47 | MIT | 否 | 是 | https://github.com/evanw/esbuild | - | - |
-| esbuild-sunos-64 | 0.14.47 | MIT | 否 | 是 | https://github.com/evanw/esbuild | - | - |
-| esbuild-windows-32 | 0.14.47 | MIT | 否 | 是 | https://github.com/evanw/esbuild | - | - |
 | esbuild-windows-64 | 0.14.47 | MIT | 否 | 是 | https://github.com/evanw/esbuild | - | - |
-| esbuild-windows-arm64 | 0.14.47 | MIT | 否 | 是 | https://github.com/evanw/esbuild | - | - |
 | escalade | 3.2.0 | MIT | 否 | 是 | lukeed/escalade | license | - |
 | escape-string-regexp | 4.0.0 | MIT | 否 | 是 | sindresorhus/escape-string-regexp | license | - |
 | eslint | 8.57.1 | MIT | 是 | 是 | eslint/eslint | LICENSE | - |
@@ -549,9 +393,6 @@ Windows 离线专业版包含一个默认关闭的 sidecar FFmpeg 内部实验�
 | fs-minipass | 1.2.7 | ISC | 否 | 是 | git+https://github.com/npm/fs-minipass.git | LICENSE | - |
 | fs-minipass | 2.1.0 | ISC | 否 | 是 | git+https://github.com/npm/fs-minipass.git | LICENSE | - |
 | fs.realpath | 1.0.0 | ISC | 否 | 是 | git+https://github.com/isaacs/fs.realpath.git | LICENSE | - |
-| fsevents | 2.1.3 | MIT | 否 | 是 | https://github.com/fsevents/fsevents.git | LICENSE | - |
-| fsevents | 2.3.2 | MIT | 否 | 是 | https://github.com/fsevents/fsevents.git | LICENSE | - |
-| fsevents | 2.3.3 | MIT | 否 | 是 | https://github.com/fsevents/fsevents.git | LICENSE | - |
 | fstream | 1.0.12 | ISC | 否 | 是 | https://github.com/npm/fstream.git | LICENSE | - |
 | function-bind | 1.1.2 | MIT | 否 | 是 | https://github.com/Raynos/function-bind.git | LICENSE | - |
 | function.prototype.name | 1.1.8 | MIT | 否 | 是 | git://github.com/es-shims/Function.prototype.name.git | LICENSE | - |
@@ -574,6 +415,7 @@ Windows 离线专业版包含一个默认关闭的 sidecar FFmpeg 内部实验�
 | gopd | 1.2.0 | MIT | 否 | 是 | git+https://github.com/ljharb/gopd.git | LICENSE | - |
 | graceful-fs | 4.2.11 | ISC | 否 | 是 | https://github.com/isaacs/node-graceful-fs | LICENSE | - |
 | graphemer | 1.4.0 | MIT | 否 | 是 | https://github.com/flmnt/graphemer.git | LICENSE | - |
+| gsap | 3.15.0 | Standard 'no charge' license: https://gsap.com/standard-license. | 是 | 是 | git+https://github.com/greensock/GSAP.git | - | - |
 | has-bigints | 1.1.0 | MIT | 否 | 是 | git+https://github.com/ljharb/has-bigints.git | LICENSE | - |
 | has-flag | 4.0.0 | MIT | 否 | 是 | sindresorhus/has-flag | license | - |
 | has-property-descriptors | 1.0.2 | MIT | 否 | 是 | git+https://github.com/inspect-js/has-property-descriptors.git | LICENSE | - |
@@ -1160,6 +1002,7 @@ Windows 离线专业版包含一个默认关闭的 sidecar FFmpeg 内部实验�
 | objc | 0.2.7 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 915b1b472bc21c53464d6c8461c9d3af805ba1ef837e1cac254428f4a77177b1 |
 | objc_exception | 0.1.2 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | ad970fb455818ad6cba4c122ad012fae53ae8b4795f86378bce65e4f6bab2ca4 |
 | objc_id | 0.1.1 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | c92d4ddb4bd7b50d730c215ff871754d0da6b2178849f8a2a2ab69712d0c073b |
+| objc-foundation | 0.1.1 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 1add1b659e36c9607c7aab864a76c7a4c2760cd0cd2e120f3fb8b952c7e22bf9 |
 | once_cell | 1.21.4 | MIT OR Apache-2.0 | https://github.com/matklad/once_cell | registry+https://github.com/rust-lang/crates.io-index | 9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50 |
 | open | 3.2.0 | MIT | https://github.com/Byron/open-rs | registry+https://github.com/rust-lang/crates.io-index | 2078c0039e6a54a0c42c28faa984e115fb4c2d5bf2208f77d1961002df8576f8 |
 | pango | 0.15.10 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 22e4045548659aee5313bde6c582b0d83a627b7904dd20dc2d9ef0895d414e4f |
@@ -1214,6 +1057,7 @@ Windows 离线专业版包含一个默认关闭的 sidecar FFmpeg 内部实验�
 | regex | 1.12.3 | MIT OR Apache-2.0 | https://github.com/rust-lang/regex | registry+https://github.com/rust-lang/crates.io-index | e10754a14b9137dd7b1e3e5b0493cc9171fdd105e0ab477f51b72e7f3ac0e276 |
 | regex-automata | 0.4.14 | MIT OR Apache-2.0 | https://github.com/rust-lang/regex | registry+https://github.com/rust-lang/crates.io-index | 6e1dd4122fc1595e8162618945476892eefca7b88c52820e74af6262213cae8f |
 | regex-syntax | 0.8.10 | MIT OR Apache-2.0 | https://github.com/rust-lang/regex | registry+https://github.com/rust-lang/crates.io-index | dc897dd8d9e8bd1ed8cdad82b5966c3e0ecae09fb1907d58efaa013543185d0a |
+| rfd | 0.10.0 | MIT | https://github.com/PolyMeilex/rfd | registry+https://github.com/rust-lang/crates.io-index | 0149778bd99b6959285b0933288206090c50e2327f47a9c463bfdbf45c8823ea |
 | rustc_version | 0.4.1 | MIT OR Apache-2.0 | https://github.com/djc/rustc-version-rs | registry+https://github.com/rust-lang/crates.io-index | cfcb3a22ef46e85b45de6ee7e79d063319ebb6594faafcf1c225ea92ab6e9b92 |
 | rustix | 1.1.4 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | b6fe4565b9518b83ef4f91bb47ce29620ca828bd32cb7e408f0062e9930ba190 |
 | rustversion | 1.0.22 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d |
@@ -1312,12 +1156,14 @@ Windows 离线专业版包含一个默认关闭的 sidecar FFmpeg 内部实验�
 | wasip2 | 1.0.3+wasi-0.2.9 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 20064672db26d7cdc89c7798c48a0fdfac8213434a1186e5ef29fd560ae223d6 |
 | wasip3 | 0.4.0+wasi-0.3.0-rc-2026-01-06 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 5428f8bf88ea5ddc08faddef2ac4a67e390b88186c703ce6dbd955e1c145aca5 |
 | wasm-bindgen | 0.2.121 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 49ace1d07c165b0864824eee619580c4689389afa9dc9ed3a4c75040d82e6790 |
+| wasm-bindgen-futures | 0.4.71 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 96492d0d3ffba25305a7dc88720d250b1401d7edca02cc3bcd50633b424673b8 |
 | wasm-bindgen-macro | 0.2.121 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 8e68e6f4afd367a562002c05637acb8578ff2dea1943df76afb9e83d177c8578 |
 | wasm-bindgen-macro-support | 0.2.121 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | d95a9ec35c64b2a7cb35d3fead40c4238d0940c86d107136999567a4703259f2 |
 | wasm-bindgen-shared | 0.2.121 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | c4e0100b01e9f0d03189a92b96772a1fb998639d981193d7dbab487302513441 |
 | wasm-encoder | 0.244.0 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 990065f2fe63003fe337b932cfb5e3b80e0b4d0f5ff650e6985b1048f62c8319 |
 | wasm-metadata | 0.244.0 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | bb0e353e6a2fbdc176932bbaab493762eb1255a7900fe0fea1a2f96c296cc909 |
 | wasmparser | 0.244.0 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 47b807c72e1bac69382b3a6fb3dbe8ea4c0ed87ff5629b8685ae6b9a611028fe |
+| web-sys | 0.3.98 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 4b572dff8bcf38bad0fa19729c89bb5748b2b9b1d8be70cf90df697e3a8f32aa |
 | webkit2gtk | 0.18.2 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | b8f859735e4a452aeb28c6c56a852967a8a76c8eb1cc32dbf931ad28a13d6370 |
 | webkit2gtk-sys | 0.18.0 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 4d76ca6ecc47aeba01ec61e480139dda143796abcae6f83bcddf50d6b5b1dcf3 |
 | webview2-com | 0.19.1 | MIT | https://github.com/wravery/webview2-rs | registry+https://github.com/rust-lang/crates.io-index | b4a769c9f1a64a8734bde70caafac2b96cada12cd4aefa49196b3a386b8b4178 |
@@ -1327,24 +1173,30 @@ Windows 离线专业版包含一个默认关闭的 sidecar FFmpeg 内部实验�
 | winapi-i686-pc-windows-gnu | 0.4.0 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | ac3b87c63620426dd9b991e5ce0329eff545bccbbb34f3be09ff6fb6ab51b7b6 |
 | winapi-util | 0.1.11 | Unlicense OR MIT | https://github.com/BurntSushi/winapi-util | registry+https://github.com/rust-lang/crates.io-index | c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22 |
 | winapi-x86_64-pc-windows-gnu | 0.4.0 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f |
+| windows | 0.37.0 | MIT OR Apache-2.0 | https://github.com/microsoft/windows-rs | registry+https://github.com/rust-lang/crates.io-index | 57b543186b344cc61c85b5aab0d2e3adf4e0f99bc076eff9aa5927bcc0b8a647 |
 | windows | 0.39.0 | MIT OR Apache-2.0 | https://github.com/microsoft/windows-rs | registry+https://github.com/rust-lang/crates.io-index | f1c4bd0a50ac6020f65184721f758dba47bb9fbc2133df715ec74a237b26794a |
 | windows | 0.48.0 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | e686886bc078bc1b0b600cac0147aadb815089b6e4da64016cbd754b6342700f |
 | windows_aarch64_gnullvm | 0.42.2 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 597a5118570b68bc08d8d59125332c54f1ba9d9adeedeef5b99b02ba2b0698f8 |
 | windows_aarch64_gnullvm | 0.48.5 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 2b38e32f0abccf9987a4e3079dfb67dcd799fb61361e53e2882c3cbaf0d905d8 |
+| windows_aarch64_msvc | 0.37.0 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 2623277cb2d1c216ba3b578c0f3cf9cdebeddb6e66b1b218bb33596ea7769c3a |
 | windows_aarch64_msvc | 0.39.0 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | ec7711666096bd4096ffa835238905bb33fb87267910e154b18b44eaabb340f2 |
 | windows_aarch64_msvc | 0.42.2 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | e08e8864a60f06ef0d0ff4ba04124db8b0fb3be5776a5cd47641e942e58c4d43 |
 | windows_aarch64_msvc | 0.48.5 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | dc35310971f3b2dbbf3f0690a219f40e2d9afcf64f9ab7cc1be722937c26b4bc |
+| windows_i686_gnu | 0.37.0 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | d3925fd0b0b804730d44d4b6278c50f9699703ec49bcd628020f46f4ba07d9e1 |
 | windows_i686_gnu | 0.39.0 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 763fc57100a5f7042e3057e7e8d9bdd7860d330070251a73d003563a3bb49e1b |
 | windows_i686_gnu | 0.42.2 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | c61d927d8da41da96a81f029489353e68739737d3beca43145c8afec9a31a84f |
 | windows_i686_gnu | 0.48.5 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | a75915e7def60c94dcef72200b9a8e58e5091744960da64ec734a6c6e9b3743e |
+| windows_i686_msvc | 0.37.0 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | ce907ac74fe331b524c1298683efbf598bb031bc84d5e274db2083696d07c57c |
 | windows_i686_msvc | 0.39.0 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 7bc7cbfe58828921e10a9f446fcaaf649204dcfe6c1ddd712c5eebae6bda1106 |
 | windows_i686_msvc | 0.42.2 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 44d840b6ec649f480a41c8d80f9c65108b92d89345dd94027bfe06ac444d1060 |
 | windows_i686_msvc | 0.48.5 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 8f55c233f70c4b27f66c523580f78f1004e8b5a8b659e05a4eb49d4166cca406 |
+| windows_x86_64_gnu | 0.37.0 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 2babfba0828f2e6b32457d5341427dcbb577ceef556273229959ac23a10af33d |
 | windows_x86_64_gnu | 0.39.0 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 6868c165637d653ae1e8dc4d82c25d4f97dd6605eaa8d784b5c6e0ab2a252b65 |
 | windows_x86_64_gnu | 0.42.2 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 8de912b8b8feb55c064867cf047dda097f92d51efad5b491dfb98f6bbb70cb36 |
 | windows_x86_64_gnu | 0.48.5 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 53d40abd2583d23e4718fddf1ebec84dbff8381c07cae67ff7768bbf19c6718e |
 | windows_x86_64_gnullvm | 0.42.2 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 26d41b46a36d453748aedef1486d5c7a85db22e56aff34643984ea85514e94a3 |
 | windows_x86_64_gnullvm | 0.48.5 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 0b7b52767868a23d5bab768e390dc5f5c55825b6d30b86c844ff2dc7414044cc |
+| windows_x86_64_msvc | 0.37.0 | MIT OR Apache-2.0 | https://github.com/microsoft/windows-rs | registry+https://github.com/rust-lang/crates.io-index | f4dd6dc7df2d84cf7b33822ed5b86318fb1781948e9663bacd047fc9dd52259d |
 | windows_x86_64_msvc | 0.39.0 | MIT OR Apache-2.0 | https://github.com/microsoft/windows-rs | registry+https://github.com/rust-lang/crates.io-index | 5e4d40883ae9cae962787ca76ba76390ffa29214667a111db9e0a1ad8377e809 |
 | windows_x86_64_msvc | 0.42.2 | MIT OR Apache-2.0 | https://github.com/microsoft/windows-rs | registry+https://github.com/rust-lang/crates.io-index | 9aec5da331524158c6d1a4ac0ab1541149c0b9505fde06423b02f5ef0106b9f0 |
 | windows_x86_64_msvc | 0.48.5 | MIT OR Apache-2.0 | https://github.com/microsoft/windows-rs | registry+https://github.com/rust-lang/crates.io-index | ed94fce61571a4006852b7389a063ab983c02eb1bb37b47f8272ce92d06d9538 |
@@ -1395,11 +1247,3 @@ Windows 离线专业版包含一个默认关闭的 sidecar FFmpeg 内部实验�
 2. 离线版：在程序的“开源许可证”页面展示同一份 Notices，并随安装包或安装目录保留 `THIRD_PARTY_NOTICES.md`。
 3. 发布包：保留项目根目录 `LICENSE`、`THIRD_PARTY_NOTICES.md`、`docs/licenses.md` 和 `docs/third-party-notices.md`。
 4. 如果更新依赖、重新打包离线版或替换 WASM/PDF/FFmpeg 静态资源，请重新运行 `pnpm generate:notices`。
-
-## 2026-05-25 FFmpeg sidecar 低风险优先补充
-
-在线版继续分发并使用本地 FFmpeg WASM：`/ffmpeg/ffmpeg-core.js` 和 `/ffmpeg/ffmpeg-core.wasm`。在线版不使用 `ffmpeg.exe`、`ffprobe.exe` 或 DLL，也不开放离线专业版批量队列。
-
-Windows 离线专业版继续保留 FFmpeg WASM，并在 sidecar 校验通过时对低风险格式优先调用本地 sidecar FFmpeg。当前 sidecar 优先范围仅限 WAV 转 FLAC、MP4 转 WebM 和 ffprobe 媒体信息读取。MP3、AAC/M4A、MP4/H.264、MOV、AVI、MKV 和视频提取音频仍使用 FFmpeg WASM，不属于 sidecar 正式默认范围。
-
-当前 sidecar 候选为 BtbN FFmpeg-Builds win64-lgpl-shared-7.1。该候选仍未完成正式商业许可证最终复核，发布前仍需人工确认许可证、专利、平台和地区要求。长期建议自建 LGPL FFmpeg 构建，并保留完整构建参数、SHA256、许可证文本和源码获取方式。

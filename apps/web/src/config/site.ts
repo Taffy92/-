@@ -6,7 +6,11 @@ export const siteConfig = {
   developer: "MR.谢",
   email: "370298218@qq.com",
   copyright: "© 2026 MR.谢. All rights reserved.",
-  url: process.env.NEXT_PUBLIC_SITE_URL || "https://your-domain.com",
+  icp: {
+    text: "鲁ICP备2026028326号",
+    url: "https://beian.miit.gov.cn/"
+  },
+  url: process.env.NEXT_PUBLIC_SITE_URL || "https://gszhmrx.cn",
   links: {
     home: "/",
     tools: "/tools",

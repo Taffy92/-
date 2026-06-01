@@ -21,7 +21,7 @@
 - 音频格式转换：MP3、WAV、AAC、M4A、FLAC
 - 视频提取音频：MP3、WAV、M4A、AAC
 
-在线版面向大众用户的轻量单文件处理；离线专业版面向批量处理、敏感文件和断网办公场景。涉及大量文件、敏感材料或批量音视频任务时，应优先使用 Windows 离线专业版。
+在线版面向大众用户的轻量单文件处理；离线专业版面向批量处理、敏感文件和断网办公场景。离线专业版使用桌面工具箱布局，批量导入跟随当前选中的转换工具，不再作为单独功能页展示。图片尺寸调整、加水印、压缩，PDF/Word/Excel 转图片，音视频转换和视频提取音频均可加入批量队列；图片裁切仍按单张图片精确裁切框处理。涉及大量文件、敏感材料或批量音视频任务时，应优先使用 Windows 离线专业版。
 
 本项目不包含 PDF 编辑功能，不提供 PDF 文字修改、PDF 涂销、PDF 签名盖章、PDF 批注标注，也不适合用于修改合同、发票、证件、财务票据等文件内容。
 
@@ -79,12 +79,12 @@ npm run build:web
 `.env.example` 中保留：
 
 ```bash
-NEXT_PUBLIC_SITE_URL=https://your-domain.com
+NEXT_PUBLIC_SITE_URL=https://gszhmrx.cn
 NEXT_PUBLIC_DOWNLOAD_AUTH_ENABLED=false
 NEXT_PUBLIC_DOWNLOAD_AUTH_ENDPOINT=
 ```
 
-当前默认 CloudBase 域名为 `https://format-converter-prod-x-d71bce41-1434109188.tcloudbaseapp.com`。自定义域名审核通过后，再把正式域名配置到 `NEXT_PUBLIC_SITE_URL`，并重新执行 `npm run build:web` 与部署。所有 canonical、sitemap、Open Graph URL 都从 `apps/web/src/config/site.ts` 的 `siteConfig.url` 读取，不需要在代码里写死真实域名。
+当前正式域名为 `https://gszhmrx.cn`，`https://www.gszhmrx.cn` 绑定到同一 CloudBase 静态托管站点。所有 canonical、sitemap、Open Graph URL 都从 `apps/web/src/config/site.ts` 的 `siteConfig.url` 读取，构建前确认 `NEXT_PUBLIC_SITE_URL=https://gszhmrx.cn`。
 
 离线安装包默认不公开直链。正式启用授权下载时，把 `NEXT_PUBLIC_DOWNLOAD_AUTH_ENABLED` 改为 `true`，把 `NEXT_PUBLIC_DOWNLOAD_AUTH_ENDPOINT` 填成 CloudBase 授权云函数的 HTTP 地址。
 
@@ -109,7 +109,7 @@ npm run deploy:vercel
 在 Vercel 环境变量中配置：
 
 ```bash
-NEXT_PUBLIC_SITE_URL=https://你的域名
+NEXT_PUBLIC_SITE_URL=https://gszhmrx.cn
 ```
 
 ## CloudBase 部署
@@ -119,11 +119,11 @@ npm run build:web
 npm run deploy:cloudbase
 ```
 
-`apps/web/cloudbaserc.json` 使用 `apps/web/out` 作为静态托管目录。当前仓库已配置 CloudBase 环境 `format-converter-prod-x-d71bce41`。如果部署到其他环境，再同步修改根目录 `package.json` 的 `deploy:cloudbase` 脚本和 `apps/web/cloudbaserc.json` 的 `envId`。上线时在 CloudBase 控制台配置自定义域名和 CDN。
+`apps/web/cloudbaserc.json` 使用 `apps/web/out` 作为静态托管目录。当前仓库已配置 CloudBase 环境 `format-converter-prod-x-d71bce41`。如果部署到其他环境，再同步修改根目录 `package.json` 的 `deploy:cloudbase` 脚本和 `apps/web/cloudbaserc.json` 的 `envId`。
 
-当前默认访问地址为 `https://format-converter-prod-x-d71bce41-1434109188.tcloudbaseapp.com`。自定义域名未绑定到本仓库配置中，等域名审核通过后再单独配置和验证。
+当前正式访问地址为 `https://gszhmrx.cn/` 和 `https://www.gszhmrx.cn/`。页脚备案号来自 `apps/web/src/config/site.ts` 的 `siteConfig.icp.text`，当前为 `鲁ICP备2026028326号`。
 
-Vercel 安全响应头由 `apps/web/src/config/securityHeaders.js` 生成，修改后执行 `pnpm sync:security` 同步到 `apps/web/vercel.json`。
+Vercel 安全响应头由 `apps/web/src/config/securityHeaders.js` 生成，修改后执行 `npm run sync:security` 同步到 `apps/web/vercel.json`。
 
 ## 离线版授权下载
 
@@ -148,6 +148,8 @@ apps/desktop/src-tauri/target/release/bundle/
 ```
 
 离线版使用 Tauri `webviewInstallMode.type = "offlineInstaller"`，目标是满足“安装和使用都完全离线”。安装包会内置网站构建产物、PDF.js worker、FFmpeg WASM、图标和本地音视频转换逻辑。核心功能不依赖服务器，不需要账号，不上传文件。
+
+离线版启动后直接进入专业工具箱：顶部命令栏、左侧分类工具、中央上传/任务队列、右侧参数面板。在线站点头尾导航和广告容器不进入离线工作台。
 
 离线安装包在构建阶段可能需要联网下载或缓存 WebView2 离线安装器；正式发布给用户的 EXE/MSI 应包含该离线安装器。发布前建议在一台断网 Windows 10/11 x64 电脑或虚拟机中做安装和核心功能回归测试。
 

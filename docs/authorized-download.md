@@ -11,10 +11,10 @@ CloudBase 私有云存储安装包 + 统一下载口令 + 云函数临时下载�
 ## 当前线上信息
 
 - CloudBase 环境：`format-converter-prod-x-d71bce41`
-- 静态网站地址：`https://format-converter-prod-x-d71bce41-1434109188.tcloudbaseapp.com`
-- 下载页：`https://format-converter-prod-x-d71bce41-1434109188.tcloudbaseapp.com/download/`
+- 静态网站地址：`https://gszhmrx.cn`（`https://www.gszhmrx.cn` 同站点）
+- 下载页：`https://gszhmrx.cn/download/`
 - 云函数：`createDownloadUrl`
-- 云函数地址：`https://<你的-cloudbase-service-domain>/createDownloadUrl`
+- 云函数地址：`https://format-converter-prod-x-d71bce41.service.tcloudbase.com/createDownloadUrl`
 - 私有安装包 fileID：
 
 ```text
@@ -67,7 +67,7 @@ INSTALLER_MSI_FILE_ID=cloud://<你的环境资源路径>/installers/v1.0.0/万�
 INSTALLER_FILE_NAME=万能格式转换器_1.0.0_x64-setup.exe
 INSTALLER_EXE_FILE_NAME=万能格式转换器_1.0.0_x64-setup.exe
 INSTALLER_MSI_FILE_NAME=万能格式转换器_1.0.0_x64_zh-CN.msi
-ALLOWED_ORIGIN=https://你的正式网站域名
+ALLOWED_ORIGINS=https://gszhmrx.cn,https://www.gszhmrx.cn
 ```
 
 ## 网站环境变量
@@ -76,7 +76,7 @@ ALLOWED_ORIGIN=https://你的正式网站域名
 
 ```env
 NEXT_PUBLIC_DOWNLOAD_AUTH_ENABLED=true
-NEXT_PUBLIC_DOWNLOAD_AUTH_ENDPOINT=https://<你的-cloudbase-service-domain>/createDownloadUrl
+NEXT_PUBLIC_DOWNLOAD_AUTH_ENDPOINT=https://format-converter-prod-x-d71bce41.service.tcloudbase.com/createDownloadUrl
 ```
 
 修改后重新构建并上传 `apps/web/out`。

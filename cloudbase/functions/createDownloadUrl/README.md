@@ -21,7 +21,7 @@ INSTALLER_EXE_FILE_ID=cloud://<你的环境资源路径>/installers/v1.0.0/万�
 INSTALLER_EXE_FILE_NAME=万能格式转换器_1.0.0_x64-setup.exe
 INSTALLER_MSI_FILE_ID=cloud://<你的环境资源路径>/installers/v1.0.0/万能格式转换器_1.0.0_x64_zh-CN.msi
 INSTALLER_MSI_FILE_NAME=万能格式转换器_1.0.0_x64_zh-CN.msi
-ALLOWED_ORIGIN=https://你的正式网站域名
+ALLOWED_ORIGINS=https://gszhmrx.cn,https://www.gszhmrx.cn
 ```
 
 以后需要更换下载口令时，只需要修改云函数环境变量 `DOWNLOAD_PASSWORD` 并重新部署或保存配置，不需要再新增数据库授权记录。

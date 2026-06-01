@@ -43,6 +43,8 @@ yarn-debug.log*
 yarn-error.log*
 .tmp/
 .icon-tmp/
+.rustup/
+AppData/
 .DS_Store
 Thumbs.db
 

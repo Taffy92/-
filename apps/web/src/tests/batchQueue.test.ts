@@ -50,7 +50,9 @@ describe("batch queue helpers", () => {
   });
 
   it("supports main offline batch formats", () => {
+    expect(isSupportedBatchName("photo.bmp", "resize")).toBe(true);
     expect(isSupportedBatchName("photo.png", "compress")).toBe(true);
+    expect(isSupportedBatchName("manual.pdf", "pdf-images")).toBe(true);
     expect(isSupportedBatchName("合同.docx", "word-images")).toBe(true);
     expect(isSupportedBatchName("表格.xlsx", "excel-images")).toBe(true);
     expect(isSupportedBatchName("video.mov", "video-convert")).toBe(true);
@@ -58,6 +60,7 @@ describe("batch queue helpers", () => {
     expect(isSupportedBatchName("audio.flac", "audio-convert")).toBe(true);
     expect(isSupportedBatchName("archive.zip", "compress")).toBe(false);
     expect(getSupportedExtensions("video-audio")).toContain(".mp4");
+    expect(getSupportedExtensions("pdf-images")).toContain(".pdf");
     expect(batchModeLabel("watermark")).toBe("图片批量加水印");
   });
 

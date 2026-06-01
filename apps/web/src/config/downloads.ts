@@ -3,9 +3,9 @@ export const downloadsConfig = {
   version: "1.0.0",
   fileName: "万能格式转换器_1.0.0_x64-setup.exe",
   fileSize: "EXE 约 245.62 MB / MSI 约 256.43 MB",
-  releaseDate: "2026-05-25",
+  releaseDate: "2026-06-01",
   sha256:
-    "EXE 012417FEF531D0C124035705219D2473E357D46ECAFFA46D75295CEC203F8EDD / MSI B8AF3A4DFCA0E17E954FF4CCC166A76E432BA7F060429C09EA2BA517169E4F26",
+    "EXE 5DFE1ACD54506DD97B554A02EF09F031D4D1BCF5205AD4A784C82E5B1D410E67 / MSI 5FB61C722D282E9464AE8014B978D04DE5D1AEFFFC80E4EB1C2A6EE5934C5766",
   primaryDownloadUrl: "",
   backupDownloadUrl: "",
   packages: [
@@ -14,7 +14,7 @@ export const downloadsConfig = {
       label: "EXE 安装包",
       fileName: "万能格式转换器_1.0.0_x64-setup.exe",
       fileSize: "245.62 MB",
-      sha256: "012417FEF531D0C124035705219D2473E357D46ECAFFA46D75295CEC203F8EDD",
+      sha256: "5DFE1ACD54506DD97B554A02EF09F031D4D1BCF5205AD4A784C82E5B1D410E67",
       note: "推荐普通用户使用，包含安装向导。"
     },
     {
@@ -22,7 +22,7 @@ export const downloadsConfig = {
       label: "MSI 安装包",
       fileName: "万能格式转换器_1.0.0_x64_zh-CN.msi",
       fileSize: "256.43 MB",
-      sha256: "B8AF3A4DFCA0E17E954FF4CCC166A76E432BA7F060429C09EA2BA517169E4F26",
+      sha256: "5FB61C722D282E9464AE8014B978D04DE5D1AEFFFC80E4EB1C2A6EE5934C5766",
       note: "适合企业、管理员或批量部署场景。"
     }
   ],
@@ -41,7 +41,7 @@ export const downloadsConfig = {
     "优化工具页功能入口，常用功能更醒目",
     "根据 pnpm-lock.yaml、Cargo.lock 和最终构建产物生成第三方 Notices",
     "离线安装包内置 JS、CSS、PDF.js、FFmpeg WASM 等静态资源",
-    "离线版新增图片批量压缩、图片批量加水印、Word 批量转图片、Excel 批量转图片、视频批量转换、音频批量转换",
+    "离线版批量队列跟随当前工具，支持图片尺寸调整/加水印/压缩、PDF/Word/Excel 转图片、视频转换、音频转换和视频提取音频",
     "在线版保持轻量单文件处理，批量处理能力仅在离线安装版中提供"
   ]
 } as const;

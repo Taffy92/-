@@ -11,7 +11,7 @@
           "cloudPath": "/",
           "ignore": [".git", "node_modules", "cloudbaserc.json"],
           "commands": {
-            "build": "pnpm build:web"
+            "build": "pnpm build"
           }
         }
       }

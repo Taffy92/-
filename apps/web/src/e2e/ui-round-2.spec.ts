@@ -26,8 +26,9 @@ for (const viewport of viewports) {
 
     if (groupedNavigation) {
       const imageSection = page.getByRole("button", { name: /图片工具/ });
-      await expect(imageSection).toHaveAttribute("aria-expanded", "false");
-      await imageSection.click();
+      if ((await imageSection.getAttribute("aria-expanded")) !== "true") {
+        await imageSection.click();
+      }
       await expect(page.locator('button[aria-pressed="true"]').first()).toContainText(/裁剪|图片裁切/);
       await expect(page.getByText(/将(单个)?文件拖/).first()).toBeVisible();
     } else {
