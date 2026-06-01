@@ -46,13 +46,12 @@ export function AdSlot({ config, name, className = "" }: AdSlotProps) {
 function GoogleAdSlot({ client, slot, className = "" }: { client: string; slot: string; className?: string }) {
   useEffect(() => {
     if (!client || !slot || process.env.NODE_ENV !== "production") return;
-    const scriptId = "google-adsense-script";
-    if (!document.getElementById(scriptId)) {
+    const scriptSrc = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(client)}`;
+    if (!document.querySelector(`script[src="${scriptSrc}"]`)) {
       const script = document.createElement("script");
-      script.id = scriptId;
       script.async = true;
       script.crossOrigin = "anonymous";
-      script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(client)}`;
+      script.src = scriptSrc;
       document.head.appendChild(script);
     }
     window.adsbygoogle = window.adsbygoogle || [];
