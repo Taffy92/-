@@ -1,6 +1,6 @@
 {
-  "buildCommand": "pnpm build",
-  "outputDirectory": "out",
+  "buildCommand": "npm run build:web",
+  "outputDirectory": "apps/web/out",
   "headers": [
     {
       "source": "/(.*)",
