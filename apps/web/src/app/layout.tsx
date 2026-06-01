@@ -26,6 +26,16 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh-CN">
+      <head>
+        {!isDesktopApp ? (
+          <script
+            id="google-adsense-script"
+            async
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3864852988527369"
+            crossOrigin="anonymous"
+          />
+        ) : null}
+      </head>
       <body>
         <ClientBoot />
         {isDesktopApp ? children : (
