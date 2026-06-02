@@ -11,20 +11,20 @@
 
 发布目录提供两种安装包：
 
-1. `万能格式转换器_1.0.0_x64-setup.exe`
-2. `万能格式转换器_1.0.0_x64_zh-CN.msi`
+1. `万能格式转换离线专业版_1.0.0_x64-setup.exe`
+2. `万能格式转换离线专业版_1.0.0_x64_zh-CN.msi`
 
 普通用户优先使用 EXE 安装包。需要企业分发、脚本部署或系统管理工具时，可使用 MSI。
 
 ## EXE 安装方式
 
-1. 双击 `万能格式转换器_1.0.0_x64-setup.exe`。
+1. 双击 `万能格式转换离线专业版_1.0.0_x64-setup.exe`。
 2. 按安装向导提示继续。
 3. 安装完成后，从桌面快捷方式或开始菜单启动。
 
 ## MSI 安装方式
 
-1. 双击 `万能格式转换器_1.0.0_x64_zh-CN.msi`。
+1. 双击 `万能格式转换离线专业版_1.0.0_x64_zh-CN.msi`。
 2. 按 Windows Installer 向导继续。
 3. 安装完成后，从开始菜单或安装目录启动。
 
@@ -45,8 +45,8 @@
 在 PowerShell 中执行：
 
 ```powershell
-Get-FileHash -Algorithm SHA256 "D:\路径\万能格式转换器_1.0.0_x64-setup.exe"
-Get-FileHash -Algorithm SHA256 "D:\路径\万能格式转换器_1.0.0_x64_zh-CN.msi"
+Get-FileHash -Algorithm SHA256 "D:\路径\万能格式转换离线专业版_1.0.0_x64-setup.exe"
+Get-FileHash -Algorithm SHA256 "D:\路径\万能格式转换离线专业版_1.0.0_x64_zh-CN.msi"
 ```
 
 校验值应与 `installers/SHA256SUMS.txt` 中记录一致。

@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, BookOpen, CheckCircle2 } from "lucide-react";
-import { AdSlot } from "@doctool/ui";
-import { adsConfig } from "@/config/ads";
 import { isDesktopApp } from "@/config/appMode";
 import { siteConfig } from "@/config/site";
 import { createPageMetadata } from "@/lib/seo";
@@ -198,7 +196,7 @@ const quickGuide = [
 
 export default function TutorialsPage() {
   return (
-    <main className="document-page mx-auto max-w-7xl px-4 py-10 text-slate-900 sm:px-6 lg:px-8">
+    <main className="document-page apple-document-page mx-auto max-w-7xl px-4 py-10 text-slate-900 sm:px-6 lg:px-8">
       <section className="rounded-sm tech-panel p-6 sm:p-8">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
@@ -254,12 +252,6 @@ export default function TutorialsPage() {
           </article>
         ))}
       </div>
-
-      {!isDesktopApp ? (
-        <div id="ad-container" className="mt-8">
-          <AdSlot config={adsConfig} name="tutorialBottom" />
-        </div>
-      ) : null}
     </main>
   );
 }

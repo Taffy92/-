@@ -65,14 +65,14 @@ export default async function ReleaseDocPage({ params }: PageProps) {
   const content = readFileSync(join(process.cwd(), "public", "release", "v1.0.0", "docs", entry.fileName), "utf8");
 
   return (
-    <main className="document-page mx-auto max-w-5xl px-4 py-10 text-slate-900 sm:px-6 lg:px-8">
-      <article className="rounded-sm tech-panel p-6 sm:p-10">
-        <p className="text-sm font-semibold text-cyan-300">发布文档</p>
+    <main className="document-page apple-document-page mx-auto max-w-5xl px-4 py-10 text-slate-900 sm:px-6 lg:px-8">
+      <article className="document-article rounded-sm tech-panel p-6 sm:p-10">
+        <p className="document-kicker text-sm font-semibold text-cyan-300">发布文档</p>
         <h1 className="mt-2 text-3xl font-bold text-slate-50">{entry.title}</h1>
-        <p className="mt-3 text-sm text-slate-300">
-          本页面为站内 HTML 渲染版本，避免浏览器直接打开 Markdown 文件时出现编码识别问题。
+        <p className="document-meta mt-3 text-sm text-slate-300">
+          万能格式转换器离线专业版 v1.0.0 · 站内阅读版
         </p>
-        <div className="mt-8 space-y-4 text-sm leading-7 text-slate-200">{renderMarkdown(content)}</div>
+        <div className="document-body mt-8 space-y-4 text-sm leading-7 text-slate-200">{renderMarkdown(content)}</div>
       </article>
     </main>
   );

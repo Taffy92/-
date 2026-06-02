@@ -12,12 +12,13 @@ import { combineImagePages, imagePagesToZip, renderDocxToImagePages, renderExcel
 import { getPdfPageCount, parsePageSelection, renderPdfPageToBlob, renderPdfPages, renderPdfPagesToZip } from "@doctool/pdf-core";
 import { audioBitrateOptions, audioOutputFormats, convertAudioFormat, convertVideoFormat, extractAudioFromVideo, extractedAudioOutputFormats, getMediaCapabilityReport, videoOutputFormats, videoSizeOptions } from "@doctool/media-core";
 import type { AudioBitrateOption, AudioOutputFormat, ExtractedAudioOutputFormat, MediaCapabilityReport, MediaQuality, VideoOutputFormat, VideoSizeOption } from "@doctool/media-core";
-import { audioAccept, excelAccept, fileNameWithSuffix, formatBytes, imageAccept, isAudioFile, isExcelFile, isImageFile, isPdfFile, isVideoFile, isWordFile, maxOnlineFileSize, pdfAccept, pdfBoundaryNotice, privacyNotice, safeBaseName, videoAccept, wordAccept } from "@doctool/shared";
+import { audioAccept, excelAccept, fileNameWithSuffix, formatBytes, imageAccept, isAudioFile, isExcelFile, isImageFile, isPdfFile, isVideoFile, isWordFile, maxOnlineFileSize, pdfAccept, safeBaseName, videoAccept, wordAccept } from "@doctool/shared";
 import type { ExportImageFormat, FileSummary, PdfOutputFormat, ProcessState } from "@doctool/shared";
 import { adsConfig } from "@/config/ads";
 import { isDesktopApp } from "@/config/appMode";
 import { downloadsConfig } from "@/config/downloads";
 import { GsapScene } from "@/components/motion/GsapScene";
+import { MatrixLogo } from "@/components/layout/MatrixLogo";
 import { batchModeLabel, batchTaskStatusLabel, buildImportSummary, createBatchTask, defaultOutputDirectory, getBatchCounts, getSupportedExtensions, isSupportedBatchName, sanitizeLocalPath } from "@/lib/batchQueue";
 import type { BatchImportSummary, BatchMode, BatchOutputDirectory, BatchTask, BatchTaskStatus } from "@/lib/batchQueue";
 import { getSidecarExperimentMode, isSidecarReady, shouldUseSidecarExperiment, sidecarExperimentStorageKey, sidecarStatusText, sidecarUnsupportedReason } from "@/lib/sidecarFfmpeg";
@@ -39,7 +40,7 @@ type ToolTab = {
 
 const webTabs: ToolTab[] = [
   { id: "crop", label: "图片裁切", description: "拖动裁切框", kind: "image", icon: Crop, featured: true },
-  { id: "resize", label: "尺寸调整", description: "百分比 / 像素", kind: "image", icon: Maximize2, featured: true },
+  { id: "resize", label: "像素/百分比调整", description: "尺寸几何重设", kind: "image", icon: Maximize2, featured: true },
   { id: "watermark", label: "添加水印", description: "文字 / 图片水印", kind: "image", icon: Type, featured: true },
   { id: "compress", label: "图片压缩", description: "压缩成 JPG", kind: "image", icon: FileImage, featured: true },
   { id: "pdf-images", label: "PDF 转图片", description: "逐页 / 合成", kind: "pdf", icon: Image },
@@ -47,9 +48,7 @@ const webTabs: ToolTab[] = [
   { id: "excel-images", label: "Excel 转图片", description: "表格转图片", kind: "excel", icon: Table2 },
   { id: "video-convert", label: "视频格式转换", description: "MP4/MOV 等", kind: "video", icon: Video },
   { id: "audio-convert", label: "音频格式转换", description: "MP3/WAV 等", kind: "audio", icon: Music },
-  { id: "video-audio", label: "视频提取音频", description: "导出音轨", kind: "video", icon: Scissors },
-  { id: "batch-gate", label: "批量处理", description: "离线专业版功能", kind: "download", icon: Files },
-  { id: "download", label: "下载离线版", description: "断网可用", kind: "download", icon: Download }
+  { id: "video-audio", label: "视频提取音频", description: "导出音轨", kind: "video", icon: Scissors }
 ];
 
 const desktopTabs: ToolTab[] = [
@@ -65,7 +64,7 @@ const desktopNavSections = [
       { id: "crop", label: "裁剪", note: "适合头像和取景", badge: "裁" },
       { id: "watermark", label: "加水印", note: "文字 / 图片", badge: "水", batch: true },
       { id: "compress", label: "压缩", note: "JPG / 质量控制", badge: "压", batch: true },
-      { id: "resize", label: "尺寸调整", note: "像素 / 百分比", badge: "尺", batch: true }
+      { id: "resize", label: "像素/百分比", note: "尺寸几何重设", badge: "尺", batch: true }
     ]
   },
   {
@@ -99,7 +98,7 @@ const onlineNavSections = [
       { id: "crop", label: "图片裁切", note: "适合头像和取景", badge: "裁" },
       { id: "watermark", label: "添加水印", note: "文字 / 图片", badge: "水" },
       { id: "compress", label: "图片压缩", note: "JPG / 质量控制", badge: "压" },
-      { id: "resize", label: "尺寸调整", note: "像素 / 百分比", badge: "尺" }
+      { id: "resize", label: "像素/百分比", note: "尺寸几何重设", badge: "尺" }
     ]
   },
   {
@@ -120,15 +119,6 @@ const onlineNavSections = [
       { id: "video-convert", label: "视频格式转换", note: "MP4 / MOV", badge: "视频" },
       { id: "video-audio", label: "视频提取音频", note: "导出音轨", badge: "提取" },
       { id: "audio-convert", label: "音频格式转换", note: "MP3 / WAV", badge: "音频" }
-    ]
-  },
-  {
-    title: "离线与批量",
-    description: "批量处理 / 离线安装版",
-    icon: Files,
-    items: [
-      { id: "batch-gate", label: "批量处理", note: "离线专业版功能", badge: "批量" },
-      { id: "download", label: "下载离线版", note: "断网可用", badge: "离线" }
     ]
   }
 ] as const;
@@ -216,7 +206,6 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   const isDesktopSurface = surface === "desktop";
   const tabs = isDesktopSurface ? desktopTabs : webTabs;
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const batchInputRef = useRef<HTMLInputElement | null>(null);
   const folderInputRef = useRef<HTMLInputElement | null>(null);
   const cropImageRef = useRef<HTMLImageElement | null>(null);
   const cropperRef = useRef<Cropper | null>(null);
@@ -624,7 +613,6 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
       setError(`没有找到当前工具支持的文件。支持格式：${getSupportedExtensions(mode).join(", ")}`);
       return;
     }
-    void handleFile(nextFiles[0]);
     appendBatchFiles(nextFiles, "files", mode);
     setImportSummary(buildImportSummary(allFiles.length, nextFiles.length, "files"));
     setProgressMessage(`已添加 ${nextFiles.length} 个文件，点击开始处理后会按顺序执行。`);
@@ -641,6 +629,10 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
       audioFormat,
       extractedAudioFormat
     }), sourcePaths?.[index] || getNativeFilePath(item)));
+    if (tasks[0]) {
+      setActiveTaskId(tasks[0].id);
+      void handleFile(files[0]);
+    }
     setBatchFiles((current) => [...current, ...files]);
     setBatchTasks((current) => [...current, ...tasks]);
     setImportSummary(buildImportSummary(files.length, files.length, source));
@@ -1148,8 +1140,9 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     const tasks = batchTasks.filter((task) => isRunnableBatchStatus(task.status) && (!modeFilter || task.mode === modeFilter));
     if (!tasks.length) throw new Error("请先添加需要批量处理的文件，或重试失败任务。");
     setProgressMessage(`准备处理 ${tasks.length} 个${modeFilter ? ` ${batchModeLabel(modeFilter)}` : "批量"}任务。`);
-    const fallbackZip = new JSZip();
-    let fallbackCount = 0;
+    const batchDownloadZip = new JSZip();
+    const batchDownloadNames = new Set<string>();
+    let batchDownloadCount = 0;
     let failedInRun = 0;
 
     for (const [index, task] of tasks.entries()) {
@@ -1171,21 +1164,23 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
 
       try {
         const result = await processBatchTask(task, setBatchProgress);
+        const resultName = uniqueBatchResultName(result.name, batchDownloadNames);
         let outputPath = result.outputPath || "";
         if (!outputPath && result.blob) {
-          outputPath = await saveBatchResult(result.blob, result.name);
+          outputPath = await saveBatchResult(result.blob, resultName);
         }
-        if (!outputPath && result.blob) {
-          fallbackZip.file(result.name, result.blob);
-          fallbackCount += 1;
+        const downloadableBlob = result.blob || await readSavedBatchResult(outputPath);
+        if (downloadableBlob) {
+          batchDownloadZip.file(resultName, downloadableBlob);
+          batchDownloadCount += 1;
         }
         const completedAt = Date.now();
         const nextTask: BatchTask = {
           ...task,
           status: "success",
           progress: 1,
-          resultName: result.name,
-          outputPath: outputPath || `浏览器下载包/${result.name}`,
+          resultName,
+          outputPath: outputPath || `浏览器下载包/${resultName}`,
           backend: result.backend,
           completedAt
         };
@@ -1209,13 +1204,19 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     }
 
     setActiveTaskId("");
-    if (fallbackCount > 0) {
-      const blob = await fallbackZip.generateAsync({ type: "blob" }, (metadata) => {
+    if (batchDownloadCount > 0) {
+      const blob = await batchDownloadZip.generateAsync({ type: "blob" }, (metadata) => {
         setProgress(0.98 + (metadata.percent / 100) * 0.02);
-        setProgressMessage("正在打包未写入目录的批量处理结果");
+        setProgressMessage("正在打包批量处理结果");
       });
-      finishTask(blob, `万能格式转换器_批量处理结果_${Date.now()}.zip`, `已完成批量任务，部分结果已打包为 ZIP。`);
+      const successfulCount = Math.max(0, tasks.length - failedInRun);
+      const message = batchDownloadCount === successfulCount
+        ? "已完成批量任务，全部可下载结果已打包为 ZIP。"
+        : `已完成批量任务，${batchDownloadCount} 个可下载结果已打包为 ZIP；其余结果已保存到输出目录。`;
+      finishTask(blob, `万能格式转换器_批量处理结果_${Date.now()}.zip`, message);
     } else {
+      setResultBlob(null);
+      setResultName("");
       setProgressMessage(`批量任务处理完成。结果目录：${outputDirectory.label}`);
     }
     setProgress(1);
@@ -1416,6 +1417,14 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     return "";
   }
 
+  async function readSavedBatchResult(outputPath?: string) {
+    if (!outputPath || outputDirectory.kind !== "tauri") return null;
+    const tauri = getTauriApi();
+    if (!tauri?.fs?.readBinaryFile) return null;
+    const bytes = await tauri.fs.readBinaryFile(outputPath);
+    return new Blob([new Uint8Array(bytes)]);
+  }
+
   function handleDownload() {
     if (!resultBlob || !resultName) return;
     downloadBlob(resultBlob, resultName);
@@ -1467,6 +1476,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   );
   const desktopPreviewMode = activeTab === "batch" ? batchMode : activeTab;
   const navigationSections = isDesktopSurface ? desktopNavSections : onlineNavSections;
+  const activeDesktopSection = desktopNavSections.find((section) => section.items.some((item) => item.id === activeTab));
   const shouldRenderAds = !isDesktopSurface;
   const sidecarReady = isSidecarReady(sidecarStatus || undefined);
   const selectedDesktopTask = visibleBatchTasks.find((task) => task.id === activeTaskId) || visibleBatchTasks[0] || null;
@@ -1502,94 +1512,368 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     if (nextBatchMode) setBatchMode(nextBatchMode);
   };
   const onlineTaskActionBar = (
-    <div className="mt-4 rounded-sm border border-[#e2e8f0] bg-white p-3">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="min-w-0">
-          <p className="text-xs font-semibold text-slate-500">任务操作</p>
-          <p className="mt-1 truncate text-sm text-slate-600">
-            {file ? `${summary?.name || file.name} · 输出 ${outputFormat}` : "先添加文件，再开始本地转换"}
-          </p>
+    <div className="ws-dashboard-bar apple-inline-action-bar" data-animate="tools-actions">
+      <div className="apple-inline-progress min-w-0">
+        <div className="apple-inline-progress-head">
+          <div className="ws-telemetry-info min-w-0">
+            控制台内核状态：
+            <span className="font-semibold text-[var(--text-apple-title)]">
+              {" "}
+              {file ? `${summary?.name || file.name} // 输出 ${outputFormat}` : "CORE_READY // 等待挂载源"}
+            </span>
+          </div>
+          <span className="apple-inline-progress-status">{progressText}</span>
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:flex sm:w-auto">
-          <button
-            className="btn-primary inline-flex min-h-11 items-center justify-center gap-2 px-5"
-            type="button"
-            disabled={!canStartTask}
-            onClick={() => void runCurrentTask()}
-            title={canStartTask ? undefined : "请先添加文件后再开始转换"}
-          >
-            {status === "running" ? <Loader2 className="h-5 w-5 animate-spin" /> : <Play className="h-5 w-5 fill-current" />}
-            开始转换
-          </button>
-          <button
-            className="btn-danger inline-flex min-h-11 items-center justify-center gap-2 px-5"
-            type="button"
-            disabled={status !== "running"}
-            onClick={cancelTask}
-          >
-            <Square className="h-4 w-4 fill-current" />
-            停止任务
-          </button>
-          {resultName ? (
-            <button
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-sm border border-emerald-700/20 bg-emerald-600 px-5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-200 disabled:text-slate-500"
-              type="button"
-              disabled={!resultBlob}
-              onClick={handleDownload}
-            >
-              <Download className="h-4 w-4" />
-              下载结果
-            </button>
-          ) : null}
+        <div className="apple-progress-track" aria-label={progressText}>
+          <div style={{ width: `${Math.round(progress * 100)}%` }} />
         </div>
+        {compressionStats ? <p className="apple-progress-note">{compressionStats}</p> : null}
+        {error ? <p className="apple-error-note">处理失败：{error}。下一步：请检查文件格式、降低文件大小或重新添加文件后再试。</p> : null}
+        {resultName ? (
+          <div className="apple-result-note">
+            <span className="inline-flex min-w-0 items-center gap-2 font-semibold">
+              <CheckCircle2 className="h-5 w-5 shrink-0" />
+              <span className="truncate">已生成：{resultName}</span>
+            </span>
+          </div>
+        ) : null}
+      </div>
+      <div className="apple-command-cluster">
+        <button
+          className="apple-command-button"
+          type="button"
+          disabled={!resultBlob}
+          onClick={handleDownload}
+          title={resultBlob ? undefined : "转换完成后可下载结果"}
+        >
+          <Download className="h-4 w-4" />
+          下载结果
+        </button>
+        <button
+          className="apple-command-button"
+          type="button"
+          disabled={status !== "running"}
+          onClick={cancelTask}
+        >
+          <Square className="h-4 w-4 fill-current" />
+          终止任务
+        </button>
+        <button
+          className="apple-command-button apple-command-button-primary"
+          type="button"
+          disabled={!canStartTask}
+          onClick={() => void runCurrentTask()}
+          title={canStartTask ? undefined : "请先添加文件后再启动本地编译"}
+        >
+          {status === "running" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4 fill-current" />}
+          启动本地编译
+        </button>
       </div>
     </div>
   );
 
   if (isDesktopSurface) {
     return (
-      <main className="desktop-replica h-screen min-h-[720px] overflow-hidden bg-[#24323B] text-[#EDF3F7]">
-        <DesktopReplicaTitlebar />
-        <div className="grid h-[calc(100vh-31px)] min-h-[689px] grid-cols-[166px_minmax(0,1fr)_280px] overflow-hidden">
-          <aside className="border-r border-[#18242B] bg-[#3A4D58]">
-            <div className="flex h-10 items-center justify-between border-b border-[#263842] px-3 text-[13px] font-semibold text-[#EDF3F7]">
-              <span>导航</span>
-              <button className="grid h-7 w-7 place-items-center text-[#CAD5DC] hover:bg-[#32434D]" type="button" aria-label="折叠导航">
-                <ChevronDown className="h-4 w-4 rotate-90" />
-              </button>
+      <main
+        className="desktop-replica desktop-compact-frame"
+        onDragOver={(event) => event.preventDefault()}
+        onDrop={(event) => {
+          event.preventDefault();
+          if (activeBatchMode && event.dataTransfer.files.length > 1) handleBatchFiles(event.dataTransfer.files);
+          else void handleFile(event.dataTransfer.files[0]);
+        }}
+      >
+        <input
+          ref={inputRef}
+          className="hidden"
+          type="file"
+          accept={accept}
+          multiple={Boolean(activeBatchMode)}
+          onChange={(event) => {
+            const files = event.currentTarget.files;
+            if (!files?.length) return;
+            if (activeBatchMode) handleBatchFiles(files);
+            else void handleFile(files[0]);
+            event.currentTarget.value = "";
+          }}
+        />
+        <input
+          ref={folderInputRef}
+          className="hidden"
+          type="file"
+          multiple
+          onChange={(event) => {
+            handleFolderInputFiles(event.currentTarget.files);
+            event.currentTarget.value = "";
+          }}
+          {...({ webkitdirectory: "", directory: "" } as Record<string, string>)}
+        />
+
+        <nav className="desktop-compact-topbar">
+          <div className="desktop-compact-brand">
+            <MatrixLogo />
+            <div className="min-w-0">
+              <p>万能格式转换器 <span>离线专业版</span></p>
+              <small>v{downloadsConfig.version} · 本地处理</small>
             </div>
-            <nav className="desktop-nav-menu">
-              {navigationSections.map((section) => (
-                <DesktopReplicaNavSection
-                  key={section.title}
-                  section={section}
-                  activeTab={activeTab}
-                  expanded={expandedSections.includes(section.title)}
-                  onToggle={() => toggleNavSection(section.title)}
-                  onSelectTab={selectTool}
-                />
+          </div>
+
+          <label className="desktop-function-select">
+            <span>当前工具</span>
+            <select value={activeTab} onChange={(event) => selectTool(event.target.value as TabId)}>
+              {desktopNavSections.map((section) => (
+                <optgroup key={section.title} label={section.title}>
+                  {section.items.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.label}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
-              <DesktopReplicaNavButton icon={HardDrive} label="本地历史" active={false} onClick={() => void copyText(`成功 ${successCount}，失败 ${failureCount}`)} />
-            </nav>
-          </aside>
+            </select>
+          </label>
 
-          <section className="flex min-w-0 flex-col overflow-hidden bg-[#2B3A43]">
-            <div className="flex h-10 shrink-0 items-center border-b border-[#18242B] px-3">
-              <h1 className="text-[18px] font-bold leading-none text-[#EDF3F7]">任务队列</h1>
+          <div className="desktop-compact-top-status">
+            <span>{activeDesktopSection?.title || "转换工具"} // {currentTab.label}</span>
+            <strong>{desktopStatusText}</strong>
+          </div>
+        </nav>
+
+        <section className="desktop-compact-control-deck">
+          <div className="desktop-compact-control-panel">
+            {controlPanel}
+          </div>
+
+          <div className="desktop-compact-actions">
+            <button className="desktop-compact-btn" type="button" onClick={() => inputRef.current?.click()}>
+              <Files className="h-3.5 w-3.5" />
+              添加文件
+            </button>
+            <button className="desktop-compact-btn" type="button" disabled={!activeBatchMode} onClick={() => void importFolder()}>
+              <FolderOpen className="h-3.5 w-3.5" />
+              文件夹
+            </button>
+            <button className="desktop-compact-btn" type="button" onClick={() => void selectOutputDirectory()}>
+              <HardDrive className="h-3.5 w-3.5" />
+              输出目录
+            </button>
+            <button className="desktop-compact-btn desktop-compact-btn-muted" type="button" disabled={!resultBlob} onClick={handleDownload}>
+              <Download className="h-3.5 w-3.5" />
+              下载结果
+            </button>
+            <button className="desktop-compact-btn desktop-compact-btn-primary" type="button" disabled={!canStartTask} onClick={() => void runCurrentTask()}>
+              {status === "running" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5 fill-current" />}
+              开始转换
+            </button>
+            <button className="desktop-compact-btn desktop-compact-btn-danger" type="button" disabled={status !== "running"} onClick={cancelTask}>
+              <Square className="h-3.5 w-3.5 fill-current" />
+              停止
+            </button>
+          </div>
+        </section>
+
+        <section className="desktop-compact-table-viewport">
+          <div className="desktop-compact-table-shell">
+            <div className="desktop-table-header desktop-compact-table-grid">
+              <span>序号</span>
+              <span>本地源文件名</span>
+              <span>处理类型</span>
+              <span>文件大小</span>
+              <span>目标容器</span>
+              <span>当前状态</span>
+              <span>操作</span>
             </div>
+            <div className="desktop-table-body">
+              {activeBatchMode && activeBatchTasks.length ? activeBatchTasks.map((task, index) => (
+                <DesktopBatchTaskRow
+                  key={task.id}
+                  task={task}
+                  index={index + 1}
+                  active={activeTaskId === task.id || (!activeTaskId && index === 0)}
+                  onSelect={() => setActiveTaskId(task.id)}
+                  onRetry={() => retryBatchTask(task.id)}
+                  onCancel={() => cancelBatchTask(task.id)}
+                  onOpenResult={() => void openResultFile(task)}
+                  onCopy={() => void copyText(task.outputPath || task.resultName)}
+                />
+              )) : file && summary ? (
+                <DesktopTaskRow
+                  name={summary.name}
+                  type={currentTab.label}
+                  size={formatBytes(summary.size)}
+                  outputFormat={outputFormat}
+                  status={status}
+                  error={error}
+                />
+              ) : (
+                <DesktopEmptyQueue batchEnabled={Boolean(activeBatchMode)} onPickFile={() => inputRef.current?.click()} onPickFolder={() => void importFolder()} onPickOutputDirectory={() => void selectOutputDirectory()} />
+              )}
+            </div>
+          </div>
+          </section>
 
-            <div className="flex min-h-0 flex-1 flex-col gap-2 p-[10px]">
+        <section className="desktop-compact-lower-viewport">
+          <div className="desktop-compact-preview-shell">
+            <DesktopInspectorPreview
+              mode={desktopPreviewMode}
+              modeLabel={activeTab === "batch" ? batchModeLabel(batchMode) : currentTab.label}
+              file={desktopInspectorFile}
+              fileUrl={desktopInspectorPreviewUrl}
+              previewUrl={desktopInspectorFile === file ? previewUrl : ""}
+              previewMessage={previewMessage}
+              documentPreview={desktopInspectorFile === file ? documentPreview : { url: "", title: "", message: "" }}
+              summary={desktopInspectorFile === file ? summary : null}
+              cropImageRef={desktopInspectorFile === file ? cropImageRef : undefined}
+              onImageLoad={() => setCropPreviewKey((value) => value + 1)}
+            />
+          </div>
+
+          <div className="desktop-backend-telemetry-cluster">
+            <div className="desktop-compact-progress">
+              <div>
+                <span>当前状态</span>
+                <strong>{desktopInspectorStatus}</strong>
+              </div>
+              <div className="desktop-compact-progress-track">
+                <span style={{ width: `${Math.round(progress * 100)}%` }} />
+              </div>
+              <p>{progressText}</p>
+            </div>
+            <DesktopTelemetryLine label="FFmpeg WASM 内核" value="Active" active />
+            <DesktopTelemetryLine label="本地 Sidecar 加速器" value={sidecarReady ? "Ready" : "未配置"} active={sidecarReady} />
+            <DesktopTelemetryLine label="任务数量" value={String(taskCount)} active={taskCount > 0} />
+            <DesktopTelemetryLine label="成功 / 失败" value={`${successCount} / ${failureCount}`} active={failureCount === 0} />
+            <DesktopTelemetryLine label="输出格式" value={desktopInspectorOutputFormat} active />
+            <div className="desktop-telemetry-actions">
+              <label title={sidecarStatusText(sidecarStatus || undefined)}>
+                <input
+                  type="checkbox"
+                  checked={sidecarExperimentEnabled}
+                  disabled={!sidecarReady}
+                  onChange={(event) => {
+                    setSidecarExperimentEnabled(event.target.checked);
+                    window.localStorage.setItem(sidecarExperimentStorageKey, event.target.checked ? "enabled" : "disabled");
+                  }}
+                />
+                Sidecar 优先
+              </label>
+              <button type="button" onClick={() => void refreshSidecarStatus()}>重新检测</button>
+              <button type="button" onClick={() => void selectOutputDirectory()}>输出目录</button>
+            </div>
+            {error ? <p className="desktop-compact-error">处理失败：{error}</p> : null}
+            {resultName ? <p className="desktop-compact-result">已生成：{resultName}</p> : null}
+          </div>
+        </section>
+
+        <footer className="desktop-compact-footer">
+          <div>
+            <span>开发者：MR.谢</span>
+            <a href="/tutorials">使用教程</a>
+            <a href="/changelog">更新日志</a>
+          </div>
+          <div>
+            <span>{outputDirectory.label}</span>
+            <span>{desktopInspectorName || "等待挂载源文件"}</span>
+          </div>
+        </footer>
+      </main>
+    );
+  }
+
+  return (
+    <main className="office-workbench apple-workbench-page">
+      <GsapScene variant="tools" animateKey={activeTab}>
+        <section id="tool-picker" className="apple-workspace-shell">
+          <div className="apple-workspace-layout" data-animate="tools-chrome">
+            <aside className="ws-sidebar-panel" data-animate="tools-nav">
+              <div className="apple-sidebar-heading">
+                <p>Tool groups</p>
+                <h2>功能导航</h2>
+                <span>按任务类型挂载本地转换流程</span>
+              </div>
+              <nav className="apple-accordion-nav">
+                {navigationSections.map((section) => {
+                  const SectionIcon = section.icon;
+                  const expanded = expandedSections.includes(section.title);
+                  return (
+                    <section key={section.title} className={`acc-wrapper-group ${expanded ? "open" : ""}`}>
+                      <button
+                        className="acc-trigger-bar"
+                        type="button"
+                        aria-expanded={expanded}
+                        onClick={() => toggleNavSection(section.title)}
+                      >
+                        <span className="flex min-w-0 items-center gap-2">
+                          <SectionIcon className="h-4 w-4 shrink-0" />
+                          <span className="truncate">{section.title}</span>
+                        </span>
+                        <ChevronDown className={`acc-chevron-icon h-3.5 w-3.5 ${expanded ? "rotate-180" : ""}`} />
+                      </button>
+                      {expanded ? (
+                        <div className="acc-collapsible-content" data-animate-dynamic="true">
+                          {section.items.map((item) => (
+                            <button
+                              key={item.id}
+                              type="button"
+                              aria-pressed={activeTab === item.id}
+                              className={`pro-menu-node ${activeTab === item.id ? "active" : ""}`}
+                              onClick={() => selectTool(item.id)}
+                            >
+                              <span className="pro-menu-badge">{item.badge}</span>
+                              <span className="min-w-0">
+                                <span className="block truncate">{item.label}</span>
+                                <span className="pro-menu-note">{item.note}</span>
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      ) : null}
+                    </section>
+                  );
+                })}
+              </nav>
+              <div className="sidebar-footer-links">
+                <div className="mb-1">
+                  <a href="/tutorials">使用教程</a>
+                  <span>·</span>
+                  <a href="/changelog">更新日志</a>
+                  <span>·</span>
+                  <a href="/download">下载专业版</a>
+                </div>
+                <p>文件本地处理，广告与转换数据隔离。</p>
+              </div>
+            </aside>
+
+            <main className="ws-center-canvas-hub" data-animate="tools-main">
+              <div className="ws-hub-header" data-animate="tools-header">
+                <div>
+                  <span className="apple-badge"><span />在线版 · 本地处理</span>
+                  <h1 id="lbl-panel-main-title">{currentTab.label}</h1>
+                  <p id="lbl-panel-main-desc">{currentTab.description}。文件只在当前设备处理，不上传服务器。</p>
+                </div>
+                <StatusBadge status={status} />
+              </div>
+
               <div
-                className="desktop-import-strip flex h-[58px] shrink-0 items-center gap-2 rounded-[5px] border border-dashed border-[#60737D] bg-[#3A4D58] px-3"
+                className="apple-mini-dropzone"
+                id="apple-dropzone-core"
+                data-animate="tools-dropzone"
+                onClick={() => inputRef.current?.click()}
                 onDragOver={(event) => event.preventDefault()}
                 onDrop={(event) => {
                   event.preventDefault();
-                  if (activeBatchMode && event.dataTransfer.files.length > 1) handleBatchFiles(event.dataTransfer.files);
+                  if (activeTab === "batch") handleBatchFiles(event.dataTransfer.files);
                   else void handleFile(event.dataTransfer.files[0]);
                 }}
               >
-                <input ref={inputRef} className="hidden" type="file" accept={accept} onChange={(event) => void handleFile(event.target.files?.[0])} />
-                <input ref={batchInputRef} className="hidden" type="file" accept={accept} multiple onChange={(event) => handleBatchFiles(event.target.files)} />
+                <input
+                  ref={inputRef}
+                  className="hidden"
+                  type="file"
+                  accept={accept}
+                  multiple={activeTab === "batch"}
+                  onChange={(event) => activeTab === "batch" ? handleBatchFiles(event.target.files) : void handleFile(event.target.files?.[0])}
+                />
                 <input
                   ref={folderInputRef}
                   className="hidden"
@@ -1598,337 +1882,56 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
                   onChange={(event) => handleFolderInputFiles(event.target.files)}
                   {...({ webkitdirectory: "", directory: "" } as Record<string, string>)}
                 />
-                <DesktopQueueButton icon={Files} label="添加文件" onClick={() => inputRef.current?.click()} />
-                <DesktopQueueButton icon={ListChecks} label="添加批量文件" disabled={!activeBatchMode} onClick={() => batchInputRef.current?.click()} />
-                <DesktopQueueButton icon={FolderOpen} label="添加文件夹" disabled={!activeBatchMode} onClick={() => void importFolder()} />
-                <button className="desktop-queue-command ml-auto" type="button" disabled={!canStartTask} onClick={() => void runCurrentTask()}>
-                  {status === "running" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5 fill-current" />}
-                  开始转换
-                </button>
-                <button className="desktop-queue-command" type="button" disabled={status !== "running"} onClick={cancelTask}>
-                  <Square className="h-3.5 w-3.5 fill-current" />
-                  停止
-                </button>
-                {resultName ? (
-                  <button className="desktop-queue-command" type="button" disabled={!resultBlob} onClick={handleDownload}>
-                    <Download className="h-3.5 w-3.5" />
-                    下载
-                  </button>
-                ) : null}
-              </div>
-
-              <div className="min-h-0 flex-1 overflow-hidden border border-[#18242B] bg-[#11191E]">
-                <div className="desktop-table-header grid h-[30px] grid-cols-[48px_minmax(180px,1fr)_105px_105px_145px_120px_104px] border-b border-[#1E2B32] bg-[#33444E] text-[13px] font-semibold text-[#EDF3F7]">
-                  <span>序号</span>
-                  <span>文件名</span>
-                  <span>类型</span>
-                  <span>大小</span>
-                  <span>目标格式</span>
-                  <span>状态</span>
-                  <span>操作</span>
+                <div className="mini-vault-icon">
+                  <Download className="h-5 w-5" />
                 </div>
-                <div className="desktop-table-body h-[calc(100%-30px)] overflow-y-auto">
-                  {activeBatchMode && activeBatchTasks.length ? activeBatchTasks.map((task, index) => (
-                    <DesktopBatchTaskRow
-                      key={task.id}
-                      task={task}
-                      index={index + 1}
-                      active={activeTaskId === task.id || (!activeTaskId && index === 0)}
-                      onSelect={() => setActiveTaskId(task.id)}
-                      onRetry={() => retryBatchTask(task.id)}
-                      onCancel={() => cancelBatchTask(task.id)}
-                      onOpenResult={() => void openResultFile(task)}
-                      onCopy={() => void copyText(task.outputPath || task.resultName)}
-                    />
-                  )) : file && summary ? (
-                    <DesktopTaskRow
-                      name={summary.name}
-                      type={currentTab.label}
-                      size={formatBytes(summary.size)}
-                      outputFormat={outputFormat}
-                      status={status}
-                      error={error}
-                    />
-                  ) : (
-                    <DesktopEmptyQueue batchEnabled={Boolean(activeBatchMode)} onPickFile={() => inputRef.current?.click()} onPickFolder={() => void importFolder()} onPickOutputDirectory={() => void selectOutputDirectory()} />
-                  )}
+                <div className="mini-vault-text">
+                  <h3>将目标文件拖拽到此区域，或点击载入本地资源</h3>
+                  <p>根据当前工具挂载对应文件，处理链路在当前浏览器本地执行。</p>
                 </div>
               </div>
-            </div>
-          </section>
 
-          <DesktopReplicaInspector
-            mode={desktopPreviewMode}
-            modeLabel={activeTab === "batch" ? batchModeLabel(batchMode) : currentTab.label}
-            file={desktopInspectorFile}
-            fileUrl={desktopInspectorPreviewUrl}
-            previewUrl={desktopInspectorFile === file ? previewUrl : ""}
-            previewMessage={previewMessage}
-            documentPreview={desktopInspectorFile === file ? documentPreview : { url: "", title: "", message: "" }}
-            summary={desktopInspectorFile === file ? summary : null}
-            cropImageRef={desktopInspectorFile === file ? cropImageRef : undefined}
-            onImageLoad={() => setCropPreviewKey((value) => value + 1)}
-            fileName={desktopInspectorName}
-            fileType={desktopInspectorType}
-            fileSize={desktopInspectorSize}
-            outputFormat={desktopInspectorOutputFormat}
-            statusText={desktopInspectorStatus}
-            progressText={progressText}
-            progress={progress}
-            taskTotal={taskCount}
-            successCount={successCount}
-            failureCount={failureCount}
-            outputDirectory={outputDirectory}
-            sidecarStatus={sidecarStatus}
-            sidecarReady={sidecarReady}
-            sidecarExperimentEnabled={sidecarExperimentEnabled}
-            controlPanel={controlPanel}
-            error={error}
-            resultName={resultName}
-            onRefreshSidecar={() => void refreshSidecarStatus()}
-            onToggleSidecar={(enabled) => {
-              setSidecarExperimentEnabled(enabled);
-              window.localStorage.setItem(sidecarExperimentStorageKey, enabled ? "enabled" : "disabled");
-            }}
-            onSelectOutput={() => void selectOutputDirectory()}
-            onDownloadResult={handleDownload}
-            canDownload={Boolean(resultBlob && resultName)}
-          />
-        </div>
-      </main>
-    );
-  }
+              {onlineTaskActionBar}
 
-  return (
-    <main className="office-workbench min-h-[calc(100vh-64px)] bg-[var(--surface-page)] text-slate-900">
-      <GsapScene variant="tools" animateKey={activeTab}>
-      <section id="tool-picker" data-animate="tools-chrome" className="mx-auto max-w-[1480px] scroll-mt-24 px-4 py-5 sm:px-6 lg:px-8">
-        <div className="grid gap-5 xl:grid-cols-[280px_minmax(0,1fr)]">
-          <aside data-animate="tools-nav" className="h-fit border border-[var(--border-soft)] bg-white xl:sticky xl:top-24">
-            <div className="border-b border-[var(--border-soft)] bg-[var(--surface-muted)] p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Tool groups</p>
-              <h2 className="mt-1 text-lg font-bold text-slate-950">功能导航</h2>
-              <p className="mt-1 text-xs leading-5 text-slate-600">按任务类型选择工具，右侧工作台会同步切换参数和预览。</p>
-            </div>
-            <nav className="grid gap-0">
-              {navigationSections.map((section) => {
-                const SectionIcon = section.icon;
-                const expanded = expandedSections.includes(section.title);
-                return (
-                  <section key={section.title} className="border-b border-[var(--border-soft)] last:border-b-0">
-                    <button
-                      className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-[var(--surface-muted)]"
-                      type="button"
-                      aria-expanded={expanded}
-                      onClick={() => toggleNavSection(section.title)}
-                    >
-                      <span className="flex min-w-0 items-center gap-2">
-                        <span className="grid h-9 w-9 place-items-center border border-[var(--border-soft)] bg-white text-slate-800">
-                          <SectionIcon className="h-4 w-4" />
-                        </span>
-                        <span className="min-w-0">
-                          <span className="block truncate text-sm font-bold text-slate-950">{section.title}</span>
-                          <span className="block truncate text-xs text-slate-500">{section.description}</span>
-                        </span>
-                      </span>
-                      <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${expanded ? "rotate-180" : ""}`} />
-                    </button>
-                    {expanded ? (
-                      <div className="border-t border-[var(--border-soft)] bg-white">
-                        {section.items.map((item) => (
-                          <button
-                            key={item.id}
-                            type="button"
-                            aria-pressed={activeTab === item.id}
-                            className={`flex w-full items-start gap-3 border-b border-[var(--border-soft)] px-4 py-3 text-left text-sm last:border-b-0 ${
-                              activeTab === item.id
-                                ? "border-l-4 border-l-[var(--accent-blue)] bg-[#e8f3fb] font-semibold text-slate-950"
-                                : "text-slate-700 hover:bg-[var(--surface-muted)] hover:text-slate-950"
-                            }`}
-                            onClick={() => selectTool(item.id)}
-                          >
-                            <span className={activeTab === item.id ? "font-bold text-[var(--accent-blue)]" : "text-slate-500"}>{item.badge}</span>
-                            <span className="min-w-0">
-                              <span className="block truncate">{item.label}</span>
-                              <span className={activeTab === item.id ? "mt-0.5 block truncate text-xs font-medium text-slate-700" : "mt-0.5 block truncate text-xs text-slate-500"}>{item.note}</span>
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    ) : null}
-                  </section>
-                );
-              })}
-            </nav>
-          </aside>
-
-          <div className="min-w-0">
-            <div data-animate="tools-header" className="border border-[var(--border-soft)] bg-white p-5">
-              <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
-            <div>
-              <div className="inline-flex items-center gap-2 border border-[var(--border-soft)] bg-[var(--surface-muted)] px-3 py-1 text-xs font-semibold text-slate-600">
-                在线版
-                <span className="h-1 w-1 rounded-sm bg-emerald-500" />
-                文件本地处理
+              <div className="apple-canvas-viewport-expanded" data-animate="tools-preview" data-animate-dynamic="true">
+                <DesktopPreviewPanel
+                  mode={activeTab}
+                  modeLabel={currentTab.label}
+                  file={file}
+                  fileUrl={fileUrl}
+                  previewUrl={previewUrl}
+                  previewMessage={previewMessage}
+                  documentPreview={documentPreview}
+                  summary={summary}
+                  cropImageRef={cropImageRef}
+                  onImageLoad={() => setCropPreviewKey((value) => value + 1)}
+                />
               </div>
-              <h1 className="mt-4 max-w-3xl text-3xl font-bold leading-tight tracking-normal text-slate-950">
-                选择一个转换任务，添加文件后直接导出
-              </h1>
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
-                在线版适合图片、文档、音频和视频的轻量单文件处理。文件仅在本地处理，不上传服务器；大文件、敏感文件和批量任务建议使用 Windows 离线专业版。
-              </p>
-            </div>
-            <div className="border border-emerald-200 bg-emerald-50 p-4">
-              <div className="flex items-start gap-3">
-                <ShieldCheck className="mt-1 h-5 w-5 shrink-0 text-emerald-700" />
-                <div>
-                  <p className="font-semibold text-emerald-950">在线版说明</p>
-                  <p className="mt-1 text-sm leading-6 text-emerald-800">广告脚本不会接收你正在处理的图片、文档、音频、视频或转换结果。</p>
-                </div>
+            </main>
+
+            <aside className="ws-inspector-panel" data-animate="tools-side" data-animate-dynamic="true">
+              <div>
+                <p className="inspector-kicker">转换参数</p>
+                <div className="inspector-panel-title" id="lbl-inspector-title">{currentTab.label}参数</div>
+                <p className="inspector-panel-desc">{currentTab.description}</p>
               </div>
-            </div>
-          </div>
-
-            <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
-          <section data-animate="tools-main" className="min-w-0">
-            <div data-animate-dynamic="true" className="border border-[var(--border-soft)] bg-white p-4 sm:p-5">
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">当前工具</p>
-                  <h2 className="mt-1 text-2xl font-bold text-slate-950">{currentTab.label}</h2>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">{currentTab.description}。文件只在当前设备处理，不上传服务器。</p>
-                </div>
-                <StatusBadge status={status} />
-              </div>
-
-              <div className="mt-4 border border-[var(--border-soft)] bg-[var(--surface-muted)] p-3 text-sm leading-6 text-slate-600 sm:p-4">
-                <p>{privacyNotice}</p>
-                <p className="mt-2">{pdfBoundaryNotice}</p>
-              </div>
-
-              {activeTab === "batch-gate" ? (
-                <BatchGateNotice />
-              ) : activeTab === "download" ? (
-                <DownloadEditionNotice />
-              ) : (
-                <>
-                  <div
-                    className="mt-4 flex min-h-56 cursor-pointer flex-col items-center justify-center border-2 border-dashed border-slate-300 bg-white px-4 text-center transition hover:border-slate-500 hover:bg-[var(--surface-muted)]"
-                    onClick={() => inputRef.current?.click()}
-                    onDragOver={(event) => event.preventDefault()}
-                    onDrop={(event) => {
-                      event.preventDefault();
-                      if (activeTab === "batch") handleBatchFiles(event.dataTransfer.files);
-                      else void handleFile(event.dataTransfer.files[0]);
-                    }}
-                  >
-                    <input
-                      ref={inputRef}
-                      className="hidden"
-                      type="file"
-                      accept={accept}
-                      multiple={activeTab === "batch"}
-                      onChange={(event) => activeTab === "batch" ? handleBatchFiles(event.target.files) : void handleFile(event.target.files?.[0])}
-                    />
-                    <input
-                      ref={folderInputRef}
-                      className="hidden"
-                      type="file"
-                      multiple
-                      onChange={(event) => handleFolderInputFiles(event.target.files)}
-                      {...({ webkitdirectory: "", directory: "" } as Record<string, string>)}
-                    />
-                    <span className="grid h-14 w-14 place-items-center border border-slate-950 bg-slate-950 text-white">
-                      <Download className="h-8 w-8" />
-                    </span>
-                    <p className="mt-5 text-xl font-bold text-slate-950">将文件拖拽到此处，或点击上传</p>
-                    <p className="mt-2 max-w-xl text-sm leading-6 text-slate-600">根据当前工具添加对应文件。在线版适合单个轻量文件，大文件建议使用离线专业版。</p>
-                  </div>
-
-                  {onlineTaskActionBar}
-
-                  <div data-animate-dynamic="true" className="mt-4">
-                    <DesktopPreviewPanel
-                      mode={activeTab}
-                      modeLabel={currentTab.label}
-                      file={file}
-                      fileUrl={fileUrl}
-                      previewUrl={previewUrl}
-                      previewMessage={previewMessage}
-                      documentPreview={documentPreview}
-                      summary={summary}
-                      cropImageRef={cropImageRef}
-                      onImageLoad={() => setCropPreviewKey((value) => value + 1)}
-                    />
-                  </div>
-                </>
-              )}
-            </div>
-
-            {activeTab !== "batch-gate" && activeTab !== "download" ? (
-              <div className="mt-5 border border-[var(--border-soft)] bg-white p-4">
-                <div className="h-2 overflow-hidden bg-slate-100">
-                  <div className="h-full bg-slate-950 transition-all" style={{ width: `${Math.round(progress * 100)}%` }} />
-                </div>
-                <div className="mt-3 flex flex-col gap-2 text-sm text-slate-600 sm:flex-row sm:items-center sm:justify-between">
-                  <span>{progressText}</span>
-                  <StatusBadge status={status} />
-                </div>
-                {compressionStats ? <p className="mt-2 text-sm font-medium text-slate-700">{compressionStats}</p> : null}
-                {error ? <p className="mt-3 border border-red-200 bg-red-50 p-3 text-sm text-red-700">处理失败：{error}。下一步：请检查文件格式、降低文件大小或重新添加文件后再试。</p> : null}
-                {resultName ? (
-                  <div className="mt-3 border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                      <span className="inline-flex min-w-0 items-center gap-2 font-semibold">
-                        <CheckCircle2 className="h-5 w-5 shrink-0" />
-                        <span className="truncate">已生成：{resultName}</span>
-                      </span>
-                      <button
-                        className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-sm bg-emerald-700 px-5 font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 sm:w-auto sm:min-w-40"
-                        type="button"
-                        disabled={!resultBlob}
-                        onClick={handleDownload}
-                      >
-                        <Download className="h-4 w-4" />
-                        下载结果
-                      </button>
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-            ) : null}
-          </section>
-
-          <aside data-animate="tools-side" data-animate-dynamic="true" className="h-fit border border-[var(--border-soft)] bg-white p-4 xl:sticky xl:top-24">
-            <div className="mb-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">转换参数</p>
-              <h2 className="mt-1 text-lg font-bold text-slate-950">{currentTab.label}</h2>
-              <p className="mt-1 text-sm leading-6 text-slate-600">{currentTab.description}</p>
-            </div>
-            <div className="space-y-3">
-              <SettingsSection title="当前参数">
+              <div className="apple-control-panel">
                 {controlPanel}
-              </SettingsSection>
-              <SettingsSection title="任务信息">
-                <DesktopSettingRow label="输出格式" value={outputFormat} />
-                <DesktopSettingRow label="当前状态" value={desktopStatusText} />
-                <DesktopSettingRow label="文件数量" value={String(taskCount)} />
-              </SettingsSection>
-              <SettingsSection title="能力边界">
-                <p className="text-sm leading-6 text-slate-600">Word 支持标准 .docx；Excel 支持 .xlsx 和 .csv，旧版 .xls 请先另存为 .xlsx。多页合成长图会增加内存占用。</p>
-              </SettingsSection>
-            </div>
-          </aside>
-        </div>
+              </div>
+              {shouldRenderAds ? (
+                <div id="ad-container" className="apple-adsense-container" data-animate="tools-ad">
+                  <div className="adsense-telemetry-header">
+                    <span>[ Sandboxed Ad Component ]</span>
+                    <span>Secure //</span>
+                  </div>
+                  <div className="adsense-core-viewport">
+                    <AdSlot config={adsConfig} name="toolBottom" />
+                  </div>
+                </div>
+              ) : null}
+            </aside>
           </div>
-        </div>
-        </div>
-        {shouldRenderAds ? (
-          <div id="ad-container" className="mt-8">
-            <AdSlot config={adsConfig} name="toolBottom" />
-          </div>
-        ) : null}
-      </section>
+        </section>
       </GsapScene>
     </main>
   );
@@ -1965,48 +1968,6 @@ function BatchSummaryView({ files, mode, importSummary }: { files: File[]; mode:
       <div className="mt-3 max-h-32 overflow-auto rounded-sm bg-slate-950 p-3">
         {files.slice(0, 20).map((item) => <p className="truncate" key={`${item.name}-${item.size}`}>{item.name} · {formatBytes(item.size)}</p>)}
         {files.length > 20 ? <p className="text-slate-500">还有 {files.length - 20} 个文件未展开显示。</p> : null}
-      </div>
-    </div>
-  );
-}
-
-function BatchGateNotice() {
-  return (
-    <div className="mb-5 rounded-sm border border-cyan-300/15 bg-cyan-950/25 p-4 sm:p-5" data-testid="online-batch-gate">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <p className="text-xs font-semibold text-cyan-300">专业版能力</p>
-          <h2 className="mt-1 text-xl font-semibold text-slate-50">批量处理</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-300">需要批量处理大量图片、文档、音频或视频？</p>
-          <p className="mt-2 text-sm font-semibold text-slate-50">批量处理为离线专业版功能，请下载 Windows 离线专业版使用。</p>
-          <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-300">
-            离线专业版支持批量任务队列、输出目录选择和失败重试，所有文件仍然只在本地处理，不上传服务器。
-          </p>
-        </div>
-        <a className="btn-primary inline-flex shrink-0 items-center justify-center gap-2" href="/download">
-          <Download className="h-5 w-5" />
-          下载离线专业版
-        </a>
-      </div>
-    </div>
-  );
-}
-
-function DownloadEditionNotice() {
-  return (
-    <div className="rounded-sm border border-cyan-300/15 bg-slate-950/60 p-4 sm:p-5">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <p className="text-xs font-semibold text-cyan-300">离线专业版</p>
-          <h2 className="mt-1 text-xl font-semibold text-slate-50">下载 Windows 离线专业版</h2>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">
-            适合敏感文件、大文件、断网环境和批量队列处理。下载入口保持原有流程，文件仍然只在本地处理。
-          </p>
-        </div>
-        <a className="btn-primary inline-flex shrink-0 items-center justify-center gap-2" href="/download">
-          <Download className="h-5 w-5" />
-          打开下载页
-        </a>
       </div>
     </div>
   );
@@ -2078,17 +2039,17 @@ function DesktopOfficeChrome({
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-        <button className={primaryCommandClass} type="button" disabled={!canStart} onClick={onStart}>
-          <Play className="h-4 w-4 fill-current" />
-          开始转换
-        </button>
-        <button className={stopCommandClass} type="button" disabled={!canStop} onClick={onStop}>
-          <Square className="h-4 w-4 fill-current" />
-          停止任务
-        </button>
           <button className={commandButtonClass} type="button" disabled={!canDownload} onClick={onDownloadResult}>
             <Download className="h-4 w-4 text-slate-600" />
             下载结果
+          </button>
+          <button className={stopCommandClass} type="button" disabled={!canStop} onClick={onStop}>
+            <Square className="h-4 w-4 fill-current" />
+            终止任务
+          </button>
+          <button className={primaryCommandClass} type="button" disabled={!canStart} onClick={onStart}>
+            <Play className="h-4 w-4 fill-current" />
+            启动本地编译
           </button>
         </div>
       </div>
@@ -2429,6 +2390,15 @@ function DesktopInspectorStat({ label, value }: { label: string; value: string }
   );
 }
 
+function DesktopTelemetryLine({ label, value, active }: { label: string; value: string; active?: boolean }) {
+  return (
+    <div className="desktop-telemetry-line">
+      <span>{label}</span>
+      <strong className={active ? "active" : ""}>{value}</strong>
+    </div>
+  );
+}
+
 function DesktopInspectorPreview({
   mode,
   modeLabel,
@@ -2457,7 +2427,15 @@ function DesktopInspectorPreview({
   const imagePreview = previewUrl && (mode === "resize" || mode === "watermark") ? previewUrl : fileUrl;
 
   if (!file) {
-    return <div className="desktop-preview-stage desktop-preview-empty" aria-hidden="true" />;
+    return (
+      <div className="desktop-preview-stage desktop-preview-empty">
+        <div className="desktop-snapshot-placeholder">
+          <FileImage className="h-8 w-8" />
+          <p>本地图片 / 文档 / 音视频预览区</p>
+          <span>等待挂载源文件</span>
+        </div>
+      </div>
+    );
   }
 
   if (file && isVideoFile(file) && fileUrl) {
@@ -2889,7 +2867,7 @@ type ControlPanelProps = any;
 
 function ControlPanel(props: ControlPanelProps) {
   if (props.activeTab === "crop") return <Panel title="图片裁切" note="拖动预览图上的裁切框即可自由裁切，也可以选择头像、证件照、横屏封面、竖屏封面等常用比例。"><Select label="裁切比例" value={props.cropRatio} onChange={props.setCropRatio} options={props.cropRatioOptions} /><div className="grid grid-cols-2 gap-2"><button className="btn-secondary" type="button" onClick={() => props.rotateCrop(-90)}>左转 90°</button><button className="btn-secondary" type="button" onClick={() => props.rotateCrop(90)}>右转 90°</button><button className="btn-secondary" type="button" onClick={() => props.flipCrop("x")}>水平翻转</button><button className="btn-secondary" type="button" onClick={() => props.flipCrop("y")}>垂直翻转</button></div><button className="btn-secondary w-full" type="button" onClick={props.resetCrop}>重置裁切框</button><ImageFormat value={props.cropFormat} onChange={props.setCropFormat} /><Range label="导出质量" value={props.cropQuality} min={10} max={100} onChange={props.setCropQuality} /></Panel>;
-  if (props.activeTab === "resize") return <Panel title="尺寸调整" note="可按百分比快速缩放，也可以输入像素宽高。右侧会自动显示处理预览。"><Select label="调整方式" value={props.resizeMode} onChange={props.setResizeMode} options={[{ value: "percent", label: "按百分比" }, { value: "pixel", label: "按像素" }]} />{props.resizeMode === "percent" ? <Field label="缩放比例"><select className="form-input" value={String(props.resizePercent)} onChange={(event) => props.setResizePercent(Number(event.target.value))}><option value="25">25%</option><option value="50">50%</option><option value="75">75%</option><option value="100">100%</option><option value="125">125%</option><option value="150">150%</option><option value="200">200%</option></select></Field> : <><NumberField label="宽度（像素）" value={props.resizeWidth} onChange={props.setResizeWidth} /><NumberField label="高度（像素）" value={props.resizeHeight} onChange={props.setResizeHeight} /><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={props.resizeKeepRatio} onChange={(event) => props.setResizeKeepRatio(event.target.checked)} />锁定原图比例</label></>}<ImageFormat value={props.resizeFormat} onChange={props.setResizeFormat} /><Range label="导出质量" value={props.resizeQuality} min={10} max={100} onChange={props.setResizeQuality} /></Panel>;
+  if (props.activeTab === "resize") return <Panel title="像素/百分比调整" note="可按百分比快速缩放，也可以输入像素宽高。右侧会自动显示处理预览。"><Select label="调整方式" value={props.resizeMode} onChange={props.setResizeMode} options={[{ value: "percent", label: "按百分比" }, { value: "pixel", label: "按像素" }]} />{props.resizeMode === "percent" ? <Field label="缩放比例"><select className="form-input" value={String(props.resizePercent)} onChange={(event) => props.setResizePercent(Number(event.target.value))}><option value="25">25%</option><option value="50">50%</option><option value="75">75%</option><option value="100">100%</option><option value="125">125%</option><option value="150">150%</option><option value="200">200%</option></select></Field> : <><NumberField label="宽度（像素）" value={props.resizeWidth} onChange={props.setResizeWidth} /><NumberField label="高度（像素）" value={props.resizeHeight} onChange={props.setResizeHeight} /><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={props.resizeKeepRatio} onChange={(event) => props.setResizeKeepRatio(event.target.checked)} />锁定原图比例</label></>}<ImageFormat value={props.resizeFormat} onChange={props.setResizeFormat} /><Range label="导出质量" value={props.resizeQuality} min={10} max={100} onChange={props.setResizeQuality} /></Panel>;
   if (props.activeTab === "watermark") return <Panel title="添加水印" note="文字或图片水印均在本地合成，不上传图片。文字水印支持字号、颜色和透明度预览。"><Select label="水印类型" value={props.watermarkMode} onChange={props.setWatermarkMode} options={["text", "image"]} />{props.watermarkMode === "image" ? <Field label="水印图片"><input type="file" accept={imageAccept} onChange={(event) => props.setWatermarkImage(event.target.files?.[0] || null)} /></Field> : <><Field label="水印文字"><input className="form-input" value={props.watermarkText} onChange={(event) => props.setWatermarkText(event.target.value)} /></Field><Range label="文字大小" value={props.watermarkFontSize} min={12} max={160} onChange={props.setWatermarkFontSize} /><Field label="文字颜色"><div className="flex gap-2"><input className="h-11 w-14 rounded-sm border border-cyan-300/20 bg-slate-950 p-1" type="color" value={props.watermarkColor} onChange={(event) => props.setWatermarkColor(event.target.value)} /><input className="form-input" value={props.watermarkColor} onChange={(event) => props.setWatermarkColor(event.target.value)} /></div></Field></>}<Select label="位置" value={props.watermarkPosition} onChange={props.setWatermarkPosition} options={["top-left", "top-right", "bottom-left", "bottom-right", "center", "tile"]} /><Range label="透明度" value={props.watermarkOpacity} min={5} max={100} onChange={props.setWatermarkOpacity} /><ImageFormat value={props.watermarkFormat} onChange={props.setWatermarkFormat} /></Panel>;
   if (props.activeTab === "compress") return <Panel title="图片压缩" note="固定导出 JPG，目标大小为 200KB、100KB、50KB、25KB。"><Select label="压缩强度" value={props.compressStrength} onChange={props.setCompressStrength} options={["light", "recommended", "extreme"]} /><Field label="目标大小"><select className="form-input" value={props.targetSize} onChange={(event) => props.setTargetSize(event.target.value)}><option value="200KB">200KB</option><option value="100KB">100KB</option><option value="50KB">50KB</option><option value="25KB">25KB</option></select></Field><Range label="质量" value={props.compressQuality} min={10} max={100} onChange={props.setCompressQuality} /><NumberField label="最大宽高" value={props.maxSize} onChange={props.setMaxSize} /><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={props.keepOriginalSize} onChange={(event) => props.setKeepOriginalSize(event.target.checked)} />保留原尺寸</label></Panel>;
   if (props.activeTab === "pdf-images") return <Panel title="PDF 转图片" note="PDF.js 本地渲染，可选择逐页导出 ZIP，也可以把所选页合成为一张长图。"><PdfPageField value={props.pdfPages} onChange={props.setPdfPages} /><Select label="导出方式" value={props.pdfImageMode} onChange={props.setPdfImageMode} options={[{ value: "pages", label: "逐页导出" }, { value: "combined", label: "合成一页导出" }]} /><Select label="图片格式" value={props.pdfImageFormat} onChange={props.setPdfImageFormat} options={["png", "jpg", "webp"]} /><Select label="清晰度" value={props.pdfScale} onChange={props.setPdfScale} options={["normal", "high", "ultra"]} /></Panel>;
@@ -3066,6 +3044,26 @@ function downloadBlob(blob: Blob, name: string) {
   anchor.click();
   anchor.remove();
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function uniqueBatchResultName(name: string, usedNames: Set<string>) {
+  const safeName = name.trim() || `result-${usedNames.size + 1}`;
+  if (!usedNames.has(safeName)) {
+    usedNames.add(safeName);
+    return safeName;
+  }
+
+  const dotIndex = safeName.lastIndexOf(".");
+  const base = dotIndex > 0 ? safeName.slice(0, dotIndex) : safeName;
+  const extension = dotIndex > 0 ? safeName.slice(dotIndex) : "";
+  let index = 2;
+  let candidate = `${base}_${index}${extension}`;
+  while (usedNames.has(candidate)) {
+    index += 1;
+    candidate = `${base}_${index}${extension}`;
+  }
+  usedNames.add(candidate);
+  return candidate;
 }
 
 async function readTauriFolderFiles(rootPath: string, mode: BatchMode) {

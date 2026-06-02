@@ -68,8 +68,8 @@ describe("privacy and product boundary checks", () => {
   });
 
   it("shows local-processing privacy and capability messaging", () => {
-    expect(toolsSource).toContain("privacyNotice");
-    expect(toolsSource).toContain("pdfBoundaryNotice");
+    expect(toolsSource).toContain("文件本地处理，广告与转换数据隔离。");
+    expect(toolsSource).toContain("文件只在当前设备处理，不上传服务器。");
     expect(toolsSource).toContain("MediaCapabilityBox");
     expect(toolsSource).toContain("getMediaCapabilityReport");
   });

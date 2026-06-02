@@ -22,7 +22,7 @@ const MAX_REQUEST_BODY_BYTES = Number(process.env.DOWNLOAD_REQUEST_MAX_BYTES || 
 const DEFAULT_FILE_ID = process.env.INSTALLER_FILE_ID || "";
 const DEFAULT_FILE_NAME =
   process.env.INSTALLER_FILE_NAME ||
-  "\u4e07\u80fd\u683c\u5f0f\u8f6c\u6362\u5668_1.0.0_x64-setup.exe";
+  "\u4e07\u80fd\u683c\u5f0f\u8f6c\u6362\u79bb\u7ebf\u4e13\u4e1a\u7248_1.0.0_x64-setup.exe";
 const INSTALLER_FILES = {
   exe: {
     fileID: process.env.INSTALLER_EXE_FILE_ID || DEFAULT_FILE_ID,
@@ -34,7 +34,7 @@ const INSTALLER_FILES = {
     fileID: process.env.INSTALLER_MSI_FILE_ID || "",
     fileName:
       process.env.INSTALLER_MSI_FILE_NAME ||
-      "\u4e07\u80fd\u683c\u5f0f\u8f6c\u6362\u5668_1.0.0_x64_zh-CN.msi"
+      "\u4e07\u80fd\u683c\u5f0f\u8f6c\u6362\u79bb\u7ebf\u4e13\u4e1a\u7248_1.0.0_x64_zh-CN.msi"
   }
 };
 

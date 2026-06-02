@@ -1,28 +1,28 @@
 export const downloadsConfig = {
-  appName: "万能格式转换器 离线专业版",
+  appName: "万能格式转换离线专业版",
   version: "1.0.0",
-  fileName: "万能格式转换器_1.0.0_x64-setup.exe",
-  fileSize: "EXE 约 245.62 MB / MSI 约 256.43 MB",
-  releaseDate: "2026-06-01",
+  fileName: "万能格式转换离线专业版_1.0.0_x64-setup.exe",
+  fileSize: "EXE 约 243.46 MB / MSI 约 254.16 MB",
+  releaseDate: "2026-06-03",
   sha256:
-    "EXE 5DFE1ACD54506DD97B554A02EF09F031D4D1BCF5205AD4A784C82E5B1D410E67 / MSI 5FB61C722D282E9464AE8014B978D04DE5D1AEFFFC80E4EB1C2A6EE5934C5766",
+    "EXE C261524B05DBD962AA73331553FE36801AA59C73C2E105FD8124D867FEF549D9 / MSI FD51973A66786ECA79AF2E8BF0556B061157762D19BA436128ACB574D11D160B",
   primaryDownloadUrl: "",
   backupDownloadUrl: "",
   packages: [
     {
       type: "exe",
       label: "EXE 安装包",
-      fileName: "万能格式转换器_1.0.0_x64-setup.exe",
-      fileSize: "245.62 MB",
-      sha256: "5DFE1ACD54506DD97B554A02EF09F031D4D1BCF5205AD4A784C82E5B1D410E67",
+      fileName: "万能格式转换离线专业版_1.0.0_x64-setup.exe",
+      fileSize: "243.46 MB",
+      sha256: "C261524B05DBD962AA73331553FE36801AA59C73C2E105FD8124D867FEF549D9",
       note: "推荐普通用户使用，包含安装向导。"
     },
     {
       type: "msi",
       label: "MSI 安装包",
-      fileName: "万能格式转换器_1.0.0_x64_zh-CN.msi",
-      fileSize: "256.43 MB",
-      sha256: "5FB61C722D282E9464AE8014B978D04DE5D1AEFFFC80E4EB1C2A6EE5934C5766",
+      fileName: "万能格式转换离线专业版_1.0.0_x64_zh-CN.msi",
+      fileSize: "254.16 MB",
+      sha256: "FD51973A66786ECA79AF2E8BF0556B061157762D19BA436128ACB574D11D160B",
       note: "适合企业、管理员或批量部署场景。"
     }
   ],

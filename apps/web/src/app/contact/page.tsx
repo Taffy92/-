@@ -10,8 +10,8 @@ export const metadata: Metadata = createPageMetadata({
 
 export default function ContactPage() {
   return (
-    <main className="document-page mx-auto max-w-4xl px-4 py-12 text-slate-900 sm:px-6 lg:px-8">
-      <article className="rounded-sm tech-panel p-6 leading-8 sm:p-10">
+    <main className="document-page apple-document-page mx-auto max-w-4xl px-4 py-12 text-slate-900 sm:px-6 lg:px-8">
+      <article className="document-article rounded-sm tech-panel p-6 leading-8 sm:p-10">
         <p className="text-sm font-semibold text-cyan-300">联系</p>
         <h1 className="mt-2 text-3xl font-bold text-slate-50">联系我们</h1>
         <p className="mt-6 text-slate-300">感谢你使用“万能格式转换器”。</p>

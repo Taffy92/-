@@ -15,12 +15,12 @@ CloudBase 统一下载口令云函数。
 DOWNLOAD_PASSWORD=你的下载口令
 LOG_COLLECTION=download_authorization_logs
 DOWNLOAD_URL_MAX_AGE=600
-INSTALLER_FILE_ID=cloud://<你的环境资源路径>/installers/v1.0.0/万能格式转换器_1.0.0_x64-setup.exe
-INSTALLER_FILE_NAME=万能格式转换器_1.0.0_x64-setup.exe
-INSTALLER_EXE_FILE_ID=cloud://<你的环境资源路径>/installers/v1.0.0/万能格式转换器_1.0.0_x64-setup.exe
-INSTALLER_EXE_FILE_NAME=万能格式转换器_1.0.0_x64-setup.exe
-INSTALLER_MSI_FILE_ID=cloud://<你的环境资源路径>/installers/v1.0.0/万能格式转换器_1.0.0_x64_zh-CN.msi
-INSTALLER_MSI_FILE_NAME=万能格式转换器_1.0.0_x64_zh-CN.msi
+INSTALLER_FILE_ID=cloud://<你的环境资源路径>/installers/v1.0.0/万能格式转换离线专业版_1.0.0_x64-setup.exe
+INSTALLER_FILE_NAME=万能格式转换离线专业版_1.0.0_x64-setup.exe
+INSTALLER_EXE_FILE_ID=cloud://<你的环境资源路径>/installers/v1.0.0/万能格式转换离线专业版_1.0.0_x64-setup.exe
+INSTALLER_EXE_FILE_NAME=万能格式转换离线专业版_1.0.0_x64-setup.exe
+INSTALLER_MSI_FILE_ID=cloud://<你的环境资源路径>/installers/v1.0.0/万能格式转换离线专业版_1.0.0_x64_zh-CN.msi
+INSTALLER_MSI_FILE_NAME=万能格式转换离线专业版_1.0.0_x64_zh-CN.msi
 ALLOWED_ORIGINS=https://gszhmrx.cn,https://www.gszhmrx.cn
 ```
 

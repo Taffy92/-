@@ -72,8 +72,12 @@ export function GsapScene({ animateKey, children, variant }: GsapSceneProps) {
       const header = q('[data-animate="tools-header"]');
       const main = q('[data-animate="tools-main"]');
       const side = q('[data-animate="tools-side"]');
+      const dropzone = q('[data-animate="tools-dropzone"]');
+      const actions = q('[data-animate="tools-actions"]');
+      const preview = q('[data-animate="tools-preview"]');
+      const ad = q('[data-animate="tools-ad"]');
 
-      gsap.set([...chrome, ...nav, ...header, ...main, ...side], { willChange: "transform, opacity" });
+      gsap.set([...chrome, ...nav, ...header, ...main, ...side, ...dropzone, ...actions, ...preview, ...ad], { willChange: "transform, opacity" });
 
       gsap.timeline({ defaults: { duration: 0.48, ease: "power3.out" } })
         .from(chrome, { autoAlpha: 0, y: 18, clearProps: "transform,opacity,visibility,willChange" })
@@ -81,6 +85,12 @@ export function GsapScene({ animateKey, children, variant }: GsapSceneProps) {
           autoAlpha: 0,
           y: 18,
           stagger: 0.07,
+          clearProps: "transform,opacity,visibility,willChange"
+        }, "-=0.2")
+        .from([dropzone, actions, preview, ad], {
+          autoAlpha: 0,
+          y: 14,
+          stagger: 0.05,
           clearProps: "transform,opacity,visibility,willChange"
         }, "-=0.2");
     }

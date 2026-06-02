@@ -28,6 +28,7 @@ apps/web/verification/
 # Tauri / Rust build outputs
 target/
 apps/desktop/src-tauri/target/
+.cargo/
 
 # Sidecar binary artifacts are handled by Git LFS or a private artifact store.
 apps/desktop/src-tauri/resources/ffmpeg/bin/*.exe

@@ -15,12 +15,26 @@ describe("online audio/video and batch professional gate", () => {
     expect(toolsClientSource).toContain("视频提取音频");
   });
 
-  it("adds a web-only professional batch gate without enabling the batch queue", () => {
-    expect(toolsClientSource).toContain('id: "batch-gate"');
-    expect(toolsClientSource).toContain("批量处理为离线专业版功能，请下载 Windows 离线专业版使用。");
-    expect(toolsClientSource).toContain('data-testid="online-batch-gate"');
-    expect(toolsClientSource).toContain('tab.id !== "download" && tab.id !== "batch-gate"');
-    expect(toolsClientSource).toContain('case "batch-gate": window.location.href = "/download"; return;');
+  it("keeps the online toolbox free of professional gate layout slots", () => {
+    const webTabsBlock = toolsClientSource.slice(
+      toolsClientSource.indexOf("const webTabs"),
+      toolsClientSource.indexOf("const desktopTabs")
+    );
+    const onlineNavBlock = toolsClientSource.slice(
+      toolsClientSource.indexOf("const onlineNavSections"),
+      toolsClientSource.indexOf("const workbenchCapabilities")
+    );
+
+    expect(webTabsBlock).not.toContain('id: "batch-gate"');
+    expect(webTabsBlock).not.toContain('id: "download"');
+    expect(onlineNavBlock).not.toContain("离线与批量");
+    expect(onlineNavBlock).not.toContain("批量处理");
+    expect(onlineNavBlock).not.toContain("下载离线版");
+    expect(toolsClientSource).not.toContain('data-testid="online-batch-gate"');
+    expect(toolsClientSource).toContain("使用教程");
+    expect(toolsClientSource).toContain("更新日志");
+    expect(toolsClientSource).toContain("下载专业版");
+    expect(toolsClientSource).toContain("文件本地处理，广告与转换数据隔离。");
   });
 
   it("keeps FFmpeg WASM loading on local static assets only", () => {

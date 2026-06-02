@@ -31,8 +31,8 @@ const changes = [
 
 export default function ChangelogPage() {
   return (
-    <main className="document-page mx-auto max-w-4xl px-4 py-12 text-slate-900 sm:px-6 lg:px-8">
-      <article className="rounded-sm tech-panel p-6 sm:p-10">
+    <main className="document-page apple-document-page mx-auto max-w-4xl px-4 py-12 text-slate-900 sm:px-6 lg:px-8">
+      <article className="document-article rounded-sm tech-panel p-6 sm:p-10">
         <p className="text-sm font-semibold text-cyan-300">版本记录</p>
         <h1 className="mt-2 text-3xl font-bold text-slate-50">更新日志</h1>
         <div className="mt-8 rounded-sm border border-cyan-300/12 bg-slate-950/60 p-5">

@@ -2,7 +2,7 @@
 // Do not edit it by hand.
 
 export const thirdPartyNoticeMeta = {
-  "generatedAt": "2026-06-01T10:09:50.777Z",
+  "generatedAt": "2026-06-02T16:41:06.295Z",
   "npmPackageCount": 728,
   "directNpmPackageCount": 35,
   "rustCrateCount": 425,
@@ -22,8 +22,8 @@ export const bundledArtifacts = [
     "label": "Next.js 静态网站产物",
     "path": "apps/web/out",
     "kind": "目录",
-    "files": 285,
-    "sizeBytes": 46697802,
+    "files": 293,
+    "sizeBytes": 44240290,
     "sha256": "",
     "note": "在线版和离线版共用的静态页面、JS、CSS 和静态资源。"
   },
@@ -47,20 +47,20 @@ export const bundledArtifacts = [
   },
   {
     "label": "Windows NSIS 安装包",
-    "path": "apps/desktop/src-tauri/target/release/bundle/nsis/万能格式转换器_1.0.0_x64-setup.exe",
+    "path": "apps/desktop/src-tauri/target/release/bundle/nsis/万能格式转换离线专业版_1.0.0_x64-setup.exe",
     "kind": "文件",
     "files": 1,
-    "sizeBytes": 257550236,
-    "sha256": "5DFE1ACD54506DD97B554A02EF09F031D4D1BCF5205AD4A784C82E5B1D410E67",
+    "sizeBytes": 255288601,
+    "sha256": "C261524B05DBD962AA73331553FE36801AA59C73C2E105FD8124D867FEF549D9",
     "note": "离线版 Windows x64 EXE 安装包。"
   },
   {
     "label": "Windows MSI 安装包",
-    "path": "apps/desktop/src-tauri/target/release/bundle/msi/万能格式转换器_1.0.0_x64_zh-CN.msi",
+    "path": "apps/desktop/src-tauri/target/release/bundle/msi/万能格式转换离线专业版_1.0.0_x64_zh-CN.msi",
     "kind": "文件",
     "files": 1,
-    "sizeBytes": 268890112,
-    "sha256": "5FB61C722D282E9464AE8014B978D04DE5D1AEFFFC80E4EB1C2A6EE5934C5766",
+    "sizeBytes": 266510336,
+    "sha256": "FD51973A66786ECA79AF2E8BF0556B061157762D19BA436128ACB574D11D160B",
     "note": "离线版 Windows x64 MSI 安装包。"
   }
 ] as const;

@@ -51,8 +51,8 @@ export default function PrivacyPage() {
 
 function PolicyArticle({ title, updated, children }: { title: string; updated: string; children: React.ReactNode }) {
   return (
-    <main className="document-page mx-auto max-w-4xl px-4 py-12 text-slate-900 sm:px-6 lg:px-8">
-      <article className="prose prose-invert max-w-none rounded-sm tech-panel p-6 leading-8 sm:p-10">
+    <main className="document-page apple-document-page mx-auto max-w-4xl px-4 py-12 text-slate-900 sm:px-6 lg:px-8">
+      <article className="document-article prose prose-invert max-w-none rounded-sm tech-panel p-6 leading-8 sm:p-10">
         <h1>{title}</h1>
         <p className="text-sm text-slate-400">更新时间：{updated}</p>
         {children}

@@ -1,9 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { AdSlot } from "@doctool/ui";
 import { DownloadAuthBox } from "@/components/download/DownloadAuthBox";
-import { adsConfig } from "@/config/ads";
-import { isDesktopApp } from "@/config/appMode";
 import { downloadsConfig } from "@/config/downloads";
 import { createPageMetadata } from "@/lib/seo";
 
@@ -16,8 +13,8 @@ export const metadata: Metadata = createPageMetadata({
 
 export default function DownloadPage() {
   return (
-    <main className="document-page mx-auto max-w-5xl px-4 py-12 text-slate-900 sm:px-6 lg:px-8">
-      <section className="rounded-sm tech-panel p-6 sm:p-10">
+    <main className="document-page apple-document-page mx-auto max-w-5xl px-4 py-12 text-slate-900 sm:px-6 lg:px-8">
+      <section className="document-hero rounded-sm tech-panel p-6 sm:p-10">
         <p className="text-sm font-semibold text-cyan-300">离线专业版</p>
         <h1 className="mt-2 text-3xl font-bold text-slate-50">下载离线安装版</h1>
         <p className="mt-3 text-slate-300">{downloadsConfig.appName}</p>
@@ -140,12 +137,6 @@ export default function DownloadPage() {
           <li>5. 在线版适合单文件或少量文件快速处理，批量处理请使用 Windows 离线专业版。</li>
         </ol>
       </section>
-
-      {!isDesktopApp ? (
-        <div id="ad-container" className="mt-8">
-          <AdSlot config={adsConfig} name="downloadBottom" />
-        </div>
-      ) : null}
     </main>
   );
 }

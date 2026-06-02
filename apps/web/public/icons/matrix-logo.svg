@@ -1,0 +1,16 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="exclusive-blue-cyan" x1="242" y1="224" x2="662" y2="624" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0066CC"/>
+      <stop offset="0.52" stop-color="#0EA5FF"/>
+      <stop offset="1" stop-color="#30D5C8"/>
+    </linearGradient>
+    <linearGradient id="exclusive-silver" x1="424" y1="360" x2="820" y2="760" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.62" stop-color="#E9EAEC"/>
+      <stop offset="1" stop-color="#A8ADB4"/>
+    </linearGradient>
+  </defs>
+  <path d="M226 392C226 286.514 286.514 226 392 226H516C621.486 226 682 286.514 682 392V516C682 621.486 621.486 682 516 682H392C286.514 682 226 621.486 226 516V392Z" stroke="url(#exclusive-blue-cyan)" stroke-width="72" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M402 488C402 382.514 462.514 322 568 322H692C797.486 322 858 382.514 858 488V612C858 717.486 797.486 778 692 778H568C462.514 778 402 717.486 402 612V488Z" stroke="url(#exclusive-silver)" stroke-width="72" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

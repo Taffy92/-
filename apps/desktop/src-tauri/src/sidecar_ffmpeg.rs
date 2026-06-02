@@ -130,7 +130,7 @@ fn execute_poc(app: AppHandle, request: SidecarPocRequest) -> SidecarCommandResu
   let ffmpeg = resolve_sidecar_file(&app, "ffmpeg.exe").expect("checked above");
   let ffprobe = resolve_sidecar_file(&app, "ffprobe.exe");
 
-  let built = match build_whitelisted_command(&app, mode, request, ffmpeg, ffprobe) {
+  let built = match build_whitelisted_command(mode, request, ffmpeg, ffprobe) {
     Ok(command) => command,
     Err(message) => return failure(mode.as_str(), message, start)
   };
@@ -206,7 +206,6 @@ struct BuiltCommand {
 }
 
 fn build_whitelisted_command(
-  app: &AppHandle,
   mode: PocMode,
   request: SidecarPocRequest,
   ffmpeg: PathBuf,
@@ -242,7 +241,7 @@ fn build_whitelisted_command(
     },
     PocMode::ConvertMp4ToWebm => {
       let input = validate_input_path(request.input_path.as_deref(), &["mp4"])?;
-      let output = validate_output_path(app, request.output_dir.as_deref(), request.output_name.as_deref(), &input, "webm")?;
+      let output = validate_output_path(request.output_dir.as_deref(), request.output_name.as_deref(), &input, "webm")?;
       Ok(BuiltCommand {
         program: ffmpeg,
         args: vec![
@@ -274,7 +273,7 @@ fn build_whitelisted_command(
     },
     PocMode::ConvertWavToFlac => {
       let input = validate_input_path(request.input_path.as_deref(), &["wav"])?;
-      let output = validate_output_path(app, request.output_dir.as_deref(), request.output_name.as_deref(), &input, "flac")?;
+      let output = validate_output_path(request.output_dir.as_deref(), request.output_name.as_deref(), &input, "flac")?;
       Ok(BuiltCommand {
         program: ffmpeg,
         args: vec![
@@ -312,7 +311,6 @@ fn validate_input_path(value: Option<&str>, allowed_extensions: &[&str]) -> Resu
 }
 
 fn validate_output_path(
-  app: &AppHandle,
   output_dir: Option<&str>,
   output_name: Option<&str>,
   input: &Path,
@@ -325,8 +323,6 @@ fn validate_output_path(
   if !canonical_dir.is_dir() {
     return Err("输出路径不是目录，请重新选择输出目录。".to_string());
   }
-  reject_install_or_system_dir(app, &canonical_dir)?;
-
   let stem = output_name
     .map(sanitize_file_stem)
     .filter(|value| !value.is_empty())
@@ -345,6 +341,7 @@ fn reject_parent_components(path: &Path) -> Result<(), String> {
   Ok(())
 }
 
+#[allow(dead_code)]
 fn reject_install_or_system_dir(app: &AppHandle, dir: &Path) -> Result<(), String> {
   let canonical = fs::canonicalize(dir).map_err(|_| "输出目录不存在，请重新选择输出目录。".to_string())?;
   if let Ok(exe) = std::env::current_exe() {
