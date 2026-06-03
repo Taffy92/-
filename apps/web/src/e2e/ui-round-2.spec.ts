@@ -54,10 +54,12 @@ for (const viewport of viewports) {
   });
 }
 
-test("download page keeps authorization copy clear and local-processing promise visible", async ({ page }) => {
+test("download page keeps trial download copy clear and local-processing promise visible", async ({ page }) => {
   await page.goto("/download/", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: "下载离线安装版" })).toBeVisible();
-  await expect(page.getByText("CloudBase 只用于下载授权，不接触用户处理文件").first()).toBeVisible();
+  await expect(page.getByText("离线专业版现在可以直接下载试用")).toBeVisible();
+  await expect(page.getByText("软件首次运行后自动开启本机 3 天试用")).toBeVisible();
+  await expect(page.getByRole("link", { name: /下载 EXE 3 天试用版/ })).toHaveAttribute("href", /x64-setup\.exe$/);
   await expect(page.getByRole("link", { name: "发布说明" })).toHaveAttribute("href", "/release/v1.0.0/docs/release-notes/");
   await expect(page.getByRole("link", { name: "安装指南" })).toHaveAttribute("href", "/release/v1.0.0/docs/install-guide/");
   await expect(page.locator("#ad-container")).toHaveCount(1);

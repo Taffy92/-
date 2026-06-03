@@ -1,29 +1,39 @@
+const installerBasePath = "/release/v1.0.0/installers";
+const exeFileName = "万能格式转换离线专业版_1.0.0_x64-setup.exe";
+const msiFileName = "万能格式转换离线专业版_1.0.0_x64_zh-CN.msi";
+const msiStorageDownloadUrl =
+  "https://666f-format-converter-prod-x-d71bce41-1434109188.tcb.qcloud.la/release/v1.0.0/installers/%E4%B8%87%E8%83%BD%E6%A0%BC%E5%BC%8F%E8%BD%AC%E6%8D%A2%E7%A6%BB%E7%BA%BF%E4%B8%93%E4%B8%9A%E7%89%88_1.0.0_x64_zh-CN.msi";
+const exeDownloadUrl = process.env.NEXT_PUBLIC_OFFLINE_EXE_DOWNLOAD_URL || `${installerBasePath}/${exeFileName}`;
+const msiDownloadUrl = process.env.NEXT_PUBLIC_OFFLINE_MSI_DOWNLOAD_URL || msiStorageDownloadUrl;
+
 export const downloadsConfig = {
   appName: "万能格式转换离线专业版",
   version: "1.0.0",
-  fileName: "万能格式转换离线专业版_1.0.0_x64-setup.exe",
-  fileSize: "EXE 约 243.46 MB / MSI 约 254.16 MB",
+  fileName: exeFileName,
+  fileSize: "EXE 约 243.56 MB / MSI 约 254.27 MB",
   releaseDate: "2026-06-03",
   sha256:
-    "EXE C261524B05DBD962AA73331553FE36801AA59C73C2E105FD8124D867FEF549D9 / MSI FD51973A66786ECA79AF2E8BF0556B061157762D19BA436128ACB574D11D160B",
-  primaryDownloadUrl: "",
-  backupDownloadUrl: "",
+    "EXE DF8258E77E2250CA513CAACF4FA4BC380812A92F687030E75042E6FAF1B2F6FD / MSI 83AE0FF2E23EAE9B0B9E64CD4579DD86202C392EBD330A0D78A142309B9577E8",
+  primaryDownloadUrl: exeDownloadUrl,
+  backupDownloadUrl: msiDownloadUrl,
   packages: [
     {
       type: "exe",
       label: "EXE 安装包",
-      fileName: "万能格式转换离线专业版_1.0.0_x64-setup.exe",
-      fileSize: "243.46 MB",
-      sha256: "C261524B05DBD962AA73331553FE36801AA59C73C2E105FD8124D867FEF549D9",
-      note: "推荐普通用户使用，包含安装向导。"
+      fileName: exeFileName,
+      downloadUrl: exeDownloadUrl,
+      fileSize: "243.56 MB",
+      sha256: "DF8258E77E2250CA513CAACF4FA4BC380812A92F687030E75042E6FAF1B2F6FD",
+      note: "推荐普通用户使用，安装后自动开启本机 3 天试用。"
     },
     {
       type: "msi",
       label: "MSI 安装包",
-      fileName: "万能格式转换离线专业版_1.0.0_x64_zh-CN.msi",
-      fileSize: "254.16 MB",
-      sha256: "FD51973A66786ECA79AF2E8BF0556B061157762D19BA436128ACB574D11D160B",
-      note: "适合企业、管理员或批量部署场景。"
+      fileName: msiFileName,
+      downloadUrl: msiDownloadUrl,
+      fileSize: "254.27 MB",
+      sha256: "83AE0FF2E23EAE9B0B9E64CD4579DD86202C392EBD330A0D78A142309B9577E8",
+      note: "适合企业、管理员或批量部署场景，同样内置 3 天试用。"
     }
   ],
   changelog: [

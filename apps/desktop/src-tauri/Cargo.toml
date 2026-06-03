@@ -15,6 +15,10 @@ tauri = { version = "1.6", features = [ "dialog-confirm", "fs-read-dir", "fs-cre
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha2 = "0.10"
+base64 = "0.22"
+ed25519-dalek = "2"
+hmac = "0.12"
+winreg = "0.52"
 
 [features]
 custom-protocol = ["tauri/custom-protocol"]

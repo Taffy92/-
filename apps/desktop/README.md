@@ -13,4 +13,8 @@ Windows 安装包使用 Tauri `webviewInstallMode.type = "offlineInstaller"`，�
 
 离线版启动后进入专业工具箱界面：左侧按图片、文档、音视频分组，中央显示上传入口和任务队列，右侧显示当前工具参数。批量导入跟随当前转换工具，不作为单独页面维护。
 
+商业授权为本地 3 天试用 + 机器码绑定激活码或 `license.mrx` 授权文件。桌面端只内置公钥校验授权签名，私钥和客户记录只保留在管理员本地。详细流程见 `../../docs/offline-license.md`。
+
+Windows SmartScreen 提示需要通过代码签名证书和长期信誉解决，不能靠安装包 UI 直接消除。说明见 `../../docs/windows-smartscreen-signing.md`。
+
 正式发布前，需要在断网 Windows 10/11 x64 电脑或虚拟机中验证安装流程和所有核心功能。软件内保留“开源许可证”页面，用于展示依赖库的许可证和商业使用保留说明。

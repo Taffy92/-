@@ -1,0 +1,15 @@
+{
+  "version": "2.0",
+  "envId": "format-converter-prod-x-d71bce41",
+  "functionRoot": "functions",
+  "functions": [
+    {
+      "name": "licenseAdmin",
+      "timeout": 10,
+      "memorySize": 256,
+      "runtime": "Nodejs18.15",
+      "handler": "index.main",
+      "description": "万能格式转换器离线专业版私有授权后台"
+    }
+  ]
+}

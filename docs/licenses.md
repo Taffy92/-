@@ -2,11 +2,11 @@
 
 本文件为“万能格式转换器”在线版和 Windows 离线安装版的第三方开源软件 Notices。内容根据锁文件、本地依赖元数据和最终构建产物生成，用于正式发布前的许可证归档和产品内展示。
 
-- 生成时间：2026-06-02T16:41:06.295Z
+- 生成时间：2026-06-03T13:14:04.835Z
 - npm 依赖数量：728
 - 直接 npm 依赖数量：35
-- Rust crate 数量：425
-- 构建产物记录数量：5
+- Rust crate 数量：439
+- 构建产物记录数量：7
 - 开发者：MR.谢
 - 联系邮箱：370298218@qq.com
 
@@ -32,11 +32,13 @@
 
 | 名称 | 路径 | 类型 | 文件数 | 大小 | SHA256 | 说明 |
 | --- | --- | --- | --- | --- | --- | --- |
-| Next.js 静态网站产物 | `apps/web/out` | 目录 | 293 | 42.19 MB | - | 在线版和离线版共用的静态页面、JS、CSS 和静态资源。 |
+| Next.js 静态网站产物 | `apps/web/out` | 目录 | 295 | 42.19 MB | - | 在线版和离线版共用的静态页面、JS、CSS 和静态资源。 |
 | PDF.js 静态资源 | `apps/web/out/pdfjs` | 目录 | 189 | 3.80 MB | - | 来自 pdfjs-dist 的主模块、worker、CMaps 和字体资源。 |
 | FFmpeg WASM 静态资源 | `apps/web/out/ffmpeg` | 目录 | 2 | 30.85 MB | - | 来自 @ffmpeg/core 的 ffmpeg-core.js 和 ffmpeg-core.wasm。 |
-| Windows NSIS 安装包 | `apps/desktop/src-tauri/target/release/bundle/nsis/万能格式转换离线专业版_1.0.0_x64-setup.exe` | 文件 | 1 | 243.46 MB | C261524B05DBD962AA73331553FE36801AA59C73C2E105FD8124D867FEF549D9 | 离线版 Windows x64 EXE 安装包。 |
-| Windows MSI 安装包 | `apps/desktop/src-tauri/target/release/bundle/msi/万能格式转换离线专业版_1.0.0_x64_zh-CN.msi` | 文件 | 1 | 254.16 MB | FD51973A66786ECA79AF2E8BF0556B061157762D19BA436128ACB574D11D160B | 离线版 Windows x64 MSI 安装包。 |
+| Windows NSIS 安装包 | `apps/desktop/src-tauri/target/release/bundle/nsis/万能格式转换器_1.0.0_x64-setup.exe` | 文件 | 1 | 243.56 MB | DF8258E77E2250CA513CAACF4FA4BC380812A92F687030E75042E6FAF1B2F6FD | 离线版 Windows x64 EXE 安装包。 |
+| Windows NSIS 安装包 | `apps/desktop/src-tauri/target/release/bundle/nsis/万能格式转换离线专业版_1.0.0_x64-setup.exe` | 文件 | 1 | 243.56 MB | DF8258E77E2250CA513CAACF4FA4BC380812A92F687030E75042E6FAF1B2F6FD | 离线版 Windows x64 EXE 安装包。 |
+| Windows MSI 安装包 | `apps/desktop/src-tauri/target/release/bundle/msi/万能格式转换器_1.0.0_x64_zh-CN.msi` | 文件 | 1 | 254.27 MB | 83AE0FF2E23EAE9B0B9E64CD4579DD86202C392EBD330A0D78A142309B9577E8 | 离线版 Windows x64 MSI 安装包。 |
+| Windows MSI 安装包 | `apps/desktop/src-tauri/target/release/bundle/msi/万能格式转换离线专业版_1.0.0_x64_zh-CN.msi` | 文件 | 1 | 254.27 MB | 83AE0FF2E23EAE9B0B9E64CD4579DD86202C392EBD330A0D78A142309B9577E8 | 离线版 Windows x64 MSI 安装包。 |
 
 ## 直接 npm 依赖
 
@@ -827,6 +829,7 @@
 | base64 | 0.13.1 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 9e1b586273c5702936fe7b7d6896644d8be71e6314cfe09d3167c95f712589e8 |
 | base64 | 0.21.7 | MIT OR Apache-2.0 | https://github.com/marshallpierce/rust-base64 | registry+https://github.com/rust-lang/crates.io-index | 9d297deb1925b89f2ccc13d7635fa0714f12c87adce1c75356b39ca9b7178567 |
 | base64 | 0.22.1 | MIT OR Apache-2.0 | https://github.com/marshallpierce/rust-base64 | registry+https://github.com/rust-lang/crates.io-index | 72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6 |
+| base64ct | 1.8.3 | Apache-2.0 OR MIT | https://github.com/RustCrypto/formats | registry+https://github.com/rust-lang/crates.io-index | 2af50177e190e07a26ab74f8b1efbfe2ef87da2116221318cb1c2e82baf7de06 |
 | bitflags | 1.3.2 | MIT/Apache-2.0 | https://github.com/bitflags/bitflags | registry+https://github.com/rust-lang/crates.io-index | bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a |
 | bitflags | 2.11.1 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | c4512299f36f043ab09a583e57bceb5a5aab7a73db1805848e8fef3c9e8c78b3 |
 | block | 0.1.6 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 0d8c1fef690941d3e7788d328517591fecc684c084084702d6ff1641e993699a |
@@ -853,6 +856,7 @@
 | cocoa-foundation | 0.1.2 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 8c6234cbb2e4c785b456c0644748b1ac416dd045799740356f8363dfe00c93f7 |
 | color_quant | 1.1.0 | MIT | https://github.com/image-rs/color_quant.git | registry+https://github.com/rust-lang/crates.io-index | 3d7b894f5411737b7867f4827955924d7c254fc9f4d91a6aad6b097804b1018b |
 | combine | 4.6.7 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | ba5a308b75df32fe02788e748662718f03fde005016435c444eea572398219fd |
+| const-oid | 0.9.6 | Apache-2.0 OR MIT | https://github.com/RustCrypto/formats/tree/master/const-oid | registry+https://github.com/rust-lang/crates.io-index | c2459377285ad874054d797f3ccebf984978aa39129f6eafde5cdc8315b612f8 |
 | convert_case | 0.4.0 | MIT | https://github.com/rutrum/convert-case | registry+https://github.com/rust-lang/crates.io-index | 6245d59a3e82a7fc217c5828a6692dbc6dfb63a0c8c90495621f7b9d79704a0e |
 | core-foundation | 0.9.4 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 91e195e091a93c46f7102ec7818a2aa394e1e1771c3ab4825963fa03e45afb8f |
 | core-foundation-sys | 0.8.7 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b |
@@ -868,9 +872,12 @@
 | cssparser | 0.27.2 | MPL-2.0 | https://github.com/servo/rust-cssparser | registry+https://github.com/rust-lang/crates.io-index | 754b69d351cdc2d8ee09ae203db831e005560fc6030da058f86ad60c92a9cb0a |
 | cssparser-macros | 0.6.1 | MPL-2.0 | https://github.com/servo/rust-cssparser | registry+https://github.com/rust-lang/crates.io-index | 13b588ba4ac1a99f7f2964d24b3d896ddc6bf847ee3855dbd4366f058cfcd331 |
 | ctor | 0.2.9 | Apache-2.0 OR MIT | https://github.com/mmastrac/rust-ctor | registry+https://github.com/rust-lang/crates.io-index | 32a2785755761f3ddc1492979ce1e48d2c00d09311c39e4466429188f3dd6501 |
+| curve25519-dalek | 4.1.3 | BSD-3-Clause | https://github.com/dalek-cryptography/curve25519-dalek/tree/main/curve25519-dalek | registry+https://github.com/rust-lang/crates.io-index | 97fb8b7c4503de7d6ae7b42ab72a5a59857b4c937ec27a3d4539dba95b5ab2be |
+| curve25519-dalek-derive | 0.1.1 | MIT/Apache-2.0 | https://github.com/dalek-cryptography/curve25519-dalek | registry+https://github.com/rust-lang/crates.io-index | f46882e17999c6cc590af592290432be3bce0428cb0d5f8b6715e4dc7b383eb3 |
 | darling | 0.23.0 | MIT | https://github.com/TedDriggs/darling | registry+https://github.com/rust-lang/crates.io-index | 25ae13da2f202d56bd7f91c25fba009e7717a1e4a1cc98a76d844b65ae912e9d |
 | darling_core | 0.23.0 | MIT | https://github.com/TedDriggs/darling | registry+https://github.com/rust-lang/crates.io-index | 9865a50f7c335f53564bb694ef660825eb8610e0a53d3e11bf1b0d3df31e03b0 |
 | darling_macro | 0.23.0 | MIT | https://github.com/TedDriggs/darling | registry+https://github.com/rust-lang/crates.io-index | ac3984ec7bd6cfa798e62b4a642426a5be0e68f9401cfc2a01e3fa9ea2fcdb8d |
+| der | 0.7.10 | Apache-2.0 OR MIT | https://github.com/RustCrypto/formats/tree/master/der | registry+https://github.com/rust-lang/crates.io-index | e7c1832837b905bbfb5101e07cc24c8deddf52f93225eee6ead5f4d63d53ddcb |
 | deranged | 0.5.8 | MIT OR Apache-2.0 | https://github.com/jhpratt/deranged | registry+https://github.com/rust-lang/crates.io-index | 7cd812cc2bc1d69d4764bd80df88b4317eaef9e773c75226407d9bc0876b211c |
 | derive_more | 0.99.20 | MIT | https://github.com/JelteF/derive_more | registry+https://github.com/rust-lang/crates.io-index | 6edb4b64a43d977b8e99788fe3a04d483834fba1215a7e02caa415b626497f7f |
 | digest | 0.10.7 | MIT OR Apache-2.0 | https://github.com/RustCrypto/traits | registry+https://github.com/rust-lang/crates.io-index | 9ed9a281f7bc9b7576e61468ba615a66a5c8cfdff42420a70aa82701a3b1e292 |
@@ -882,6 +889,8 @@
 | dtoa-short | 0.3.5 | MPL-2.0 | https://github.com/upsuper/dtoa-short | registry+https://github.com/rust-lang/crates.io-index | cd1511a7b6a56299bd043a9c167a6d2bfb37bf84a6dfceaba651168adfb43c87 |
 | dunce | 1.0.5 | CC0-1.0 OR MIT-0 OR Apache-2.0 | https://gitlab.com/kornelski/dunce | registry+https://github.com/rust-lang/crates.io-index | 92773504d58c093f6de2459af4af33faa518c13451eb8f2b5698ed3d36e7c813 |
 | dyn-clone | 1.0.20 | MIT OR Apache-2.0 | https://github.com/dtolnay/dyn-clone | registry+https://github.com/rust-lang/crates.io-index | d0881ea181b1df73ff77ffaaf9c7544ecc11e82fba9b5f27b262a3c73a332555 |
+| ed25519 | 2.2.3 | Apache-2.0 OR MIT | https://github.com/RustCrypto/signatures/tree/master/ed25519 | registry+https://github.com/rust-lang/crates.io-index | 115531babc129696a58c64a4fef0a8bf9e9698629fb97e9e40767d235cfbcd53 |
+| ed25519-dalek | 2.2.0 | BSD-3-Clause | https://github.com/dalek-cryptography/curve25519-dalek/tree/main/ed25519-dalek | registry+https://github.com/rust-lang/crates.io-index | 70e796c081cee67dc755e1a36a0a172b897fab85fc3f6bc48307991f64e4eca9 |
 | embed_plist | 1.2.2 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 4ef6b89e5b37196644d8796de5268852ff179b44e96276cf4290264843743bb7 |
 | embed-resource | 2.5.2 | MIT | https://github.com/nabijaczleweli/rust-embed-resource | registry+https://github.com/rust-lang/crates.io-index | d506610004cfc74a6f5ee7e8c632b355de5eca1f03ee5e5e0ec11b77d4eb3d61 |
 | encoding_rs | 0.8.35 | (Apache-2.0 OR MIT) AND BSD-3-Clause | https://github.com/hsivonen/encoding_rs | registry+https://github.com/rust-lang/crates.io-index | 75030f3c4f45dafd7586dd6780965a8c7e8e285a5ecb86713e63a79c5b2766f3 |
@@ -889,6 +898,7 @@
 | errno | 0.3.14 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb |
 | fastrand | 2.4.1 | Apache-2.0 OR MIT | https://github.com/smol-rs/fastrand | registry+https://github.com/rust-lang/crates.io-index | 9f1f227452a390804cdb637b74a86990f2a7d7ba4b7d5693aac9b4dd6defd8d6 |
 | fdeflate | 0.3.7 | MIT OR Apache-2.0 | https://github.com/image-rs/fdeflate | registry+https://github.com/rust-lang/crates.io-index | 1e6853b52649d4ac5c0bd02320cddc5ba956bdb407c4b75a2c6b75bf51500f8c |
+| fiat-crypto | 0.2.9 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 28dea519a9695b9977216879a3ebfddf92f1c08c05d984f8996aecd6ecdc811d |
 | field-offset | 0.3.6 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 38e2275cc4e4fc009b0669731a1e5ab7ebf11f469eaede2bab9309a5b4d6057f |
 | filetime | 0.2.29 | MIT/Apache-2.0 | https://github.com/alexcrichton/filetime | registry+https://github.com/rust-lang/crates.io-index | 5c287a33c7f0a620c38e641e7f60827713987b3c0f26e8ddc9462cc69cf75759 |
 | find-msvc-tools | 0.1.9 | MIT OR Apache-2.0 | https://github.com/rust-lang/cc-rs | registry+https://github.com/rust-lang/crates.io-index | 5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582 |
@@ -937,6 +947,7 @@
 | heck | 0.4.1 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 95505c38b4572b2d910cecb0281560f54b440a19336cbbcb27bf6ce6adc6f5a8 |
 | heck | 0.5.0 | MIT OR Apache-2.0 | https://github.com/withoutboats/heck | registry+https://github.com/rust-lang/crates.io-index | 2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea |
 | hex | 0.4.3 | MIT OR Apache-2.0 | https://github.com/KokaKiwi/rust-hex | registry+https://github.com/rust-lang/crates.io-index | 7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70 |
+| hmac | 0.12.1 | MIT OR Apache-2.0 | https://github.com/RustCrypto/MACs | registry+https://github.com/rust-lang/crates.io-index | 6c49c37c09c17a53d937dfbb742eb3a961d65a994e6bcdcf37e7399d0cc8ab5e |
 | html5ever | 0.26.0 | MIT OR Apache-2.0 | https://github.com/servo/html5ever | registry+https://github.com/rust-lang/crates.io-index | bea68cab48b8459f17cf1c944c67ddc572d272d9f2b274140f223ecb1da4a3b7 |
 | http | 0.2.12 | MIT OR Apache-2.0 | https://github.com/hyperium/http | registry+https://github.com/rust-lang/crates.io-index | 601cbb57e577e2f5ef5be8e7b83f0f63994f25aa94d673e54a92d5c516d101f1 |
 | http-range | 0.1.5 | MIT | https://github.com/bancek/rust-http-range.git | registry+https://github.com/rust-lang/crates.io-index | 21dec9db110f5f872ed9699c3ecf50cf16f423502706ba5c72462e28d3157573 |
@@ -1025,6 +1036,7 @@
 | phf_shared | 0.11.3 | MIT | https://github.com/rust-phf/rust-phf | registry+https://github.com/rust-lang/crates.io-index | 67eabc2ef2a60eb7faa00097bd1ffdb5bd28e62bf39990626a582201b7a754e5 |
 | phf_shared | 0.8.0 | MIT | https://github.com/sfackler/rust-phf | registry+https://github.com/rust-lang/crates.io-index | c00cf8b9eafe68dde5e9eaa2cef8ee84a9336a47d566ec55ca16589633b65af7 |
 | pin-project-lite | 0.2.17 | Apache-2.0 OR MIT | https://github.com/taiki-e/pin-project-lite | registry+https://github.com/rust-lang/crates.io-index | a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd |
+| pkcs8 | 0.10.2 | Apache-2.0 OR MIT | https://github.com/RustCrypto/formats/tree/master/pkcs8 | registry+https://github.com/rust-lang/crates.io-index | f950b2377845cebe5cf8b5165cb3cc1a5e0fa5cfa3e1f7f55707d8fd82e0a7b7 |
 | pkg-config | 0.3.33 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 19f132c84eca552bf34cab8ec81f1c1dcc229b811638f9d283dceabe58c5569e |
 | plist | 1.9.0 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 092791278e026273c1b65bbdcfbba3a300f2994c896bd01ab01da613c29c46f1 |
 | png | 0.17.16 | MIT OR Apache-2.0 | https://github.com/image-rs/image-png | registry+https://github.com/rust-lang/crates.io-index | 82151a2fc869e011c153adc57cf2789ccb8d9906ce52c0b39a6b5697749d7526 |
@@ -1082,6 +1094,7 @@
 | sha2 | 0.10.9 | MIT OR Apache-2.0 | https://github.com/RustCrypto/hashes | registry+https://github.com/rust-lang/crates.io-index | a7507d819769d01a365ab707794a4084392c824f54a7a6a7862f8c3d0892b283 |
 | sharded-slab | 0.1.7 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | f40ca3c46823713e0d4209592e8d6e826aa57e928f09752619fc696c499637f6 |
 | shlex | 1.3.0 | MIT OR Apache-2.0 | https://github.com/comex/rust-shlex | registry+https://github.com/rust-lang/crates.io-index | 0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64 |
+| signature | 2.2.0 | Apache-2.0 OR MIT | https://github.com/RustCrypto/traits/tree/master/signature | registry+https://github.com/rust-lang/crates.io-index | 77549399552de45a898a580c1b41d445bf730df867cc44e6c0233bbc4b8329de |
 | simd-adler32 | 0.3.9 | MIT | https://github.com/mcountryman/simd-adler32 | registry+https://github.com/rust-lang/crates.io-index | 703d5c7ef118737c72f1af64ad2f6f8c5e1921f818cdcb97b8fe6fc69bf66214 |
 | siphasher | 0.3.11 | MIT/Apache-2.0 | https://github.com/jedisct1/rust-siphash | registry+https://github.com/rust-lang/crates.io-index | 38b58827f4464d87d377d175e90bf58eb00fd8716ff0a62f80356b5e61555d0d |
 | siphasher | 1.0.3 | MIT/Apache-2.0 | https://github.com/jedisct1/rust-siphash | registry+https://github.com/rust-lang/crates.io-index | 8ee5873ec9cce0195efcb7a4e9507a04cd49aec9c83d0389df45b1ef7ba2e649 |
@@ -1089,11 +1102,13 @@
 | smallvec | 1.15.1 | MIT OR Apache-2.0 | https://github.com/servo/rust-smallvec | registry+https://github.com/rust-lang/crates.io-index | 67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03 |
 | soup2 | 0.2.1 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | b2b4d76501d8ba387cf0fefbe055c3e0a59891d09f0f995ae4e4b16f6b60f3c0 |
 | soup2-sys | 0.2.0 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 009ef427103fcb17f802871647a7fa6c60cbb654b4c4e4c0ac60a31c5f6dc9cf |
+| spki | 0.7.3 | Apache-2.0 OR MIT | https://github.com/RustCrypto/formats/tree/master/spki | registry+https://github.com/rust-lang/crates.io-index | d91ed6c858b01f942cd56b37a94b3e0a1798290327d1236e4d9cf4eaca44d29d |
 | stable_deref_trait | 1.2.1 | MIT OR Apache-2.0 | https://github.com/storyyeller/stable_deref_trait | registry+https://github.com/rust-lang/crates.io-index | 6ce2be8dc25455e1f91df71bfa12ad37d7af1092ae736f3a6cd0e37bc7810596 |
 | state | 0.5.3 | MIT/Apache-2.0 | https://github.com/SergioBenitez/state | registry+https://github.com/rust-lang/crates.io-index | dbe866e1e51e8260c9eed836a042a5e7f6726bb2b411dffeaa712e19c388f23b |
 | string_cache | 0.8.9 | MIT OR Apache-2.0 | https://github.com/servo/string-cache | registry+https://github.com/rust-lang/crates.io-index | bf776ba3fa74f83bf4b63c3dcbbf82173db2632ed8452cb2d891d33f459de70f |
 | string_cache_codegen | 0.5.4 | MIT OR Apache-2.0 | https://github.com/servo/string-cache | registry+https://github.com/rust-lang/crates.io-index | c711928715f1fe0fe509c53b43e993a9a557babc2d0a3567d0a3006f1ac931a0 |
 | strsim | 0.11.1 | MIT | https://github.com/rapidfuzz/strsim-rs | registry+https://github.com/rust-lang/crates.io-index | 7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f |
+| subtle | 2.6.1 | BSD-3-Clause | https://github.com/dalek-cryptography/subtle | registry+https://github.com/rust-lang/crates.io-index | 13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292 |
 | syn | 1.0.109 | MIT OR Apache-2.0 | https://github.com/dtolnay/syn | registry+https://github.com/rust-lang/crates.io-index | 72b64191b275b66ffe2469e8af2c1cfe3bafa67b529ead792a6d0160888b4237 |
 | syn | 2.0.117 | MIT OR Apache-2.0 | https://github.com/dtolnay/syn | registry+https://github.com/rust-lang/crates.io-index | e665b8803e7b1d2a727f4023456bbbbe74da67099c585258af0ad9c5013b9b99 |
 | synstructure | 0.13.2 | MIT | https://github.com/mystor/synstructure | registry+https://github.com/rust-lang/crates.io-index | 728a70f3dbaf5bab7f0c4b1ac8d7ae5ea60a4b5549c8a5914361c99147a709d2 |
@@ -1236,6 +1251,7 @@
 | zerocopy-derive | 0.8.48 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 70e3cd084b1788766f53af483dd21f93881ff30d7320490ec3ef7526d203bad4 |
 | zerofrom | 0.1.8 | Unicode-3.0 | https://github.com/unicode-org/icu4x | registry+https://github.com/rust-lang/crates.io-index | 0ec05a11813ea801ff6d75110ad09cd0824ddba17dfe17128ea0d5f68e6c5272 |
 | zerofrom-derive | 0.1.7 | Unicode-3.0 | https://github.com/unicode-org/icu4x | registry+https://github.com/rust-lang/crates.io-index | 11532158c46691caf0f2593ea8358fed6bbf68a0315e80aae9bd41fbade684a1 |
+| zeroize | 1.8.2 | Apache-2.0 OR MIT | https://github.com/RustCrypto/utils | registry+https://github.com/rust-lang/crates.io-index | b97154e67e32c85465826e8bcc1c59429aaaf107c1e4a9e53c8d8ccd5eff88d0 |
 | zerotrie | 0.2.4 | Unicode-3.0 | https://github.com/unicode-org/icu4x | registry+https://github.com/rust-lang/crates.io-index | 0f9152d31db0792fa83f70fb2f83148effb5c1f5b8c7686c3459e361d9bc20bf |
 | zerovec | 0.11.6 | Unicode-3.0 | https://github.com/unicode-org/icu4x | registry+https://github.com/rust-lang/crates.io-index | 90f911cbc359ab6af17377d242225f4d75119aec87ea711a880987b18cd7b239 |
 | zerovec-derive | 0.11.3 | Unicode-3.0 | https://github.com/unicode-org/icu4x | registry+https://github.com/rust-lang/crates.io-index | 625dc425cab0dca6dc3c3319506e6593dcb08a9f387ea3b284dbd52a92c40555 |
@@ -1247,3 +1263,4 @@
 2. 离线版：在程序的“开源许可证”页面展示同一份 Notices，并随安装包或安装目录保留 `THIRD_PARTY_NOTICES.md`。
 3. 发布包：保留项目根目录 `LICENSE`、`THIRD_PARTY_NOTICES.md`、`docs/licenses.md` 和 `docs/third-party-notices.md`。
 4. 如果更新依赖、重新打包离线版或替换 WASM/PDF/FFmpeg 静态资源，请重新运行 `pnpm generate:notices`。
+

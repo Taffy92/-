@@ -49,7 +49,15 @@ AppData/
 .DS_Store
 Thumbs.db
 
+# Local licensing secrets and generated licenses
+tools/admin-license-generator/keys/
+tools/admin-license-generator/license_records.json
+tools/admin-license-generator/out/
+tools/admin-license-generator/.tmp/
+tools/admin-license-generator/**/*.mrx
+
 # Local previews and screenshots
+.preview/
 desktop-preview*.png
 apps/web/desktop-review*.png
 preview-*.png
@@ -96,7 +104,10 @@ verification/**/msi-admin-extract/
 # Release installers are distributed via CloudBase/COS/Release artifacts.
 release/*/installers/*.exe
 release/*/installers/*.msi
+apps/web/public/release/*/installers/*.exe
+apps/web/public/release/*/installers/*.msi
 !release/*/installers/SHA256SUMS.txt
+!apps/web/public/release/*/installers/SHA256SUMS.txt
 
 # Release verification: keep Markdown audit records, ignore generated evidence.
 release/*/verification/**/*.log

@@ -2,11 +2,11 @@
 // Do not edit it by hand.
 
 export const thirdPartyNoticeMeta = {
-  "generatedAt": "2026-06-02T16:41:06.295Z",
+  "generatedAt": "2026-06-03T13:14:04.835Z",
   "npmPackageCount": 728,
   "directNpmPackageCount": 35,
-  "rustCrateCount": 425,
-  "bundledArtifactCount": 5,
+  "rustCrateCount": 439,
+  "bundledArtifactCount": 7,
   "sources": [
     "pnpm-lock.yaml",
     "node_modules/.pnpm/**/package.json",
@@ -22,8 +22,8 @@ export const bundledArtifacts = [
     "label": "Next.js 静态网站产物",
     "path": "apps/web/out",
     "kind": "目录",
-    "files": 293,
-    "sizeBytes": 44240290,
+    "files": 295,
+    "sizeBytes": 44243520,
     "sha256": "",
     "note": "在线版和离线版共用的静态页面、JS、CSS 和静态资源。"
   },
@@ -47,12 +47,30 @@ export const bundledArtifacts = [
   },
   {
     "label": "Windows NSIS 安装包",
+    "path": "apps/desktop/src-tauri/target/release/bundle/nsis/万能格式转换器_1.0.0_x64-setup.exe",
+    "kind": "文件",
+    "files": 1,
+    "sizeBytes": 255387018,
+    "sha256": "DF8258E77E2250CA513CAACF4FA4BC380812A92F687030E75042E6FAF1B2F6FD",
+    "note": "离线版 Windows x64 EXE 安装包。"
+  },
+  {
+    "label": "Windows NSIS 安装包",
     "path": "apps/desktop/src-tauri/target/release/bundle/nsis/万能格式转换离线专业版_1.0.0_x64-setup.exe",
     "kind": "文件",
     "files": 1,
     "sizeBytes": 255288601,
-    "sha256": "C261524B05DBD962AA73331553FE36801AA59C73C2E105FD8124D867FEF549D9",
+    "sha256": "DF8258E77E2250CA513CAACF4FA4BC380812A92F687030E75042E6FAF1B2F6FD",
     "note": "离线版 Windows x64 EXE 安装包。"
+  },
+  {
+    "label": "Windows MSI 安装包",
+    "path": "apps/desktop/src-tauri/target/release/bundle/msi/万能格式转换器_1.0.0_x64_zh-CN.msi",
+    "kind": "文件",
+    "files": 1,
+    "sizeBytes": 266625024,
+    "sha256": "83AE0FF2E23EAE9B0B9E64CD4579DD86202C392EBD330A0D78A142309B9577E8",
+    "note": "离线版 Windows x64 MSI 安装包。"
   },
   {
     "label": "Windows MSI 安装包",
@@ -60,7 +78,7 @@ export const bundledArtifacts = [
     "kind": "文件",
     "files": 1,
     "sizeBytes": 266510336,
-    "sha256": "FD51973A66786ECA79AF2E8BF0556B061157762D19BA436128ACB574D11D160B",
+    "sha256": "83AE0FF2E23EAE9B0B9E64CD4579DD86202C392EBD330A0D78A142309B9577E8",
     "note": "离线版 Windows x64 MSI 安装包。"
   }
 ] as const;
@@ -10743,6 +10761,15 @@ export const rustCrates = [
     "checksum": "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
   },
   {
+    "name": "base64ct",
+    "version": "1.8.3",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/RustCrypto/formats",
+    "homepage": "https://github.com/RustCrypto/formats/tree/master/base64ct",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "checksum": "2af50177e190e07a26ab74f8b1efbfe2ef87da2116221318cb1c2e82baf7de06"
+  },
+  {
     "name": "bitflags",
     "version": "1.3.2",
     "license": "MIT/Apache-2.0",
@@ -10977,6 +11004,15 @@ export const rustCrates = [
     "checksum": "ba5a308b75df32fe02788e748662718f03fde005016435c444eea572398219fd"
   },
   {
+    "name": "const-oid",
+    "version": "0.9.6",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/RustCrypto/formats/tree/master/const-oid",
+    "homepage": "",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "checksum": "c2459377285ad874054d797f3ccebf984978aa39129f6eafde5cdc8315b612f8"
+  },
+  {
     "name": "convert_case",
     "version": "0.4.0",
     "license": "MIT",
@@ -11112,6 +11148,24 @@ export const rustCrates = [
     "checksum": "32a2785755761f3ddc1492979ce1e48d2c00d09311c39e4466429188f3dd6501"
   },
   {
+    "name": "curve25519-dalek",
+    "version": "4.1.3",
+    "license": "BSD-3-Clause",
+    "repository": "https://github.com/dalek-cryptography/curve25519-dalek/tree/main/curve25519-dalek",
+    "homepage": "https://github.com/dalek-cryptography/curve25519-dalek",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "checksum": "97fb8b7c4503de7d6ae7b42ab72a5a59857b4c937ec27a3d4539dba95b5ab2be"
+  },
+  {
+    "name": "curve25519-dalek-derive",
+    "version": "0.1.1",
+    "license": "MIT/Apache-2.0",
+    "repository": "https://github.com/dalek-cryptography/curve25519-dalek",
+    "homepage": "https://github.com/dalek-cryptography/curve25519-dalek",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "checksum": "f46882e17999c6cc590af592290432be3bce0428cb0d5f8b6715e4dc7b383eb3"
+  },
+  {
     "name": "darling",
     "version": "0.23.0",
     "license": "MIT",
@@ -11137,6 +11191,15 @@ export const rustCrates = [
     "homepage": "",
     "source": "registry+https://github.com/rust-lang/crates.io-index",
     "checksum": "ac3984ec7bd6cfa798e62b4a642426a5be0e68f9401cfc2a01e3fa9ea2fcdb8d"
+  },
+  {
+    "name": "der",
+    "version": "0.7.10",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/RustCrypto/formats/tree/master/der",
+    "homepage": "",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "checksum": "e7c1832837b905bbfb5101e07cc24c8deddf52f93225eee6ead5f4d63d53ddcb"
   },
   {
     "name": "deranged",
@@ -11238,6 +11301,24 @@ export const rustCrates = [
     "checksum": "d0881ea181b1df73ff77ffaaf9c7544ecc11e82fba9b5f27b262a3c73a332555"
   },
   {
+    "name": "ed25519",
+    "version": "2.2.3",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/RustCrypto/signatures/tree/master/ed25519",
+    "homepage": "",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "checksum": "115531babc129696a58c64a4fef0a8bf9e9698629fb97e9e40767d235cfbcd53"
+  },
+  {
+    "name": "ed25519-dalek",
+    "version": "2.2.0",
+    "license": "BSD-3-Clause",
+    "repository": "https://github.com/dalek-cryptography/curve25519-dalek/tree/main/ed25519-dalek",
+    "homepage": "https://github.com/dalek-cryptography/curve25519-dalek",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "checksum": "70e796c081cee67dc755e1a36a0a172b897fab85fc3f6bc48307991f64e4eca9"
+  },
+  {
     "name": "embed_plist",
     "version": "1.2.2",
     "license": "未在本地 Cargo manifest 中声明",
@@ -11299,6 +11380,15 @@ export const rustCrates = [
     "homepage": "https://github.com/image-rs/fdeflate",
     "source": "registry+https://github.com/rust-lang/crates.io-index",
     "checksum": "1e6853b52649d4ac5c0bd02320cddc5ba956bdb407c4b75a2c6b75bf51500f8c"
+  },
+  {
+    "name": "fiat-crypto",
+    "version": "0.2.9",
+    "license": "未在本地 Cargo manifest 中声明",
+    "repository": "",
+    "homepage": "",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "checksum": "28dea519a9695b9977216879a3ebfddf92f1c08c05d984f8996aecd6ecdc811d"
   },
   {
     "name": "field-offset",
@@ -11731,6 +11821,15 @@ export const rustCrates = [
     "homepage": "",
     "source": "registry+https://github.com/rust-lang/crates.io-index",
     "checksum": "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
+  },
+  {
+    "name": "hmac",
+    "version": "0.12.1",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/RustCrypto/MACs",
+    "homepage": "",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "checksum": "6c49c37c09c17a53d937dfbb742eb3a961d65a994e6bcdcf37e7399d0cc8ab5e"
   },
   {
     "name": "html5ever",
@@ -12525,6 +12624,15 @@ export const rustCrates = [
     "checksum": "a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd"
   },
   {
+    "name": "pkcs8",
+    "version": "0.10.2",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/RustCrypto/formats/tree/master/pkcs8",
+    "homepage": "",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "checksum": "f950b2377845cebe5cf8b5165cb3cc1a5e0fa5cfa3e1f7f55707d8fd82e0a7b7"
+  },
+  {
     "name": "pkg-config",
     "version": "0.3.33",
     "license": "未在本地 Cargo manifest 中声明",
@@ -13038,6 +13146,15 @@ export const rustCrates = [
     "checksum": "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
   },
   {
+    "name": "signature",
+    "version": "2.2.0",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/RustCrypto/traits/tree/master/signature",
+    "homepage": "",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "checksum": "77549399552de45a898a580c1b41d445bf730df867cc44e6c0233bbc4b8329de"
+  },
+  {
     "name": "simd-adler32",
     "version": "0.3.9",
     "license": "MIT",
@@ -13101,6 +13218,15 @@ export const rustCrates = [
     "checksum": "009ef427103fcb17f802871647a7fa6c60cbb654b4c4e4c0ac60a31c5f6dc9cf"
   },
   {
+    "name": "spki",
+    "version": "0.7.3",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/RustCrypto/formats/tree/master/spki",
+    "homepage": "",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "checksum": "d91ed6c858b01f942cd56b37a94b3e0a1798290327d1236e4d9cf4eaca44d29d"
+  },
+  {
     "name": "stable_deref_trait",
     "version": "1.2.1",
     "license": "MIT OR Apache-2.0",
@@ -13144,6 +13270,15 @@ export const rustCrates = [
     "homepage": "https://github.com/rapidfuzz/strsim-rs",
     "source": "registry+https://github.com/rust-lang/crates.io-index",
     "checksum": "7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f"
+  },
+  {
+    "name": "subtle",
+    "version": "2.6.1",
+    "license": "BSD-3-Clause",
+    "repository": "https://github.com/dalek-cryptography/subtle",
+    "homepage": "https://dalek.rs/",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "checksum": "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
   },
   {
     "name": "syn",
@@ -14424,6 +14559,15 @@ export const rustCrates = [
     "checksum": "11532158c46691caf0f2593ea8358fed6bbf68a0315e80aae9bd41fbade684a1"
   },
   {
+    "name": "zeroize",
+    "version": "1.8.2",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/RustCrypto/utils",
+    "homepage": "https://github.com/RustCrypto/utils/tree/master/zeroize",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "checksum": "b97154e67e32c85465826e8bcc1c59429aaaf107c1e4a9e53c8d8ccd5eff88d0"
+  },
+  {
     "name": "zerotrie",
     "version": "0.2.4",
     "license": "Unicode-3.0",
@@ -14460,3 +14604,4 @@ export const rustCrates = [
     "checksum": "b8848ee67ecc8aedbaf3e4122217aff892639231befc6a1b58d29fff4c2cabaa"
   }
 ] as const;
+

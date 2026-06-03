@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { RefObject } from "react";
+import type { ComponentType, RefObject } from "react";
 import { AdSlot } from "@doctool/ui";
 import Cropper from "cropperjs";
 import JSZip from "jszip";
@@ -21,6 +21,7 @@ import { GsapScene } from "@/components/motion/GsapScene";
 import { MatrixLogo } from "@/components/layout/MatrixLogo";
 import { batchModeLabel, batchTaskStatusLabel, buildImportSummary, createBatchTask, defaultOutputDirectory, getBatchCounts, getSupportedExtensions, isSupportedBatchName, sanitizeLocalPath } from "@/lib/batchQueue";
 import type { BatchImportSummary, BatchMode, BatchOutputDirectory, BatchTask, BatchTaskStatus } from "@/lib/batchQueue";
+import type { DesktopLicenseStatus } from "@/lib/desktopLicense";
 import { getSidecarExperimentMode, isSidecarReady, shouldUseSidecarExperiment, sidecarExperimentStorageKey, sidecarStatusText, sidecarUnsupportedReason } from "@/lib/sidecarFfmpeg";
 import type { SidecarCheckResult, SidecarCommandMode, SidecarCommandResult } from "@/lib/sidecarFfmpeg";
 
@@ -186,6 +187,24 @@ type DocumentPreviewState = {
   message: string;
 };
 
+type DesktopLicenseGateComponent = ComponentType<{
+  status: DesktopLicenseStatus;
+  onStatusChange: (status: DesktopLicenseStatus) => void;
+}>;
+
+const desktopBuildMode = process.env.NEXT_PUBLIC_APP_MODE === "desktop";
+
+async function loadDesktopLicenseApi() {
+  if (!desktopBuildMode) return null;
+  return import("@/lib/desktopLicense");
+}
+
+async function loadLicenseGateComponent(): Promise<DesktopLicenseGateComponent | null> {
+  if (!desktopBuildMode) return null;
+  const mod = await import("@/components/tools/LicenseGate");
+  return mod.LicenseGate;
+}
+
 function getOnlineFileSizeLimit(file: File) {
   if (isImageFile(file)) return { bytes: onlineFileSizeLimits.image, label: "图片" };
   if (isPdfFile(file)) return { bytes: onlineFileSizeLimits.document, label: "PDF" };
@@ -277,6 +296,9 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   const [sidecarExperimentEnabled, setSidecarExperimentEnabled] = useState(false);
   const [sidecarStatus, setSidecarStatus] = useState<SidecarCheckResult | null>(null);
   const [expandedSections, setExpandedSections] = useState<string[]>(isDesktopSurface ? [] : ["图片工具"]);
+  const [desktopLicenseStatus, setDesktopLicenseStatus] = useState<DesktopLicenseStatus | null>(null);
+  const [desktopLicenseLoading, setDesktopLicenseLoading] = useState(false);
+  const [desktopLicenseGate, setDesktopLicenseGate] = useState<DesktopLicenseGateComponent | null>(null);
 
   const activeKind = tabs.find((tab) => tab.id === activeTab)?.kind;
   const activeBatchMode = isDesktopSurface ? getBatchModeForTab(activeTab) : activeTab === "batch" ? batchMode : undefined;
@@ -311,6 +333,47 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   }, [documentPreview.url]);
 
   useEffect(() => {
+    if (!isDesktopSurface) {
+      setDesktopLicenseStatus(null);
+      setDesktopLicenseLoading(false);
+      setDesktopLicenseGate(null);
+      return;
+    }
+
+    let cancelled = false;
+    setDesktopLicenseLoading(true);
+
+    async function loadLicenseStatus() {
+      try {
+        const api = await loadDesktopLicenseApi();
+        const Gate = await loadLicenseGateComponent();
+        if (cancelled) return;
+        if (!api || !Gate || !api.hasDesktopLicenseApi()) {
+          setDesktopLicenseStatus(null);
+          setDesktopLicenseGate(null);
+          return;
+        }
+        setDesktopLicenseGate(() => Gate);
+        const status = await api.getDesktopLicenseStatus();
+        if (!cancelled) setDesktopLicenseStatus(status);
+      } catch {
+        if (!cancelled) {
+          setDesktopLicenseStatus(null);
+          setDesktopLicenseGate(null);
+        }
+      } finally {
+        if (!cancelled) setDesktopLicenseLoading(false);
+      }
+    }
+
+    void loadLicenseStatus();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isDesktopSurface]);
+
+  useEffect(() => {
     if (!isDesktopSurface) return;
     setSidecarExperimentEnabled(window.localStorage.getItem(sidecarExperimentStorageKey) === "enabled");
     void refreshSidecarStatus();
@@ -337,22 +400,35 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
 
     cropperRef.current?.destroy();
     cropperRef.current = new Cropper(image, {
-      viewMode: 1,
+      viewMode: 2,
       dragMode: "crop",
       aspectRatio: getCropAspectRatio(cropRatio),
       autoCrop: true,
-      autoCropArea: 0.82,
+      autoCropArea: 1,
       responsive: true,
       restore: false,
       checkOrientation: true,
       background: false,
-      movable: true,
+      movable: false,
       zoomable: true,
       rotatable: true,
       scalable: true,
       cropBoxMovable: true,
       cropBoxResizable: true,
-      toggleDragModeOnDblclick: true
+      toggleDragModeOnDblclick: false,
+      ready() {
+        window.requestAnimationFrame(() => {
+          const cropper = cropperRef.current;
+          const canvas = cropper?.getCanvasData();
+          if (!cropper || !canvas) return;
+          cropper.setCropBoxData({
+            left: canvas.left,
+            top: canvas.top,
+            width: canvas.width,
+            height: canvas.height
+          });
+        });
+      }
     });
 
     return () => {
@@ -690,6 +766,17 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     }
   }
 
+  async function ensureDesktopLicenseAllowed() {
+    if (!isDesktopSurface) return;
+    const api = await loadDesktopLicenseApi();
+    if (!api || !api.hasDesktopLicenseApi()) return;
+    const nextStatus = await api.getDesktopLicenseStatus();
+    setDesktopLicenseStatus(nextStatus);
+    if (!nextStatus.allowed) {
+      throw new Error(nextStatus.reason || "当前授权状态不可用。");
+    }
+  }
+
   async function runCurrentTask() {
     const modeForActiveTool = isDesktopSurface ? getBatchModeForTab(activeTab) : undefined;
     const shouldRunCurrentBatch = Boolean(modeForActiveTool && batchTasks.some((task) => task.mode === modeForActiveTool && isRunnableBatchStatus(task.status)));
@@ -700,6 +787,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     setResultName("");
     cancelRef.current = false;
     try {
+      await ensureDesktopLicenseAllowed();
       if (shouldRunCurrentBatch && modeForActiveTool) {
         await runBatch(modeForActiveTool);
       } else switch (activeTab) {
@@ -1425,9 +1513,14 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     return new Blob([new Uint8Array(bytes)]);
   }
 
-  function handleDownload() {
+  async function handleDownload() {
     if (!resultBlob || !resultName) return;
-    downloadBlob(resultBlob, resultName);
+    try {
+      await ensureDesktopLicenseAllowed();
+      downloadBlob(resultBlob, resultName);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "当前授权状态不可用。");
+    }
   }
 
   const currentTab = tabs.find((tab) => tab.id === activeTab) || tabs[0];
@@ -1511,6 +1604,33 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     const nextBatchMode = getBatchModeForTab(tabId);
     if (nextBatchMode) setBatchMode(nextBatchMode);
   };
+
+  if (isDesktopSurface && desktopLicenseLoading) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#0F1418] px-6 text-[#EDF3F7]">
+        <div className="flex items-center gap-3 border border-[#50646F] bg-[#182229] px-5 py-4 text-sm">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          正在检查授权状态...
+        </div>
+      </main>
+    );
+  }
+
+  if (isDesktopSurface && desktopLicenseStatus && !desktopLicenseStatus.allowed) {
+    if (!desktopLicenseGate) {
+      return (
+        <main className="flex min-h-screen items-center justify-center bg-[#0F1418] px-6 text-[#EDF3F7]">
+          <div className="flex items-center gap-3 border border-[#50646F] bg-[#182229] px-5 py-4 text-sm">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            正在加载激活面板...
+          </div>
+        </main>
+      );
+    }
+    const LicenseGateComponent = desktopLicenseGate;
+    return <LicenseGateComponent status={desktopLicenseStatus} onStatusChange={setDesktopLicenseStatus} />;
+  }
+
   const onlineTaskActionBar = (
     <div className="ws-dashboard-bar apple-inline-action-bar" data-animate="tools-actions">
       <div className="apple-inline-progress min-w-0">
@@ -1563,10 +1683,10 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
           type="button"
           disabled={!canStartTask}
           onClick={() => void runCurrentTask()}
-          title={canStartTask ? undefined : "请先添加文件后再启动本地编译"}
+          title={canStartTask ? undefined : "请先添加文件后再开始"}
         >
           {status === "running" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4 fill-current" />}
-          启动本地编译
+          开始
         </button>
       </div>
     </div>
@@ -2049,7 +2169,7 @@ function DesktopOfficeChrome({
           </button>
           <button className={primaryCommandClass} type="button" disabled={!canStart} onClick={onStart}>
             <Play className="h-4 w-4 fill-current" />
-            启动本地编译
+            开始
           </button>
         </div>
       </div>
@@ -2431,7 +2551,7 @@ function DesktopInspectorPreview({
       <div className="desktop-preview-stage desktop-preview-empty">
         <div className="desktop-snapshot-placeholder">
           <FileImage className="h-8 w-8" />
-          <p>本地图片 / 文档 / 音视频预览区</p>
+          <p>等待挂载源文件</p>
           <span>等待挂载源文件</span>
         </div>
       </div>
@@ -2502,7 +2622,6 @@ function DesktopPreviewPanel({
   const isImageMode = mode === "crop" || mode === "resize" || mode === "watermark" || mode === "compress" || mode === "batch";
   const isDocumentMode = mode === "pdf-images" || mode === "word-images" || mode === "excel-images";
   const imagePreview = previewUrl && (mode === "resize" || mode === "watermark") ? previewUrl : fileUrl;
-  const previewTitle = mode === "resize" ? "尺寸预览" : mode === "watermark" ? "水印预览" : "当前文件预览";
   const mediaKind = getDesktopPreviewMediaKind(file, summary);
   const fileType = summary ? getDesktopPreviewFileType(summary) : "";
 
@@ -2527,14 +2646,14 @@ function DesktopPreviewPanel({
     previewBody = (
       <img
         ref={mode === "crop" ? cropImageRef : undefined}
-        className="max-h-[460px] w-full rounded-sm bg-slate-950 object-contain"
+        className="desktop-large-preview-image"
         src={imagePreview}
         alt={`${modeLabel}预览`}
         onLoad={mode === "crop" ? onImageLoad : undefined}
       />
     );
   } else if (file && (isPdfFile(file) || isWordFile(file) || isExcelFile(file)) && isDocumentMode && documentPreview.url) {
-    previewBody = <img className="max-h-[460px] w-full rounded-sm bg-slate-950 object-contain" src={documentPreview.url} alt={`${modeLabel}预览`} />;
+    previewBody = <img className="desktop-large-preview-image" src={documentPreview.url} alt={`${modeLabel}预览`} />;
   } else {
     previewBody = (
       <div className="flex min-h-56 items-center justify-center rounded-sm border border-dashed border-slate-700/80 bg-slate-950/70 px-6 text-center text-sm text-slate-500">
@@ -2548,21 +2667,15 @@ function DesktopPreviewPanel({
 
   return (
     <section className="rounded-sm border border-slate-700/80 bg-slate-950/72 p-4">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-        <div>
-          <p className="text-xs font-semibold text-cyan-300">预览区</p>
-          <h3 className="mt-1 text-lg font-semibold text-slate-50">{previewTitle}</h3>
-        </div>
-      </div>
       {summary ? (
-        <div className="mt-3 grid gap-2 rounded-sm border border-slate-800/90 bg-slate-950/60 p-3 text-xs text-slate-300 sm:grid-cols-2">
-          <p className="min-w-0 truncate">文件名：{summary.name}</p>
+        <div className="grid gap-2 rounded-sm border border-slate-800/90 bg-slate-950/60 p-3 text-xs text-slate-300 sm:grid-cols-2">
+          <p className="min-w-0 truncate font-semibold text-slate-100">文件名：{summary.name}</p>
           <p>大小：{formatBytes(summary.size)}</p>
           <p>类型：{fileType}</p>
           <p>媒体类型：{mediaKind}</p>
         </div>
       ) : null}
-      <div className="mt-4 rounded-sm border border-slate-800/90 bg-slate-950/80 p-3">
+      <div className="desktop-preview-body-shell mt-3 rounded-sm border border-slate-800/90 bg-slate-950/80 p-3">
         {previewBody}
       </div>
     </section>

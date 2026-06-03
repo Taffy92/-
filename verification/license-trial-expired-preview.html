@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>离线专业版试用结束效果图</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: #0f1418;
+        color: #edf3f7;
+        font-family: Arial, "Microsoft YaHei", "PingFang SC", sans-serif;
+      }
+
+      main {
+        min-height: 100vh;
+        padding: 32px 24px;
+      }
+
+      .stage {
+        display: flex;
+        min-height: calc(100vh - 64px);
+        max-width: 960px;
+        margin: 0 auto;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .gate {
+        width: 100%;
+        border: 1px solid #50646f;
+        background: #182229;
+        padding: 28px;
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+      }
+
+      .head {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+      }
+
+      .alert {
+        display: grid;
+        width: 48px;
+        height: 48px;
+        flex: 0 0 auto;
+        place-items: center;
+        border: 1px solid rgba(213, 106, 106, 0.6);
+        background: #2c1d20;
+        color: #ffb4b4;
+        font-size: 26px;
+        font-weight: 800;
+      }
+
+      .kicker {
+        margin: 0;
+        color: #9facb4;
+        font-size: 14px;
+      }
+
+      h1 {
+        margin: 8px 0 0;
+        font-size: 30px;
+        line-height: 1.2;
+      }
+
+      .reason {
+        max-width: 720px;
+        margin: 12px 0 0;
+        color: #cad5dc;
+        font-size: 15px;
+        line-height: 1.75;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 16px;
+        margin-top: 24px;
+      }
+
+      section {
+        border: 1px solid #50646f;
+        background: #111a20;
+        padding: 16px;
+      }
+
+      .section-title {
+        display: flex;
+        margin: 0;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      code {
+        display: inline-flex;
+        margin-top: 14px;
+        border: 1px solid #50646f;
+        background: #23313a;
+        padding: 10px 12px;
+        color: #f5f7fa;
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 20px;
+        font-weight: 800;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      button,
+      .button {
+        display: inline-flex;
+        min-height: 38px;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border: 1px solid #50646f;
+        background: #23313a;
+        padding: 0 14px;
+        color: #edf3f7;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      textarea {
+        width: 100%;
+        height: 120px;
+        margin-top: 14px;
+        resize: none;
+        border: 1px solid #50646f;
+        background: #23313a;
+        padding: 12px;
+        color: #edf3f7;
+        outline: none;
+      }
+
+      .primary {
+        width: 100%;
+        margin-top: 12px;
+        border-color: #76c77d;
+        background: #1f3a31;
+        color: #d8ffe0;
+      }
+
+      footer {
+        margin-top: 22px;
+        border-top: 1px solid #50646f;
+        padding-top: 14px;
+        color: #cad5dc;
+        font-size: 14px;
+        line-height: 1.8;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="stage">
+        <div class="gate">
+          <div class="head">
+            <div class="alert">!</div>
+            <div>
+              <p class="kicker">万能格式转换器离线专业版</p>
+              <h1>试用已结束</h1>
+              <p class="reason">3 天试用已结束，请联系管理员获取正式授权。当前设备不会上传文件或转换结果，只需要把机器码发给管理员生成离线激活码。</p>
+            </div>
+          </div>
+
+          <div class="grid">
+            <section>
+              <p class="section-title">当前设备</p>
+              <code>TEST-TEST-TEST-TEST</code>
+              <div class="actions">
+                <span class="button">复制机器码</span>
+                <span class="button">导出授权申请文件</span>
+                <span class="button">导入 license.mrx</span>
+              </div>
+            </section>
+
+            <section>
+              <p class="section-title">输入授权码</p>
+              <textarea placeholder="UFC1-..."></textarea>
+              <button class="primary">激活</button>
+            </section>
+          </div>
+
+          <footer>
+            <div>管理员微信：___Skyblue</div>
+            <div>联系电话：15588261515</div>
+            <div>邮箱：370298218@qq.com</div>
+          </footer>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

@@ -5,7 +5,7 @@ import { siteConfig } from "@/config/site";
 export const metadata: Metadata = createPageMetadata({
   title: "隐私政策 - 万能格式转换器",
   path: "/privacy",
-  description: "万能格式转换器的隐私政策，说明文件本地处理、广告服务、下载授权和离线版隐私保护。"
+  description: "万能格式转换器的隐私政策，说明文件本地处理、广告服务、试用下载、离线授权和离线版隐私保护。"
 });
 
 export default function PrivacyPage() {
@@ -33,7 +33,7 @@ export default function PrivacyPage() {
         广告脚本不会接收用户正在处理的图片、PDF、Word、Excel、音频、视频、OCR 内容或转换结果。广告组件与文件处理功能隔离。
         用户可以通过浏览器设置管理 Cookie，也可以使用广告拦截工具或离线专业版。
       </p>
-      <p>第三方服务可能包括 Vercel、CloudBase、静态资源 CDN、Google AdSense、百度广告。CloudBase 只用于静态托管、下载授权和临时下载链接生成，不接触用户处理文件。</p>
+      <p>第三方服务可能包括 Vercel、CloudBase、静态资源 CDN、Google AdSense、百度广告。CloudBase 用于静态托管、离线安装包分发和管理员私有授权后台，不接触用户处理文件。</p>
       <h2>三、功能边界</h2>
       <p>本项目不提供 PDF 编辑、PDF 内容篡改、签章、涂销、批注、局部替换等功能。</p>
       <p>

@@ -1,3 +1,4 @@
+use crate::license;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{
@@ -103,6 +104,9 @@ pub fn get_ffmpeg_sidecar_version(app: AppHandle) -> SidecarCommandResult {
 
 #[tauri::command]
 pub fn run_ffmpeg_sidecar_poc(app: AppHandle, request: SidecarPocRequest) -> SidecarCommandResult {
+  if let Err(message) = license::require_license_allowed(&app) {
+    return failure(&request.mode, message, Instant::now());
+  }
   execute_poc(app, request)
 }
 

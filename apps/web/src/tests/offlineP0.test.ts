@@ -51,4 +51,19 @@ describe("offline P0 release checks", () => {
     expect(source).toContain('data-testid="open-result-file-button"');
     expect(source).toContain("结果文件不存在，请重新处理或检查输出目录。");
   });
+
+  it("keeps the reviewed desktop UI copy and crop preview constraints", () => {
+    const toolsClientPath = resolve(projectRoot, "apps", "web", "src", "components", "tools", "ToolsClient.tsx");
+    const homePagePath = resolve(projectRoot, "apps", "web", "src", "app", "page.tsx");
+    const source = readFileSync(toolsClientPath, "utf8");
+    const homeSource = readFileSync(homePagePath, "utf8");
+
+    expect(source).not.toContain("启动本地编译");
+    expect(source).not.toContain("当前文件预览");
+    expect(source).not.toContain("预览区");
+    expect(source).toContain("viewMode: 2");
+    expect(source).toContain("autoCropArea: 1");
+    expect(source).toContain("desktop-preview-body-shell");
+    expect(homeSource).not.toContain("进入工具台");
+  });
 });

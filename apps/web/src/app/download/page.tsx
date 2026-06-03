@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { DownloadAuthBox } from "@/components/download/DownloadAuthBox";
 import { downloadsConfig } from "@/config/downloads";
 import { createPageMetadata } from "@/lib/seo";
 
@@ -8,7 +7,7 @@ export const metadata: Metadata = createPageMetadata({
   title: "下载离线专业版 - 万能格式转换器",
   path: "/download",
   description:
-    "万能格式转换器 Windows 离线专业版支持断网安装、断网使用和批量处理。安装包下载需要联系作者获取下载口令。"
+    "万能格式转换器 Windows 离线专业版支持断网安装、断网使用和批量处理。安装后可免费试用 3 天，继续使用需要激活码。"
 });
 
 export default function DownloadPage() {
@@ -27,7 +26,7 @@ export default function DownloadPage() {
             图片加水印、图片压缩、PDF/Word/Excel 转图片、视频格式转换、音频格式转换和视频提取音频，并可在无互联网连接的电脑上安装和使用核心功能。
           </p>
           <p className="mt-2">
-            为避免安装包被随意传播，离线专业版下载采用统一下载口令。需要安装包或批量处理能力，请联系作者 MR.谢：370298218@qq.com。
+            离线专业版改为直接下载 3 天试用版。安装后首次运行会在本机开启试用期，试用结束后需要输入激活码或导入授权文件继续使用。
           </p>
         </div>
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -55,18 +54,17 @@ export default function DownloadPage() {
               </div>
             </dl>
             <a
-              href="#authorized-download"
+              href={item.downloadUrl}
+              download={item.fileName}
               className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-sm border border-cyan-300/50 bg-cyan-400 px-5 text-sm font-semibold text-slate-950 hover:bg-cyan-300"
             >
-              获取 {item.type.toUpperCase()} 下载链接
+              下载 {item.type.toUpperCase()} 3 天试用版
             </a>
           </div>
         ))}
       </section>
 
-      <div id="authorized-download">
-        <DownloadAuthBox />
-      </div>
+      <TrialDownloadPanel />
 
       <section className="mt-8 grid gap-5 md:grid-cols-2">
         <Card title="支持系统" items={["Windows 10 x64", "Windows 11 x64"]} />
@@ -94,9 +92,9 @@ export default function DownloadPage() {
         <Card
           title="获取方式"
           items={[
-            "下载与安装使用需联系作者获取下载口令",
-            "联系邮箱：370298218@qq.com",
-            "输入下载口令后生成短时有效下载链接",
+            "在线页面直接下载 3 天试用版",
+            "首次运行自动开启本机试用期",
+            "试用结束后输入激活码或导入 license.mrx",
             "下载后可复制到 U 盘，在断网电脑上安装测试"
           ]}
         />
@@ -133,11 +131,43 @@ export default function DownloadPage() {
           <li>1. 下载 EXE 或 MSI 后，先核对页面展示的 SHA256 与本地文件是否一致。</li>
           <li>2. Windows 10 / 11 均可安装；离线专业版安装包内置 WebView2 离线安装支持。</li>
           <li>3. 如果 SmartScreen 提示未知发布者，请确认文件来源和 SHA256，再根据自己的风险判断继续安装。</li>
-          <li>4. 离线专业版支持断网使用；CloudBase 只用于下载授权，不接触用户处理文件。</li>
+          <li>4. 离线专业版支持断网使用；授权只控制桌面端继续使用，不接触用户处理文件。</li>
           <li>5. 在线版适合单文件或少量文件快速处理，批量处理请使用 Windows 离线专业版。</li>
         </ol>
       </section>
     </main>
+  );
+}
+
+function TrialDownloadPanel() {
+  return (
+    <section id="trial-download" className="mt-8 rounded-sm border border-cyan-300/15 bg-slate-950/70 p-5 text-slate-100 sm:p-7">
+      <p className="inline-flex items-center rounded-sm border border-cyan-300/25 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-200">
+        3 天试用 · 离线激活
+      </p>
+      <h2 className="mt-3 text-xl font-bold text-slate-50">离线专业版现在可以直接下载试用</h2>
+      <p className="mt-2 max-w-3xl text-sm leading-7 text-slate-300">
+        下载和安装不再需要口令。软件首次运行后自动开启本机 3 天试用；试用结束后，用户把机器码发给管理员，再输入激活码或导入
+        license.mrx 授权文件即可继续使用。授权流程不要求登录，也不会上传用户处理的图片、PDF、Word、Excel、音频或视频。
+      </p>
+      <div className="mt-6 grid gap-3 sm:grid-cols-2">
+        {downloadsConfig.packages.map((item) => (
+          <a
+            key={item.type}
+            href={item.downloadUrl}
+            download={item.fileName}
+            className="rounded-sm border border-cyan-300/20 bg-slate-900/70 p-4 transition hover:border-cyan-300/50 hover:bg-cyan-400/10"
+          >
+            <span className="block text-sm font-semibold text-slate-50">下载 {item.label}</span>
+            <span className="mt-1 block text-xs text-slate-400">{item.fileName}</span>
+            <span className="mt-2 block text-xs text-cyan-200">无需口令，安装后自动试用 3 天</span>
+          </a>
+        ))}
+      </div>
+      <div className="mt-5 rounded-sm border border-cyan-300/12 bg-slate-900/70 p-4 text-sm leading-7 text-slate-300">
+        试用结束或需要正式授权时，联系管理员：微信 ___Skyblue，电话 15588261515，邮箱 370298218@qq.com。
+      </div>
+    </section>
   );
 }
 

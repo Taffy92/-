@@ -88,10 +88,11 @@ describe("privacy and product boundary checks", () => {
   it("provides previewable watermark and resize controls", () => {
     expect(toolsSource).toContain("watermarkFontSize");
     expect(toolsSource).toContain("watermarkColor");
-    expect(toolsSource).toContain("水印预览");
+    expect(toolsSource).toContain("addTextWatermark");
+    expect(toolsSource).toContain("addImageWatermark");
     expect(toolsSource).toContain("resizeMode");
     expect(toolsSource).toContain("resizePercent");
-    expect(toolsSource).toContain("尺寸预览");
+    expect(toolsSource).toContain("desktop-preview-body-shell");
     expect(toolsSource).toContain("按百分比");
     expect(toolsSource).toContain("按像素");
   });
@@ -99,6 +100,8 @@ describe("privacy and product boundary checks", () => {
   it("keeps image cropping as a user-draggable Cropper.js workflow", () => {
     expect(toolsSource).toContain('import Cropper from "cropperjs"');
     expect(toolsSource).toContain("cropper.getCroppedCanvas");
+    expect(toolsSource).toContain("viewMode: 2");
+    expect(toolsSource).toContain("autoCropArea: 1");
     expect(toolsSource).toContain("cropBoxResizable: true");
     expect(toolsSource).toContain("自由裁切");
     expect(toolsSource).toContain("16:9 横屏");

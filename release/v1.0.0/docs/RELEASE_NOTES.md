@@ -1,4 +1,4 @@
-# 万能格式转换器 v1.0.0 发布说明
+﻿# 万能格式转换器 v1.0.0 发布说明
 
 发布日期：2026-06-03  
 产品名称：万能格式转换离线专业版  
@@ -88,8 +88,8 @@ Windows 离线专业版安装包已配置 WebView2 Evergreen Standalone Installe
 
 | 文件 | 大小 | SHA256 |
 | --- | ---: | --- |
-| 万能格式转换离线专业版_1.0.0_x64-setup.exe | 255,288,601 bytes | C261524B05DBD962AA73331553FE36801AA59C73C2E105FD8124D867FEF549D9 |
-| 万能格式转换离线专业版_1.0.0_x64_zh-CN.msi | 266,510,336 bytes | FD51973A66786ECA79AF2E8BF0556B061157762D19BA436128ACB574D11D160B |
+| 万能格式转换离线专业版_1.0.0_x64-setup.exe | 255,387,018 bytes | DF8258E77E2250CA513CAACF4FA4BC380812A92F687030E75042E6FAF1B2F6FD |
+| 万能格式转换离线专业版_1.0.0_x64_zh-CN.msi | 266,625,024 bytes | 83AE0FF2E23EAE9B0B9E64CD4579DD86202C392EBD330A0D78A142309B9577E8 |
 
 ## 发布前提醒
 
@@ -99,3 +99,4 @@ Windows 离线专业版安装包已配置 WebView2 Evergreen Standalone Installe
 2. FFmpeg / GPL / LGPL / 专利复核。
 3. BtbN FFmpeg 候选商业再分发复核。
 4. 长期自建 LGPL FFmpeg 构建评估。
+

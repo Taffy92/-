@@ -451,26 +451,38 @@ textarea {
   flex: 1 1 360px;
   align-items: center;
   gap: 8px;
-  color: var(--desktop-muted);
+  border: 1px solid rgba(0, 102, 204, 0.58);
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(0, 102, 204, 0.22), rgba(0, 102, 204, 0.08));
+  padding: 3px 4px 3px 8px;
+  color: #b9dcff;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 760;
+  box-shadow: 0 0 0 1px rgba(48, 213, 200, 0.08), inset 0 0 12px rgba(0, 102, 204, 0.18);
 }
 
 .desktop-function-select span {
   flex: 0 0 auto;
+  letter-spacing: 0;
 }
 
 .desktop-function-select select {
   min-width: 0;
   flex: 1 1 auto;
   height: 28px;
-  border: 1px solid var(--desktop-border);
+  border: 1px solid rgba(185, 220, 255, 0.22);
   border-radius: 4px;
-  background: var(--desktop-field);
-  color: var(--desktop-text);
+  background: #f5f5f7;
+  color: #111827;
   padding: 0 9px;
-  font-size: 12px;
+  font-size: 12.5px;
+  font-weight: 780;
   outline: none;
+}
+
+.desktop-function-select select:focus {
+  border-color: #30d5c8;
+  box-shadow: 0 0 0 2px rgba(48, 213, 200, 0.22);
 }
 
 .desktop-compact-top-status {
@@ -694,6 +706,7 @@ textarea {
 .desktop-compact-preview-shell {
   min-width: 0;
   min-height: 0;
+  overflow: hidden;
   border: 1px solid var(--desktop-border-dark);
   border-radius: 4px;
   background: #000000;
@@ -712,6 +725,15 @@ textarea {
 .desktop-compact-preview-shell img.desktop-preview-stage,
 .desktop-compact-preview-shell video.desktop-preview-stage {
   object-fit: contain;
+}
+
+.desktop-compact-preview-shell .cropper-container,
+.desktop-compact-preview-shell .cropper-wrap-box,
+.desktop-compact-preview-shell .cropper-canvas,
+.desktop-compact-preview-shell .cropper-drag-box,
+.desktop-compact-preview-shell .cropper-crop-box {
+  max-width: 100% !important;
+  max-height: 100% !important;
 }
 
 .desktop-backend-telemetry-cluster {
@@ -1068,6 +1090,29 @@ textarea {
   overflow: hidden;
   border: 1px solid #0d1418;
   background: #05090b;
+}
+
+.desktop-large-preview-image {
+  display: block;
+  width: 100%;
+  max-height: 460px;
+  border-radius: 4px;
+  background: #020405;
+  object-fit: contain;
+}
+
+.desktop-preview-body-shell {
+  overflow: hidden;
+}
+
+.desktop-preview-body-shell .cropper-container,
+.desktop-preview-body-shell .cropper-wrap-box,
+.desktop-preview-body-shell .cropper-canvas,
+.desktop-preview-body-shell .cropper-drag-box,
+.desktop-preview-body-shell .cropper-crop-box {
+  max-width: 100% !important;
+  max-height: 460px !important;
+  overflow: hidden;
 }
 
 .desktop-preview-empty {

@@ -61,9 +61,6 @@ export default function HomePage() {
                 <p>Function matrix</p>
                 <h2>选择核心模块，快速挂载任务</h2>
               </div>
-              <Link className="apple-home-inline-link" href={siteConfig.links.tools}>
-                进入工具台 <ArrowRight size={14} />
-              </Link>
             </div>
 
             <div className="apple-pro-grid apple-pro-grid-compact">

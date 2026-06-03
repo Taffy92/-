@@ -1,6 +1,6 @@
 # createDownloadUrl
 
-CloudBase 统一下载口令云函数。
+CloudBase 统一下载口令云函数。当前公开下载页已改为直接下载 3 天试用版，本函数只作为备用内部分发方案保留。
 
 用途：
 

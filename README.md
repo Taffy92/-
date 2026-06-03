@@ -80,13 +80,17 @@ npm run build:web
 
 ```bash
 NEXT_PUBLIC_SITE_URL=https://gszhmrx.cn
-NEXT_PUBLIC_DOWNLOAD_AUTH_ENABLED=false
-NEXT_PUBLIC_DOWNLOAD_AUTH_ENDPOINT=
+NEXT_PUBLIC_OFFLINE_EXE_DOWNLOAD_URL=
+NEXT_PUBLIC_OFFLINE_MSI_DOWNLOAD_URL=
+LICENSE_ADMIN_PASSWORD_SHA256=
+LICENSE_PRIVATE_KEY_PEM_B64=
 ```
 
 当前正式域名为 `https://gszhmrx.cn`，`https://www.gszhmrx.cn` 绑定到同一 CloudBase 静态托管站点。所有 canonical、sitemap、Open Graph URL 都从 `apps/web/src/config/site.ts` 的 `siteConfig.url` 读取，构建前确认 `NEXT_PUBLIC_SITE_URL=https://gszhmrx.cn`。
 
-离线安装包默认不公开直链。正式启用授权下载时，把 `NEXT_PUBLIC_DOWNLOAD_AUTH_ENABLED` 改为 `true`，把 `NEXT_PUBLIC_DOWNLOAD_AUTH_ENDPOINT` 填成 CloudBase 授权云函数的 HTTP 地址。
+离线安装包现在按 3 天试用模式直接下载。生产环境可以把 `NEXT_PUBLIC_OFFLINE_EXE_DOWNLOAD_URL` 和 `NEXT_PUBLIC_OFFLINE_MSI_DOWNLOAD_URL` 配成公开对象存储地址；不配置时，EXE 使用 `/release/v1.0.0/installers/` 下的静态路径，MSI 默认使用当前 CloudBase 公开只读对象存储链接。
+
+`LICENSE_ADMIN_PASSWORD_SHA256` 和 `LICENSE_PRIVATE_KEY_PEM_B64` 只用于 `cloudbase/functions/licenseAdmin` 私有授权后台，必须配置在 CloudBase 云函数环境变量中，不要写入在线前端或 Git。
 
 ## 广告配置
 
@@ -125,11 +129,30 @@ npm run deploy:cloudbase
 
 Vercel 安全响应头由 `apps/web/src/config/securityHeaders.js` 生成，修改后执行 `npm run sync:security` 同步到 `apps/web/vercel.json`。
 
-## 离线版授权下载
+## 离线版试用下载
 
-静态网站托管不适合直接保护 EXE 安装包，所以不要把安装包上传到 `apps/web/out`。建议把安装包上传到 CloudBase 私有云存储，再用 `cloudbase/functions/createDownloadUrl` 云函数校验授权码并返回临时下载链接。
+离线专业版采用“直接下载 3 天试用，试用结束后激活”的模式。下载入口不再要求统一下载口令，授权控制发生在桌面端启动和试用到期之后。
 
-详细操作文档：`docs/authorized-download.md`。
+如果使用 CloudBase/COS 分发安装包，建议把 EXE/MSI 放在公开下载路径或 CDN 后面，再通过 `NEXT_PUBLIC_OFFLINE_EXE_DOWNLOAD_URL`、`NEXT_PUBLIC_OFFLINE_MSI_DOWNLOAD_URL` 指向实际地址。当前 MSI 默认走公开只读 CloudBase 对象存储，因为文件超过静态托管稳定上传阈值。旧的 `cloudbase/functions/createDownloadUrl` 口令云函数可作为备用内部分发方案保留，但不再是公开下载页主流程。
+
+## 私有授权后台
+
+私有授权后台位于 `cloudbase/functions/licenseAdmin`。部署后管理员可用手机浏览器打开 `/licenseAdmin`，输入管理员密码、用户机器码和授权天数，生成激活码或 `license.mrx`。生成结果仍按桌面端本地公钥验签，用户电脑有网或无网都可以授权。
+
+部署命令：
+
+```bash
+npm run deploy:license-admin
+```
+
+部署前必须在 CloudBase 函数环境变量中配置：
+
+```text
+LICENSE_ADMIN_PASSWORD_SHA256=<管理员密码 sha256>
+LICENSE_PRIVATE_KEY_PEM_B64=<Ed25519 私钥 PEM 的 Base64>
+```
+
+不要把私钥、后台密码或授权记录提交到 Git。管理员本地生码器仍保留在 `tools/admin-license-generator`，可作为离线备用方案。
 
 ## 离线安装版
 
@@ -150,6 +173,8 @@ apps/desktop/src-tauri/target/release/bundle/
 离线版使用 Tauri `webviewInstallMode.type = "offlineInstaller"`，目标是满足“安装和使用都完全离线”。安装包会内置网站构建产物、PDF.js worker、FFmpeg WASM、图标和本地音视频转换逻辑。核心功能不依赖服务器，不需要账号，不上传文件。
 
 离线版启动后直接进入专业工具箱：顶部命令栏、左侧分类工具、中央上传/任务队列、右侧参数面板。在线站点头尾导航和广告容器不进入离线工作台。
+
+离线专业版包含本地 3 天试用和机器码绑定授权。试用结束后继续使用需要管理员签发的激活码或 `license.mrx`，授权细节见 `docs/offline-license.md`。该机制不引入登录、会员或云端转换，也不上传用户文件。
 
 离线安装包在构建阶段可能需要联网下载或缓存 WebView2 离线安装器；正式发布给用户的 EXE/MSI 应包含该离线安装器。发布前建议在一台断网 Windows 10/11 x64 电脑或虚拟机中做安装和核心功能回归测试。
 
@@ -189,10 +214,11 @@ Excel 转图片：支持 `.xlsx`、`.csv`。旧版 `.xls` 请先用 Excel/WPS �
 2. 更新 `apps/web/src/app/changelog/page.tsx`。
 3. 运行 `npm test`。
 4. 运行 `npm run build:web`。
-5. 运行 `npm run package:desktop`。
-6. 上传安装包到 CloudBase 私有云存储。
-7. 更新授权记录里的 `fileID`、版本号和 SHA256。
-8. 重新部署静态网站和授权云函数。
+5. 商业发布前确认离线授权生产公钥已替换，管理员私钥和授权记录没有进入客户包。
+6. 运行 `npm run package:desktop`。
+7. 将新 EXE/MSI 同步到 `release/<version>/installers/`，更新 SHA256；EXE 可同步到静态下载路径，MSI 建议上传到公开只读对象存储并更新下载链接。
+8. 确认 `licenseAdmin` 云函数环境变量中的私钥对应桌面端 `PUBLIC_KEY_RAW_B64`。
+9. 运行 `npm run build:web`，部署静态网站和 `licenseAdmin` 云函数。
 
 ## 第三方依赖许可证
 
