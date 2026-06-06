@@ -10,30 +10,22 @@
 
 ## 1. 本轮读取和参考的文件
 
-1. `SIDECAR_FFMPEG_PROOF_OF_CONCEPT_REPORT.md`
-2. `SIDECAR_FFMPEG_BINARY_SOURCE_REVIEW.md`
-3. `SIDECAR_FFMPEG_LGPL_TECH_PLAN_REPORT.md`
-4. `LGPL_FFMPEG_BUILD_EVALUATION.md`
-5. `SIDECAR_FFMPEG_PACKAGING_PLAN.md`
-6. `SIDECAR_FFMPEG_SECURITY_PLAN.md`
-7. `FFMPEG_LICENSE_NOTICE.md`
-8. `THIRD_PARTY_NOTICES.md`
-9. `OPEN_SOURCE_LICENSES.md`
-10. `RELEASE_COMPLIANCE_CHECKLIST.md`
+前置 sidecar、许可和打包研究报告已在 2026-06-06 文档清理中归并到本选型结论，不再单独保留。仍保留的依据入口：
+
+1. `FFMPEG_LICENSE_NOTICE.md`
+2. `THIRD_PARTY_NOTICES.md`
+3. `OPEN_SOURCE_LICENSES.md`
+4. `docs/reports/archive/RELEASE_COMPLIANCE_CHECKLIST.md`
 
 ## 2. 本轮生成的文件
 
-1. `FFMPEG_BINARY_SOURCE_OPTIONS.md`
-2. `FFMPEG_LGPL_BUILD_REQUIREMENTS.md`
-3. `FFMPEG_BINARY_CANDIDATE_TEST_REPORT.md`
-4. `FFMPEG_BINARY_SOURCE_SELECTION_REPORT.md`
-5. `verification/ffmpeg-binary-candidates/README.md`
-6. `verification/ffmpeg-binary-candidates/SHA256SUMS.txt`
-7. `verification/ffmpeg-binary-candidates/SOURCE.txt`
-8. `verification/ffmpeg-binary-candidates/BUILD_CONFIG.txt`
-9. `verification/ffmpeg-binary-candidates/LICENSE_REVIEW.md`
-10. `verification/ffmpeg-binary-candidates/run-candidate-test.mjs`
-11. `verification/ffmpeg-binary-candidates/BtbN-ffmpeg-n7.1-win64-lgpl-shared-7.1/candidate-test-results.json`
+长期保留入口：
+
+1. `docs/reports/archive/FFMPEG_BINARY_SOURCE_SELECTION_REPORT.md`
+2. `FFMPEG_LICENSE_NOTICE.md`
+3. `THIRD_PARTY_NOTICES.md`
+4. `OPEN_SOURCE_LICENSES.md`
+5. `docs/reports/archive/RELEASE_COMPLIANCE_CHECKLIST.md`
 
 候选 ZIP 和解压文件只位于：
 
@@ -291,7 +283,7 @@ ZIP：
 
 报告：
 
-`FFMPEG_BINARY_CANDIDATE_TEST_REPORT.md`
+候选测试过程报告已归并到本文，不再单独保留。
 
 验证脚本：
 

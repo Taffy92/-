@@ -42,12 +42,11 @@
 2. MSI 安装包：
    `D:\万能格式转换器项目\apps\desktop\src-tauri\target\release\bundle\msi\万能格式转换器_1.0.0_x64_zh-CN.msi`
 3. 本测试指南：
-   `D:\万能格式转换器项目\MANUAL_CLEAN_VM_TEST_GUIDE.md`
+   `D:\万能格式转换器项目\docs\reports\archive\MANUAL_CLEAN_VM_TEST_GUIDE.md`
 4. 结果回填模板：
-   `D:\万能格式转换器项目\MANUAL_CLEAN_VM_TEST_RESULT_TEMPLATE.md`
-5. 样例文件说明：
-   `D:\万能格式转换器项目\CLEAN_VM_TEST_SAMPLE_FILES_README.md`
-6. 样例文件夹，按 `CLEAN_VM_TEST_SAMPLE_FILES_README.md` 准备。
+   `D:\万能格式转换器项目\release\v1.0.0\verification\MANUAL_CLEAN_VM_TEST_RESULT_TEMPLATE.md`
+5. 样例文件：
+   准备常见文档、图片、音视频和压缩包样例，复制到 VM 本地目录。
 
 建议复制到 VM 后立即断网，再开始关键离线测试。
 
@@ -603,7 +602,7 @@ Get-NetTCPConnection | Sort-Object OwningProcess | Format-Table -AutoSize
 
 打开：
 
-`MANUAL_CLEAN_VM_TEST_RESULT_TEMPLATE.md`
+`D:\万能格式转换器项目\release\v1.0.0\verification\MANUAL_CLEAN_VM_TEST_RESULT_TEMPLATE.md`
 
 每次测试建议新增一行：
 
