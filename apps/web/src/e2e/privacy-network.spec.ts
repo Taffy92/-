@@ -1,5 +1,8 @@
 import { expect, test } from "@playwright/test";
 
+const localPrivacyText =
+  "\u6587\u4ef6\u53ea\u5728\u5f53\u524d\u8bbe\u5907\u5904\u7406\uff0c\u4e0d\u4e0a\u4f20\u670d\u52a1\u5668\u3002";
+
 test("local processing page does not upload user files while ads and download authorization stay isolated", async ({ page }) => {
   const fileUploadRequests: string[] = [];
   const allowedNetworkRequests: string[] = [];
@@ -20,7 +23,7 @@ test("local processing page does not upload user files while ads and download au
   });
 
   await page.goto("/tools/", { waitUntil: "domcontentloaded" });
-  await expect(page.getByText(/文件仅(在本地|在本机)处理.*不上传服务器/).first()).toBeVisible();
+  await expect(page.locator("#lbl-panel-main-desc")).toContainText(localPrivacyText);
 
   await page.waitForTimeout(500);
   expect(fileUploadRequests).toEqual([]);

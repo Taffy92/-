@@ -10,6 +10,11 @@ export const siteConfig = {
     text: "鲁ICP备2026028326号",
     url: "https://beian.miit.gov.cn/"
   },
+  publicSecurity: {
+    text: "鲁公网安备37048102006986号",
+    url: "https://beian.mps.gov.cn/#/query/webSearch?code=37048102006986",
+    icon: "/icons/beian-gongan.png"
+  },
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://gszhmrx.cn",
   links: {
     home: "/",

@@ -97,9 +97,15 @@ export function Footer() {
           </div>
           <div className="footer-filing">
             {!desktop ? (
-              <a href={siteConfig.icp.url} target="_blank" rel="noopener noreferrer">
-                {siteConfig.icp.text}
-              </a>
+              <>
+                <a className="footer-public-security" href={siteConfig.publicSecurity.url} target="_blank" rel="noreferrer">
+                  <img src={siteConfig.publicSecurity.icon} alt="" aria-hidden="true" />
+                  <span>{siteConfig.publicSecurity.text}</span>
+                </a>
+                <a href={siteConfig.icp.url} target="_blank" rel="noopener noreferrer">
+                  {siteConfig.icp.text}
+                </a>
+              </>
             ) : null}
             <span>{siteConfig.copyright}</span>
           </div>

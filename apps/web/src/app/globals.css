@@ -2449,6 +2449,18 @@ textarea {
   text-align: right;
 }
 
+.footer-public-security {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.footer-public-security img {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+
 main.document-page {
   width: 100%;
   max-width: none !important;

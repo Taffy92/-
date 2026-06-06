@@ -194,6 +194,39 @@ const quickGuide = [
   }
 ];
 
+const fieldNotes = [
+  {
+    title: "报名、考试和证件资料怎么处理",
+    text:
+      "这类页面通常会写清楚“照片小于 200KB”“尺寸 295 x 413”“只收 JPG”。先别急着反复压缩，先看清楚它到底限制的是文件大小、图片尺寸，还是格式。证件照建议先按比例裁切，再按像素调整尺寸，最后再压缩体积。处理完以后打开结果看一眼，确认脸部没有被裁掉、文字没有糊、背景颜色没有因为压缩变脏。"
+  },
+  {
+    title: "公司表格和报价单怎么发给别人看",
+    text:
+      "Excel 表格直接发给别人，有时对方手机打不开，或者打开后列宽乱掉。临时确认价格、库存、排班、课程表时，可以先把 Excel 转成图片。表格很宽时，建议先在 Excel 里隐藏暂时不看的列，把表头、金额、日期这些关键列放在前面，再转成图片。发出去之前最好放大检查金额和小数点，别只看缩略图。"
+  },
+  {
+    title: "聊天里发文档预览怎么更稳",
+    text:
+      "有些人只是想看一眼内容，不一定需要原始 Word 或 PDF。把 Word、PDF 转成图片后，对方在微信、QQ 或浏览器里打开会更直接，也不容易因为没有安装办公软件而打不开。正式合同、证明、报价这类材料，不建议只看转换后的图片，仍然要保留原文件，图片只当预览和沟通用。"
+  },
+  {
+    title: "视频和音频处理前先留出时间",
+    text:
+      "音视频转换比图片处理慢得多，尤其是长视频、高清素材和会议录屏。开始前先确认电脑还有足够磁盘空间，处理时不要把浏览器页面关掉。只是发给别人预览，优先转成 MP4 或 MP3；如果还要继续剪辑，就别把质量压得太低。转完以后至少检查开头、中间、结尾，避免只看文件生成了就直接发出。"
+  },
+  {
+    title: "敏感资料优先用离线版",
+    text:
+      "身份证件、客户资料、内部表格、会议录音这类文件，建议在 Windows 离线专业版里处理。离线版安装后可以断网使用，适合公司电脑、资料电脑和临时没有网络的场景。在线版也坚持本地处理，但网页会加载页面资源和广告脚本；如果你希望整个过程更安静，直接用离线版会更省心。"
+  },
+  {
+    title: "处理完不要只看下载按钮",
+    text:
+      "很多问题不是转换时报错，而是结果不适合继续使用。图片要看清晰度和边缘，PDF/Word/Excel 要看页码、表头和文字，音视频要试听或播放。特别是要提交到平台、发给客户、放进报名系统的文件，下载后再打开一次，比事后重交材料省时间。"
+  }
+];
+
 export default function TutorialsPage() {
   return (
     <main className="document-page apple-document-page mx-auto max-w-7xl px-4 py-10 text-slate-900 sm:px-6 lg:px-8">
@@ -221,6 +254,24 @@ export default function TutorialsPage() {
             <p className="mt-2 text-sm leading-6 text-slate-600">{item.text}</p>
           </div>
         ))}
+      </section>
+
+      <section className="mt-6 rounded-sm tech-panel p-6 sm:p-8">
+        <div className="max-w-3xl">
+          <p className="text-sm font-semibold text-cyan-300">实际使用场景</p>
+          <h2 className="mt-2 text-2xl font-bold text-slate-50">先按要交付的结果来选工具</h2>
+          <p className="mt-3 text-sm leading-7 text-slate-300">
+            下面这些不是功能清单，而是平时处理文件时经常遇到的情况。很多文件并不是“转换一下”就结束，真正麻烦的是尺寸、清晰度、平台限制、别人能不能打开，以及资料是不是适合在线处理。
+          </p>
+        </div>
+        <div className="mt-5 grid gap-4 lg:grid-cols-2">
+          {fieldNotes.map((note) => (
+            <div key={note.title} className="border border-[var(--border-soft)] bg-[var(--surface-muted)] p-5">
+              <h3 className="text-base font-bold text-slate-50">{note.title}</h3>
+              <p className="mt-2 text-sm leading-7 text-slate-300">{note.text}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
       <div className="mt-6 grid gap-6">
