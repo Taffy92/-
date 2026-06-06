@@ -88,7 +88,7 @@ LICENSE_PRIVATE_KEY_PEM_B64=
 
 当前正式域名为 `https://gszhmrx.cn`，`https://www.gszhmrx.cn` 绑定到同一 CloudBase 静态托管站点。所有 canonical、sitemap、Open Graph URL 都从 `apps/web/src/config/site.ts` 的 `siteConfig.url` 读取，构建前确认 `NEXT_PUBLIC_SITE_URL=https://gszhmrx.cn`。
 
-离线安装包现在按 3 天试用模式直接下载。生产环境可以把 `NEXT_PUBLIC_OFFLINE_EXE_DOWNLOAD_URL` 和 `NEXT_PUBLIC_OFFLINE_MSI_DOWNLOAD_URL` 配成公开对象存储地址；不配置时，EXE 使用 `/release/v1.0.0/installers/` 下的静态路径，MSI 默认使用当前 CloudBase 公开只读对象存储链接。
+离线安装包现在按 3 天试用模式直接下载。生产环境可以把 `NEXT_PUBLIC_OFFLINE_EXE_DOWNLOAD_URL` 和 `NEXT_PUBLIC_OFFLINE_MSI_DOWNLOAD_URL` 配成公开对象存储或 CDN 地址；不配置时，EXE/MSI 默认使用当前 CloudBase 公开只读对象路径 `/installers/v1.0.0/`。
 
 `LICENSE_ADMIN_PASSWORD_SHA256` 和 `LICENSE_PRIVATE_KEY_PEM_B64` 只用于 `cloudbase/functions/licenseAdmin` 私有授权后台，必须配置在 CloudBase 云函数环境变量中，不要写入在线前端或 Git。
 
@@ -133,7 +133,7 @@ Vercel 安全响应头由 `apps/web/src/config/securityHeaders.js` 生成，修�
 
 离线专业版采用“直接下载 3 天试用，试用结束后激活”的模式。下载入口不再要求统一下载口令，授权控制发生在桌面端启动和试用到期之后。
 
-如果使用 CloudBase/COS 分发安装包，建议把 EXE/MSI 放在公开下载路径或 CDN 后面，再通过 `NEXT_PUBLIC_OFFLINE_EXE_DOWNLOAD_URL`、`NEXT_PUBLIC_OFFLINE_MSI_DOWNLOAD_URL` 指向实际地址。当前 MSI 默认走公开只读 CloudBase 对象存储，因为文件超过静态托管稳定上传阈值。旧的 `cloudbase/functions/createDownloadUrl` 口令云函数可作为备用内部分发方案保留，但不再是公开下载页主流程。
+如果使用 CloudBase/COS 分发安装包，建议把 EXE/MSI 放在公开下载路径或 CDN 后面，再通过 `NEXT_PUBLIC_OFFLINE_EXE_DOWNLOAD_URL`、`NEXT_PUBLIC_OFFLINE_MSI_DOWNLOAD_URL` 指向实际地址。当前 EXE/MSI 默认都走公开只读 CloudBase 对象存储，静态站只保留 `SHA256SUMS.txt` 等轻量发布校验文件。旧的 `cloudbase/functions/createDownloadUrl` 口令云函数可作为备用内部分发方案保留，但不再是公开下载页主流程。
 
 ## 私有授权后台
 
@@ -216,7 +216,7 @@ Excel 转图片：支持 `.xlsx`、`.csv`。旧版 `.xls` 请先用 Excel/WPS �
 4. 运行 `npm run build:web`。
 5. 商业发布前确认离线授权生产公钥已替换，管理员私钥和授权记录没有进入客户包。
 6. 运行 `npm run package:desktop`。
-7. 将新 EXE/MSI 同步到 `release/<version>/installers/`，更新 SHA256；EXE 可同步到静态下载路径，MSI 建议上传到公开只读对象存储并更新下载链接。
+7. 将新 EXE/MSI 同步到 `release/<version>/installers/`，更新 SHA256；安装包默认上传到公开只读对象存储或 CDN，再更新下载链接。
 8. 确认 `licenseAdmin` 云函数环境变量中的私钥对应桌面端 `PUBLIC_KEY_RAW_B64`。
 9. 运行 `npm run build:web`，部署静态网站和 `licenseAdmin` 云函数。
 

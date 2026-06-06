@@ -2,18 +2,18 @@
 // Do not edit it by hand.
 
 export const thirdPartyNoticeMeta = {
-  "generatedAt": "2026-06-03T13:14:04.835Z",
+  "generatedAt": "2026-06-05T16:57:51.569Z",
   "npmPackageCount": 728,
   "directNpmPackageCount": 35,
   "rustCrateCount": 439,
-  "bundledArtifactCount": 7,
+  "bundledArtifactCount": 5,
   "sources": [
     "pnpm-lock.yaml",
     "node_modules/.pnpm/**/package.json",
     "apps/desktop/src-tauri/Cargo.lock",
     "本机 Cargo registry manifest（可用时）",
     "apps/web/out",
-    "apps/desktop/src-tauri/target/release/bundle"
+    "release/v1.0.0/installers"
   ]
 } as const;
 
@@ -22,8 +22,8 @@ export const bundledArtifacts = [
     "label": "Next.js 静态网站产物",
     "path": "apps/web/out",
     "kind": "目录",
-    "files": 295,
-    "sizeBytes": 44243520,
+    "files": 296,
+    "sizeBytes": 44388647,
     "sha256": "",
     "note": "在线版和离线版共用的静态页面、JS、CSS 和静态资源。"
   },
@@ -47,7 +47,7 @@ export const bundledArtifacts = [
   },
   {
     "label": "Windows NSIS 安装包",
-    "path": "apps/desktop/src-tauri/target/release/bundle/nsis/万能格式转换器_1.0.0_x64-setup.exe",
+    "path": "release/v1.0.0/installers/万能格式转换离线专业版_1.0.0_x64-setup.exe",
     "kind": "文件",
     "files": 1,
     "sizeBytes": 255387018,
@@ -55,29 +55,11 @@ export const bundledArtifacts = [
     "note": "离线版 Windows x64 EXE 安装包。"
   },
   {
-    "label": "Windows NSIS 安装包",
-    "path": "apps/desktop/src-tauri/target/release/bundle/nsis/万能格式转换离线专业版_1.0.0_x64-setup.exe",
-    "kind": "文件",
-    "files": 1,
-    "sizeBytes": 255288601,
-    "sha256": "DF8258E77E2250CA513CAACF4FA4BC380812A92F687030E75042E6FAF1B2F6FD",
-    "note": "离线版 Windows x64 EXE 安装包。"
-  },
-  {
     "label": "Windows MSI 安装包",
-    "path": "apps/desktop/src-tauri/target/release/bundle/msi/万能格式转换器_1.0.0_x64_zh-CN.msi",
+    "path": "release/v1.0.0/installers/万能格式转换离线专业版_1.0.0_x64_zh-CN.msi",
     "kind": "文件",
     "files": 1,
     "sizeBytes": 266625024,
-    "sha256": "83AE0FF2E23EAE9B0B9E64CD4579DD86202C392EBD330A0D78A142309B9577E8",
-    "note": "离线版 Windows x64 MSI 安装包。"
-  },
-  {
-    "label": "Windows MSI 安装包",
-    "path": "apps/desktop/src-tauri/target/release/bundle/msi/万能格式转换离线专业版_1.0.0_x64_zh-CN.msi",
-    "kind": "文件",
-    "files": 1,
-    "sizeBytes": 266510336,
     "sha256": "83AE0FF2E23EAE9B0B9E64CD4579DD86202C392EBD330A0D78A142309B9577E8",
     "note": "离线版 Windows x64 MSI 安装包。"
   }
@@ -14604,4 +14586,3 @@ export const rustCrates = [
     "checksum": "b8848ee67ecc8aedbaf3e4122217aff892639231befc6a1b58d29fff4c2cabaa"
   }
 ] as const;
-

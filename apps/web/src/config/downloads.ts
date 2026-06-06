@@ -1,9 +1,11 @@
-const installerBasePath = "/release/v1.0.0/installers";
 const exeFileName = "万能格式转换离线专业版_1.0.0_x64-setup.exe";
 const msiFileName = "万能格式转换离线专业版_1.0.0_x64_zh-CN.msi";
+const objectStorageBaseUrl = "https://666f-format-converter-prod-x-d71bce41-1434109188.tcb.qcloud.la/installers/v1.0.0";
+const exeStorageDownloadUrl =
+  `${objectStorageBaseUrl}/%E4%B8%87%E8%83%BD%E6%A0%BC%E5%BC%8F%E8%BD%AC%E6%8D%A2%E7%A6%BB%E7%BA%BF%E4%B8%93%E4%B8%9A%E7%89%88_1.0.0_x64-setup.exe`;
 const msiStorageDownloadUrl =
-  "https://666f-format-converter-prod-x-d71bce41-1434109188.tcb.qcloud.la/release/v1.0.0/installers/%E4%B8%87%E8%83%BD%E6%A0%BC%E5%BC%8F%E8%BD%AC%E6%8D%A2%E7%A6%BB%E7%BA%BF%E4%B8%93%E4%B8%9A%E7%89%88_1.0.0_x64_zh-CN.msi";
-const exeDownloadUrl = process.env.NEXT_PUBLIC_OFFLINE_EXE_DOWNLOAD_URL || `${installerBasePath}/${exeFileName}`;
+  `${objectStorageBaseUrl}/%E4%B8%87%E8%83%BD%E6%A0%BC%E5%BC%8F%E8%BD%AC%E6%8D%A2%E7%A6%BB%E7%BA%BF%E4%B8%93%E4%B8%9A%E7%89%88_1.0.0_x64_zh-CN.msi`;
+const exeDownloadUrl = process.env.NEXT_PUBLIC_OFFLINE_EXE_DOWNLOAD_URL || exeStorageDownloadUrl;
 const msiDownloadUrl = process.env.NEXT_PUBLIC_OFFLINE_MSI_DOWNLOAD_URL || msiStorageDownloadUrl;
 
 export const downloadsConfig = {

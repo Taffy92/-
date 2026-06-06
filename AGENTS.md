@@ -26,7 +26,7 @@ npm run package:desktop
 npm run deploy:license-admin
 ```
 
-在线构建产物位于 `apps/web/out`。离线构建会改写构建模式，正式部署前必须重新执行 `npm run build:web`，确保 `apps/web/out` 是在线版产物。发布直接下载试用版时，EXE 可临时放入 `apps/web/public/release/<version>/installers/` 参与静态部署；MSI 体积较大，默认走公开只读 CloudBase/COS 对象存储链接。安装包不得进入 Git。
+在线构建产物位于 `apps/web/out`。离线构建会改写构建模式，正式部署前必须重新执行 `npm run build:web`，确保 `apps/web/out` 是在线版产物。发布直接下载试用版时，EXE/MSI 默认走公开只读 CloudBase/COS 对象存储或 CDN 链接；静态站安装包目录只保留 `SHA256SUMS.txt` 等轻量校验文件。安装包不得进入 Git。
 
 ## 文档与发布
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 
 const projectRoot = resolve(process.cwd(), "..", "..");
@@ -40,6 +40,29 @@ describe("offline P0 release checks", () => {
     const workerAssetPath = resolve(projectRoot, "apps", "web", "public", "vendor", "browser-image-compression", "browser-image-compression.js");
     expect(existsSync(workerAssetPath)).toBe(true);
     expect(readFileSync(workerAssetPath, "utf8")).toContain("browser-image-compression");
+  });
+
+  it("keeps release downloads on object storage and static installer folders checksum-only", () => {
+    const downloadsConfigPath = resolve(projectRoot, "apps", "web", "src", "config", "downloads.ts");
+    const downloadsConfigSource = readFileSync(downloadsConfigPath, "utf8");
+    const publicInstallerDir = resolve(projectRoot, "apps", "web", "public", "release", "v1.0.0", "installers");
+    const outInstallerDir = resolve(projectRoot, "apps", "web", "out", "release", "v1.0.0", "installers");
+    const releaseSumsPath = resolve(projectRoot, "release", "v1.0.0", "installers", "SHA256SUMS.txt");
+    const publicSumsPath = resolve(publicInstallerDir, "SHA256SUMS.txt");
+
+    expect(downloadsConfigSource).toContain("tcb.qcloud.la/installers/v1.0.0");
+    expect(downloadsConfigSource).not.toContain('"/release/v1.0.0/installers"');
+    expect(downloadsConfigSource).toContain("DF8258E77E2250CA513CAACF4FA4BC380812A92F687030E75042E6FAF1B2F6FD");
+    expect(downloadsConfigSource).toContain("83AE0FF2E23EAE9B0B9E64CD4579DD86202C392EBD330A0D78A142309B9577E8");
+    expect(downloadsConfigSource).not.toContain("6561983E608F");
+    expect(downloadsConfigSource).not.toContain("80EEFAC831A6");
+
+    expect(readFileSync(publicSumsPath, "utf8")).toBe(readFileSync(releaseSumsPath, "utf8"));
+    for (const dir of [publicInstallerDir, outInstallerDir]) {
+      if (!existsSync(dir)) continue;
+      const binaryInstallers = readdirSync(dir).filter((name) => /\.(exe|msi)$/i.test(name));
+      expect(binaryInstallers).toEqual([]);
+    }
   });
 
   it("exposes stable batch action selectors", () => {

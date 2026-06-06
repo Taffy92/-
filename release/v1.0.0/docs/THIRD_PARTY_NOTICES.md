@@ -2,11 +2,11 @@
 
 本文件为“万能格式转换器”在线版和 Windows 离线安装版的第三方开源软件 Notices。内容根据锁文件、本地依赖元数据和最终构建产物生成，用于正式发布前的许可证归档和产品内展示。
 
-- 生成时间：2026-06-03T13:14:04.835Z
+- 生成时间：2026-06-05T16:57:51.569Z
 - npm 依赖数量：728
 - 直接 npm 依赖数量：35
 - Rust crate 数量：439
-- 构建产物记录数量：7
+- 构建产物记录数量：5
 - 开发者：MR.谢
 - 联系邮箱：370298218@qq.com
 
@@ -17,7 +17,7 @@
 - `apps/desktop/src-tauri/Cargo.lock`
 - `本机 Cargo registry manifest（可用时）`
 - `apps/web/out`
-- `apps/desktop/src-tauri/target/release/bundle`
+- `release/v1.0.0/installers`
 
 ## 发布前必须保留的重点说明
 
@@ -32,13 +32,11 @@
 
 | 名称 | 路径 | 类型 | 文件数 | 大小 | SHA256 | 说明 |
 | --- | --- | --- | --- | --- | --- | --- |
-| Next.js 静态网站产物 | `apps/web/out` | 目录 | 295 | 42.19 MB | - | 在线版和离线版共用的静态页面、JS、CSS 和静态资源。 |
+| Next.js 静态网站产物 | `apps/web/out` | 目录 | 296 | 42.33 MB | - | 在线版和离线版共用的静态页面、JS、CSS 和静态资源。 |
 | PDF.js 静态资源 | `apps/web/out/pdfjs` | 目录 | 189 | 3.80 MB | - | 来自 pdfjs-dist 的主模块、worker、CMaps 和字体资源。 |
 | FFmpeg WASM 静态资源 | `apps/web/out/ffmpeg` | 目录 | 2 | 30.85 MB | - | 来自 @ffmpeg/core 的 ffmpeg-core.js 和 ffmpeg-core.wasm。 |
-| Windows NSIS 安装包 | `apps/desktop/src-tauri/target/release/bundle/nsis/万能格式转换器_1.0.0_x64-setup.exe` | 文件 | 1 | 243.56 MB | DF8258E77E2250CA513CAACF4FA4BC380812A92F687030E75042E6FAF1B2F6FD | 离线版 Windows x64 EXE 安装包。 |
-| Windows NSIS 安装包 | `apps/desktop/src-tauri/target/release/bundle/nsis/万能格式转换离线专业版_1.0.0_x64-setup.exe` | 文件 | 1 | 243.56 MB | DF8258E77E2250CA513CAACF4FA4BC380812A92F687030E75042E6FAF1B2F6FD | 离线版 Windows x64 EXE 安装包。 |
-| Windows MSI 安装包 | `apps/desktop/src-tauri/target/release/bundle/msi/万能格式转换器_1.0.0_x64_zh-CN.msi` | 文件 | 1 | 254.27 MB | 83AE0FF2E23EAE9B0B9E64CD4579DD86202C392EBD330A0D78A142309B9577E8 | 离线版 Windows x64 MSI 安装包。 |
-| Windows MSI 安装包 | `apps/desktop/src-tauri/target/release/bundle/msi/万能格式转换离线专业版_1.0.0_x64_zh-CN.msi` | 文件 | 1 | 254.27 MB | 83AE0FF2E23EAE9B0B9E64CD4579DD86202C392EBD330A0D78A142309B9577E8 | 离线版 Windows x64 MSI 安装包。 |
+| Windows NSIS 安装包 | `release/v1.0.0/installers/万能格式转换离线专业版_1.0.0_x64-setup.exe` | 文件 | 1 | 243.56 MB | DF8258E77E2250CA513CAACF4FA4BC380812A92F687030E75042E6FAF1B2F6FD | 离线版 Windows x64 EXE 安装包。 |
+| Windows MSI 安装包 | `release/v1.0.0/installers/万能格式转换离线专业版_1.0.0_x64_zh-CN.msi` | 文件 | 1 | 254.27 MB | 83AE0FF2E23EAE9B0B9E64CD4579DD86202C392EBD330A0D78A142309B9577E8 | 离线版 Windows x64 MSI 安装包。 |
 
 ## 直接 npm 依赖
 
@@ -1263,4 +1261,3 @@
 2. 离线版：在程序的“开源许可证”页面展示同一份 Notices，并随安装包或安装目录保留 `THIRD_PARTY_NOTICES.md`。
 3. 发布包：保留项目根目录 `LICENSE`、`THIRD_PARTY_NOTICES.md`、`docs/licenses.md` 和 `docs/third-party-notices.md`。
 4. 如果更新依赖、重新打包离线版或替换 WASM/PDF/FFmpeg 静态资源，请重新运行 `pnpm generate:notices`。
-
