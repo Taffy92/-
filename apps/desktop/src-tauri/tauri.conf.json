@@ -32,7 +32,6 @@
         "removeFile": false,
         "renameFile": false,
         "scope": [
-          "**",
           "$HOME/**",
           "$DESKTOP/**",
           "$DOCUMENT/**",

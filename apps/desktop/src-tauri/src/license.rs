@@ -771,19 +771,19 @@ fn write_trial_registry(text: &str) -> Result<(), String> {
 fn machine_id() -> String {
   let mut factors = Vec::new();
   if let Some(value) = read_machine_guid() {
-    factors.push(format!("machine_guid={}", normalize_factor(&value)));
+    push_machine_factor(&mut factors, "machine_guid", &value);
   }
   if let Some(value) = wmic_value(&["csproduct", "get", "uuid", "/value"], "UUID") {
-    factors.push(format!("board_uuid={}", normalize_factor(&value)));
+    push_machine_factor(&mut factors, "board_uuid", &value);
   }
   if let Some(value) = wmic_value(&["cpu", "get", "processorid", "/value"], "ProcessorId") {
-    factors.push(format!("cpu={}", normalize_factor(&value)));
+    push_machine_factor(&mut factors, "cpu", &value);
   }
   if let Some(value) = wmic_value(&["diskdrive", "get", "serialnumber", "/value"], "SerialNumber") {
-    factors.push(format!("disk={}", normalize_factor(&value)));
+    push_machine_factor(&mut factors, "disk", &value);
   }
   if let Ok(value) = env::var("COMPUTERNAME") {
-    factors.push(format!("computer={}", normalize_factor(&value)));
+    push_machine_factor(&mut factors, "computer", &value);
   }
 
   if factors.is_empty() {
@@ -797,6 +797,13 @@ fn machine_id() -> String {
   hasher.update(factors.join("|").as_bytes());
   let digest = hasher.finalize();
   short_code(&digest[..16])
+}
+
+fn push_machine_factor(factors: &mut Vec<String>, key: &str, value: &str) {
+  let normalized = normalize_factor(value);
+  if !normalized.is_empty() {
+    factors.push(format!("{key}={normalized}"));
+  }
 }
 
 fn read_machine_guid() -> Option<String> {
@@ -814,12 +821,13 @@ fn wmic_value(args: &[&str], key: &str) -> Option<String> {
     return None;
   }
   let stdout = String::from_utf8_lossy(&output.stdout);
+  let prefix = format!("{key}=");
   for line in stdout.lines() {
     let trimmed = line.trim();
-    if let Some(value) = trimmed.strip_prefix(&format!("{key}=")) {
-      let cleaned = value.trim();
-      if !cleaned.is_empty() {
-        return Some(cleaned.to_string());
+    if let Some(value) = trimmed.strip_prefix(&prefix) {
+      let normalized = normalize_factor(value);
+      if !normalized.is_empty() {
+        return Some(normalized);
       }
     }
   }
@@ -894,6 +902,16 @@ mod tests {
   fn formats_machine_code_as_four_blocks() {
     assert_eq!(short_code(&[0; 16]), "AAAA-AAAA-AAAA-AAAA");
     assert_eq!(short_code(&[31; 16]), "9999-9999-9999-9999");
+  }
+
+  #[test]
+  fn normalizes_and_skips_empty_machine_factors() {
+    let mut factors = Vec::new();
+
+    push_machine_factor(&mut factors, "cpu", " ab cd\t\r\n");
+    push_machine_factor(&mut factors, "disk", "  ");
+
+    assert_eq!(factors, vec!["cpu=ABCD"]);
   }
 
   #[test]

@@ -12,8 +12,6 @@ mkdirSync(tmpDir, { recursive: true });
 
 const env = {
   ...process.env,
-  HOME: root,
-  USERPROFILE: root,
   TEMP: tmpDir,
   TMP: tmpDir,
   PNPM_HOME: join(root, ".pnpm-home"),

@@ -1,5 +1,6 @@
-import { createPrivateKey, createPublicKey, generateKeyPairSync, verify } from "node:crypto";
+import { createHash, createPrivateKey, createPublicKey, generateKeyPairSync, verify } from "node:crypto";
 import { createRequire } from "node:module";
+import type { Server } from "node:http";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -11,6 +12,7 @@ const licenseAdmin = require(path.join(projectRoot, "cloudbase/functions/license
   canonicalLicensePayload: (payload: LicensePayload) => string;
   generateLicenseFromInput: (input: Record<string, unknown>, privateKeyPem: string) => LicenseResult;
   activationRequestHmac: (request: ActivationRequest, machineId: string) => string;
+  server: Server;
 };
 
 type LicensePayload = {
@@ -120,5 +122,58 @@ describe("licenseAdmin cloud function", () => {
     expect(() => {
       licenseAdmin.generateLicenseFromInput({ request: JSON.stringify(request), days: 365 }, privatePem);
     }).toThrow("签名无效");
+  });
+
+  it("requires the admin bearer password before issuing licenses", async () => {
+    const { privateKey } = generateKeyPairSync("ed25519");
+    const privatePem = privateKey.export({ format: "pem", type: "pkcs8" }).toString();
+    const previousPasswordHash = process.env.LICENSE_ADMIN_PASSWORD_SHA256;
+    const previousPrivateKey = process.env.LICENSE_PRIVATE_KEY_PEM_B64;
+
+    process.env.LICENSE_ADMIN_PASSWORD_SHA256 = createHash("sha256").update("admin-pass", "utf8").digest("hex");
+    process.env.LICENSE_PRIVATE_KEY_PEM_B64 = Buffer.from(privatePem, "utf8").toString("base64");
+
+    await new Promise<void>((resolve) => licenseAdmin.server.listen(0, "127.0.0.1", resolve));
+    try {
+      const address = licenseAdmin.server.address();
+      if (!address || typeof address === "string") throw new Error("licenseAdmin test server did not bind to a port");
+      const url = `http://127.0.0.1:${address.port}/api/license`;
+      const body = JSON.stringify({
+        machineId: "TEST-TEST-TEST-TEST",
+        days: 30,
+        issuedAt: 1700000000,
+        licenseId: "LIC-AUTH"
+      });
+      const headers = { "Content-Type": "application/json" };
+
+      const missingPassword = await fetch(url, { method: "POST", headers, body });
+      expect(missingPassword.status).toBe(401);
+
+      const wrongPassword = await fetch(url, {
+        method: "POST",
+        headers: { ...headers, Authorization: "Bearer wrong-pass" },
+        body
+      });
+      expect(wrongPassword.status).toBe(401);
+
+      const correctPassword = await fetch(url, {
+        method: "POST",
+        headers: { ...headers, Authorization: "Bearer admin-pass" },
+        body
+      });
+      expect(correctPassword.status).toBe(200);
+      expect(await correctPassword.json()).toMatchObject({
+        ok: true,
+        machineId: "TEST-TEST-TEST-TEST"
+      });
+    } finally {
+      await new Promise<void>((resolve, reject) => {
+        licenseAdmin.server.close((error) => (error ? reject(error) : resolve()));
+      });
+      if (previousPasswordHash === undefined) delete process.env.LICENSE_ADMIN_PASSWORD_SHA256;
+      else process.env.LICENSE_ADMIN_PASSWORD_SHA256 = previousPasswordHash;
+      if (previousPrivateKey === undefined) delete process.env.LICENSE_PRIVATE_KEY_PEM_B64;
+      else process.env.LICENSE_PRIVATE_KEY_PEM_B64 = previousPrivateKey;
+    }
   });
 });

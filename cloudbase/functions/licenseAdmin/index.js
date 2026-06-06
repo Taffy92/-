@@ -369,13 +369,11 @@ function renderAdminPage() {
       licenseCode: document.getElementById("licenseCode")
     };
     let licenseFileContent = "";
-    els.password.value = localStorage.getItem("licenseAdminPassword") || "";
     document.getElementById("generate").addEventListener("click", async () => {
       els.status.textContent = "正在生成...";
       els.status.className = "muted";
       licenseFileContent = "";
       try {
-        localStorage.setItem("licenseAdminPassword", els.password.value);
         const apiPath = location.pathname.replace(/\\/$/, "") + "/api/license";
         const response = await fetch(apiPath || "/api/license", {
           method: "POST",

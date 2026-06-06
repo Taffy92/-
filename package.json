@@ -10,7 +10,7 @@
     "sync:security": "node scripts/run-pnpm.cjs --filter web sync:security",
     "deploy:vercel": "vercel --prod",
     "deploy:cloudbase": "tcb hosting deploy apps/web/out -e format-converter-prod-x-d71bce41",
-    "deploy:license-admin": "tcb fn deploy licenseAdmin --dir cloudbase/functions/licenseAdmin --httpFn --path /licenseAdmin --force -e format-converter-prod-x-d71bce41",
+    "deploy:license-admin": "cd cloudbase/functions/licenseAdmin && echo. | tcb fn deploy licenseAdmin --dir . --httpFn --force -e format-converter-prod-x-d71bce41",
     "build:desktop": "node scripts/run-pnpm.cjs --filter desktop build",
     "package:desktop": "node scripts/run-pnpm.cjs --filter desktop package",
     "check:privacy": "node scripts/run-pnpm.cjs --filter web check:privacy",

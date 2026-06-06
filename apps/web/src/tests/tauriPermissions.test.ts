@@ -33,12 +33,12 @@ describe("Tauri permission hardening", () => {
     expect(allowlist.fs.renameFile).toBe(false);
   });
 
-  it("allows any user-selected output folder while retaining required local directories", () => {
+  it("keeps fs scope bounded to user and project directories", () => {
     const config = readTauriConfig();
     const scope: string[] = config.tauri.allowlist.fs.scope;
 
     expect(scope).not.toContain("C:/**");
-    expect(scope).toContain("**");
+    expect(scope).not.toContain("**");
     expect(scope).toEqual(
       expect.arrayContaining([
         "$HOME/**",
