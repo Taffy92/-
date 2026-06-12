@@ -99,8 +99,8 @@ describe("batch queue helpers", () => {
     const task = {
       ...createBatchTask(file("客户表格.xlsx", 4096), "excel-images", "PNG", "D:\\客户资料\\合同项目\\客户表格.xlsx"),
       status: "success" as const,
-      outputPath: "D:\\输出 目录\\客户表格_sheets.zip",
-      resultName: "客户表格_sheets.zip",
+      outputPath: "D:\\输出 目录\\客户表格",
+      resultName: "客户表格",
       backend: "wasm" as const,
       completedAt
     };
@@ -108,10 +108,10 @@ describe("batch queue helpers", () => {
     expect(history).toMatchObject({
       fileName: "客户表格.xlsx",
       status: "success",
-      resultName: "客户表格_sheets.zip",
+      resultName: "客户表格",
       backend: "wasm",
       sanitizedSourcePath: "D:/.../客户表格.xlsx",
-      sanitizedOutputPath: "D:/.../客户表格_sheets.zip"
+      sanitizedOutputPath: "D:/.../客户表格"
     });
     expect(JSON.stringify(history)).not.toContain("客户资料\\合同项目");
     expect(JSON.stringify(history)).not.toContain("输出 目录\\客户表格");

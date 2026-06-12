@@ -7,7 +7,6 @@
   "types": "src/index.ts",
   "dependencies": {
     "@doctool/shared": "workspace:*",
-    "jszip": "^3.10.1",
     "pdfjs-dist": "^4.3.136"
   }
 }

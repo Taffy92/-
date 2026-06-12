@@ -56,14 +56,8 @@
       },
       "shell": {
         "all": false,
-        "open": true,
-        "scope": [
-          {
-            "name": "open-output-directory",
-            "cmd": "explorer",
-            "args": true
-          }
-        ]
+        "open": false,
+        "scope": []
       }
     },
     "bundle": {

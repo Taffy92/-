@@ -4,6 +4,9 @@ import { describe, expect, it } from "vitest";
 
 const projectRoot = resolve(process.cwd(), "..", "..");
 const tauriConfigPath = resolve(projectRoot, "apps", "desktop", "src-tauri", "tauri.conf.json");
+const toolsClientPath = resolve(projectRoot, "apps", "web", "src", "components", "tools", "ToolsClient.tsx");
+const rustMainPath = resolve(projectRoot, "apps", "desktop", "src-tauri", "src", "main.rs");
+const localPathsPath = resolve(projectRoot, "apps", "desktop", "src-tauri", "src", "local_paths.rs");
 
 function readTauriConfig() {
   return JSON.parse(readFileSync(tauriConfigPath, "utf8"));
@@ -56,11 +59,19 @@ describe("Tauri permission hardening", () => {
   it("keeps shell, path, process, updater and WebView2 install behavior stable", () => {
     const config = readTauriConfig();
     const allowlist = config.tauri.allowlist;
+    const toolsSource = readFileSync(toolsClientPath, "utf8");
+    const rustMain = readFileSync(rustMainPath, "utf8");
+    const localPaths = readFileSync(localPathsPath, "utf8");
 
     expect(config.build.withGlobalTauri).toBe(true);
     expect(allowlist.path.all).toBe(true);
     expect(allowlist.shell.all).toBe(false);
-    expect(allowlist.shell.open).toBe(true);
+    expect(allowlist.shell.open).toBe(false);
+    expect(allowlist.shell.scope).toEqual([]);
+    expect(toolsSource).not.toContain("tauri.shell.open");
+    expect(toolsSource).toContain('invokeTauri<void>("open_output_path"');
+    expect(rustMain).toContain("local_paths::open_output_path");
+    expect(localPaths).toContain("Command::new(\"explorer.exe\")");
     expect(allowlist.process.all).toBe(false);
     expect(allowlist.process.exit).toBe(false);
     expect(allowlist.process.relaunch).toBe(false);

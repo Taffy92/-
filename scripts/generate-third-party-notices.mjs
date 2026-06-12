@@ -21,6 +21,7 @@ const directNames = await collectDirectDependencyNames();
 const npmPackages = await collectPnpmPackages(lockPackages, directNames);
 const rustCrates = await collectRustCrates();
 const bundledArtifacts = await collectBundledArtifacts();
+const embeddedArtifacts = bundledArtifacts.filter((item) => !item.path.startsWith("release/v1.0.0/installers/"));
 const directNpmPackages = npmPackages.filter((item) => item.direct);
 
 const meta = {
@@ -46,7 +47,11 @@ const markdown = renderMarkdown(meta, bundledArtifacts, directNpmPackages, npmPa
 await writeUtf8Bom(paths.rootNotices, markdown);
 await writeUtf8Bom(paths.docsNotices, markdown);
 await writeUtf8Bom(paths.docsLicenses, markdown);
-await writeUtf8Bom(paths.generatedTs, renderTypescript(meta, bundledArtifacts, directNpmPackages, npmPackages, rustCrates));
+await writeUtf8Bom(paths.generatedTs, renderTypescript({
+  ...meta,
+  bundledArtifactCount: embeddedArtifacts.length,
+  sources: meta.sources.filter((source) => source !== "release/v1.0.0/installers")
+}, embeddedArtifacts, directNpmPackages, npmPackages, rustCrates));
 
 console.log(`Generated ${paths.rootNotices}`);
 console.log(`Generated ${paths.docsNotices}`);

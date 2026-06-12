@@ -75,14 +75,6 @@ export async function renderExcelToImagePages(file: File, options: OfficeImageOp
   return pages;
 }
 
-export async function imagePagesToZip(pages: ImagePage[], baseName: string, extension: ExportImageFormat, onProgress?: ProgressReporter): Promise<Blob> {
-  const zip = new JSZip();
-  pages.forEach((page) => {
-    zip.file(`${baseName}_${String(page.pageNumber).padStart(3, "0")}.${extension}`, page.blob);
-  });
-  return zip.generateAsync({ type: "blob" }, (metadata) => onProgress?.(metadata.percent / 100, "正在打包逐页图片"));
-}
-
 export async function combineImagePages(pages: ImagePage[], format: ExportImageFormat, onProgress?: ProgressReporter): Promise<Blob> {
   if (!pages.length) throw new Error("没有可合成的图片页面。");
   const bitmaps = [];

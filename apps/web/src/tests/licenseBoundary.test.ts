@@ -39,6 +39,17 @@ describe("offline license boundary", () => {
     expect(gitignore).toContain("tools/admin-license-generator/license_records.json");
   });
 
+  it("checks license status without visible helper consoles or writable machine-id caches", () => {
+    const licenseSource = readProjectFile("apps", "desktop", "src-tauri", "src", "license.rs");
+
+    expect(licenseSource).toContain("CREATE_NO_WINDOW");
+    expect(licenseSource).toContain("hidden_command_output(\"wmic\"");
+    expect(licenseSource).toContain("static MACHINE_ID: OnceLock<String>");
+    expect(licenseSource).toContain("MACHINE_ID.get_or_init(compute_machine_id)");
+    expect(licenseSource).not.toContain("machine.id");
+    expect(licenseSource).not.toContain("REGISTRY_MACHINE_ID_VALUE");
+  });
+
   it("keeps the license gate desktop-only and leaves online tabs unchanged", () => {
     const toolsSource = readProjectFile("apps", "web", "src", "components", "tools", "ToolsClient.tsx");
     const gateSource = readProjectFile("apps", "web", "src", "components", "tools", "LicenseGate.tsx");
@@ -57,5 +68,32 @@ describe("offline license boundary", () => {
     expect(toolsSource).toContain("await ensureDesktopLicenseAllowed()");
     expect(gateSource).toContain("activation_request.mrx");
     expect(gateSource).toContain("license.mrx");
+  });
+
+  it("does not re-check the license when downloading an already generated result", () => {
+    const toolsSource = readProjectFile("apps", "web", "src", "components", "tools", "ToolsClient.tsx");
+    const runTaskBlock = toolsSource.slice(toolsSource.indexOf("async function runCurrentTask()"), toolsSource.indexOf("async function runCrop()"));
+    const downloadBlock = toolsSource.slice(toolsSource.indexOf("async function handleDownload()"), toolsSource.indexOf("async function openLocalPath("));
+
+    expect(runTaskBlock).toContain("await ensureDesktopLicenseAllowed()");
+    expect(downloadBlock).not.toContain("ensureDesktopLicenseAllowed");
+    expect(downloadBlock).toContain("结果已保存");
+  });
+
+  it("documents the complete offline activation flow in the install guide", () => {
+    const installGuide = readProjectFile(
+      "apps",
+      "web",
+      "public",
+      "release",
+      "v1.0.0",
+      "docs",
+      "INSTALL_GUIDE.md"
+    );
+
+    expect(installGuide).toContain("3 天试用");
+    expect(installGuide).toContain("机器码");
+    expect(installGuide).toContain("激活码");
+    expect(installGuide).toContain("license.mrx");
   });
 });

@@ -86,7 +86,7 @@ export default function DownloadPage() {
             "图片尺寸调整、加水印和压缩",
             "PDF、Word、Excel 转图片",
             "视频转换、音频转换和视频提取音频",
-            "输出目录、失败重试、预览和下载结果"
+            "输出目录、清空任务、文件预览和下载结果"
           ]}
         />
         <Card

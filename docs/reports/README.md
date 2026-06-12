@@ -2,16 +2,17 @@
 
 根目录只保留项目入口、许可证和协作规则。阶段性审查、设计、部署、测试和修复报告统一归档到 `docs/reports/archive/`，避免根目录膨胀。
 
-2026-06-06 已清理失效的中间计划、过程报告、重复验证模板和被后续结论覆盖的旧报告。当前只保留最终结论、可复用决策、交接说明和仍有审查价值的报告。
+2026-06-12 已完成离线工作台、转换输出、授权、发布包和线上部署的收口审查。当前只保留最终结论、可复用决策、交接说明和仍有审查价值的报告。
 
 ## 当前优先查看
 
 ### 最新审查
 
-- `archive/PROJECT_NEAT_FREAK_FULL_AUDIT_2026-06-06.md`
+- `archive/PROJECT_NEAT_FREAK_RELEASE_AUDIT_2026-06-12.md`
 
 ### 项目审查
 
+- `archive/PROJECT_NEAT_FREAK_FULL_AUDIT_2026-06-06.md`
 - `archive/PROJECT_NEAT_FREAK_RELEASE_AUDIT_2026-06-03.md`
 - `archive/PROJECT_NEAT_FREAK_2026-06-02.md`
 - `archive/OFFLINE_TOOLBOX_NEAT_FREAK_2026-05-31.md`

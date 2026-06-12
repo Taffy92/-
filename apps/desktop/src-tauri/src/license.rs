@@ -11,8 +11,11 @@ use std::{
   fs,
   path::{Path, PathBuf},
   process::Command,
+  sync::OnceLock,
   time::{SystemTime, UNIX_EPOCH}
 };
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
 use tauri::AppHandle;
 use winreg::{enums::*, RegKey};
 
@@ -22,12 +25,16 @@ const APP_DIR_NAME: &str = "UniversalFormatConverterOfflinePro";
 const TRIAL_FILE_NAME: &str = "trial.dat";
 const LICENSE_FILE_NAME: &str = "license.mrx";
 const REGISTRY_PATH: &str = "Software\\UniversalFormatConverterOfflinePro\\Trial";
+const REGISTRY_TRIAL_RECORD_VALUE: &str = "record";
 const TRIAL_SECONDS: u64 = 3 * 24 * 60 * 60;
 const TIME_ROLLBACK_GRACE: u64 = 5 * 60;
 const LICENSE_CODE_PREFIX: &str = "UFC1-";
 const LOCAL_TRIAL_KEY_CONTEXT: &str = "ufc-local-trial-v1";
+#[cfg(target_os = "windows")]
+const CREATE_NO_WINDOW: u32 = 0x08000000;
 
 const PUBLIC_KEY_RAW_B64: &str = "qWYN9p6oQy5Qr0xaDmf8CGR3jOrA/TXNg6EkLPhdTSM=";
+static MACHINE_ID: OnceLock<String> = OnceLock::new();
 
 type HmacSha256 = Hmac<Sha256>;
 
@@ -759,16 +766,20 @@ fn write_text_file(path: &Path, text: &str) -> std::io::Result<()> {
 fn read_trial_registry() -> Option<String> {
   let hkcu = RegKey::predef(HKEY_CURRENT_USER);
   let key = hkcu.open_subkey(REGISTRY_PATH).ok()?;
-  key.get_value("record").ok()
+  key.get_value(REGISTRY_TRIAL_RECORD_VALUE).ok()
 }
 
 fn write_trial_registry(text: &str) -> Result<(), String> {
   let hkcu = RegKey::predef(HKEY_CURRENT_USER);
   let (key, _) = hkcu.create_subkey(REGISTRY_PATH).map_err(|_| "无法写入试用注册表记录。".to_string())?;
-  key.set_value("record", &text).map_err(|_| "无法写入试用注册表记录。".to_string())
+  key.set_value(REGISTRY_TRIAL_RECORD_VALUE, &text).map_err(|_| "无法写入试用注册表记录。".to_string())
 }
 
 fn machine_id() -> String {
+  MACHINE_ID.get_or_init(compute_machine_id).clone()
+}
+
+fn compute_machine_id() -> String {
   let mut factors = Vec::new();
   if let Some(value) = read_machine_guid() {
     push_machine_factor(&mut factors, "machine_guid", &value);
@@ -813,10 +824,7 @@ fn read_machine_guid() -> Option<String> {
 }
 
 fn wmic_value(args: &[&str], key: &str) -> Option<String> {
-  let output = Command::new("wmic")
-    .args(args)
-    .output()
-    .ok()?;
+  let output = hidden_command_output("wmic", args)?;
   if !output.status.success() {
     return None;
   }
@@ -832,6 +840,14 @@ fn wmic_value(args: &[&str], key: &str) -> Option<String> {
     }
   }
   None
+}
+
+fn hidden_command_output(program: &str, args: &[&str]) -> Option<std::process::Output> {
+  let mut command = Command::new(program);
+  command.args(args);
+  #[cfg(target_os = "windows")]
+  command.creation_flags(CREATE_NO_WINDOW);
+  command.output().ok()
 }
 
 fn normalize_factor(value: &str) -> String {

@@ -1,4 +1,3 @@
-import JSZip from "jszip";
 import type { PdfOutputFormat, ProgressReporter } from "@doctool/shared";
 
 export interface PdfRenderOptions {
@@ -53,17 +52,6 @@ export async function renderPdfPages(file: File, options: PdfRenderOptions): Pro
     options.onProgress?.((index + 1) / options.pages.length, `正在渲染第 ${pageNumber} 页`);
   }
   return results;
-}
-
-export async function renderPdfPagesToZip(file: File, options: PdfRenderOptions, baseName: string): Promise<Blob> {
-  const zip = new JSZip();
-  const pages = await renderPdfPages(file, options);
-  pages.forEach(({ pageNumber, blob }) => {
-    zip.file(`${baseName}_page_${String(pageNumber).padStart(3, "0")}.${options.format === "jpg" ? "jpg" : options.format}`, blob);
-  });
-  return zip.generateAsync({ type: "blob" }, (metadata) => {
-    options.onProgress?.(metadata.percent / 100, "正在打包 ZIP");
-  });
 }
 
 export async function loadPdf(file: File): Promise<any> {

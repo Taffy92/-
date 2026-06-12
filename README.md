@@ -21,7 +21,7 @@
 - 音频格式转换：MP3、WAV、AAC、M4A、FLAC
 - 视频提取音频：MP3、WAV、M4A、AAC
 
-在线版面向大众用户的轻量单文件处理；离线专业版面向批量处理、敏感文件和断网办公场景。离线专业版使用桌面工具箱布局，批量导入跟随当前选中的转换工具，不再作为单独功能页展示。图片尺寸调整、加水印、压缩，PDF/Word/Excel 转图片，音视频转换和视频提取音频均可加入批量队列；图片裁切仍按单张图片精确裁切框处理。涉及大量文件、敏感材料或批量音视频任务时，应优先使用 Windows 离线专业版。
+在线版面向大众用户的轻量单文件处理；离线专业版面向批量处理、敏感文件和断网办公场景。离线专业版使用白色桌面工作台，文件选择区和预览区合并；选择多个文件时，图片直接显示缩略图，PDF、Word、Excel 显示第一页缩略图，视频显示首帧容器。批量导入跟随当前选中的转换工具，不再作为单独功能页展示。图片尺寸调整、加水印、压缩，PDF/Word/Excel 转图片，音视频转换和视频提取音频均可加入批量队列；图片裁切仍按单张图片精确裁切框处理。桌面批量结果保存到独立时间戳文件夹，多页 PDF/Word/Excel 保存到同名子文件夹，不使用 ZIP 或 7Z 汇总。涉及大量文件、敏感材料或批量音视频任务时，应优先使用 Windows 离线专业版。
 
 本项目不包含 PDF 编辑功能，不提供 PDF 文字修改、PDF 涂销、PDF 签名盖章、PDF 批注标注，也不适合用于修改合同、发票、证件、财务票据等文件内容。
 
@@ -172,7 +172,9 @@ apps/desktop/src-tauri/target/release/bundle/
 
 离线版使用 Tauri `webviewInstallMode.type = "offlineInstaller"`，目标是满足“安装和使用都完全离线”。安装包会内置网站构建产物、PDF.js worker、FFmpeg WASM、图标和本地音视频转换逻辑。核心功能不依赖服务器，不需要账号，不上传文件。
 
-离线版启动后直接进入专业工具箱：顶部命令栏、左侧分类工具、中央上传/任务队列、右侧参数面板。在线站点头尾导航和广告容器不进入离线工作台。
+离线版启动后直接进入白色桌面工作台：顶部选择当前工具、转换参数、清空任务、输出目录和下载结果，中部把文件选择与预览合并为同一区域，大号橙色选择文件按钮支持单选和多选，右侧显示本地内核、任务进度和输出状态。多个文件会在主区域平铺缩略图；底部只显示“本地运行，保护隐私安全”和开发者信息。在线站点头尾导航和广告容器不进入离线工作台。
+
+桌面批量任务每次创建独立结果文件夹，图片压缩等多文件结果直接写入该文件夹；PDF、Word、Excel 逐页导出时在其中创建同名子文件夹。离线版不会再为这些结果生成 ZIP 或 7Z。
 
 离线专业版包含本地 3 天试用和机器码绑定授权。试用结束后继续使用需要管理员签发的激活码或 `license.mrx`，授权细节见 `docs/offline-license.md`。该机制不引入登录、会员或云端转换，也不上传用户文件。
 
@@ -222,6 +224,6 @@ Excel 转图片：支持 `.xlsx`、`.csv`。旧版 `.xls` 请先用 Excel/WPS �
 
 ## 第三方依赖许可证
 
-第三方依赖包括 Next.js、React、TypeScript、Tailwind CSS、PDF.js、SheetJS、browser-image-compression、Cropper.js、JSZip、@ffmpeg/ffmpeg、@ffmpeg/core、@ffmpeg/util、Tauri、lucide-react 等。上线前请根据锁文件复核许可证清单，页面 `/licenses` 已提供基础说明。
+第三方依赖包括 Next.js、React、TypeScript、Tailwind CSS、PDF.js、ExcelJS、browser-image-compression、Cropper.js、JSZip、@ffmpeg/ffmpeg、@ffmpeg/core、@ffmpeg/util、Tauri、lucide-react 等。上线前请根据锁文件复核许可证清单，页面 `/licenses` 已提供基础说明。
 
 正式发布时，网站和离线软件内都必须保留“开源许可证”页面。大多数依赖允许商业使用，但需要保留各自的版权声明、许可证文本和必要的 NOTICE 信息。`@ffmpeg/core` 当前许可证为 `GPL-2.0-or-later`，商业分发时必须额外遵守 GPL 对源代码、许可证和版权声明的要求。当前离线版使用 Tauri，未引入 Electron；如以后切换到 Electron，也需要补充 Electron 及其依赖的许可证说明。

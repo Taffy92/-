@@ -2,10 +2,10 @@
 
 本文件为“万能格式转换器”在线版和 Windows 离线安装版的第三方开源软件 Notices。内容根据锁文件、本地依赖元数据和最终构建产物生成，用于正式发布前的许可证归档和产品内展示。
 
-- 生成时间：2026-06-05T16:57:51.569Z
+- 生成时间：2026-06-12T14:24:19.505Z
 - npm 依赖数量：728
 - 直接 npm 依赖数量：35
-- Rust crate 数量：439
+- Rust crate 数量：429
 - 构建产物记录数量：5
 - 开发者：MR.谢
 - 联系邮箱：370298218@qq.com
@@ -32,11 +32,11 @@
 
 | 名称 | 路径 | 类型 | 文件数 | 大小 | SHA256 | 说明 |
 | --- | --- | --- | --- | --- | --- | --- |
-| Next.js 静态网站产物 | `apps/web/out` | 目录 | 296 | 42.33 MB | - | 在线版和离线版共用的静态页面、JS、CSS 和静态资源。 |
+| Next.js 静态网站产物 | `apps/web/out` | 目录 | 274 | 41.33 MB | - | 在线版和离线版共用的静态页面、JS、CSS 和静态资源。 |
 | PDF.js 静态资源 | `apps/web/out/pdfjs` | 目录 | 189 | 3.80 MB | - | 来自 pdfjs-dist 的主模块、worker、CMaps 和字体资源。 |
 | FFmpeg WASM 静态资源 | `apps/web/out/ffmpeg` | 目录 | 2 | 30.85 MB | - | 来自 @ffmpeg/core 的 ffmpeg-core.js 和 ffmpeg-core.wasm。 |
-| Windows NSIS 安装包 | `release/v1.0.0/installers/万能格式转换离线专业版_1.0.0_x64-setup.exe` | 文件 | 1 | 243.56 MB | DF8258E77E2250CA513CAACF4FA4BC380812A92F687030E75042E6FAF1B2F6FD | 离线版 Windows x64 EXE 安装包。 |
-| Windows MSI 安装包 | `release/v1.0.0/installers/万能格式转换离线专业版_1.0.0_x64_zh-CN.msi` | 文件 | 1 | 254.27 MB | 83AE0FF2E23EAE9B0B9E64CD4579DD86202C392EBD330A0D78A142309B9577E8 | 离线版 Windows x64 MSI 安装包。 |
+| Windows NSIS 安装包 | `release/v1.0.0/installers/万能格式转换离线专业版_1.0.0_x64-setup.exe` | 文件 | 1 | 245.34 MB | 961B344581C4C33D06D21A23A16E96E85E5508D3498321D4D88E5B797130B9A5 | 离线版 Windows x64 EXE 安装包。 |
+| Windows MSI 安装包 | `release/v1.0.0/installers/万能格式转换离线专业版_1.0.0_x64_zh-CN.msi` | 文件 | 1 | 255.84 MB | 8883D68A69C00929540EF0A1DB1C27E364F13FE55EB323D32CF10EC6E25F9F59 | 离线版 Windows x64 MSI 安装包。 |
 
 ## 直接 npm 依赖
 
@@ -1013,12 +1013,10 @@
 | objc_id | 0.1.1 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | c92d4ddb4bd7b50d730c215ff871754d0da6b2178849f8a2a2ab69712d0c073b |
 | objc-foundation | 0.1.1 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 1add1b659e36c9607c7aab864a76c7a4c2760cd0cd2e120f3fb8b952c7e22bf9 |
 | once_cell | 1.21.4 | MIT OR Apache-2.0 | https://github.com/matklad/once_cell | registry+https://github.com/rust-lang/crates.io-index | 9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50 |
-| open | 3.2.0 | MIT | https://github.com/Byron/open-rs | registry+https://github.com/rust-lang/crates.io-index | 2078c0039e6a54a0c42c28faa984e115fb4c2d5bf2208f77d1961002df8576f8 |
 | pango | 0.15.10 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 22e4045548659aee5313bde6c582b0d83a627b7904dd20dc2d9ef0895d414e4f |
 | pango-sys | 0.15.10 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | d2a00081cde4661982ed91d80ef437c20eacaf6aa1a5962c0279ae194662c3aa |
 | parking_lot | 0.12.5 | MIT OR Apache-2.0 | https://github.com/Amanieu/parking_lot | registry+https://github.com/rust-lang/crates.io-index | 93857453250e3077bd71ff98b6a65ea6621a19bb0f559a85248955ac12c45a1a |
 | parking_lot_core | 0.9.12 | MIT OR Apache-2.0 | https://github.com/Amanieu/parking_lot | registry+https://github.com/rust-lang/crates.io-index | 2621685985a2ebf1c516881c026032ac7deafcda1a2c9b7850dc81e3dfcb64c1 |
-| pathdiff | 0.2.3 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | df94ce210e5bc13cb6651479fa48d14f601d9858cfe0467f43ae157023b938d3 |
 | percent-encoding | 2.3.2 | MIT OR Apache-2.0 | https://github.com/servo/rust-url/ | registry+https://github.com/rust-lang/crates.io-index | 9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220 |
 | phf | 0.10.1 | MIT | https://github.com/sfackler/rust-phf | registry+https://github.com/rust-lang/crates.io-index | fabbf1ead8a5bcbc20f5f8b939ee3f5b0f6f281b6ad3468b84656b658b455259 |
 | phf | 0.11.3 | MIT | https://github.com/rust-phf/rust-phf | registry+https://github.com/rust-lang/crates.io-index | 1fd6780a80ae0c52cc120a26a1a42c1ae51b247a253e4e06113d23d2c2edd078 |
@@ -1189,29 +1187,22 @@
 | windows | 0.37.0 | MIT OR Apache-2.0 | https://github.com/microsoft/windows-rs | registry+https://github.com/rust-lang/crates.io-index | 57b543186b344cc61c85b5aab0d2e3adf4e0f99bc076eff9aa5927bcc0b8a647 |
 | windows | 0.39.0 | MIT OR Apache-2.0 | https://github.com/microsoft/windows-rs | registry+https://github.com/rust-lang/crates.io-index | f1c4bd0a50ac6020f65184721f758dba47bb9fbc2133df715ec74a237b26794a |
 | windows | 0.48.0 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | e686886bc078bc1b0b600cac0147aadb815089b6e4da64016cbd754b6342700f |
-| windows_aarch64_gnullvm | 0.42.2 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 597a5118570b68bc08d8d59125332c54f1ba9d9adeedeef5b99b02ba2b0698f8 |
 | windows_aarch64_gnullvm | 0.48.5 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 2b38e32f0abccf9987a4e3079dfb67dcd799fb61361e53e2882c3cbaf0d905d8 |
 | windows_aarch64_msvc | 0.37.0 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 2623277cb2d1c216ba3b578c0f3cf9cdebeddb6e66b1b218bb33596ea7769c3a |
 | windows_aarch64_msvc | 0.39.0 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | ec7711666096bd4096ffa835238905bb33fb87267910e154b18b44eaabb340f2 |
-| windows_aarch64_msvc | 0.42.2 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | e08e8864a60f06ef0d0ff4ba04124db8b0fb3be5776a5cd47641e942e58c4d43 |
 | windows_aarch64_msvc | 0.48.5 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | dc35310971f3b2dbbf3f0690a219f40e2d9afcf64f9ab7cc1be722937c26b4bc |
 | windows_i686_gnu | 0.37.0 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | d3925fd0b0b804730d44d4b6278c50f9699703ec49bcd628020f46f4ba07d9e1 |
 | windows_i686_gnu | 0.39.0 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 763fc57100a5f7042e3057e7e8d9bdd7860d330070251a73d003563a3bb49e1b |
-| windows_i686_gnu | 0.42.2 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | c61d927d8da41da96a81f029489353e68739737d3beca43145c8afec9a31a84f |
 | windows_i686_gnu | 0.48.5 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | a75915e7def60c94dcef72200b9a8e58e5091744960da64ec734a6c6e9b3743e |
 | windows_i686_msvc | 0.37.0 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | ce907ac74fe331b524c1298683efbf598bb031bc84d5e274db2083696d07c57c |
 | windows_i686_msvc | 0.39.0 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 7bc7cbfe58828921e10a9f446fcaaf649204dcfe6c1ddd712c5eebae6bda1106 |
-| windows_i686_msvc | 0.42.2 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 44d840b6ec649f480a41c8d80f9c65108b92d89345dd94027bfe06ac444d1060 |
 | windows_i686_msvc | 0.48.5 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 8f55c233f70c4b27f66c523580f78f1004e8b5a8b659e05a4eb49d4166cca406 |
 | windows_x86_64_gnu | 0.37.0 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 2babfba0828f2e6b32457d5341427dcbb577ceef556273229959ac23a10af33d |
 | windows_x86_64_gnu | 0.39.0 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 6868c165637d653ae1e8dc4d82c25d4f97dd6605eaa8d784b5c6e0ab2a252b65 |
-| windows_x86_64_gnu | 0.42.2 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 8de912b8b8feb55c064867cf047dda097f92d51efad5b491dfb98f6bbb70cb36 |
 | windows_x86_64_gnu | 0.48.5 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 53d40abd2583d23e4718fddf1ebec84dbff8381c07cae67ff7768bbf19c6718e |
-| windows_x86_64_gnullvm | 0.42.2 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 26d41b46a36d453748aedef1486d5c7a85db22e56aff34643984ea85514e94a3 |
 | windows_x86_64_gnullvm | 0.48.5 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 0b7b52767868a23d5bab768e390dc5f5c55825b6d30b86c844ff2dc7414044cc |
 | windows_x86_64_msvc | 0.37.0 | MIT OR Apache-2.0 | https://github.com/microsoft/windows-rs | registry+https://github.com/rust-lang/crates.io-index | f4dd6dc7df2d84cf7b33822ed5b86318fb1781948e9663bacd047fc9dd52259d |
 | windows_x86_64_msvc | 0.39.0 | MIT OR Apache-2.0 | https://github.com/microsoft/windows-rs | registry+https://github.com/rust-lang/crates.io-index | 5e4d40883ae9cae962787ca76ba76390ffa29214667a111db9e0a1ad8377e809 |
-| windows_x86_64_msvc | 0.42.2 | MIT OR Apache-2.0 | https://github.com/microsoft/windows-rs | registry+https://github.com/rust-lang/crates.io-index | 9aec5da331524158c6d1a4ac0ab1541149c0b9505fde06423b02f5ef0106b9f0 |
 | windows_x86_64_msvc | 0.48.5 | MIT OR Apache-2.0 | https://github.com/microsoft/windows-rs | registry+https://github.com/rust-lang/crates.io-index | ed94fce61571a4006852b7389a063ab983c02eb1bb37b47f8272ce92d06d9538 |
 | windows-bindgen | 0.39.0 | MIT OR Apache-2.0 | https://github.com/microsoft/windows-rs | registry+https://github.com/rust-lang/crates.io-index | 68003dbd0e38abc0fb85b939240f4bce37c43a5981d3df37ccbaaa981b47cb41 |
 | windows-core | 0.62.2 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | b8e83a14d34d0623b51dce9581199302a221863196a1dde71a7663a4c2be9deb |
@@ -1222,7 +1213,6 @@
 | windows-metadata | 0.39.0 | MIT OR Apache-2.0 | https://github.com/microsoft/windows-rs | registry+https://github.com/rust-lang/crates.io-index | 9ee5e275231f07c6e240d14f34e1b635bf1faa1c76c57cfd59a5cdb9848e4278 |
 | windows-result | 0.4.1 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 7781fa89eaf60850ac3d2da7af8e5242a5ea78d1a11c49bf2910bb5a73853eb5 |
 | windows-strings | 0.5.1 | 未在本地 Cargo manifest 中声明 | - | registry+https://github.com/rust-lang/crates.io-index | 7837d08f69c77cf6b07689544538e017c1bfcf57e34b4c0ff58e6c2cd3b37091 |
-| windows-sys | 0.42.0 | MIT OR Apache-2.0 | https://github.com/microsoft/windows-rs | registry+https://github.com/rust-lang/crates.io-index | 5a3e1820f08b8513f676f7ab6c1f99ff312fb97b553d30ff4dd86f9f15728aa7 |
 | windows-sys | 0.48.0 | MIT OR Apache-2.0 | https://github.com/microsoft/windows-rs | registry+https://github.com/rust-lang/crates.io-index | 677d2418bec65e3338edb076e806bc1ec15693c5d0104683f2efe857f61056a9 |
 | windows-sys | 0.61.2 | MIT OR Apache-2.0 | https://github.com/microsoft/windows-rs | registry+https://github.com/rust-lang/crates.io-index | ae137229bcbd6cdf0f7b80a31df61766145077ddf49416a728b02cb3921ff3fc |
 | windows-targets | 0.48.5 | MIT OR Apache-2.0 | https://github.com/microsoft/windows-rs | registry+https://github.com/rust-lang/crates.io-index | 9a2fa6e2155d7247be68c096456083145c183cbbbc2764150dda45a87197940c |

@@ -56,14 +56,15 @@ describe("privacy and product boundary checks", () => {
     expect(toolsSource).toContain("runBatch(modeForActiveTool)");
     expect(toolsSource).toContain("handleBatchFiles");
     expect(toolsSource).toContain("runBatch");
+    expect(toolsSource).toContain("isSupportedBatchName(file.name, mode)");
     expect(toolsSource).toContain("图片批量压缩");
     expect(toolsSource).toContain("视频批量转换");
     expect(toolsSource).toContain("音频批量转换");
   });
 
   it("keeps the desktop titlebar version tied to release configuration", () => {
-    expect(toolsSource).toContain('import { downloadsConfig } from "@/config/downloads"');
-    expect(toolsSource).toContain("离线专业版 v{downloadsConfig.version}");
+    expect(toolsSource).toContain('import { currentReleaseVersion } from "@/config/version"');
+    expect(toolsSource).toContain("离线专业版 v{currentReleaseVersion}");
     expect(toolsSource).not.toContain("离线专业版 v1.2.0");
   });
 
@@ -78,6 +79,7 @@ describe("privacy and product boundary checks", () => {
     expect(toolsSource).toContain('useState("200KB")');
     expect(toolsSource).toContain('format: "jpg"');
     expect(toolsSource).toContain('fileNameWithSuffix(source.name, "compressed", "jpg")');
+    expect(toolsSource).toContain('<option value="500KB">500KB</option>');
     expect(toolsSource).toContain('<option value="200KB">200KB</option>');
     expect(toolsSource).toContain('<option value="100KB">100KB</option>');
     expect(toolsSource).toContain('<option value="50KB">50KB</option>');
@@ -116,6 +118,25 @@ describe("privacy and product boundary checks", () => {
     expect(pdfCoreSource).toContain("pdf.worker.polyfill.mjs");
     expect(pdfCoreSource).toContain("useWorkerFetch: false");
     expect(toolsSource).toContain("combineImagePages");
+    expect(toolsSource).toContain("saveFilesToOutputFolder");
+    expect(toolsSource).toContain("ensureFolderOutputDirectory");
+    expect(toolsSource).toContain("pdfSingleImageName(source.name, pdfImageFormat)");
+    expect(toolsSource).toContain("pdfPageImageName(source.name, page.pageNumber, pdfImageFormat)");
+    expect(toolsSource).toContain("PDF 已逐页保存到同名文件夹。");
+    expect(toolsSource).toContain("Word 已逐页保存到同名文件夹。");
+    expect(toolsSource).toContain("Excel 已逐页保存到同名文件夹。");
+    expect(toolsSource).not.toContain("renderPdfPagesToZip");
+    expect(toolsSource).not.toContain("imagePagesToZip");
+    expect(toolsSource).not.toMatch(/_pages\.zip|_sheets\.zip/);
+    expect(pdfCoreSource).not.toContain("renderPdfPagesToZip");
+    expect(exportCoreSource).not.toContain("imagePagesToZip");
+    const batchBlock = toolsSource.slice(toolsSource.indexOf("async function runBatch"), toolsSource.indexOf("async function processBatchTask"));
+    expect(batchBlock).toContain("createOutputSubfolder");
+    expect(batchBlock).toContain("batchRunDirectory");
+    expect(batchBlock).toContain("已保存到独立文件夹");
+    expect(batchBlock).toContain("finishFolderTask");
+    expect(batchBlock).not.toContain("JSZip");
+    expect(batchBlock).not.toContain(".zip");
     expect(toolsSource).toContain("renderDocxToImagePages");
     expect(toolsSource).toContain("renderExcelToImagePages");
     expect(exportCoreSource).toContain("JSZip.loadAsync");
@@ -149,5 +170,6 @@ describe("privacy and product boundary checks", () => {
     expect(handleFileBlock).toContain("isDesktopSurface ? \"\" : getOnlineFileSizeLimitMessage(nextFile)");
     expect(handleFileBlock.indexOf("getOnlineFileSizeLimitMessage(nextFile)")).toBeLessThan(handleFileBlock.indexOf("URL.createObjectURL(nextFile)"));
     expect(handleFileBlock.indexOf("getOnlineFileSizeLimitMessage(nextFile)")).toBeLessThan(handleFileBlock.indexOf("summarizeFile(nextFile)"));
+    expect(handleFileBlock).toContain("setError(friendlyError(reason))");
   });
 });

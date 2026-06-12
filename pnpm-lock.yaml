@@ -167,9 +167,6 @@ importers:
       '@doctool/shared':
         specifier: workspace:*
         version: link:../shared
-      jszip:
-        specifier: ^3.10.1
-        version: 3.10.1
       pdfjs-dist:
         specifier: ^4.3.136
         version: 4.10.38

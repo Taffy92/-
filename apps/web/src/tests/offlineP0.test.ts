@@ -45,6 +45,7 @@ describe("offline P0 release checks", () => {
   it("keeps release downloads on object storage and static installer folders checksum-only", () => {
     const downloadsConfigPath = resolve(projectRoot, "apps", "web", "src", "config", "downloads.ts");
     const downloadsConfigSource = readFileSync(downloadsConfigPath, "utf8");
+    const versionSource = readFileSync(resolve(projectRoot, "apps", "web", "src", "config", "version.ts"), "utf8");
     const publicInstallerDir = resolve(projectRoot, "apps", "web", "public", "release", "v1.0.0", "installers");
     const outInstallerDir = resolve(projectRoot, "apps", "web", "out", "release", "v1.0.0", "installers");
     const releaseSumsPath = resolve(projectRoot, "release", "v1.0.0", "installers", "SHA256SUMS.txt");
@@ -52,12 +53,18 @@ describe("offline P0 release checks", () => {
 
     expect(downloadsConfigSource).toContain("tcb.qcloud.la/installers/v1.0.0");
     expect(downloadsConfigSource).not.toContain('"/release/v1.0.0/installers"');
-    expect(downloadsConfigSource).toContain("DF8258E77E2250CA513CAACF4FA4BC380812A92F687030E75042E6FAF1B2F6FD");
-    expect(downloadsConfigSource).toContain("83AE0FF2E23EAE9B0B9E64CD4579DD86202C392EBD330A0D78A142309B9577E8");
+    expect(downloadsConfigSource).toContain('version: "1.0.0"');
+    expect(versionSource).toContain('currentReleaseVersion = "1.0.0"');
+    const releaseSums = readFileSync(releaseSumsPath, "utf8");
+    const releaseHashes = releaseSums.match(/\b[A-F0-9]{64}\b/g) || [];
+    expect(releaseHashes).toHaveLength(2);
+    for (const hash of releaseHashes) {
+      expect(downloadsConfigSource).toContain(hash);
+    }
     expect(downloadsConfigSource).not.toContain("6561983E608F");
     expect(downloadsConfigSource).not.toContain("80EEFAC831A6");
 
-    expect(readFileSync(publicSumsPath, "utf8")).toBe(readFileSync(releaseSumsPath, "utf8"));
+    expect(readFileSync(publicSumsPath, "utf8")).toBe(releaseSums);
     for (const dir of [publicInstallerDir, outInstallerDir]) {
       if (!existsSync(dir)) continue;
       const binaryInstallers = readdirSync(dir).filter((name) => /\.(exe|msi)$/i.test(name));
@@ -65,25 +72,97 @@ describe("offline P0 release checks", () => {
     }
   });
 
-  it("exposes stable batch action selectors", () => {
+  it("keeps installer self-hashes out of the embedded notices bundle", () => {
+    const generatedNoticesPath = resolve(projectRoot, "apps", "web", "src", "generated", "thirdPartyNotices.ts");
+    const generatedNotices = readFileSync(generatedNoticesPath, "utf8");
+
+    expect(generatedNotices).not.toContain("Windows NSIS 安装包");
+    expect(generatedNotices).not.toContain("Windows MSI 安装包");
+    expect(generatedNotices).not.toContain("release/v1.0.0/installers/");
+  });
+
+  it("keeps installer download material out of desktop build output", () => {
+    const buildScriptPath = resolve(projectRoot, "apps", "web", "scripts", "build-desktop.mjs");
+    const buildScript = readFileSync(buildScriptPath, "utf8");
+    const toolsClientPath = resolve(projectRoot, "apps", "web", "src", "components", "tools", "ToolsClient.tsx");
+    const toolsClient = readFileSync(toolsClientPath, "utf8");
+
+    expect(buildScript).toContain('rm(path.join(outDir, "download")');
+    expect(buildScript).toContain('rm(path.join(outDir, "release")');
+    expect(buildScript).toContain("Desktop output contains installer self-hashes");
+    expect(toolsClient).toContain('import { currentReleaseVersion } from "@/config/version"');
+    expect(toolsClient).not.toContain('from "@/config/downloads"');
+  });
+
+  it("keeps desktop task clearing and file picker constraints", () => {
     const toolsClientPath = resolve(projectRoot, "apps", "web", "src", "components", "tools", "ToolsClient.tsx");
     const source = readFileSync(toolsClientPath, "utf8");
-    expect(source).toContain('aria-label="重试任务"');
-    expect(source).toContain('data-testid="retry-task-button"');
-    expect(source).toContain('aria-label="打开结果文件"');
-    expect(source).toContain('data-testid="open-result-file-button"');
-    expect(source).toContain("结果文件不存在，请重新处理或检查输出目录。");
+    const actionBarBlock = source.slice(
+      source.indexOf('className="desktop-compact-actions"'),
+      source.indexOf('<section className="desktop-file-workspace"')
+    );
+
+    expect(source).toContain("function clearAllLocalTasks");
+    expect(source).toContain("if (isDesktopSurface && tabId !== activeTab) clearAllLocalTasks");
+    expect(actionBarBlock).toContain("清空任务");
+    expect(actionBarBlock.indexOf("清空任务")).toBeLessThan(actionBarBlock.indexOf("输出目录"));
   });
 
   it("keeps the reviewed desktop UI copy and crop preview constraints", () => {
     const toolsClientPath = resolve(projectRoot, "apps", "web", "src", "components", "tools", "ToolsClient.tsx");
+    const globalsPath = resolve(projectRoot, "apps", "web", "src", "app", "globals.css");
     const homePagePath = resolve(projectRoot, "apps", "web", "src", "app", "page.tsx");
     const source = readFileSync(toolsClientPath, "utf8");
+    const globals = readFileSync(globalsPath, "utf8");
     const homeSource = readFileSync(homePagePath, "utf8");
+    const actionBarBlock = source.slice(
+      source.indexOf('className="desktop-compact-actions"'),
+      source.indexOf('<section className="desktop-file-workspace"')
+    );
+    const desktopBranchStart = source.indexOf('className="desktop-replica desktop-compact-frame"');
+    const desktopBranch = source.slice(desktopBranchStart, source.indexOf('className="office-workbench apple-workbench-page"', desktopBranchStart));
 
     expect(source).not.toContain("启动本地编译");
     expect(source).not.toContain("当前文件预览");
     expect(source).not.toContain("预览区");
+    expect(source).not.toContain("选择文件即预览");
+    expect(source).not.toContain("首页预览");
+    expect(source).not.toContain("第一页预览");
+    expect(source).not.toContain("本地任务");
+    expect(source).not.toContain("DesktopBatchTaskRow");
+    expect(source).not.toContain("DesktopEmptyQueue");
+    expect(source).toContain("desktop-file-workspace");
+    expect(source).toContain("desktop-file-stage-preview");
+    expect(source).toContain("desktop-file-pick-cta");
+    expect(source).toContain("desktop-preview-file-name");
+    expect(source).toContain("DesktopTiledPreview");
+    expect(source).toContain('aria-label="多文件缩略图预览"');
+    expect(source).toContain("renderPdfPageToBlob(task.file, 1");
+    expect(actionBarBlock).not.toContain("inputRef.current?.click()");
+    expect(actionBarBlock).not.toContain("importFolder()");
+    expect(desktopBranch).not.toContain("folderInputRef");
+    expect(desktopBranch).not.toContain("webkitdirectory");
+    expect(desktopBranch).not.toContain("onDragOver");
+    expect(desktopBranch).not.toContain("onDrop");
+    expect(desktopBranch).toMatch(/ref=\{inputRef\}[\s\S]*?multiple[\s\S]*?onChange/);
+    expect(globals).toContain("--desktop-bg: #f5f5f7");
+    expect(globals).toContain("color-scheme: light");
+    expect(globals).toContain(".desktop-tile-preview-grid");
+    expect(globals).toContain(".desktop-file-pick-cta");
+    expect(globals).toContain("width: 300px");
+    expect(globals).toContain("height: 64px");
+    expect(globals).toContain("font-weight: 900");
+    expect(globals).toContain(".desktop-preview-file-name");
+    expect(globals).not.toContain(".desktop-compact-table-shell");
+    expect(globals).not.toContain(".desktop-file-stage-header");
+    const footerBlock = source.slice(
+      source.indexOf('<footer className="desktop-compact-footer">'),
+      source.indexOf("</footer>", source.indexOf('<footer className="desktop-compact-footer">'))
+    );
+    expect(footerBlock).toContain("本地运行，保护隐私安全");
+    expect(footerBlock).toContain("开发者：MR.谢");
+    expect(footerBlock).not.toContain("更新日志");
+    expect(footerBlock).not.toContain("使用教程");
     expect(source).toContain("viewMode: 2");
     expect(source).toContain("autoCropArea: 1");
     expect(source).toContain("desktop-preview-body-shell");

@@ -4,19 +4,18 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { ComponentType, RefObject } from "react";
 import { AdSlot } from "@doctool/ui";
 import Cropper from "cropperjs";
-import JSZip from "jszip";
-import { CheckCircle2, ChevronDown, Copy, Crop, Download, ExternalLink, FileImage, FileText, Files, FolderOpen, Gauge, HardDrive, Image, ListChecks, Loader2, Maximize2, Music, Play, RotateCcw, Scissors, ShieldCheck, SlidersHorizontal, Square, Table2, Trash2, Type, Video, Zap } from "lucide-react";
+import { CheckCircle2, ChevronDown, Crop, Download, FileImage, FileText, Files, FolderOpen, Gauge, HardDrive, Image, ListChecks, Loader2, Maximize2, Music, Play, Scissors, ShieldCheck, SlidersHorizontal, Square, Table2, Trash2, Type, Video, Zap } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { addImageWatermark, addTextWatermark, canvasToBlob, compressImage, loadImageElement, resizeImage } from "@doctool/image-core";
-import { combineImagePages, imagePagesToZip, renderDocxToImagePages, renderExcelToImagePages } from "@doctool/export-core";
-import { getPdfPageCount, parsePageSelection, renderPdfPageToBlob, renderPdfPages, renderPdfPagesToZip } from "@doctool/pdf-core";
+import { combineImagePages, renderDocxToImagePages, renderExcelToImagePages } from "@doctool/export-core";
+import { getPdfPageCount, parsePageSelection, renderPdfPageToBlob, renderPdfPages } from "@doctool/pdf-core";
 import { audioBitrateOptions, audioOutputFormats, convertAudioFormat, convertVideoFormat, extractAudioFromVideo, extractedAudioOutputFormats, getMediaCapabilityReport, videoOutputFormats, videoSizeOptions } from "@doctool/media-core";
 import type { AudioBitrateOption, AudioOutputFormat, ExtractedAudioOutputFormat, MediaCapabilityReport, MediaQuality, VideoOutputFormat, VideoSizeOption } from "@doctool/media-core";
 import { audioAccept, excelAccept, fileNameWithSuffix, formatBytes, imageAccept, isAudioFile, isExcelFile, isImageFile, isPdfFile, isVideoFile, isWordFile, maxOnlineFileSize, pdfAccept, safeBaseName, videoAccept, wordAccept } from "@doctool/shared";
 import type { ExportImageFormat, FileSummary, PdfOutputFormat, ProcessState } from "@doctool/shared";
 import { adsConfig } from "@/config/ads";
 import { isDesktopApp } from "@/config/appMode";
-import { downloadsConfig } from "@/config/downloads";
+import { currentReleaseVersion } from "@/config/version";
 import { GsapScene } from "@/components/motion/GsapScene";
 import { MatrixLogo } from "@/components/layout/MatrixLogo";
 import { batchModeLabel, batchTaskStatusLabel, buildImportSummary, createBatchTask, defaultOutputDirectory, getBatchCounts, getSupportedExtensions, isSupportedBatchName, sanitizeLocalPath } from "@/lib/batchQueue";
@@ -187,6 +186,14 @@ type DocumentPreviewState = {
   message: string;
 };
 
+type DesktopTilePreview = {
+  taskId: string;
+  name: string;
+  kind: "image" | "video" | "audio" | "file";
+  url: string;
+  note: string;
+};
+
 type DesktopLicenseGateComponent = ComponentType<{
   status: DesktopLicenseStatus;
   onStatusChange: (status: DesktopLicenseStatus) => void;
@@ -241,6 +248,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   const [error, setError] = useState("");
   const [resultBlob, setResultBlob] = useState<Blob | null>(null);
   const [resultName, setResultName] = useState("");
+  const [resultFolderPath, setResultFolderPath] = useState("");
   const [previewUrl, setPreviewUrl] = useState("");
   const [previewMessage, setPreviewMessage] = useState("");
   const [documentPreview, setDocumentPreview] = useState<DocumentPreviewState>({ url: "", title: "", message: "" });
@@ -291,6 +299,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   const [batchTasks, setBatchTasks] = useState<BatchTask[]>([]);
   const [activeTaskId, setActiveTaskId] = useState("");
   const [desktopTaskPreviewUrl, setDesktopTaskPreviewUrl] = useState("");
+  const [desktopTilePreviews, setDesktopTilePreviews] = useState<DesktopTilePreview[]>([]);
   const [outputDirectory, setOutputDirectory] = useState<BatchOutputDirectory>(() => defaultOutputDirectory());
   const [importSummary, setImportSummary] = useState<BatchImportSummary | null>(null);
   const [sidecarExperimentEnabled, setSidecarExperimentEnabled] = useState(false);
@@ -549,11 +558,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
       void (async () => {
         setDocumentPreview((current) => {
           if (current.url) URL.revokeObjectURL(current.url);
-          return {
-            url: "",
-            title: previewMode === "pdf-images" ? "PDF 首页预览" : previewMode === "word-images" ? "Word 首页预览" : "Excel 首表预览",
-            message: "正在本地生成预览..."
-          };
+          return { url: "", title: file.name, message: "正在本地生成预览..." };
         });
 
         try {
@@ -566,8 +571,8 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
             const pageNumber = pages[0] || 1;
             const previewScale = pdfScale === "ultra" ? 1.6 : pdfScale === "high" ? 1.25 : 1;
             blob = await renderPdfPageToBlob(file, pageNumber, "png", previewScale);
-            title = `PDF 第 ${pageNumber} 页预览`;
-            message = "预览只渲染首个选中页，正式转换仍按页码设置导出。";
+            title = file.name;
+            message = "";
           } else if (previewMode === "word-images") {
             const pages = await renderDocxToImagePages(file, {
               format: "png",
@@ -579,8 +584,8 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
             });
             if (!pages[0]) throw new Error("Word 文档没有可预览页面。");
             blob = pages[0].blob;
-            title = "Word 第 1 页预览";
-            message = pages.length > 1 ? `共解析 ${pages.length} 页，预览显示第 1 页。` : "预览显示第 1 页。";
+            title = file.name;
+            message = "";
           } else {
             const pages = await renderExcelToImagePages(file, {
               format: "png",
@@ -592,8 +597,8 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
             });
             if (!pages[0]) throw new Error("Excel 文件没有可预览工作表。");
             blob = pages[0].blob;
-            title = "Excel 首个工作表预览";
-            message = pages.length > 1 ? `共解析 ${pages.length} 个工作表，预览显示第 1 个。` : "预览显示首个工作表。";
+            title = file.name;
+            message = "";
           }
 
           const nextUrl = URL.createObjectURL(blob);
@@ -611,7 +616,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
               if (current.url) URL.revokeObjectURL(current.url);
               return {
                 url: "",
-                title: previewMode === "pdf-images" ? "PDF 预览" : previewMode === "word-images" ? "Word 预览" : "Excel 预览",
+                title: file.name,
                 message: "预览生成失败，仍可点击开始转换；如文件较大，建议使用离线专业版。"
               };
             });
@@ -631,6 +636,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     setError("");
     setResultBlob(null);
     setResultName("");
+    setResultFolderPath("");
     setPreviewUrl((current) => {
       if (current) URL.revokeObjectURL(current);
       return "";
@@ -657,13 +663,22 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
       return;
     }
     if (fileUrl) URL.revokeObjectURL(fileUrl);
+    const nextFileUrl = URL.createObjectURL(nextFile);
     setFile(nextFile);
-    setFileUrl(URL.createObjectURL(nextFile));
-    const nextSummary = await summarizeFile(nextFile);
-    setSummary(nextSummary);
-    if (nextSummary.image) {
-      setResizeWidth(nextSummary.image.width);
-      setResizeHeight(nextSummary.image.height);
+    setFileUrl(nextFileUrl);
+    try {
+      const nextSummary = await summarizeFile(nextFile);
+      setSummary(nextSummary);
+      if (nextSummary.image) {
+        setResizeWidth(nextSummary.image.width);
+        setResizeHeight(nextSummary.image.height);
+      }
+    } catch (reason) {
+      URL.revokeObjectURL(nextFileUrl);
+      setFile(null);
+      setFileUrl("");
+      setSummary(null);
+      setError(friendlyError(reason));
     }
   }
 
@@ -681,6 +696,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     setError("");
     setResultBlob(null);
     setResultName("");
+    setResultFolderPath("");
     setCompressionStats("");
     const allFiles = Array.from(fileList);
     const nextFiles = allFiles.filter((item) => isBatchFileAllowed(item, mode));
@@ -689,6 +705,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
       setError(`没有找到当前工具支持的文件。支持格式：${getSupportedExtensions(mode).join(", ")}`);
       return;
     }
+    if (isDesktopSurface) clearAllLocalTasks("");
     appendBatchFiles(nextFiles, "files", mode);
     setImportSummary(buildImportSummary(allFiles.length, nextFiles.length, "files"));
     setProgressMessage(`已添加 ${nextFiles.length} 个文件，点击开始处理后会按顺序执行。`);
@@ -785,6 +802,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     setError("");
     setResultBlob(null);
     setResultName("");
+    setResultFolderPath("");
     cancelRef.current = false;
     try {
       await ensureDesktopLicenseAllowed();
@@ -852,6 +870,34 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     setError("当前环境不支持直接选择输出目录。下一步：处理完成后请使用下载结果按钮保存文件。");
   }
 
+  async function ensureFolderOutputDirectory(): Promise<BatchOutputDirectory> {
+    if (outputDirectory.kind !== "download") return outputDirectory;
+    if (isDesktopSurface) {
+      throw new Error("输出目录尚未就绪，请先选择输出目录后再开始处理。");
+    }
+
+    const picker = (window as any).showDirectoryPicker;
+    if (typeof picker !== "function") {
+      throw new Error("当前浏览器不支持文件夹输出，请使用最新版 Chrome 或 Edge，或选择“合成一页”导出。");
+    }
+
+    try {
+      const handle = await picker.call(window, { mode: "readwrite" });
+      const destination: BatchOutputDirectory = {
+        kind: "browser",
+        handle,
+        label: handle.name || "已选择本地目录"
+      };
+      setOutputDirectory(destination);
+      return destination;
+    } catch (reason) {
+      if (reason instanceof DOMException && reason.name === "AbortError") {
+        throw new Error("未选择输出目录，逐页结果不会生成压缩包。");
+      }
+      throw reason;
+    }
+  }
+
   async function importFolder() {
     setError("");
     const mode = getCurrentBatchMode();
@@ -879,47 +925,15 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   }
 
   async function openOutputDirectory() {
-    const tauri = getTauriApi();
-    if (outputDirectory.kind === "tauri" && tauri?.shell?.open) {
+    if (outputDirectory.kind === "tauri") {
       try {
-        await tauri.shell.open(outputDirectory.path);
-      } catch {
-        setProgressMessage("输出目录已设置，可从结果列表复制路径打开。");
+        await openLocalPath(outputDirectory.path, "输出目录");
+      } catch (error) {
+        setError(`${friendlyError(error)}。输出目录：${sanitizeLocalPath(outputDirectory.path)}`);
       }
       return;
     }
     setProgressMessage("输出目录已设置，可从结果列表复制路径打开。");
-  }
-
-  async function openResultFile(task: BatchTask) {
-    const tauri = getTauriApi();
-    if (!tauri?.shell?.open) {
-      setProgressMessage("当前环境不能直接打开本地结果文件。请使用下载结果或复制输出路径后手动打开。");
-      return;
-    }
-    if (task.status !== "success" || !task.outputPath || !isLocalFilePath(task.outputPath)) {
-      setError("结果文件不存在，请重新处理或检查输出目录。");
-      return;
-    }
-    try {
-      if (tauri.fs?.exists) {
-        const exists = await tauri.fs.exists(task.outputPath);
-        if (!exists) {
-          setError("结果文件不存在，请重新处理或检查输出目录。");
-          return;
-        }
-      }
-      await tauri.shell.open(task.outputPath);
-      setProgressMessage(`已打开结果文件：${sanitizeLocalPath(task.outputPath)}`);
-    } catch {
-      setError("结果文件不存在，请重新处理或检查输出目录。");
-    }
-  }
-
-  async function copyText(value?: string) {
-    if (!value) return;
-    await navigator.clipboard?.writeText(value);
-    setProgressMessage("已复制输出路径。");
   }
 
   async function refreshSidecarStatus() {
@@ -942,40 +956,45 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     }
   }
 
-  function retryBatchTask(id: string) {
-    setBatchTasks((current) => current.map((task) => task.id === id ? {
-      ...task,
-      status: "queued",
-      progress: 0,
-      error: undefined,
-      completedAt: undefined,
-      outputPath: undefined,
-      resultName: undefined,
-      backend: undefined
-    } : task));
-    setStatus("idle");
-    setProgressMessage("失败任务已放回等待队列。");
-  }
-
-  function cancelBatchTask(id: string) {
-    if (activeTaskId === id) cancelTask();
-    const completedAt = Date.now();
-    setBatchTasks((current) => current.map((task) => task.id === id && (task.status === "queued" || task.status === "running") ? {
-      ...task,
-      status: "cancelled",
-      completedAt,
-      error: "用户取消处理"
-    } : task));
-  }
-
   function clearAllBatchTasks() {
+    clearAllLocalTasks("已清空全部任务。");
+  }
+
+  function clearAllLocalTasks(message = "已清空任务。") {
+    cancelRef.current = true;
+    mediaAbortRef.current?.abort();
     setBatchFiles([]);
     setBatchTasks([]);
     setImportSummary(null);
     setActiveTaskId("");
+    setFile(null);
+    setSummary(null);
+    setFileUrl((current) => {
+      if (current) URL.revokeObjectURL(current);
+      return "";
+    });
+    setPreviewUrl((current) => {
+      if (current) URL.revokeObjectURL(current);
+      return "";
+    });
+    setDocumentPreview((current) => {
+      if (current.url) URL.revokeObjectURL(current.url);
+      return { url: "", title: "", message: "" };
+    });
+    setDesktopTaskPreviewUrl((current) => {
+      if (current) URL.revokeObjectURL(current);
+      return "";
+    });
+    setDesktopTilePreviews([]);
+    setError("");
+    setResultBlob(null);
+    setResultName("");
+    setResultFolderPath("");
+    setPreviewMessage("");
+    setCompressionStats("");
     setStatus("idle");
     setProgress(0);
-    setProgressMessage("已清空全部任务。");
+    if (message) setProgressMessage(message);
   }
 
   function clearCompletedBatchTasks() {
@@ -998,6 +1017,14 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   function finishTask(blob: Blob, name: string, message = "处理完成，可以下载结果。") {
     setResultBlob(blob);
     setResultName(name);
+    setResultFolderPath("");
+    setProgressMessage(message);
+  }
+
+  function finishFolderTask(folderPath: string, name: string, message: string) {
+    setResultBlob(null);
+    setResultName(name);
+    setResultFolderPath(folderPath);
     setProgressMessage(message);
   }
 
@@ -1128,6 +1155,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
 
   async function runPdfImages() {
     const source = ensureFile("pdf");
+    const destination = pdfImageMode === "pages" ? await ensureFolderOutputDirectory() : outputDirectory;
     const pages = await selectedPdfPages(source);
     const scale = pdfScale === "ultra" ? 3 : pdfScale === "high" ? 2 : 1.2;
     if (pdfImageMode === "combined") {
@@ -1143,20 +1171,36 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
         setProgress(0.7 + value * 0.3);
         setProgressMessage(message || "正在合成一页图片");
       });
-      finishTask(blob, `${safeBaseName(source.name)}_combined.${pdfImageFormat}`, "PDF 已合成为一张长图，可以下载。");
+      finishTask(blob, pdfSingleImageName(source.name, pdfImageFormat), "PDF 已合成为一张长图，可以下载。");
       return;
     }
-    if (pages.length === 1) {
-      const blob = await renderPdfPageToBlob(source, pages[0], pdfImageFormat, scale);
-      finishTask(blob, `${safeBaseName(source.name)}_page_${String(pages[0]).padStart(3, "0")}.${pdfImageFormat}`);
-      return;
-    }
-    const blob = await renderPdfPagesToZip(source, { pages, format: pdfImageFormat, scale, onProgress: (value) => setProgress(value) }, safeBaseName(source.name));
-    finishTask(blob, `${safeBaseName(source.name)}_pages.zip`);
+    const rendered = await renderPdfPages(source, {
+      pages,
+      format: pdfImageFormat,
+      scale,
+      onProgress: (value, message) => {
+        setProgress(value * 0.9);
+        setProgressMessage(message || "正在逐页导出 PDF");
+      }
+    });
+    const folderPath = await saveFilesToOutputFolder(
+      pdfOutputFolderName(source.name),
+      rendered.map((page) => ({
+        blob: page.blob,
+        name: rendered.length === 1
+          ? pdfSingleImageName(source.name, pdfImageFormat)
+          : pdfPageImageName(source.name, page.pageNumber, pdfImageFormat)
+      })),
+      destination
+    );
+    if (!folderPath) throw new Error("无法创建 PDF 输出文件夹，请重新选择输出目录后再试。");
+    setProgress(1);
+    finishFolderTask(folderPath, pdfOutputFolderName(source.name), "PDF 已逐页保存到同名文件夹。");
   }
 
   async function runWordImages() {
     const source = ensureFile("word");
+    const destination = officeImageMode === "pages" ? await ensureFolderOutputDirectory() : outputDirectory;
     const pages = await renderDocxToImagePages(source, { format: officeImageFormat, onProgress: (value, message) => {
       setProgress(value * 0.7);
       setProgressMessage(message || "正在渲染 Word 文档");
@@ -1169,16 +1213,24 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
       finishTask(blob, fileNameWithSuffix(source.name, "combined", officeImageFormat), "Word 已合成为一张长图，可以下载。");
       return;
     }
-    if (pages.length === 1) {
-      finishTask(pages[0].blob, fileNameWithSuffix(source.name, "page_001", officeImageFormat));
-      return;
-    }
-    const blob = await imagePagesToZip(pages, safeBaseName(source.name), officeImageFormat, (value) => setProgress(0.7 + value * 0.3));
-    finishTask(blob, `${safeBaseName(source.name)}_pages.zip`, "Word 已逐页导出并打包，可以下载。");
+    const folderPath = await saveFilesToOutputFolder(
+      officeOutputFolderName(source.name),
+      pages.map((page) => ({
+        blob: page.blob,
+        name: pages.length === 1
+          ? officeSingleImageName(source.name, officeImageFormat)
+          : officePageImageName(source.name, page.pageNumber, officeImageFormat)
+      })),
+      destination
+    );
+    if (!folderPath) throw new Error("无法创建 Word 输出文件夹，请重新选择输出目录后再试。");
+    setProgress(1);
+    finishFolderTask(folderPath, officeOutputFolderName(source.name), "Word 已逐页保存到同名文件夹。");
   }
 
   async function runExcelImages() {
     const source = ensureFile("excel");
+    const destination = officeImageMode === "pages" ? await ensureFolderOutputDirectory() : outputDirectory;
     const pages = await renderExcelToImagePages(source, { format: officeImageFormat, onProgress: (value, message) => {
       setProgress(value * 0.7);
       setProgressMessage(message || "正在渲染 Excel 工作表");
@@ -1191,12 +1243,19 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
       finishTask(blob, fileNameWithSuffix(source.name, "combined", officeImageFormat), "Excel 已合成为一张长图，可以下载。");
       return;
     }
-    if (pages.length === 1) {
-      finishTask(pages[0].blob, fileNameWithSuffix(source.name, "sheet_001", officeImageFormat));
-      return;
-    }
-    const blob = await imagePagesToZip(pages, safeBaseName(source.name), officeImageFormat, (value) => setProgress(0.7 + value * 0.3));
-    finishTask(blob, `${safeBaseName(source.name)}_sheets.zip`, "Excel 已逐页导出并打包，可以下载。");
+    const folderPath = await saveFilesToOutputFolder(
+      officeOutputFolderName(source.name),
+      pages.map((page) => ({
+        blob: page.blob,
+        name: pages.length === 1
+          ? officeSingleImageName(source.name, officeImageFormat)
+          : officePageImageName(source.name, page.pageNumber, officeImageFormat)
+      })),
+      destination
+    );
+    if (!folderPath) throw new Error("无法创建 Excel 输出文件夹，请重新选择输出目录后再试。");
+    setProgress(1);
+    finishFolderTask(folderPath, officeOutputFolderName(source.name), "Excel 已逐页保存到同名文件夹。");
   }
 
   async function runVideoConvert() {
@@ -1225,13 +1284,16 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
 
   async function runBatch(modeFilter?: BatchMode) {
     if (!isDesktopSurface) throw new Error("批量处理仅在离线安装版中提供。");
+    if (outputDirectory.kind === "download") throw new Error("输出目录尚未就绪，请选择输出目录后再开始批量处理。");
     const tasks = batchTasks.filter((task) => isRunnableBatchStatus(task.status) && (!modeFilter || task.mode === modeFilter));
     if (!tasks.length) throw new Error("请先添加需要批量处理的文件，或重试失败任务。");
+    const batchFolderName = batchOutputFolderName();
+    const batchRunDirectory = await createOutputSubfolder(batchFolderName, outputDirectory);
+    if (!batchRunDirectory) throw new Error("无法创建批量结果文件夹，请检查输出目录权限后重试。");
     setProgressMessage(`准备处理 ${tasks.length} 个${modeFilter ? ` ${batchModeLabel(modeFilter)}` : "批量"}任务。`);
-    const batchDownloadZip = new JSZip();
     const batchDownloadNames = new Set<string>();
-    let batchDownloadCount = 0;
     let failedInRun = 0;
+    let successfulInRun = 0;
 
     for (const [index, task] of tasks.entries()) {
       if (cancelRef.current) {
@@ -1251,17 +1313,14 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
       };
 
       try {
-        const result = await processBatchTask(task, setBatchProgress);
+        const result = await processBatchTask(task, setBatchProgress, batchRunDirectory);
         const resultName = uniqueBatchResultName(result.name, batchDownloadNames);
         let outputPath = result.outputPath || "";
         if (!outputPath && result.blob) {
-          outputPath = await saveBatchResult(result.blob, resultName);
+          outputPath = await saveBatchResult(result.blob, resultName, batchRunDirectory);
         }
-        const downloadableBlob = result.blob || await readSavedBatchResult(outputPath);
-        if (downloadableBlob) {
-          batchDownloadZip.file(resultName, downloadableBlob);
-          batchDownloadCount += 1;
-        }
+        if (!outputPath) throw new Error("结果未能写入输出目录，请检查目录权限后重试。");
+        successfulInRun += 1;
         const completedAt = Date.now();
         const nextTask: BatchTask = {
           ...task,
@@ -1292,29 +1351,30 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     }
 
     setActiveTaskId("");
-    if (batchDownloadCount > 0) {
-      const blob = await batchDownloadZip.generateAsync({ type: "blob" }, (metadata) => {
-        setProgress(0.98 + (metadata.percent / 100) * 0.02);
-        setProgressMessage("正在打包批量处理结果");
-      });
-      const successfulCount = Math.max(0, tasks.length - failedInRun);
-      const message = batchDownloadCount === successfulCount
-        ? "已完成批量任务，全部可下载结果已打包为 ZIP。"
-        : `已完成批量任务，${batchDownloadCount} 个可下载结果已打包为 ZIP；其余结果已保存到输出目录。`;
-      finishTask(blob, `万能格式转换器_批量处理结果_${Date.now()}.zip`, message);
+    if (batchRunDirectory.kind === "tauri" && successfulInRun > 0) {
+      finishFolderTask(
+        batchRunDirectory.path,
+        batchFolderName,
+        `批量任务处理完成，${successfulInRun} 个结果已保存到独立文件夹。`
+      );
     } else {
       setResultBlob(null);
-      setResultName("");
+      setResultName(successfulInRun > 0 ? `${successfulInRun} 个转换结果` : "");
+      setResultFolderPath("");
       setProgressMessage(`批量任务处理完成。结果目录：${outputDirectory.label}`);
     }
     setProgress(1);
     if (failedInRun > 0) setError("部分任务处理失败，请在任务队列中查看失败原因并重试。");
   }
 
-  async function processBatchTask(task: BatchTask, onProgress: (value: number, message?: string) => void): Promise<{ blob?: Blob; name: string; outputPath?: string; backend: "wasm" | "sidecar" }> {
+  async function processBatchTask(
+    task: BatchTask,
+    onProgress: (value: number, message?: string) => void,
+    destination: BatchOutputDirectory = outputDirectory
+  ): Promise<{ blob?: Blob; name: string; outputPath?: string; backend: "wasm" | "sidecar" }> {
     const item = task.file;
     const mode = task.mode;
-    const sidecarResult = await maybeRunSidecarBatchTask(task, onProgress);
+    const sidecarResult = await maybeRunSidecarBatchTask(task, onProgress, destination);
     if (sidecarResult) return sidecarResult;
 
     if (mode === "resize") {
@@ -1365,20 +1425,27 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
           label: `第 ${page.pageNumber} 页`,
           blob: page.blob
         })), pdfImageFormat, (value, message) => onProgress(0.7 + value * 0.3, message || "正在合成 PDF 长图"));
-        return { blob, name: `${safeBaseName(item.name)}_combined.${pdfImageFormat}`, backend: "wasm" };
+        return { blob, name: pdfSingleImageName(item.name, pdfImageFormat), backend: "wasm" };
       }
-      if (pages.length === 1) {
-        const blob = await renderPdfPageToBlob(item, pages[0], pdfImageFormat, scale);
-        onProgress(1, `已完成 PDF：${item.name}`);
-        return { blob, name: `${safeBaseName(item.name)}_page_${String(pages[0]).padStart(3, "0")}.${pdfImageFormat}`, backend: "wasm" };
-      }
-      const blob = await renderPdfPagesToZip(item, {
+      const rendered = await renderPdfPages(item, {
         pages,
         format: pdfImageFormat,
         scale,
-        onProgress: (value, message) => onProgress(value, message || `正在导出 PDF 页面：${item.name}`)
-      }, safeBaseName(item.name));
-      return { blob, name: `${safeBaseName(item.name)}_pages.zip`, backend: "wasm" };
+        onProgress: (value, message) => onProgress(value * 0.9, message || `正在逐页导出 PDF：${item.name}`)
+      });
+      const outputPath = await saveFilesToOutputFolder(
+        pdfOutputFolderName(item.name),
+        rendered.map((page) => ({
+          blob: page.blob,
+          name: rendered.length === 1
+            ? pdfSingleImageName(item.name, pdfImageFormat)
+            : pdfPageImageName(item.name, page.pageNumber, pdfImageFormat)
+        })),
+        destination
+      );
+      if (!outputPath) throw new Error("无法创建 PDF 输出文件夹，请重新选择输出目录后再试。");
+      onProgress(1, `已保存 PDF 文件夹：${sanitizeLocalPath(outputPath)}`);
+      return { name: pdfOutputFolderName(item.name), outputPath, backend: "wasm" };
     }
 
     if (mode === "word-images") {
@@ -1387,9 +1454,19 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
         const blob = await combineImagePages(pages, officeImageFormat, onProgress);
         return { blob, name: fileNameWithSuffix(item.name, "combined", officeImageFormat), backend: "wasm" };
       }
-      if (pages.length === 1) return { blob: pages[0].blob, name: fileNameWithSuffix(item.name, "page_001", officeImageFormat), backend: "wasm" };
-      const blob = await imagePagesToZip(pages, safeBaseName(item.name), officeImageFormat, onProgress);
-      return { blob, name: `${safeBaseName(item.name)}_pages.zip`, backend: "wasm" };
+      const outputPath = await saveFilesToOutputFolder(
+        officeOutputFolderName(item.name),
+        pages.map((page) => ({
+          blob: page.blob,
+          name: pages.length === 1
+            ? officeSingleImageName(item.name, officeImageFormat)
+            : officePageImageName(item.name, page.pageNumber, officeImageFormat)
+        })),
+        destination
+      );
+      if (!outputPath) throw new Error("无法创建 Word 输出文件夹，请重新选择输出目录后再试。");
+      onProgress(1, `已保存 Word 文件夹：${sanitizeLocalPath(outputPath)}`);
+      return { name: officeOutputFolderName(item.name), outputPath, backend: "wasm" };
     }
 
     if (mode === "excel-images") {
@@ -1398,9 +1475,19 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
         const blob = await combineImagePages(pages, officeImageFormat, onProgress);
         return { blob, name: fileNameWithSuffix(item.name, "combined", officeImageFormat), backend: "wasm" };
       }
-      if (pages.length === 1) return { blob: pages[0].blob, name: fileNameWithSuffix(item.name, "sheet_001", officeImageFormat), backend: "wasm" };
-      const blob = await imagePagesToZip(pages, safeBaseName(item.name), officeImageFormat, onProgress);
-      return { blob, name: `${safeBaseName(item.name)}_sheets.zip`, backend: "wasm" };
+      const outputPath = await saveFilesToOutputFolder(
+        officeOutputFolderName(item.name),
+        pages.map((page) => ({
+          blob: page.blob,
+          name: pages.length === 1
+            ? officeSingleImageName(item.name, officeImageFormat)
+            : officePageImageName(item.name, page.pageNumber, officeImageFormat)
+        })),
+        destination
+      );
+      if (!outputPath) throw new Error("无法创建 Excel 输出文件夹，请重新选择输出目录后再试。");
+      onProgress(1, `已保存 Excel 文件夹：${sanitizeLocalPath(outputPath)}`);
+      return { name: officeOutputFolderName(item.name), outputPath, backend: "wasm" };
     }
 
     if (mode === "video-convert") {
@@ -1423,7 +1510,11 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     return { blob, name: fileNameWithSuffix(item.name, "converted", audioFormat), backend: "wasm" };
   }
 
-  async function maybeRunSidecarBatchTask(task: BatchTask, onProgress: (value: number, message?: string) => void) {
+  async function maybeRunSidecarBatchTask(
+    task: BatchTask,
+    onProgress: (value: number, message?: string) => void,
+    destination: BatchOutputDirectory
+  ) {
     const sourcePath = task.sourcePath || getNativeFilePath(task.file);
     const sidecarMode = getSidecarExperimentMode({
       mode: task.mode,
@@ -1436,7 +1527,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
       isDesktopSurface,
       enabled: sidecarExperimentEnabled,
       status: sidecarStatus || undefined,
-      outputDirectory,
+      outputDirectory: destination,
       sourcePath,
       mode: task.mode,
       fileName: task.fileName,
@@ -1449,11 +1540,11 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
       return null;
     }
 
-    if (!sidecarMode || outputDirectory.kind !== "tauri" || !sourcePath) return null;
+    if (!sidecarMode || destination.kind !== "tauri" || !sourcePath) return null;
     onProgress(0.05, `sidecar 低风险优先处理中：${task.fileName}`);
     const result = await runSidecarExperiment(sidecarMode, {
       inputPath: sourcePath,
-      outputDir: outputDirectory.path,
+      outputDir: destination.path,
       outputName: safeBaseName(task.fileName)
     });
     if (result.status !== "ok" || !result.outputPath) {
@@ -1484,43 +1575,103 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     } : task));
   }
 
-  async function saveBatchResult(blob: Blob, name: string) {
-    if (outputDirectory.kind === "tauri") {
+  async function saveBatchResult(blob: Blob, name: string, destination: BatchOutputDirectory = outputDirectory) {
+    if (destination.kind === "tauri") {
       const tauri = getTauriApi();
       if (!tauri?.fs?.writeBinaryFile) return "";
-      const outputPath = joinLocalPath(outputDirectory.path, name);
+      const outputPath = joinLocalPath(destination.path, name);
       const bytes = new Uint8Array(await blob.arrayBuffer());
       await tauri.fs.writeBinaryFile({ path: outputPath, contents: bytes });
       return outputPath;
     }
 
-    if (outputDirectory.kind === "browser") {
-      const fileHandle = await outputDirectory.handle.getFileHandle(name, { create: true });
+    if (destination.kind === "browser") {
+      const fileHandle = await destination.handle.getFileHandle(name, { create: true });
       const writable = await fileHandle.createWritable();
       await writable.write(blob);
       await writable.close();
-      return `${outputDirectory.label}/${name}`;
+      return `${destination.label}/${name}`;
     }
 
     return "";
   }
 
-  async function readSavedBatchResult(outputPath?: string) {
-    if (!outputPath || outputDirectory.kind !== "tauri") return null;
-    const tauri = getTauriApi();
-    if (!tauri?.fs?.readBinaryFile) return null;
-    const bytes = await tauri.fs.readBinaryFile(outputPath);
-    return new Blob([new Uint8Array(bytes)]);
+  async function saveFilesToOutputFolder(
+    folderName: string,
+    files: Array<{ blob: Blob; name: string }>,
+    destination: BatchOutputDirectory = outputDirectory
+  ) {
+    if (!files.length) return "";
+
+    if (destination.kind === "tauri") {
+      const tauri = getTauriApi();
+      if (!tauri?.fs?.createDir || !tauri?.fs?.writeBinaryFile) return "";
+      const folderPath = joinLocalPath(destination.path, folderName);
+      await tauri.fs.createDir(folderPath, { recursive: true });
+      for (const item of files) {
+        const outputPath = joinLocalPath(folderPath, item.name);
+        const bytes = new Uint8Array(await item.blob.arrayBuffer());
+        await tauri.fs.writeBinaryFile({ path: outputPath, contents: bytes });
+      }
+      return folderPath;
+    }
+
+    if (destination.kind === "browser" && typeof destination.handle?.getDirectoryHandle === "function") {
+      const directory = await destination.handle.getDirectoryHandle(folderName, { create: true });
+      for (const item of files) {
+        const fileHandle = await directory.getFileHandle(item.name, { create: true });
+        const writable = await fileHandle.createWritable();
+        await writable.write(item.blob);
+        await writable.close();
+      }
+      return `${destination.label}/${folderName}`;
+    }
+
+    return "";
+  }
+
+  async function createOutputSubfolder(folderName: string, destination: BatchOutputDirectory): Promise<BatchOutputDirectory | null> {
+    if (destination.kind === "tauri") {
+      const tauri = getTauriApi();
+      if (!tauri?.fs?.createDir) return null;
+      const folderPath = joinLocalPath(destination.path, folderName);
+      await tauri.fs.createDir(folderPath, { recursive: true });
+      return { kind: "tauri", path: folderPath, label: sanitizeLocalPath(folderPath) };
+    }
+
+    if (destination.kind === "browser" && typeof destination.handle?.getDirectoryHandle === "function") {
+      const handle = await destination.handle.getDirectoryHandle(folderName, { create: true });
+      return { kind: "browser", handle, label: `${destination.label}/${folderName}` };
+    }
+
+    return null;
   }
 
   async function handleDownload() {
-    if (!resultBlob || !resultName) return;
+    if ((!resultBlob || !resultName) && !resultFolderPath) return;
+    setError("");
     try {
-      await ensureDesktopLicenseAllowed();
+      if (resultFolderPath) {
+        await openLocalPath(resultFolderPath);
+        return;
+      }
+      if (!resultBlob || !resultName) return;
       downloadBlob(resultBlob, resultName);
     } catch (error) {
-      setError(error instanceof Error ? error.message : "当前授权状态不可用。");
+      const message = friendlyError(error);
+      setError(resultFolderPath ? `${message}。结果已保存：${sanitizeLocalPath(resultFolderPath)}` : message);
     }
+  }
+
+  async function openLocalPath(pathValue: string, label = "结果文件夹") {
+    const tauri = getTauriApi();
+    const invoke = tauri?.tauri?.invoke || tauri?.invoke;
+    if (typeof invoke !== "function") {
+      setProgressMessage(`${label}已保存：${sanitizeLocalPath(pathValue)}`);
+      return;
+    }
+    await invokeTauri<void>("open_output_path", { path: pathValue });
+    setProgressMessage(`已打开${label}：${sanitizeLocalPath(pathValue)}`);
   }
 
   const currentTab = tabs.find((tab) => tab.id === activeTab) || tabs[0];
@@ -1529,6 +1680,9 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   const activeBatchCounts = getBatchCounts(activeBatchTasks);
   const visibleBatchTasks = isDesktopSurface ? activeBatchTasks : batchTasks;
   const visibleBatchFiles = visibleBatchTasks.map((task) => task.file);
+  const desktopTilePreviewSignature = visibleBatchTasks.length > 1
+    ? visibleBatchTasks.map((task) => `${task.id}:${task.file.name}:${task.file.size}:${task.file.lastModified}`).join("|")
+    : "";
   const hasActiveBatchQueue = isDesktopSurface && Boolean(activeBatchMode) && activeBatchTasks.length > 0;
   const taskCount = activeTab === "batch" ? batchCounts.total : hasActiveBatchQueue ? activeBatchCounts.total : file ? 1 : 0;
   const successCount = activeTab === "batch" ? batchCounts.success : hasActiveBatchQueue ? activeBatchCounts.success : status === "done" ? 1 : 0;
@@ -1538,7 +1692,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   const canStartTask = activeTab === "batch"
     ? runnableBatchCount > 0 && status !== "running"
     : (runnableActiveBatchCount > 0 || Boolean(file)) && status !== "running";
-  const shouldShowDesktopDetail = Boolean(file || summary || batchTasks.length || error || resultName);
+  const shouldShowDesktopDetail = Boolean(file || summary || batchTasks.length || error || resultName || resultFolderPath);
   const desktopStatusText = getDesktopStatusText(status);
   const progressText = getProgressText(progress, taskCount, progressMessage);
   const outputFormat = getOutputFormatLabel({
@@ -1576,8 +1730,6 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   const desktopInspectorFile = selectedDesktopTask?.file || file || null;
   const desktopInspectorPreviewUrl = desktopInspectorFile === file ? fileUrl : desktopTaskPreviewUrl;
   const desktopInspectorName = selectedDesktopTask?.fileName || summary?.name || file?.name || "";
-  const desktopInspectorType = selectedDesktopTask?.fileType || (summary ? getDesktopPreviewFileType(summary) : file ? currentTab.label : "");
-  const desktopInspectorSize = selectedDesktopTask ? formatBytes(selectedDesktopTask.fileSize) : summary ? formatBytes(summary.size) : file ? formatBytes(file.size) : "";
   const desktopInspectorOutputFormat = selectedDesktopTask?.outputFormat || outputFormat;
   const desktopInspectorStatus = selectedDesktopTask ? batchTaskStatusLabel(selectedDesktopTask.status) : desktopStatusText;
   useEffect(() => {
@@ -1592,6 +1744,73 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     return () => URL.revokeObjectURL(nextUrl);
   }, [file, isDesktopSurface, selectedDesktopTask?.file]);
 
+  useEffect(() => {
+    if (!isDesktopSurface || !desktopTilePreviewSignature) {
+      setDesktopTilePreviews([]);
+      return;
+    }
+
+    let cancelled = false;
+    const objectUrls: string[] = [];
+    const tasks = visibleBatchTasks.map((task) => ({ id: task.id, file: task.file, name: task.fileName }));
+    setDesktopTilePreviews(tasks.map((task) => ({
+      taskId: task.id,
+      name: task.name,
+      kind: isVideoFile(task.file) ? "video" : isAudioFile(task.file) ? "audio" : "file",
+      url: "",
+      note: ""
+    })));
+
+    void (async () => {
+      for (const task of tasks) {
+        if (cancelled) break;
+        let preview: DesktopTilePreview;
+        try {
+          if (isImageFile(task.file) || isVideoFile(task.file)) {
+            const url = URL.createObjectURL(task.file);
+            objectUrls.push(url);
+            preview = {
+              taskId: task.id,
+              name: task.name,
+              kind: isVideoFile(task.file) ? "video" : "image",
+              url,
+              note: ""
+            };
+          } else if (isAudioFile(task.file)) {
+            preview = { taskId: task.id, name: task.name, kind: "audio", url: "", note: "" };
+          } else {
+            let blob: Blob;
+            if (isPdfFile(task.file)) {
+              blob = await renderPdfPageToBlob(task.file, 1, "png", 0.7);
+            } else if (isWordFile(task.file)) {
+              const pages = await renderDocxToImagePages(task.file, { format: "png" });
+              if (!pages[0]) throw new Error("Word 文档没有可预览页面。");
+              blob = pages[0].blob;
+            } else if (isExcelFile(task.file)) {
+              const pages = await renderExcelToImagePages(task.file, { format: "png" });
+              if (!pages[0]) throw new Error("Excel 文件没有可预览工作表。");
+              blob = pages[0].blob;
+            } else {
+              throw new Error("当前文件没有可生成的缩略图。");
+            }
+            const url = URL.createObjectURL(blob);
+            objectUrls.push(url);
+            preview = { taskId: task.id, name: task.name, kind: "image", url, note: "" };
+          }
+        } catch {
+          preview = { taskId: task.id, name: task.name, kind: "file", url: "", note: "" };
+        }
+        if (cancelled) break;
+        setDesktopTilePreviews((current) => current.map((item) => item.taskId === task.id ? preview : item));
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      objectUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [desktopTilePreviewSignature, isDesktopSurface]);
+
   const toggleNavSection = (title: string) => {
     setExpandedSections((current) => (
       current.includes(title)
@@ -1600,6 +1819,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     ));
   };
   const selectTool = (tabId: TabId) => {
+    if (isDesktopSurface && tabId !== activeTab) clearAllLocalTasks("");
     setActiveTab(tabId);
     const nextBatchMode = getBatchModeForTab(tabId);
     if (nextBatchMode) setBatchMode(nextBatchMode);
@@ -1694,21 +1914,13 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
 
   if (isDesktopSurface) {
     return (
-      <main
-        className="desktop-replica desktop-compact-frame"
-        onDragOver={(event) => event.preventDefault()}
-        onDrop={(event) => {
-          event.preventDefault();
-          if (activeBatchMode && event.dataTransfer.files.length > 1) handleBatchFiles(event.dataTransfer.files);
-          else void handleFile(event.dataTransfer.files[0]);
-        }}
-      >
+      <main className="desktop-replica desktop-compact-frame">
         <input
           ref={inputRef}
           className="hidden"
           type="file"
           accept={accept}
-          multiple={Boolean(activeBatchMode)}
+          multiple
           onChange={(event) => {
             const files = event.currentTarget.files;
             if (!files?.length) return;
@@ -1717,24 +1929,13 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
             event.currentTarget.value = "";
           }}
         />
-        <input
-          ref={folderInputRef}
-          className="hidden"
-          type="file"
-          multiple
-          onChange={(event) => {
-            handleFolderInputFiles(event.currentTarget.files);
-            event.currentTarget.value = "";
-          }}
-          {...({ webkitdirectory: "", directory: "" } as Record<string, string>)}
-        />
 
         <nav className="desktop-compact-topbar">
           <div className="desktop-compact-brand">
             <MatrixLogo />
             <div className="min-w-0">
               <p>万能格式转换器 <span>离线专业版</span></p>
-              <small>v{downloadsConfig.version} · 本地处理</small>
+              <small>v{currentReleaseVersion} · 本地处理</small>
             </div>
           </div>
 
@@ -1765,19 +1966,15 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
           </div>
 
           <div className="desktop-compact-actions">
-            <button className="desktop-compact-btn" type="button" onClick={() => inputRef.current?.click()}>
-              <Files className="h-3.5 w-3.5" />
-              添加文件
-            </button>
-            <button className="desktop-compact-btn" type="button" disabled={!activeBatchMode} onClick={() => void importFolder()}>
-              <FolderOpen className="h-3.5 w-3.5" />
-              文件夹
+            <button className="desktop-compact-btn desktop-compact-btn-muted" type="button" disabled={status === "running" && taskCount > 0} onClick={() => clearAllLocalTasks()}>
+              <Trash2 className="h-3.5 w-3.5" />
+              清空任务
             </button>
             <button className="desktop-compact-btn" type="button" onClick={() => void selectOutputDirectory()}>
               <HardDrive className="h-3.5 w-3.5" />
               输出目录
             </button>
-            <button className="desktop-compact-btn desktop-compact-btn-muted" type="button" disabled={!resultBlob} onClick={handleDownload}>
+            <button className="desktop-compact-btn desktop-compact-btn-muted" type="button" disabled={!resultBlob && !resultFolderPath} onClick={handleDownload}>
               <Download className="h-3.5 w-3.5" />
               下载结果
             </button>
@@ -1792,60 +1989,31 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
           </div>
         </section>
 
-        <section className="desktop-compact-table-viewport">
-          <div className="desktop-compact-table-shell">
-            <div className="desktop-table-header desktop-compact-table-grid">
-              <span>序号</span>
-              <span>本地源文件名</span>
-              <span>处理类型</span>
-              <span>文件大小</span>
-              <span>目标容器</span>
-              <span>当前状态</span>
-              <span>操作</span>
-            </div>
-            <div className="desktop-table-body">
-              {activeBatchMode && activeBatchTasks.length ? activeBatchTasks.map((task, index) => (
-                <DesktopBatchTaskRow
-                  key={task.id}
-                  task={task}
-                  index={index + 1}
-                  active={activeTaskId === task.id || (!activeTaskId && index === 0)}
-                  onSelect={() => setActiveTaskId(task.id)}
-                  onRetry={() => retryBatchTask(task.id)}
-                  onCancel={() => cancelBatchTask(task.id)}
-                  onOpenResult={() => void openResultFile(task)}
-                  onCopy={() => void copyText(task.outputPath || task.resultName)}
-                />
-              )) : file && summary ? (
-                <DesktopTaskRow
-                  name={summary.name}
-                  type={currentTab.label}
-                  size={formatBytes(summary.size)}
-                  outputFormat={outputFormat}
-                  status={status}
-                  error={error}
+        <section className="desktop-file-workspace">
+          <div className="desktop-file-stage-shell">
+            <div className="desktop-file-stage-preview">
+              {desktopTilePreviews.length > 1 ? (
+                <DesktopTiledPreview
+                  previews={desktopTilePreviews}
+                  activeTaskId={selectedDesktopTask?.id || ""}
+                  onSelect={setActiveTaskId}
                 />
               ) : (
-                <DesktopEmptyQueue batchEnabled={Boolean(activeBatchMode)} onPickFile={() => inputRef.current?.click()} onPickFolder={() => void importFolder()} onPickOutputDirectory={() => void selectOutputDirectory()} />
+                <DesktopInspectorPreview
+                  mode={desktopPreviewMode}
+                  modeLabel={activeTab === "batch" ? batchModeLabel(batchMode) : currentTab.label}
+                  file={desktopInspectorFile}
+                  fileUrl={desktopInspectorPreviewUrl}
+                  previewUrl={desktopInspectorFile === file ? previewUrl : ""}
+                  previewMessage={previewMessage}
+                  documentPreview={desktopInspectorFile === file ? documentPreview : { url: "", title: "", message: "" }}
+                  summary={desktopInspectorFile === file ? summary : null}
+                  cropImageRef={desktopInspectorFile === file ? cropImageRef : undefined}
+                  onImageLoad={() => setCropPreviewKey((value) => value + 1)}
+                  onPickFile={() => inputRef.current?.click()}
+                />
               )}
             </div>
-          </div>
-          </section>
-
-        <section className="desktop-compact-lower-viewport">
-          <div className="desktop-compact-preview-shell">
-            <DesktopInspectorPreview
-              mode={desktopPreviewMode}
-              modeLabel={activeTab === "batch" ? batchModeLabel(batchMode) : currentTab.label}
-              file={desktopInspectorFile}
-              fileUrl={desktopInspectorPreviewUrl}
-              previewUrl={desktopInspectorFile === file ? previewUrl : ""}
-              previewMessage={previewMessage}
-              documentPreview={desktopInspectorFile === file ? documentPreview : { url: "", title: "", message: "" }}
-              summary={desktopInspectorFile === file ? summary : null}
-              cropImageRef={desktopInspectorFile === file ? cropImageRef : undefined}
-              onImageLoad={() => setCropPreviewKey((value) => value + 1)}
-            />
           </div>
 
           <div className="desktop-backend-telemetry-cluster">
@@ -1886,15 +2054,8 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
         </section>
 
         <footer className="desktop-compact-footer">
-          <div>
-            <span>开发者：MR.谢</span>
-            <a href="/tutorials">使用教程</a>
-            <a href="/changelog">更新日志</a>
-          </div>
-          <div>
-            <span>{outputDirectory.label}</span>
-            <span>{desktopInspectorName || "等待挂载源文件"}</span>
-          </div>
+          <span>本地运行，保护隐私安全</span>
+          <span>开发者：MR.谢</span>
         </footer>
       </main>
     );
@@ -2255,7 +2416,7 @@ function DesktopTreeSection({
 function DesktopReplicaTitlebar() {
   return (
     <div className="flex h-[31px] items-center border-b border-[#17242C] bg-[#1E2A32] px-[10px] text-[#EDF3F7]">
-      <h1 className="truncate text-[16px] font-bold leading-none">离线专业版 v{downloadsConfig.version}</h1>
+      <h1 className="truncate text-[16px] font-bold leading-none">离线专业版 v{currentReleaseVersion}</h1>
       <div className="ml-auto flex h-full items-center text-[14px] text-[#CAD5DC]" aria-hidden="true">
         <span className="grid h-full w-[46px] place-items-center">-</span>
         <span className="grid h-full w-[46px] place-items-center">□</span>
@@ -2529,7 +2690,8 @@ function DesktopInspectorPreview({
   documentPreview,
   summary,
   cropImageRef,
-  onImageLoad
+  onImageLoad,
+  onPickFile
 }: {
   mode: TabId | BatchMode;
   modeLabel: string;
@@ -2541,57 +2703,112 @@ function DesktopInspectorPreview({
   summary: FileSummary | null;
   cropImageRef?: RefObject<HTMLImageElement>;
   onImageLoad?: () => void;
+  onPickFile?: () => void;
 }) {
   const isImageMode = mode === "crop" || mode === "resize" || mode === "watermark" || mode === "compress" || mode === "batch";
   const isDocumentMode = mode === "pdf-images" || mode === "word-images" || mode === "excel-images";
   const imagePreview = previewUrl && (mode === "resize" || mode === "watermark") ? previewUrl : fileUrl;
+  const fileCaption = file?.name || "";
 
   if (!file) {
     return (
       <div className="desktop-preview-stage desktop-preview-empty">
         <div className="desktop-snapshot-placeholder">
-          <FileImage className="h-8 w-8" />
-          <p>等待挂载源文件</p>
-          <span>等待挂载源文件</span>
+          <button className="desktop-file-pick-cta" type="button" onClick={onPickFile}>
+            <span>选择文件</span>
+          </button>
         </div>
       </div>
     );
   }
 
   if (file && isVideoFile(file) && fileUrl) {
-    return <video key={fileUrl} className="desktop-preview-stage bg-[#05090B] object-contain" src={fileUrl} controls preload="metadata" playsInline />;
+    return (
+      <div className="desktop-preview-stage desktop-preview-single">
+        <video key={fileUrl} className="desktop-preview-single-media bg-[#05090B]" src={fileUrl} controls preload="metadata" playsInline />
+        <strong className="desktop-preview-file-name" title={fileCaption}>{fileCaption}</strong>
+      </div>
+    );
   }
 
   if (file && isAudioFile(file) && fileUrl) {
     return (
-      <div className="desktop-preview-stage flex items-center px-3">
-        <audio key={fileUrl} className="w-full" src={fileUrl} controls preload="metadata" />
+      <div className="desktop-preview-stage desktop-preview-single">
+        <div className="desktop-preview-audio-shell">
+          <audio key={fileUrl} className="w-full" src={fileUrl} controls preload="metadata" />
+        </div>
+        <strong className="desktop-preview-file-name" title={fileCaption}>{fileCaption}</strong>
       </div>
     );
   }
 
   if (file && isImageFile(file) && isImageMode && imagePreview) {
     return (
-      <img
-        ref={mode === "crop" ? cropImageRef : undefined}
-        className="desktop-preview-stage object-contain"
-        src={imagePreview}
-        alt={`${modeLabel}预览`}
-        onLoad={mode === "crop" ? onImageLoad : undefined}
-      />
+      <div className="desktop-preview-stage desktop-preview-single">
+        <img
+          ref={mode === "crop" ? cropImageRef : undefined}
+          className="desktop-preview-single-media"
+          src={imagePreview}
+          alt={fileCaption || `${modeLabel}预览`}
+          onLoad={mode === "crop" ? onImageLoad : undefined}
+        />
+        <strong className="desktop-preview-file-name" title={fileCaption}>{fileCaption}</strong>
+      </div>
     );
   }
 
   if (file && (isPdfFile(file) || isWordFile(file) || isExcelFile(file)) && isDocumentMode && documentPreview.url) {
-    return <img className="desktop-preview-stage object-contain" src={documentPreview.url} alt={`${modeLabel}预览`} />;
+    return (
+      <div className="desktop-preview-stage desktop-preview-single">
+        <img className="desktop-preview-single-media" src={documentPreview.url} alt={fileCaption || `${modeLabel}预览`} />
+        <strong className="desktop-preview-file-name" title={fileCaption}>{fileCaption}</strong>
+      </div>
+    );
   }
 
   return (
-    <div className="desktop-preview-stage flex items-center justify-center px-4 text-center text-[12px] text-[#CAD5DC]">
+    <div className="desktop-preview-stage flex items-center justify-center px-4 text-center text-[12px]">
       <div>
-        <p className="font-semibold text-[#EDF3F7]">当前模式：{modeLabel}</p>
+        <p className="font-semibold">当前模式：{modeLabel}</p>
         <p className="mt-2 leading-5">{previewMessage || documentPreview.message || `${summary ? summary.name : "文件"} 已添加，转换逻辑可用。`}</p>
       </div>
+    </div>
+  );
+}
+
+function DesktopTiledPreview({
+  previews,
+  activeTaskId,
+  onSelect
+}: {
+  previews: DesktopTilePreview[];
+  activeTaskId: string;
+  onSelect: (taskId: string) => void;
+}) {
+  return (
+    <div className="desktop-tile-preview-grid" aria-label="多文件缩略图预览">
+      {previews.map((preview) => (
+        <button
+          key={preview.taskId}
+          type="button"
+          className={`desktop-preview-tile ${preview.taskId === activeTaskId ? "active" : ""}`}
+          onClick={() => onSelect(preview.taskId)}
+        >
+          <span className="desktop-preview-tile-media">
+            {preview.kind === "image" && preview.url ? (
+              <img src={preview.url} alt={preview.name} />
+            ) : preview.kind === "video" && preview.url ? (
+              <video src={preview.url} muted preload="metadata" playsInline />
+            ) : preview.kind === "audio" ? (
+              <Music className="h-8 w-8" />
+            ) : (
+              <FileText className="h-8 w-8" />
+            )}
+          </span>
+          <strong title={preview.name}>{preview.name}</strong>
+          {preview.note ? <small>{preview.note}</small> : null}
+        </button>
+      ))}
     </div>
   );
 }
@@ -2716,106 +2933,12 @@ function DesktopUploadAction({ icon: Icon, title, description, disabled, onClick
   );
 }
 
-function DesktopEmptyQueue({ batchEnabled, onPickFile, onPickFolder, onPickOutputDirectory }: { batchEnabled: boolean; onPickFile: () => void; onPickFolder: () => void; onPickOutputDirectory: () => void }) {
-  return (
-    <div>
-      <div className="desktop-table-row grid grid-cols-[48px_minmax(180px,1fr)_105px_105px_145px_120px_104px] items-center text-[13px] text-[#CAD5DC]">
-        <span>1</span>
-        <button className="truncate text-left font-semibold text-[#EDF3F7] hover:text-[#9FC6E5]" type="button" onClick={onPickFile}>暂无任务</button>
-        <span>{batchEnabled ? "可批量" : "单文件"}</span>
-        <span>-</span>
-        <span>-</span>
-        <StatusBadge status="idle" />
-        <button className="w-fit border border-[#50646F] px-2 py-1 text-[12px] text-[#EDF3F7] hover:bg-[#436078]" type="button" onClick={batchEnabled ? onPickFolder : onPickOutputDirectory}>
-          {batchEnabled ? "导入" : "设置"}
-        </button>
-      </div>
-      {Array.from({ length: 17 }).map((_, index) => (
-        <div key={index} className="desktop-table-row grid grid-cols-[48px_minmax(180px,1fr)_105px_105px_145px_120px_104px] items-center text-[13px] text-[#CAD5DC]" aria-hidden="true">
-          <span>{index + 2}</span>
-          <span className="h-2.5 w-40 bg-[#41545F]/55" />
-          <span className="h-2.5 w-12 bg-[#41545F]/45" />
-          <span className="h-2.5 w-14 bg-[#41545F]/45" />
-          <span className="h-6 w-[118px] border border-[#50646F] bg-[#23313A]" />
-          <span className="h-2.5 w-14 bg-[#41545F]/45" />
-          <span className="h-2.5 w-12 bg-[#41545F]/45" />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function DesktopBatchTaskRow({
-  task,
-  index,
-  active,
-  onSelect,
-  onRetry,
-  onCancel,
-  onOpenResult,
-  onCopy
-}: {
-  task: BatchTask;
-  index: number;
-  active: boolean;
-  onSelect: () => void;
-  onRetry: () => void;
-  onCancel: () => void;
-  onOpenResult: () => void;
-  onCopy: () => void;
-}) {
-  const failureReason = task.status === "failed" || task.status === "cancelled" ? (task.error || "处理失败，请检查文件格式后重试") : "—";
-  const canRetry = task.status === "failed" || task.status === "cancelled";
-  const canCancel = task.status === "queued" || task.status === "running";
-  const canOpen = task.status === "success" && Boolean(task.outputPath);
-
-  return (
-    <div
-      className={`desktop-table-row batch-table-row grid grid-cols-[48px_minmax(180px,1fr)_105px_105px_145px_120px_104px] items-center text-[13px] ${active ? "desktop-table-row-active" : ""}`}
-      data-testid="batch-task-row"
-      data-task-id={task.id}
-      onClick={onSelect}
-    >
-      <span>{index}</span>
-      <span className="min-w-0 truncate font-medium text-[#EDF3F7]" title={task.sourcePath || task.fileName}>{task.fileName}</span>
-      <span className="truncate text-[#CAD5DC]">{task.fileType || batchModeLabel(task.mode)}</span>
-      <span className="truncate text-[#CAD5DC]">{formatBytes(task.fileSize)}</span>
-      <span className="mr-2 truncate rounded-[4px] border border-[#60737D] bg-[#23313A] px-2 py-1 text-[#EDF3F7]">{task.outputFormat}{task.backend ? ` · ${task.backend === "sidecar" ? "sidecar" : "WASM"}` : ""}</span>
-      <BatchStatusBadge status={task.status} progress={task.progress} />
-      <span className="flex items-center gap-1" title={failureReason}>
-        {canRetry ? <button type="button" className="desktop-row-icon-button" title="重试" aria-label="重试任务" data-testid="retry-task-button" onClick={(event) => { event.stopPropagation(); onRetry(); }}><RotateCcw className="h-3.5 w-3.5" /></button> : null}
-        {canCancel ? <button type="button" className="desktop-row-icon-button text-[#D56A6A]" title="取消" onClick={(event) => { event.stopPropagation(); onCancel(); }}><Square className="h-3.5 w-3.5 fill-current" /></button> : null}
-        {canOpen ? <button type="button" className="desktop-row-icon-button" title="打开结果文件" aria-label="打开结果文件" data-testid="open-result-file-button" onClick={(event) => { event.stopPropagation(); onOpenResult(); }}><ExternalLink className="h-3.5 w-3.5" /></button> : null}
-        {task.outputPath ? <button type="button" className="desktop-row-icon-button" title="复制输出路径" onClick={(event) => { event.stopPropagation(); onCopy(); }}><Copy className="h-3.5 w-3.5" /></button> : null}
-      </span>
-    </div>
-  );
-}
-
 function DesktopMetric({ label, value, tone = "default" }: { label: string; value: string | number; tone?: "default" | "success" | "danger" }) {
   const toneClass = tone === "success" ? "text-emerald-300" : tone === "danger" ? "text-red-300" : "text-slate-50";
   return (
     <div className="rounded-sm border border-cyan-300/15 bg-slate-950/70 p-4">
       <p className="text-xs font-medium text-slate-400">{label}</p>
       <p className={`mt-1 truncate text-xl font-bold ${toneClass}`}>{value}</p>
-    </div>
-  );
-}
-
-function DesktopTaskRow({ name, type, size, outputFormat, status, error }: { name: string; type: string; size: string; outputFormat: string; status: ProcessState; error?: string }) {
-  const failureReason = status === "error" ? (error || "处理失败，请检查文件格式后重试") : "—";
-
-  return (
-    <div className="desktop-table-row batch-table-row desktop-table-row-active grid grid-cols-[48px_minmax(180px,1fr)_105px_105px_145px_120px_104px] items-center text-[13px]">
-      <span>1</span>
-      <span className="min-w-0 truncate font-medium text-[#EDF3F7]" title={name}>{name}</span>
-      <span className="truncate text-[#CAD5DC]">{type}</span>
-      <span className="truncate text-[#CAD5DC]">{size}</span>
-      <span className="mr-2 truncate rounded-[4px] border border-[#60737D] bg-[#23313A] px-2 py-1 text-[#EDF3F7]">{outputFormat}</span>
-      <StatusBadge status={status} />
-      <span className="flex items-center gap-1" title={failureReason}>
-        <button type="button" className="desktop-row-icon-button" title="重试"><RotateCcw className="h-3.5 w-3.5" /></button>
-      </span>
     </div>
   );
 }
@@ -2839,20 +2962,6 @@ function StatusBadge({ status }: { status: ProcessState }) {
           : "bg-slate-800 text-slate-300 ring-1 ring-slate-700";
 
   return <span className={`w-fit rounded-sm px-2.5 py-1 text-xs font-semibold ${statusClass}`}>{statusText[status]}</span>;
-}
-
-function BatchStatusBadge({ status, progress }: { status: BatchTaskStatus; progress: number }) {
-  const statusClass = status === "success"
-    ? "bg-emerald-400/12 text-emerald-200 ring-1 ring-emerald-300/25"
-    : status === "failed"
-      ? "bg-red-400/12 text-red-200 ring-1 ring-red-300/25"
-      : status === "running"
-        ? "bg-cyan-400/12 text-cyan-200 ring-1 ring-cyan-300/25"
-        : status === "cancelled"
-          ? "bg-amber-400/12 text-amber-200 ring-1 ring-amber-300/25"
-          : "bg-slate-800 text-slate-300 ring-1 ring-slate-700";
-  const suffix = status === "running" ? ` · ${Math.round(progress * 100)}%` : "";
-  return <span className={`w-fit rounded-sm px-2.5 py-1 text-xs font-semibold ${statusClass}`}>{batchTaskStatusLabel(status)}{suffix}</span>;
 }
 
 function SettingsSection({ title, children }: { title: string; children: React.ReactNode }) {
@@ -2982,15 +3091,15 @@ function ControlPanel(props: ControlPanelProps) {
   if (props.activeTab === "crop") return <Panel title="图片裁切" note="拖动预览图上的裁切框即可自由裁切，也可以选择头像、证件照、横屏封面、竖屏封面等常用比例。"><Select label="裁切比例" value={props.cropRatio} onChange={props.setCropRatio} options={props.cropRatioOptions} /><div className="grid grid-cols-2 gap-2"><button className="btn-secondary" type="button" onClick={() => props.rotateCrop(-90)}>左转 90°</button><button className="btn-secondary" type="button" onClick={() => props.rotateCrop(90)}>右转 90°</button><button className="btn-secondary" type="button" onClick={() => props.flipCrop("x")}>水平翻转</button><button className="btn-secondary" type="button" onClick={() => props.flipCrop("y")}>垂直翻转</button></div><button className="btn-secondary w-full" type="button" onClick={props.resetCrop}>重置裁切框</button><ImageFormat value={props.cropFormat} onChange={props.setCropFormat} /><Range label="导出质量" value={props.cropQuality} min={10} max={100} onChange={props.setCropQuality} /></Panel>;
   if (props.activeTab === "resize") return <Panel title="像素/百分比调整" note="可按百分比快速缩放，也可以输入像素宽高。右侧会自动显示处理预览。"><Select label="调整方式" value={props.resizeMode} onChange={props.setResizeMode} options={[{ value: "percent", label: "按百分比" }, { value: "pixel", label: "按像素" }]} />{props.resizeMode === "percent" ? <Field label="缩放比例"><select className="form-input" value={String(props.resizePercent)} onChange={(event) => props.setResizePercent(Number(event.target.value))}><option value="25">25%</option><option value="50">50%</option><option value="75">75%</option><option value="100">100%</option><option value="125">125%</option><option value="150">150%</option><option value="200">200%</option></select></Field> : <><NumberField label="宽度（像素）" value={props.resizeWidth} onChange={props.setResizeWidth} /><NumberField label="高度（像素）" value={props.resizeHeight} onChange={props.setResizeHeight} /><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={props.resizeKeepRatio} onChange={(event) => props.setResizeKeepRatio(event.target.checked)} />锁定原图比例</label></>}<ImageFormat value={props.resizeFormat} onChange={props.setResizeFormat} /><Range label="导出质量" value={props.resizeQuality} min={10} max={100} onChange={props.setResizeQuality} /></Panel>;
   if (props.activeTab === "watermark") return <Panel title="添加水印" note="文字或图片水印均在本地合成，不上传图片。文字水印支持字号、颜色和透明度预览。"><Select label="水印类型" value={props.watermarkMode} onChange={props.setWatermarkMode} options={["text", "image"]} />{props.watermarkMode === "image" ? <Field label="水印图片"><input type="file" accept={imageAccept} onChange={(event) => props.setWatermarkImage(event.target.files?.[0] || null)} /></Field> : <><Field label="水印文字"><input className="form-input" value={props.watermarkText} onChange={(event) => props.setWatermarkText(event.target.value)} /></Field><Range label="文字大小" value={props.watermarkFontSize} min={12} max={160} onChange={props.setWatermarkFontSize} /><Field label="文字颜色"><div className="flex gap-2"><input className="h-11 w-14 rounded-sm border border-cyan-300/20 bg-slate-950 p-1" type="color" value={props.watermarkColor} onChange={(event) => props.setWatermarkColor(event.target.value)} /><input className="form-input" value={props.watermarkColor} onChange={(event) => props.setWatermarkColor(event.target.value)} /></div></Field></>}<Select label="位置" value={props.watermarkPosition} onChange={props.setWatermarkPosition} options={["top-left", "top-right", "bottom-left", "bottom-right", "center", "tile"]} /><Range label="透明度" value={props.watermarkOpacity} min={5} max={100} onChange={props.setWatermarkOpacity} /><ImageFormat value={props.watermarkFormat} onChange={props.setWatermarkFormat} /></Panel>;
-  if (props.activeTab === "compress") return <Panel title="图片压缩" note="固定导出 JPG，目标大小为 200KB、100KB、50KB、25KB。"><Select label="压缩强度" value={props.compressStrength} onChange={props.setCompressStrength} options={["light", "recommended", "extreme"]} /><Field label="目标大小"><select className="form-input" value={props.targetSize} onChange={(event) => props.setTargetSize(event.target.value)}><option value="200KB">200KB</option><option value="100KB">100KB</option><option value="50KB">50KB</option><option value="25KB">25KB</option></select></Field><Range label="质量" value={props.compressQuality} min={10} max={100} onChange={props.setCompressQuality} /><NumberField label="最大宽高" value={props.maxSize} onChange={props.setMaxSize} /><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={props.keepOriginalSize} onChange={(event) => props.setKeepOriginalSize(event.target.checked)} />保留原尺寸</label></Panel>;
-  if (props.activeTab === "pdf-images") return <Panel title="PDF 转图片" note="PDF.js 本地渲染，可选择逐页导出 ZIP，也可以把所选页合成为一张长图。"><PdfPageField value={props.pdfPages} onChange={props.setPdfPages} /><Select label="导出方式" value={props.pdfImageMode} onChange={props.setPdfImageMode} options={[{ value: "pages", label: "逐页导出" }, { value: "combined", label: "合成一页导出" }]} /><Select label="图片格式" value={props.pdfImageFormat} onChange={props.setPdfImageFormat} options={["png", "jpg", "webp"]} /><Select label="清晰度" value={props.pdfScale} onChange={props.setPdfScale} options={["normal", "high", "ultra"]} /></Panel>;
+  if (props.activeTab === "compress") return <Panel title="图片压缩" note="固定导出 JPG，目标大小为 500KB、200KB、100KB、50KB、25KB。"><Select label="压缩强度" value={props.compressStrength} onChange={props.setCompressStrength} options={["light", "recommended", "extreme"]} /><Field label="目标大小"><select className="form-input" value={props.targetSize} onChange={(event) => props.setTargetSize(event.target.value)}><option value="500KB">500KB</option><option value="200KB">200KB</option><option value="100KB">100KB</option><option value="50KB">50KB</option><option value="25KB">25KB</option></select></Field><Range label="质量" value={props.compressQuality} min={10} max={100} onChange={props.setCompressQuality} /><NumberField label="最大宽高" value={props.maxSize} onChange={props.setMaxSize} /><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={props.keepOriginalSize} onChange={(event) => props.setKeepOriginalSize(event.target.checked)} />保留原尺寸</label></Panel>;
+  if (props.activeTab === "pdf-images") return <Panel title="PDF 转图片" note="PDF.js 本地渲染。离线版逐页导出会保存到同名文件夹；在线版无法直接创建文件夹时才打包 ZIP。"><PdfPageField value={props.pdfPages} onChange={props.setPdfPages} /><Select label="导出方式" value={props.pdfImageMode} onChange={props.setPdfImageMode} options={[{ value: "pages", label: "逐页导出" }, { value: "combined", label: "合成一页导出" }]} /><Select label="图片格式" value={props.pdfImageFormat} onChange={props.setPdfImageFormat} options={["png", "jpg", "webp"]} /><Select label="清晰度" value={props.pdfScale} onChange={props.setPdfScale} options={["normal", "high", "ultra"]} /></Panel>;
   if (props.activeTab === "word-images") return <Panel title="Word 转图片" note="支持标准 .docx 文档，按页面导出图片或合成为一张长图，所有解析和渲染都在本地完成。"><Select label="导出方式" value={props.officeImageMode} onChange={props.setOfficeImageMode} options={[{ value: "pages", label: "逐页导出" }, { value: "combined", label: "合成一页导出" }]} /><ImageFormat value={props.officeImageFormat} onChange={props.setOfficeImageFormat} /></Panel>;
   if (props.activeTab === "excel-images") return <Panel title="Excel 转图片" note="支持 xlsx、csv。旧版 xls 请先另存为 xlsx 后再转换，以降低浏览器解析风险。"><Select label="导出方式" value={props.officeImageMode} onChange={props.setOfficeImageMode} options={[{ value: "pages", label: "逐页导出" }, { value: "combined", label: "合成一页导出" }]} /><ImageFormat value={props.officeImageFormat} onChange={props.setOfficeImageFormat} /></Panel>;
   if (props.activeTab === "video-convert") return <Panel title="视频格式转换" note="使用本地 FFmpeg WASM，支持 MP4、MOV、AVI、MKV、WebM，并可选择分辨率、码率和是否清理元数据。">{props.desktopMode ? null : <MediaCapabilityBox report={props.mediaReport} />}<Select label="输出格式" value={props.videoFormat} onChange={props.setVideoFormat} options={[...videoOutputFormats]} /><Quality value={props.mediaQuality} onChange={props.setMediaQuality} /><Select label="视频尺寸" value={props.videoSize} onChange={props.setVideoSize} options={[...videoSizeOptions]} /><MediaAdvancedControls {...props} /></Panel>;
   if (props.activeTab === "audio-convert") return <Panel title="音频格式转换" note="使用本地 FFmpeg WASM，支持 MP3、WAV、AAC、M4A、FLAC，并可选择音频码率。">{props.desktopMode ? null : <MediaCapabilityBox report={props.mediaReport} />}<Select label="输出格式" value={props.audioFormat} onChange={props.setAudioFormat} options={[...audioOutputFormats]} /><Quality value={props.mediaQuality} onChange={props.setMediaQuality} /><MediaAdvancedControls {...props} /></Panel>;
   if (props.activeTab === "video-audio") return <Panel title="视频提取音频" note="只读取视频中的音频轨道，导出 MP3、WAV、M4A、AAC。">{props.desktopMode ? null : <MediaCapabilityBox report={props.mediaReport} />}<Select label="输出格式" value={props.extractedAudioFormat} onChange={props.setExtractedAudioFormat} options={[...extractedAudioOutputFormats]} /><Quality value={props.mediaQuality} onChange={props.setMediaQuality} /><MediaAdvancedControls {...props} /></Panel>;
   if (props.activeTab === "batch-gate") return <Panel title="批量处理" note="批量处理为离线专业版功能，请下载 Windows 离线专业版使用。"><a className="btn-primary inline-flex items-center justify-center gap-2" href="/download"><Download className="h-5 w-5" />下载离线专业版</a></Panel>;
-  if (props.activeTab === "batch") return <Panel title="离线批量处理" note="批量能力只在离线安装版提供，支持断网环境下顺序处理多个文件，并优先保存到本地输出目录。"><Select label="批量类型" value={props.batchMode} onChange={props.setBatchMode} options={[{ value: "compress", label: "图片批量压缩" }, { value: "watermark", label: "图片批量加水印" }, { value: "word-images", label: "Word 批量转图片" }, { value: "excel-images", label: "Excel 批量转图片" }, { value: "video-convert", label: "视频批量转换" }, { value: "audio-convert", label: "音频批量转换" }, { value: "video-audio", label: "视频批量提取音频" }]} /><div className="rounded-sm border border-cyan-300/10 bg-slate-950/60 p-3 text-sm leading-6 text-slate-300">已添加 {props.batchFiles?.length || 0} 个文件。切换批量类型后，建议重新添加对应格式的文件。</div>{props.batchMode === "compress" ? <><Select label="压缩强度" value={props.compressStrength} onChange={props.setCompressStrength} options={["light", "recommended", "extreme"]} /><Field label="目标大小"><select className="form-input" value={props.targetSize} onChange={(event) => props.setTargetSize(event.target.value)}><option value="200KB">200KB</option><option value="100KB">100KB</option><option value="50KB">50KB</option><option value="25KB">25KB</option></select></Field><Range label="质量" value={props.compressQuality} min={10} max={100} onChange={props.setCompressQuality} /><NumberField label="最大宽高" value={props.maxSize} onChange={props.setMaxSize} /><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={props.keepOriginalSize} onChange={(event) => props.setKeepOriginalSize(event.target.checked)} />保留原尺寸</label></> : null}{props.batchMode === "watermark" ? <><Select label="水印类型" value={props.watermarkMode} onChange={props.setWatermarkMode} options={["text", "image"]} />{props.watermarkMode === "image" ? <Field label="水印图片"><input type="file" accept={imageAccept} onChange={(event) => props.setWatermarkImage(event.target.files?.[0] || null)} /></Field> : <><Field label="水印文字"><input className="form-input" value={props.watermarkText} onChange={(event) => props.setWatermarkText(event.target.value)} /></Field><Range label="文字大小" value={props.watermarkFontSize} min={12} max={160} onChange={props.setWatermarkFontSize} /><Field label="文字颜色"><div className="flex gap-2"><input className="h-11 w-14 rounded-sm border border-cyan-300/20 bg-slate-950 p-1" type="color" value={props.watermarkColor} onChange={(event) => props.setWatermarkColor(event.target.value)} /><input className="form-input" value={props.watermarkColor} onChange={(event) => props.setWatermarkColor(event.target.value)} /></div></Field></>}<Select label="位置" value={props.watermarkPosition} onChange={props.setWatermarkPosition} options={["top-left", "top-right", "bottom-left", "bottom-right", "center", "tile"]} /><Range label="透明度" value={props.watermarkOpacity} min={5} max={100} onChange={props.setWatermarkOpacity} /><ImageFormat value={props.watermarkFormat} onChange={props.setWatermarkFormat} /></> : null}{props.batchMode === "word-images" || props.batchMode === "excel-images" ? <><Select label="导出方式" value={props.officeImageMode} onChange={props.setOfficeImageMode} options={[{ value: "pages", label: "逐页导出" }, { value: "combined", label: "合成一页导出" }]} /><ImageFormat value={props.officeImageFormat} onChange={props.setOfficeImageFormat} /></> : null}{props.batchMode === "video-convert" ? <><MediaCapabilityBox report={props.mediaReport} /><Select label="输出格式" value={props.videoFormat} onChange={props.setVideoFormat} options={[...videoOutputFormats]} /><Quality value={props.mediaQuality} onChange={props.setMediaQuality} /><Select label="视频尺寸" value={props.videoSize} onChange={props.setVideoSize} options={[...videoSizeOptions]} /><MediaAdvancedControls {...props} /></> : null}{props.batchMode === "audio-convert" ? <><MediaCapabilityBox report={props.mediaReport} /><Select label="输出格式" value={props.audioFormat} onChange={props.setAudioFormat} options={[...audioOutputFormats]} /><Quality value={props.mediaQuality} onChange={props.setMediaQuality} /><MediaAdvancedControls {...props} /></> : null}{props.batchMode === "video-audio" ? <><MediaCapabilityBox report={props.mediaReport} /><Select label="输出格式" value={props.extractedAudioFormat} onChange={props.setExtractedAudioFormat} options={[...extractedAudioOutputFormats]} /><Quality value={props.mediaQuality} onChange={props.setMediaQuality} /><MediaAdvancedControls {...props} /></> : null}</Panel>;
+  if (props.activeTab === "batch") return <Panel title="离线批量处理" note="批量能力只在离线安装版提供，支持断网环境下顺序处理多个文件，并优先保存到本地输出目录。"><Select label="批量类型" value={props.batchMode} onChange={props.setBatchMode} options={[{ value: "compress", label: "图片批量压缩" }, { value: "watermark", label: "图片批量加水印" }, { value: "word-images", label: "Word 批量转图片" }, { value: "excel-images", label: "Excel 批量转图片" }, { value: "video-convert", label: "视频批量转换" }, { value: "audio-convert", label: "音频批量转换" }, { value: "video-audio", label: "视频批量提取音频" }]} /><div className="rounded-sm border border-cyan-300/10 bg-slate-950/60 p-3 text-sm leading-6 text-slate-300">已添加 {props.batchFiles?.length || 0} 个文件。切换批量类型后，建议重新添加对应格式的文件。</div>{props.batchMode === "compress" ? <><Select label="压缩强度" value={props.compressStrength} onChange={props.setCompressStrength} options={["light", "recommended", "extreme"]} /><Field label="目标大小"><select className="form-input" value={props.targetSize} onChange={(event) => props.setTargetSize(event.target.value)}><option value="500KB">500KB</option><option value="200KB">200KB</option><option value="100KB">100KB</option><option value="50KB">50KB</option><option value="25KB">25KB</option></select></Field><Range label="质量" value={props.compressQuality} min={10} max={100} onChange={props.setCompressQuality} /><NumberField label="最大宽高" value={props.maxSize} onChange={props.setMaxSize} /><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={props.keepOriginalSize} onChange={(event) => props.setKeepOriginalSize(event.target.checked)} />保留原尺寸</label></> : null}{props.batchMode === "watermark" ? <><Select label="水印类型" value={props.watermarkMode} onChange={props.setWatermarkMode} options={["text", "image"]} />{props.watermarkMode === "image" ? <Field label="水印图片"><input type="file" accept={imageAccept} onChange={(event) => props.setWatermarkImage(event.target.files?.[0] || null)} /></Field> : <><Field label="水印文字"><input className="form-input" value={props.watermarkText} onChange={(event) => props.setWatermarkText(event.target.value)} /></Field><Range label="文字大小" value={props.watermarkFontSize} min={12} max={160} onChange={props.setWatermarkFontSize} /><Field label="文字颜色"><div className="flex gap-2"><input className="h-11 w-14 rounded-sm border border-cyan-300/20 bg-slate-950 p-1" type="color" value={props.watermarkColor} onChange={(event) => props.setWatermarkColor(event.target.value)} /><input className="form-input" value={props.watermarkColor} onChange={(event) => props.setWatermarkColor(event.target.value)} /></div></Field></>}<Select label="位置" value={props.watermarkPosition} onChange={props.setWatermarkPosition} options={["top-left", "top-right", "bottom-left", "bottom-right", "center", "tile"]} /><Range label="透明度" value={props.watermarkOpacity} min={5} max={100} onChange={props.setWatermarkOpacity} /><ImageFormat value={props.watermarkFormat} onChange={props.setWatermarkFormat} /></> : null}{props.batchMode === "word-images" || props.batchMode === "excel-images" ? <><Select label="导出方式" value={props.officeImageMode} onChange={props.setOfficeImageMode} options={[{ value: "pages", label: "逐页导出" }, { value: "combined", label: "合成一页导出" }]} /><ImageFormat value={props.officeImageFormat} onChange={props.setOfficeImageFormat} /></> : null}{props.batchMode === "video-convert" ? <><MediaCapabilityBox report={props.mediaReport} /><Select label="输出格式" value={props.videoFormat} onChange={props.setVideoFormat} options={[...videoOutputFormats]} /><Quality value={props.mediaQuality} onChange={props.setMediaQuality} /><Select label="视频尺寸" value={props.videoSize} onChange={props.setVideoSize} options={[...videoSizeOptions]} /><MediaAdvancedControls {...props} /></> : null}{props.batchMode === "audio-convert" ? <><MediaCapabilityBox report={props.mediaReport} /><Select label="输出格式" value={props.audioFormat} onChange={props.setAudioFormat} options={[...audioOutputFormats]} /><Quality value={props.mediaQuality} onChange={props.setMediaQuality} /><MediaAdvancedControls {...props} /></> : null}{props.batchMode === "video-audio" ? <><MediaCapabilityBox report={props.mediaReport} /><Select label="输出格式" value={props.extractedAudioFormat} onChange={props.setExtractedAudioFormat} options={[...extractedAudioOutputFormats]} /><Quality value={props.mediaQuality} onChange={props.setMediaQuality} /><MediaAdvancedControls {...props} /></> : null}</Panel>;
   return <Panel title="下载离线版" note="离线版用于敏感文件、大文件和无网络环境。"><a className="btn-primary" href="/download">打开下载页</a></Panel>;
 }
 
@@ -3133,7 +3242,7 @@ function getTauriApi() {
 async function invokeTauri<T>(command: string, args?: Record<string, unknown>): Promise<T> {
   const tauri = getTauriApi();
   const invoke = tauri?.tauri?.invoke || tauri?.invoke;
-  if (typeof invoke !== "function") throw new Error("当前环境不能调用 Tauri sidecar。");
+  if (typeof invoke !== "function") throw new Error("当前环境不能调用桌面服务。");
   return invoke(command, args);
 }
 
@@ -3157,6 +3266,43 @@ function downloadBlob(blob: Blob, name: string) {
   anchor.click();
   anchor.remove();
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function pdfOutputFolderName(fileName: string) {
+  return safeBaseName(fileName);
+}
+
+function pdfSingleImageName(fileName: string, format: PdfOutputFormat) {
+  return `${safeBaseName(fileName)}.${format}`;
+}
+
+function pdfPageImageName(fileName: string, pageNumber: number, format: PdfOutputFormat) {
+  return `${safeBaseName(fileName)}_${String(pageNumber).padStart(3, "0")}.${format}`;
+}
+
+function officeOutputFolderName(fileName: string) {
+  return safeBaseName(fileName);
+}
+
+function officeSingleImageName(fileName: string, format: ExportImageFormat) {
+  return `${safeBaseName(fileName)}.${format}`;
+}
+
+function officePageImageName(fileName: string, pageNumber: number, format: ExportImageFormat) {
+  return `${safeBaseName(fileName)}_${String(pageNumber).padStart(3, "0")}.${format}`;
+}
+
+function batchOutputFolderName(now = new Date()) {
+  const stamp = [
+    now.getFullYear(),
+    String(now.getMonth() + 1).padStart(2, "0"),
+    String(now.getDate()).padStart(2, "0"),
+    "_",
+    String(now.getHours()).padStart(2, "0"),
+    String(now.getMinutes()).padStart(2, "0"),
+    String(now.getSeconds()).padStart(2, "0")
+  ].join("");
+  return `万能格式转换器_批量结果_${stamp}`;
 }
 
 function uniqueBatchResultName(name: string, usedNames: Set<string>) {
@@ -3291,6 +3437,7 @@ function parseTargetSize(value: string) {
 }
 
 function isBatchFileAllowed(file: File, mode: BatchMode) {
+  if (isSupportedBatchName(file.name, mode)) return true;
   if (mode === "compress" || mode === "watermark") return isImageFile(file);
   if (mode === "word-images") return isWordFile(file);
   if (mode === "excel-images") return isExcelFile(file);
