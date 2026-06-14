@@ -323,6 +323,198 @@
         line-height: 1.35;
       }
 
+      .operation-panel {
+        position: absolute;
+        z-index: 8;
+        display: grid;
+        gap: 10px;
+        width: 292px;
+        pointer-events: none;
+      }
+
+      .operation-step {
+        display: grid;
+        grid-template-columns: 34px 1fr;
+        gap: 11px;
+        align-items: center;
+        min-height: 52px;
+        padding: 10px 12px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.78);
+        box-shadow: 0 16px 44px rgba(0, 0, 0, 0.38);
+        color: #f5f5f7;
+      }
+
+      .operation-step b {
+        display: grid;
+        width: 34px;
+        height: 34px;
+        place-items: center;
+        border-radius: 7px;
+        background: rgba(41, 151, 255, 0.18);
+        color: #2997ff;
+        font-size: 18px;
+      }
+
+      .operation-step span {
+        font-size: 18px;
+        font-weight: 800;
+        line-height: 1.24;
+      }
+
+      .operation-step small {
+        display: block;
+        margin-top: 3px;
+        color: #a1a1a6;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .operation-step.done b {
+        background: rgba(48, 213, 200, 0.18);
+        color: #30d5c8;
+      }
+
+      .op-cursor {
+        position: absolute;
+        z-index: 10;
+        width: 34px;
+        height: 44px;
+        background: #f5f5f7;
+        clip-path: polygon(0 0, 0 35px, 10px 26px, 17px 43px, 27px 39px, 20px 23px, 34px 23px);
+        filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5));
+        pointer-events: none;
+      }
+
+      .click-ring {
+        position: absolute;
+        z-index: 9;
+        width: 64px;
+        height: 64px;
+        margin: -32px 0 0 -32px;
+        border: 3px solid rgba(48, 213, 200, 0.8);
+        border-radius: 50%;
+        box-shadow: 0 0 30px rgba(48, 213, 200, 0.34);
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .hotspot {
+        position: absolute;
+        z-index: 6;
+        border: 2px solid rgba(48, 213, 200, 0.72);
+        border-radius: 8px;
+        background: rgba(48, 213, 200, 0.08);
+        box-shadow: 0 0 38px rgba(48, 213, 200, 0.28);
+        pointer-events: none;
+      }
+
+      .zoom-card {
+        position: absolute;
+        z-index: 7;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 8px;
+        background: #111112;
+        box-shadow: 0 24px 72px rgba(0, 0, 0, 0.48);
+        pointer-events: none;
+      }
+
+      .zoom-card::before {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        border: 1px solid rgba(48, 213, 200, 0.44);
+        border-radius: inherit;
+        content: "";
+      }
+
+      .zoom-img {
+        position: absolute;
+        inset: 0;
+        background-repeat: no-repeat;
+        background-size: 150% 150%;
+      }
+
+      .zoom-label {
+        position: absolute;
+        left: 12px;
+        bottom: 10px;
+        z-index: 3;
+        padding: 7px 10px;
+        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.76);
+        color: #30d5c8;
+        font-size: 15px;
+        font-weight: 900;
+      }
+
+      .status-strip {
+        position: absolute;
+        z-index: 8;
+        left: 22px;
+        right: 22px;
+        top: 78px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        pointer-events: none;
+      }
+
+      .status-chip {
+        min-height: 54px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.74);
+        padding: 10px 12px;
+        box-shadow: 0 16px 42px rgba(0, 0, 0, 0.36);
+        color: #f5f5f7;
+        font-size: 16px;
+        font-weight: 800;
+      }
+
+      .status-chip span {
+        display: block;
+        height: 6px;
+        margin-top: 9px;
+        overflow: hidden;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.14);
+      }
+
+      .status-chip span::before {
+        display: block;
+        width: 72%;
+        height: 100%;
+        border-radius: inherit;
+        background: #30d5c8;
+        content: "";
+      }
+
+      .output-toast {
+        position: absolute;
+        right: 10px;
+        bottom: 18px;
+        z-index: 8;
+        max-width: 360px;
+        border: 1px solid rgba(48, 213, 200, 0.32);
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.78);
+        padding: 16px 18px;
+        box-shadow: 0 22px 68px rgba(0, 0, 0, 0.46);
+        color: #f5f5f7;
+        font-size: 19px;
+        font-weight: 900;
+      }
+
+      .output-toast small {
+        display: block;
+        margin-top: 6px;
+        color: #a1a1a6;
+        font-size: 14px;
+      }
+
       .shell-bar {
         display: flex;
         height: 56px;
@@ -618,15 +810,20 @@
       }
 
       .folder-name {
-        height: 13px;
+        min-height: 24px;
         border-radius: 4px;
-        background: #f5f5f7;
+        color: #f5f5f7;
+        font-size: 19px;
+        font-weight: 800;
       }
 
       .folder-size {
-        height: 10px;
+        min-height: 18px;
         border-radius: 4px;
-        background: #6e6e73;
+        color: #a1a1a6;
+        font-size: 16px;
+        font-weight: 800;
+        text-align: right;
       }
 
       .shield {
@@ -766,6 +963,19 @@
             <div data-hf-id="hf-dtwu" class="shell-bar"><span data-hf-id="hf-9gry" class="dot"></span><span data-hf-id="hf-zcc2" class="dot"></span><span data-hf-id="hf-zqn3" class="dot"></span><div data-hf-id="hf-p2gj" class="url-pill">https://gszhmrx.cn/tools/</div></div>
             <div data-hf-id="hf-z1gx" class="real-screen-viewport" data-layout-allow-overflow="">
               <img data-hf-id="hf-r0mg" class="real-screen online-screen" src="assets/online-tools-real.png" alt="万能格式转换器在线工具台真实界面">
+              <div data-hf-id="hf-op-s2-hot1" class="hotspot s2-op" style="left: 48px; top: 88px; width: 226px; height: 68px;"></div>
+              <div data-hf-id="hf-op-s2-hot2" class="hotspot s2-op" style="right: 42px; top: 106px; width: 238px; height: 168px;"></div>
+              <div data-hf-id="hf-op-s2-zoom" class="zoom-card s2-op" style="left: 24px; bottom: 72px; width: 318px; height: 174px;">
+                <div data-hf-id="hf-op-s2-zoom-img" class="zoom-img" style="background-image: url('assets/online-tools-real.png'); background-position: 8% 28%;"></div>
+                <div data-hf-id="hf-op-s2-zoom-label" class="zoom-label">实操：文件已进入预览区</div>
+              </div>
+              <div data-hf-id="hf-op-s2-panel" class="operation-panel s2-op" style="right: 24px; top: 72px;">
+                <div data-hf-id="hf-op-s2-step1" class="operation-step done"><b data-hf-id="hf-t4n0">1</b><span data-hf-id="hf-w4b6">选择本地文件<small data-hf-id="hf-1sdw">浏览器内完成预览</small></span></div>
+                <div data-hf-id="hf-op-s2-step2" class="operation-step"><b data-hf-id="hf-rxpx">2</b><span data-hf-id="hf-99ob">确认处理参数<small data-hf-id="hf-pef0">右侧面板即时可见</small></span></div>
+                <div data-hf-id="hf-op-s2-step3" class="operation-step"><b data-hf-id="hf-sc0y">3</b><span data-hf-id="hf-6hg2">导出处理结果<small data-hf-id="hf-l6e6">适合临时轻量任务</small></span></div>
+              </div>
+              <div data-hf-id="hf-op-s2-cursor" class="op-cursor s2-op" style="left: 210px; top: 136px;" data-layout-ignore=""></div>
+              <div data-hf-id="hf-op-s2-click" class="click-ring s2-op" style="left: 218px; top: 150px;" data-layout-ignore=""></div>
               <div data-hf-id="hf-ofol" class="proof-tag-bar s2-proof">
                 <span data-hf-id="hf-c9h9" class="proof-tag green">真实在线工具台</span>
                 <span data-hf-id="hf-gh9r" class="proof-tag">已载入本地文件预览</span>
@@ -790,6 +1000,15 @@
             <div data-hf-id="hf-y27m" class="shell-bar"><span data-hf-id="hf-04y4" class="dot"></span><span data-hf-id="hf-0j95" class="dot"></span><span data-hf-id="hf-0xk6" class="dot"></span><div data-hf-id="hf-8zfq" class="url-pill">万能格式转换器 · 离线专业版</div></div>
             <div data-hf-id="hf-j7s5" class="real-screen-viewport" data-layout-allow-overflow="">
               <img data-hf-id="hf-eiyk" class="real-screen desktop-screen" src="assets/offline-pro-real.png" alt="Windows 离线专业版真实工作台界面">
+              <div data-hf-id="hf-op-s3-hot1" class="hotspot s3-op" style="left: 20px; top: 86px; width: 232px; height: 360px;"></div>
+              <div data-hf-id="hf-op-s3-hot2" class="hotspot s3-op" style="left: 272px; top: 92px; width: 372px; height: 216px;"></div>
+              <div data-hf-id="hf-op-s3-panel" class="operation-panel s3-op" style="right: 24px; top: 82px;">
+                <div data-hf-id="hf-op-s3-step1" class="operation-step done"><b data-hf-id="hf-dmic">1</b><span data-hf-id="hf-p18n">打开离线专业版<small data-hf-id="hf-fuaa">绿色单机，本地运行</small></span></div>
+                <div data-hf-id="hf-op-s3-step2" class="operation-step done"><b data-hf-id="hf-mt2h">2</b><span data-hf-id="hf-bs61">选择处理工具<small data-hf-id="hf-5b5h">图片 / 文档 / 音视频</small></span></div>
+                <div data-hf-id="hf-op-s3-step3" class="operation-step"><b data-hf-id="hf-nwee">3</b><span data-hf-id="hf-hjxc">创建本地任务<small data-hf-id="hf-lp8t">不上传服务器</small></span></div>
+              </div>
+              <div data-hf-id="hf-op-s3-cursor" class="op-cursor s3-op" style="left: 152px; top: 210px;" data-layout-ignore=""></div>
+              <div data-hf-id="hf-op-s3-click" class="click-ring s3-op" style="left: 162px; top: 224px;" data-layout-ignore=""></div>
               <div data-hf-id="hf-gdkk" class="proof-tag-bar s3-proof">
                 <span data-hf-id="hf-i43p" class="proof-tag green">保护隐私</span>
                 <span data-hf-id="hf-knuy" class="proof-tag">绿色单机 · 本地运行</span>
@@ -814,10 +1033,21 @@
             <div data-hf-id="hf-ygin" class="shell-bar"><span data-hf-id="hf-1bv7" class="dot"></span><span data-hf-id="hf-1q68" class="dot"></span><span data-hf-id="hf-vrkt" class="dot"></span><div data-hf-id="hf-37hn" class="url-pill">离线专业版 · 批量压缩队列</div></div>
             <div data-hf-id="hf-kep8" class="real-screen-viewport" data-layout-allow-overflow="">
               <img data-hf-id="hf-c8nr" class="real-screen desktop-screen" src="assets/offline-pro-queue-real.png" alt="离线专业版批量文件队列真实界面">
+              <div data-hf-id="hf-op-s4-status" class="status-strip s4-op">
+                <div data-hf-id="hf-op-s4-chip1" class="status-chip">01 选择工具<span data-hf-id="hf-1qzj"></span></div>
+                <div data-hf-id="hf-op-s4-chip2" class="status-chip">02 批量导入<span data-hf-id="hf-25ak"></span></div>
+                <div data-hf-id="hf-op-s4-chip3" class="status-chip">03 本地处理<span data-hf-id="hf-0ydh"></span></div>
+              </div>
               <div data-hf-id="hf-vyv5" class="screen-callout s4-callout" style="right: 28px; top: 128px;">
                 <strong data-hf-id="hf-3c0n">3 个文件已加入队列</strong>
                 <span data-hf-id="hf-nbf3">平铺缩略图、参数面板和输出状态同屏。</span>
               </div>
+              <div data-hf-id="hf-op-s4-zoom" class="zoom-card s4-op" style="left: 24px; bottom: 82px; width: 340px; height: 188px;">
+                <div data-hf-id="hf-op-s4-zoom-img" class="zoom-img" style="background-image: url('assets/offline-pro-queue-real.png'); background-position: 12% 38%;"></div>
+                <div data-hf-id="hf-op-s4-zoom-label" class="zoom-label">实操：平铺缩略图与状态</div>
+              </div>
+              <div data-hf-id="hf-op-s4-cursor" class="op-cursor s4-op" style="left: 868px; top: 402px;" data-layout-ignore=""></div>
+              <div data-hf-id="hf-op-s4-click" class="click-ring s4-op" style="left: 878px; top: 416px;" data-layout-ignore=""></div>
               <div data-hf-id="hf-rn2j" class="proof-tag-bar s4-proof">
                 <span data-hf-id="hf-iz4o" class="proof-tag green">真实批量队列</span>
                 <span data-hf-id="hf-vzqv" class="proof-tag">平铺预览</span>
@@ -841,10 +1071,13 @@
           </div>
           <div data-hf-id="hf-5m2t" class="folder-stage">
             <div data-hf-id="hf-tish" class="folder s5-folder">
-              <div data-hf-id="hf-jphv" class="folder-row"><div data-hf-id="hf-2rk6" class="folder-icon"></div><div data-hf-id="hf-xgfk" class="folder-name"></div><div data-hf-id="hf-2nta" class="folder-size"></div></div>
-              <div data-hf-id="hf-12cz" class="folder-row"><div data-hf-id="hf-sj62" class="folder-icon"></div><div data-hf-id="hf-vhx9" class="folder-name" style="width: 72%;"></div><div data-hf-id="hf-3zf6" class="folder-size"></div></div>
-              <div data-hf-id="hf-0o1y" class="folder-row"><div data-hf-id="hf-sxh3" class="folder-icon"></div><div data-hf-id="hf-3ija" class="folder-name" style="width: 88%;"></div><div data-hf-id="hf-4dq7" class="folder-size"></div></div>
-              <div data-hf-id="hf-09qx" class="folder-row"><div data-hf-id="hf-tbs4" class="folder-icon"></div><div data-hf-id="hf-rfrg" class="folder-name" style="width: 64%;"></div><div data-hf-id="hf-4s18" class="folder-size"></div></div>
+              <div data-hf-id="hf-jphv" class="folder-row"><div data-hf-id="hf-2rk6" class="folder-icon"></div><div data-hf-id="hf-xgfk" class="folder-name">输出结果</div><div data-hf-id="hf-2nta" class="folder-size">4 项</div></div>
+              <div data-hf-id="hf-12cz" class="folder-row"><div data-hf-id="hf-sj62" class="folder-icon"></div><div data-hf-id="hf-vhx9" class="folder-name">PDF_逐页图片</div><div data-hf-id="hf-3zf6" class="folder-size">12 张</div></div>
+              <div data-hf-id="hf-0o1y" class="folder-row"><div data-hf-id="hf-sxh3" class="folder-icon"></div><div data-hf-id="hf-3ija" class="folder-name">音视频转换</div><div data-hf-id="hf-4dq7" class="folder-size">3 个</div></div>
+              <div data-hf-id="hf-09qx" class="folder-row"><div data-hf-id="hf-tbs4" class="folder-icon"></div><div data-hf-id="hf-rfrg" class="folder-name">图片压缩</div><div data-hf-id="hf-4s18" class="folder-size">完成</div></div>
+              <div data-hf-id="hf-op-s5-toast" class="output-toast s5-op">打开输出文件夹<small data-hf-id="hf-wivz">D:\万能格式转换器\输出结果</small></div>
+              <div data-hf-id="hf-op-s5-cursor" class="op-cursor s5-op" style="left: 486px; top: 292px;" data-layout-ignore=""></div>
+              <div data-hf-id="hf-op-s5-click" class="click-ring s5-op" style="left: 496px; top: 306px;" data-layout-ignore=""></div>
             </div>
           </div>
         </div>
@@ -900,22 +1133,42 @@
       tl.from(".s2-shell", { opacity: 0, x: 90, scale: 0.96, duration: 0.72, ease: "expo.out" }, 9.56);
       tl.from("#scene-2 .s2-proof .proof-tag", { opacity: 0, y: 16, duration: 0.38, stagger: 0.08, ease: "back.out(1.4)" }, 10.08);
       tl.to("#scene-2 .real-screen", { scale: 1.025, y: -10, duration: 12.5, ease: "sine.inOut" }, 10.4);
+      tl.from("#scene-2 .hotspot", { opacity: 0, scale: 0.92, duration: 0.42, stagger: 0.16, ease: "power3.out" }, 11.2);
+      tl.from("#scene-2 .operation-step", { opacity: 0, x: 22, duration: 0.42, stagger: 0.18, ease: "power3.out" }, 11.56);
+      tl.from("#scene-2 .zoom-card", { opacity: 0, y: 28, scale: 0.96, duration: 0.48, ease: "expo.out" }, 12.4);
+      tl.fromTo("#scene-2 .op-cursor", { opacity: 0, x: -70, y: 44 }, { opacity: 1, x: 14, y: 8, duration: 0.78, ease: "power3.out" }, 11.1);
+      tl.to("#scene-2 .op-cursor", { x: 520, y: 110, duration: 1.12, ease: "power2.inOut" }, 13.1);
+      tl.fromTo("#scene-2 .click-ring", { opacity: 0.85, scale: 0.55 }, { opacity: 0, scale: 1.7, duration: 0.5, ease: "power2.out" }, 14.1);
 
       enterScene("#scene-3", ".s3-el", 24);
       tl.from(".s3-shell", { opacity: 0, x: 120, scale: 0.93, duration: 0.82, ease: "expo.out" }, 24.62);
       tl.from("#scene-3 .s3-proof .proof-tag", { opacity: 0, y: 18, duration: 0.44, stagger: 0.08, ease: "power3.out" }, 25.2);
       tl.to("#scene-3 .real-screen", { scale: 1.025, y: -12, duration: 12, ease: "sine.inOut" }, 25.4);
+      tl.from("#scene-3 .hotspot", { opacity: 0, scale: 0.92, duration: 0.44, stagger: 0.18, ease: "power3.out" }, 26.2);
+      tl.from("#scene-3 .operation-step", { opacity: 0, x: 26, duration: 0.44, stagger: 0.18, ease: "power3.out" }, 26.7);
+      tl.fromTo("#scene-3 .op-cursor", { opacity: 0, x: -60, y: 20 }, { opacity: 1, x: 86, y: 36, duration: 0.86, ease: "power3.out" }, 26.1);
+      tl.to("#scene-3 .op-cursor", { x: 180, y: -48, duration: 1.1, ease: "power2.inOut" }, 29.3);
+      tl.fromTo("#scene-3 .click-ring", { opacity: 0.85, scale: 0.55 }, { opacity: 0, scale: 1.7, duration: 0.5, ease: "power2.out" }, 30.15);
 
       enterScene("#scene-4", ".s4-el", 39);
       tl.from(".s4-shell", { opacity: 0, x: 110, scale: 0.94, duration: 0.74, ease: "expo.out" }, 39.66);
       tl.from(".s4-callout", { opacity: 0, y: 22, scale: 0.96, duration: 0.44, ease: "back.out(1.35)" }, 40.28);
       tl.from("#scene-4 .s4-proof .proof-tag", { opacity: 0, y: 16, duration: 0.42, stagger: 0.07, ease: "power3.out" }, 40.58);
       tl.to("#scene-4 .real-screen", { scale: 1.035, y: -16, duration: 13, ease: "sine.inOut" }, 40.7);
+      tl.from("#scene-4 .status-chip", { opacity: 0, y: -18, duration: 0.42, stagger: 0.16, ease: "power3.out" }, 41.1);
+      tl.from("#scene-4 .zoom-card", { opacity: 0, x: -24, scale: 0.96, duration: 0.48, ease: "expo.out" }, 42.3);
+      tl.fromTo("#scene-4 .op-cursor", { opacity: 0, x: -90, y: -40 }, { opacity: 1, x: -12, y: -18, duration: 0.74, ease: "power3.out" }, 41.4);
+      tl.to("#scene-4 .op-cursor", { x: -152, y: 66, duration: 1.2, ease: "power2.inOut" }, 44.2);
+      tl.fromTo("#scene-4 .click-ring", { opacity: 0.85, scale: 0.55 }, { opacity: 0, scale: 1.7, duration: 0.5, ease: "power2.out" }, 45.18);
 
       enterScene("#scene-5", ".s5-el", 55);
       tl.from(".s5-folder", { opacity: 0, y: 58, scale: 0.93, duration: 0.72, ease: "expo.out" }, 55.62);
       tl.from("#scene-5 .folder-row", { opacity: 0, x: 44, duration: 0.42, stagger: 0.08, ease: "power3.out" }, 56.16);
       tl.to(".s5-folder", { y: -10, duration: 9.8, ease: "sine.inOut" }, 56.6);
+      tl.from("#scene-5 .output-toast", { opacity: 0, y: 28, scale: 0.96, duration: 0.5, ease: "expo.out" }, 58.4);
+      tl.fromTo("#scene-5 .op-cursor", { opacity: 0, x: -90, y: -64 }, { opacity: 1, x: -18, y: -18, duration: 0.76, ease: "power3.out" }, 58.0);
+      tl.to("#scene-5 .op-cursor", { x: 34, y: 68, duration: 0.9, ease: "power2.inOut" }, 60.8);
+      tl.fromTo("#scene-5 .click-ring", { opacity: 0.85, scale: 0.55 }, { opacity: 0, scale: 1.7, duration: 0.5, ease: "power2.out" }, 61.55);
 
       enterScene("#scene-6", ".s6-el", 68);
       tl.from(".s6-shield", { opacity: 0, scale: 0.8, rotation: -4, duration: 0.72, ease: "back.out(1.5)" }, 68.42);

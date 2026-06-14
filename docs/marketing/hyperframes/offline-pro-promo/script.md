@@ -17,7 +17,7 @@ Voiceover: 万能格式转换器提供在线版和 Windows 离线专业版两种
 
 Subtitle: 在线版：轻量处理 · 快速预览 · 偶尔使用。
 
-Shot: The real `gszhmrx.cn/tools/` online workbench appears briefly with a local file preview.
+Shot: The real `gszhmrx.cn/tools/` online workbench appears with cursor movement, highlighted upload/parameter areas, and a zoomed file-preview operation detail.
 
 ## 24-39s
 
@@ -25,7 +25,7 @@ Voiceover: Windows 离线专业版面向更高频、更专业的本地处理场�
 
 Subtitle: 离线专业版：保护隐私 · 绿色单机 · 本地运行。
 
-Shot: Offline Pro title and real desktop workbench frame push into view.
+Shot: Offline Pro title and real desktop workbench frame push into view, with cursor and step cards showing launch, tool selection, and local task creation.
 
 ## 39-55s
 
@@ -33,7 +33,7 @@ Voiceover: 离线专业版保护隐私，绿色单机，本地运行。文件处
 
 Subtitle: 批量导入 · 平铺预览 · 本地处理。
 
-Shot: Real batch queue, tiled previews, task status, and control panel stay on screen.
+Shot: Real batch queue, tiled previews, task status, and control panel stay on screen with process chips, cursor click feedback, and a zoomed queue detail.
 
 ## 55-68s
 
@@ -41,7 +41,7 @@ Voiceover: 批量任务中，每个文件都有缩略图、参数和状态；多
 
 Subtitle: 独立结果文件夹，多页文档清楚归档。
 
-Shot: Output folder opens, page files flow into named subfolders.
+Shot: Output folder opens with named result folders, a local path toast, and cursor feedback for opening the output folder.
 
 ## 68-84s
 
