@@ -50,3 +50,8 @@ Voiceover: 文件尽量在本机处理，不上传服务器，不调用云端转
 Subtitle: gszhmrx.cn · 下载 Windows 离线专业版。
 
 Shot: Privacy shield, logo, website, and download CTA settle in the safe area.
+
+## Voiceover Asset
+
+Generated locally as `assets/voiceover.wav` with Windows `Microsoft Huihui Desktop` (`zh-CN`) at rate `3`.
+HyperFrames Kokoro TTS was attempted with `zf_xiaobei`, but this Windows environment's espeak backend reported that `zh` is unsupported. The generated WAV can be replaced later with a human-recorded narration using the same copy.
