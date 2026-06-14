@@ -53,5 +53,5 @@ Shot: Privacy shield, logo, website, and download CTA settle in the safe area.
 
 ## Voiceover Asset
 
-Generated as `assets/voiceover.wav` with the Chinese female voice `zh-CN-XiaoxiaoNeural`, tuned to `+18%` rate and normalized for a softer product-demo mix.
+Generated as `assets/voiceover.wav` with the Chinese female voice `zh-CN-XiaoxiaoNeural`, tuned to `+16%` rate and normalized for a softer, Siri-like product-demo mix. The actual Apple Siri voice was not available in this Windows environment.
 HyperFrames Kokoro TTS was attempted with `zf_xiaobei`, but this Windows environment's espeak backend reported that `zh` is unsupported. The generated WAV can be replaced later with a human-recorded narration using the same copy.
