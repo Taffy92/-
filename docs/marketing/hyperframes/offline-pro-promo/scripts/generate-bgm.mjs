@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const output = resolve(__dirname, "../assets/bgm.wav");
 
-const sampleRate = 44100;
+const sampleRate = 48000;
 const durationSeconds = 48;
 const totalSamples = sampleRate * durationSeconds;
 const channels = 2;
@@ -46,17 +46,16 @@ for (let i = 0; i < totalSamples; i += 1) {
   const t = i / sampleRate;
   const env = envelope(t);
   const pad =
-    Math.sin(2 * Math.PI * 110 * t) * 0.16 +
-    Math.sin(2 * Math.PI * 164.81 * t) * 0.10 +
-    Math.sin(2 * Math.PI * 220 * t) * 0.08;
+    Math.sin(2 * Math.PI * 110 * t) * 0.14 +
+    Math.sin(2 * Math.PI * 164.81 * t) * 0.08 +
+    Math.sin(2 * Math.PI * 220 * t) * 0.06;
   const shimmer =
-    Math.sin(2 * Math.PI * 440 * t + Math.sin(2 * Math.PI * 0.07 * t) * 0.8) * 0.035 +
-    Math.sin(2 * Math.PI * 660 * t) * 0.018;
-  const kick = Math.sin(2 * Math.PI * 58 * t) * pulse(t, 1.5) * 0.22;
-  const tick = Math.sin(2 * Math.PI * 1320 * t) * pulse(t + 0.18, 3) * 0.025;
-  const value = Math.max(-1, Math.min(1, (pad + shimmer + kick + tick) * env * 0.34));
+    Math.sin(2 * Math.PI * 440 * t + Math.sin(2 * Math.PI * 0.07 * t) * 0.6) * 0.012 +
+    Math.sin(2 * Math.PI * 660 * t) * 0.006;
+  const kick = Math.sin(2 * Math.PI * 58 * t) * pulse(t, 1.5) * 0.12;
+  const value = Math.max(-1, Math.min(1, (pad + shimmer + kick) * env * 0.3));
   const left = Math.round(value * 32767);
-  const right = Math.round((value * 0.92 + shimmer * 0.04) * 32767);
+  const right = Math.round((value * 0.96 + shimmer * 0.02) * 32767);
   const offset = 44 + i * channels * 2;
   buffer.writeInt16LE(left, offset);
   buffer.writeInt16LE(right, offset + 2);
