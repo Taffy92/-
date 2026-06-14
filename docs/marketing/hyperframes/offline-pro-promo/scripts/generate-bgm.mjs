@@ -6,7 +6,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const output = resolve(__dirname, "../assets/bgm.wav");
 
 const sampleRate = 48000;
-const durationSeconds = 48;
+const durationSeconds = 84;
 const totalSamples = sampleRate * durationSeconds;
 const channels = 2;
 const bitsPerSample = 16;

@@ -1,55 +1,55 @@
 # Offline Pro Promo Script
 
-Duration target: 48 seconds
+Duration target: 84 seconds
 Format: 1920x1080, safe for later 9:16 crop
 
-## 00-06s
+## 00-09s
 
-Voiceover: 图片太大传不上去，PDF 想转图片，视频格式打不开，只想从视频里提取音频。
+Voiceover: 每天处理文件，最担心的不只是格式复杂，更是文件是否会被上传。
 
-Subtitle: 日常办公的格式问题，不该卡住你。
+Subtitle: 在线版和 Windows 离线专业版，覆盖日常格式处理。
 
 Shot: File cards for image, PDF, video, and audio stack into the center.
 
-## 06-12s
+## 09-24s
 
-Voiceover: 临时处理，可以直接打开万能格式转换器在线版。
+Voiceover: 万能格式转换器提供在线版和 Windows 离线专业版两种使用方式，覆盖图片、PDF、Word、Excel、音频、视频等常见格式转换与处理需求。在线版适合临时使用和轻量处理。打开浏览器，就可以完成常用格式转换、图片压缩、文档与媒体文件处理，适合快速预览和偶尔使用。
 
-Subtitle: 在线版：打开网站，快速处理单个文件。
+Subtitle: 在线版：轻量处理 · 快速预览 · 偶尔使用。
 
-Shot: `gszhmrx.cn` and a compact online workbench surface appear briefly.
+Shot: The real `gszhmrx.cn/tools/` online workbench appears briefly with a local file preview.
 
-## 12-21s
+## 24-39s
 
-Voiceover: 但如果是公司资料、客户文件、大文件，或者一批文件要处理，更适合 Windows 离线专业版。
+Voiceover: Windows 离线专业版面向更高频、更专业的本地处理场景。它支持多文件批量处理、平铺预览、参数设置、处理状态查看，以及按文件夹输出转换结果。
 
-Subtitle: 主推：Windows 离线专业版。
+Subtitle: 离线专业版：保护隐私 · 绿色单机 · 本地运行。
 
-Shot: Offline Pro title and desktop workbench frame push into view.
+Shot: Offline Pro title and real desktop workbench frame push into view.
 
-## 21-31s
+## 39-55s
 
-Voiceover: 安装后直接进入本地工作台，选择工具，批量导入，图片、PDF、Word、Excel、音频和视频都能排进任务。
+Voiceover: 离线专业版保护隐私，绿色单机，本地运行。文件处理过程不上传服务器，不调用云端转换 API，更适合办公批处理、资料整理，以及对隐私要求更高的场景。
 
 Subtitle: 批量导入 · 平铺预览 · 本地处理。
 
-Shot: Sidebar tools, tiled previews, task queue, and control panel light up.
+Shot: Real batch queue, tiled previews, task status, and control panel stay on screen.
 
-## 31-39s
+## 55-68s
 
-Voiceover: 结果保存到独立文件夹，多页文档按同名子文件夹输出，不用再把结果压成一个包。
+Voiceover: 批量任务中，每个文件都有缩略图、参数和状态；多页文档会按文件夹输出，结果清晰，便于复查和归档。
 
 Subtitle: 独立结果文件夹，多页文档清楚归档。
 
 Shot: Output folder opens, page files flow into named subfolders.
 
-## 39-48s
+## 68-84s
 
-Voiceover: 文件尽量在本机处理，不上传服务器，不调用云端转换 API。访问 gszhmrx.cn，也可以下载离线专业版试用。
+Voiceover: 离线专业版支持三天试用、离线激活。授权到期后，可联系作者续期或重新激活，微信同号：15588261515。万能格式转换器，让格式转换更稳定、更高效，也更安心。
 
-Subtitle: gszhmrx.cn · 下载 Windows 离线专业版。
+Subtitle: 授权到期后联系作者，微信同号：15588261515。
 
-Shot: Privacy shield, logo, website, and download CTA settle in the safe area.
+Shot: Privacy shield, logo, trial/license CTA, and contact information settle in the safe area.
 
 ## Voiceover Asset
 
