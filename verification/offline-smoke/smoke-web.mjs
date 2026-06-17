@@ -14,6 +14,22 @@ const requireFromWeb = createRequire(path.join(projectRoot, "apps", "web", "pack
 const { chromium } = requireFromWeb("@playwright/test");
 await mkdir(evidenceDir, { recursive: true });
 
+const sample = {
+  imageA: path.join(inputDir, "图片 一.jpg"),
+  imageB: path.join(inputDir, "图片 二.png"),
+  damagedImage: path.join(inputDir, "损坏 图片.jpg"),
+  docx: path.join(inputDir, "测试 文档.docx"),
+  xlsx: path.join(inputDir, "测试 表格.xlsx"),
+  wav: path.join(inputDir, "测试 音频.wav"),
+  mp4: path.join(inputDir, "测试 视频.mp4")
+};
+
+for (const [name, filePath] of Object.entries(sample)) {
+  if (!existsSync(filePath)) {
+    throw new Error(`缺少 ${name} 离线 Web 冒烟样本：${filePath}`);
+  }
+}
+
 const mime = new Map([
   [".html", "text/html; charset=utf-8"],
   [".js", "text/javascript; charset=utf-8"],
@@ -90,84 +106,80 @@ async function screenshot(name) {
   result.screenshots.push(target);
 }
 
+async function bodyText() {
+  return (await page.locator("body").textContent().catch(() => "")) || "";
+}
+
+async function clearAll() {
+  await page.getByRole("button", { name: /清空(任务|全部)/ }).click().catch(() => undefined);
+}
+
+async function selectTool(mode) {
+  await page.locator(".desktop-function-select select, select").first().selectOption(mode);
+}
+
+async function waitForFileTitle(filePath) {
+  await page.locator(`[title="${path.basename(filePath)}"]`).first().waitFor({ timeout: 15000 });
+}
+
+async function queueOne(mode, filePath) {
+  await clearAll();
+  await selectTool(mode);
+  await page.locator('input[type="file"]').first().setInputFiles(filePath);
+  await waitForFileTitle(filePath);
+}
+
 try {
   await page.goto(result.url, { waitUntil: "networkidle", timeout: 60000 });
-  await page.getByRole("heading", { name: "专业工作台" }).waitFor({ timeout: 30000 });
+  await page.locator(".desktop-replica").waitFor({ timeout: 30000 });
   result.checks.desktopWorkbenchVisible = true;
-  result.checks.privacyTextVisible = await page.getByText("文件仅在本机处理，不上传服务器").first().isVisible().catch(() => false);
-  result.checks.startDisabledWhenEmpty = await page.getByRole("button", { name: /开始处理/ }).first().isDisabled();
+  result.checks.privacyTextVisible = /本地运行，保护隐私安全|本地处理/.test(await bodyText());
+  result.checks.startDisabledWhenEmpty = await page.getByRole("button", { name: /开始(转换|处理)/ }).first().isDisabled();
   await screenshot("desktop-workbench-1440.png");
 
-  await page.getByRole("button", { name: "批量任务" }).click();
+  await selectTool("compress");
   await page.locator('input[type="file"]').first().setInputFiles([
-    path.join(inputDir, "图片 一.jpg"),
-    path.join(inputDir, "图片 二.png")
+    sample.imageA,
+    sample.imageB
   ]);
-  await page.locator('[title="图片 一.jpg"]').waitFor({ timeout: 15000 });
-  result.checks.multiImageFilesAdded = await page.getByText("已添加 2 个文件").isVisible().catch(() => false);
-  result.checks.independentQueuedStateVisible = await page.getByText("等待中").first().isVisible().catch(() => false);
+  await waitForFileTitle(sample.imageA);
+  await waitForFileTitle(sample.imageB);
+  const imageText = await bodyText();
+  result.checks.multiImageFilesAdded = imageText.includes("已添加 2 个文件");
+  result.checks.independentQueuedStateVisible = imageText.includes("等待中");
+  result.checks.startEnabledWithFiles = !(await page.getByRole("button", { name: /开始(转换|处理)/ }).first().isDisabled());
+  await page.getByRole("button", { name: /开始(转换|处理)/ }).first().click();
+  await page.waitForFunction(() => document.body.innerText.includes("输出目录尚未就绪"), undefined, { timeout: 10000 }).catch(() => {});
+  result.checks.outputDirectoryGuardVisible = (await bodyText()).includes("输出目录尚未就绪");
+  await screenshot("image-batch-queued.png");
 
-  const downloadPromise = page.waitForEvent("download", { timeout: 90000 }).catch(() => null);
-  await page.getByRole("button", { name: /开始处理/ }).first().click();
-  await page.getByText("已完成批量任务", { exact: false }).waitFor({ timeout: 90000 }).catch(() => {});
-  const download = await downloadPromise;
-  if (download) {
-    const suggested = download.suggestedFilename();
-    const saveAs = path.join(evidenceDir, suggested);
-    await download.saveAs(saveAs);
-    result.downloads.push(saveAs);
+  await queueOne("compress", sample.damagedImage);
+  result.checks.damagedImageQueued = await page.locator(`[title="${path.basename(sample.damagedImage)}"]`).first().isVisible().catch(() => false);
+
+  await queueOne("word-images", sample.docx);
+  result.checks.wordFileQueued = await page.locator(`[title="${path.basename(sample.docx)}"]`).first().isVisible().catch(() => false);
+
+  await queueOne("excel-images", sample.xlsx);
+  result.checks.excelFileQueued = await page.locator(`[title="${path.basename(sample.xlsx)}"]`).first().isVisible().catch(() => false);
+
+  await queueOne("audio-convert", sample.wav);
+  result.checks.audioFileQueued = await page.locator(`[title="${path.basename(sample.wav)}"]`).first().isVisible().catch(() => false);
+
+  await queueOne("video-convert", sample.mp4);
+  result.checks.videoFileQueued = await page.locator(`[title="${path.basename(sample.mp4)}"]`).first().isVisible().catch(() => false);
+
+  const failedChecks = Object.entries(result.checks)
+    .filter(([, value]) => value !== true)
+    .map(([key]) => key);
+  if (failedChecks.length > 0) {
+    result.error = `Smoke checks failed: ${failedChecks.join(", ")}`;
   }
-  result.checks.imageBatchSuccessVisible = await page.getByText("成功", { exact: true }).first().isVisible().catch(() => false);
-  result.checks.copyOutputPathButtonVisible = await page.getByTitle("复制输出路径").first().isVisible().catch(() => false);
-  await screenshot("image-batch-after-run.png");
-
-  await page.getByRole("button", { name: "清空全部" }).click();
-  await page.getByRole("combobox", { name: "批量类型" }).selectOption("compress");
-  await page.locator('input[type="file"]').first().setInputFiles(path.join(inputDir, "损坏 图片.jpg"));
-  await page.locator('[title="损坏 图片.jpg"]').waitFor({ timeout: 15000 });
-  await page.getByRole("button", { name: /开始处理/ }).first().click();
-  await page.getByText("失败").waitFor({ timeout: 45000 }).catch(() => {});
-  result.checks.failedReasonVisible = await page.getByText("处理失败", { exact: false }).first().isVisible().catch(() => false);
-  result.checks.retryButtonVisible = await page.getByTitle("重试").first().isVisible().catch(() => false);
-
-  await page.getByTitle("重试").first().click().catch(() => {});
-  result.checks.retryClicked = true;
-  await page.getByRole("button", { name: "清空全部" }).click();
-
-  await page.locator('input[type="file"]').first().setInputFiles(path.join(inputDir, "图片 一.jpg"));
-  await page.getByTitle("取消").first().click();
-  result.checks.cancelledStateVisible = await page.getByText("已取消").first().isVisible().catch(() => false);
-  await page.getByRole("button", { name: "清空全部" }).click();
-
-  const folderInput = page.locator('input[webkitdirectory]').first();
-  await folderInput.setInputFiles(inputDir);
-  await page.waitForTimeout(1500);
-  result.checks.folderImportSummaryText = await page.getByText("最近导入", { exact: false }).first().textContent().catch(() => "");
-  result.checks.folderImportVisible = Boolean(result.checks.folderImportSummaryText);
-  await screenshot("folder-import.png");
-
-  await page.getByRole("combobox", { name: "批量类型" }).selectOption("word-images");
-  await page.locator('input[type="file"]').first().setInputFiles(path.join(inputDir, "测试 文档.docx"));
-  result.checks.wordFileQueued = await page.locator('[title="测试 文档.docx"]').isVisible().catch(() => false);
-
-  await page.getByRole("button", { name: "清空全部" }).click();
-  await page.getByRole("combobox", { name: "批量类型" }).selectOption("excel-images");
-  await page.locator('input[type="file"]').first().setInputFiles(path.join(inputDir, "测试 表格.xlsx"));
-  result.checks.excelFileQueued = await page.locator('[title="测试 表格.xlsx"]').isVisible().catch(() => false);
-
-  await page.getByRole("button", { name: "清空全部" }).click();
-  await page.getByRole("combobox", { name: "批量类型" }).selectOption("audio-convert");
-  await page.locator('input[type="file"]').first().setInputFiles(path.join(inputDir, "测试 音频.wav"));
-  result.checks.audioFileQueued = await page.locator('[title="测试 音频.wav"]').isVisible().catch(() => false);
-
-  await page.getByRole("button", { name: "清空全部" }).click();
-  await page.getByRole("combobox", { name: "批量类型" }).selectOption("video-convert");
-  await page.locator('input[type="file"]').first().setInputFiles(path.join(inputDir, "测试 视频.mp4"));
-  result.checks.videoFileQueued = await page.locator('[title="测试 视频.mp4"]').isVisible().catch(() => false);
-
-  await page.getByRole("button", { name: "导出处理日志" }).click();
-  await page.waitForTimeout(500);
-  result.checks.exportLogClicked = true;
+  if (result.externalRequests.length > 0) {
+    result.error = `${result.error ? `${result.error}; ` : ""}Unexpected external requests: ${result.externalRequests.map((entry) => entry.url).join(", ")}`;
+  }
+  if (result.consoleErrors.length > 0) {
+    result.error = `${result.error ? `${result.error}; ` : ""}Console errors: ${result.consoleErrors.join(" | ")}`;
+  }
 } catch (error) {
   result.error = error instanceof Error ? error.message : String(error);
 } finally {

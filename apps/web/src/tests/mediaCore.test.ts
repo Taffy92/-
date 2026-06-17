@@ -88,6 +88,9 @@ describe("media-core FFmpeg WASM capability checks", () => {
     expect(mediaCoreSource).toContain("videoSize");
     expect(mediaCoreSource).toContain("audioBitrate");
     expect(mediaCoreSource).toContain("scale=-2");
+    expect(mediaCoreSource).toContain("\"mpeg4\"");
+    expect(mediaCoreSource).toContain('options.format === "mp4" || options.format === "mov"');
+    expect(mediaCoreSource).not.toContain("libx264");
     expect(mediaCoreSource).not.toContain("unpkg.com");
     expect(mediaCoreSource).not.toContain("https://");
     expect(mediaCoreSource).not.toContain("FormData");

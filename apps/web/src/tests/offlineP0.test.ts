@@ -5,6 +5,18 @@ import { resolve } from "node:path";
 const projectRoot = resolve(process.cwd(), "..", "..");
 
 describe("offline P0 release checks", () => {
+  it("keeps the default desktop package path on NSIS and leaves MSI explicit", () => {
+    const rootPackage = JSON.parse(readFileSync(resolve(projectRoot, "package.json"), "utf8"));
+    const desktopPackage = JSON.parse(readFileSync(resolve(projectRoot, "apps", "desktop", "package.json"), "utf8"));
+
+    expect(desktopPackage.scripts.build).toBe("tauri build --bundles nsis");
+    expect(desktopPackage.scripts["build:all"]).toBe("tauri build");
+    expect(desktopPackage.scripts["package:msi"]).toBe("tauri build --bundles msi");
+    expect(rootPackage.scripts["package:desktop"]).toContain("--filter desktop package");
+    expect(rootPackage.scripts["package:desktop:msi"]).toContain("--filter desktop package:msi");
+    expect(rootPackage.scripts["package:desktop:all"]).toContain("--filter desktop build:all");
+  });
+
   it("keeps Tauri Chinese metadata valid UTF-8", () => {
     const tauriConfigPath = resolve(projectRoot, "apps", "desktop", "src-tauri", "tauri.conf.json");
     const config = JSON.parse(readFileSync(tauriConfigPath, "utf8"));

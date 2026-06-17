@@ -1,6 +1,6 @@
 ﻿# 万能格式转换器 v1.0.0 发布说明
 
-发布日期：2026-06-12<br>
+发布日期：2026-06-17<br>
 产品名称：万能格式转换离线专业版<br>
 开发者：MR.谢
 
@@ -9,6 +9,16 @@
 万能格式转换器提供在线网页版和 Windows 离线专业版。在线版适合轻量单文件处理；Windows 离线专业版适合断网环境、敏感文件和批量任务。
 
 本版本继续坚持本地处理原则：图片、PDF、Word、Excel、音频、视频和转换结果默认只在当前设备中处理，不上传服务器，不调用云端转换 API。
+
+## 2026-06-17 重新打包上传部署记录
+
+1. 重新打包并上传部署 v1.0.0 最新产物。
+2. 离线专业版 sidecar FFmpeg 白名单优先范围扩展为 WAV 转 FLAC、MP4 / MOV / AVI / MKV / WebM 常用视频格式转换和 ffprobe 信息读取。
+3. 修复离线版视频 sidecar 参数传递、批量错误提示和手动关闭 sidecar 后的回退逻辑。
+4. 移除视频转换对 `libx264` 的依赖路径，WASM fallback 使用 mpeg4 / VP9 等本地可用编码组合。
+5. 修正 MKV fallback 不再附加仅适用于 MP4 / MOV 的 faststart 参数。
+6. 更新下载页、站内更新日志、许可证说明、第三方组件声明和安装包 SHA256 记录。
+7. 重新执行在线版与离线版隐私、网络、转换和打包验证后上传部署。
 
 ## 在线版能力
 
@@ -51,23 +61,19 @@
 
 Windows 离线专业版安装包已配置 WebView2 Evergreen Standalone Installer。目标电脑没有 WebView2 Runtime 且完全断网时，安装包仍可使用本地内置安装器完成运行环境安装。
 
-## sidecar FFmpeg 低风险格式优先
+## sidecar FFmpeg 本地白名单格式优先
 
-离线专业版仍保留 FFmpeg WASM 回退能力。在 sidecar 校验通过、用户未关闭该选项、输入文件有本地路径且输出目录为本地目录时，以下低风险格式优先使用本地 sidecar FFmpeg：
+离线专业版仍保留 FFmpeg WASM 回退能力。在 sidecar 校验通过、用户未关闭该选项、输入文件有本地路径且输出目录为本地目录时，以下本地白名单任务优先使用随包 sidecar FFmpeg：
 
 1. WAV 转 FLAC。
-2. MP4 转 WebM。
+2. MP4、MOV、AVI、MKV、WebM 常用视频容器互转。
 3. ffprobe 媒体信息读取。
 
-以下格式仍使用 FFmpeg WASM，不属于 sidecar 正式默认范围：
+以下任务仍使用 FFmpeg WASM，不属于 sidecar 白名单范围：
 
-1. MP3 输出。
-2. AAC / M4A 输出。
-3. MP4 / H.264 输出。
-4. MOV 输出。
-5. AVI 输出。
-6. MKV 输出。
-7. 视频提取音频到 MP3 / AAC / M4A。
+1. MP3、AAC、M4A 等音频格式转换。
+2. 视频提取音频到 MP3 / AAC / M4A。
+3. 不在本地白名单内的音视频容器或编码组合。
 
 ## 已知限制
 
@@ -75,14 +81,14 @@ Windows 离线专业版安装包已配置 WebView2 Evergreen Standalone Installe
 2. 在线版大文件处理受浏览器内存和设备性能影响。
 3. 离线专业版未做代码签名时，Windows Defender 或 SmartScreen 可能出现提示。
 4. BtbN FFmpeg 候选仍未完成商业许可证最终复核，不应宣传为已完成最终商业授权审查。
-5. MP3、AAC/M4A、MP4/H.264 等格式在商业发布前仍建议做许可证、专利、平台和地区复核。
+5. sidecar 使用到的 `libopenh264`、`libmp3lame`、AAC、Opus 等能力在商业发布前仍建议做许可证、专利、平台和地区复核。
 
 ## 安装包校验
 
 | 文件 | 大小 | SHA256 |
 | --- | ---: | --- |
-| 万能格式转换离线专业版_1.0.0_x64-setup.exe | 257,256,549 bytes | 961B344581C4C33D06D21A23A16E96E85E5508D3498321D4D88E5B797130B9A5 |
-| 万能格式转换离线专业版_1.0.0_x64_zh-CN.msi | 268,263,424 bytes | 8883D68A69C00929540EF0A1DB1C27E364F13FE55EB323D32CF10EC6E25F9F59 |
+| 万能格式转换离线专业版_1.0.0_x64-setup.exe | 257,337,957 bytes | E2A03FDDE5907DD0462FF76C4A440869201B82A71533E82FD0EB25E2826D5564 |
+| 万能格式转换离线专业版_1.0.0_x64_zh-CN.msi | 268,357,632 bytes | 17B59355E550C5295CF3B9383E4391F57D1789AF1F2783302B483663555C850C |
 
 ## 发布前提醒
 

@@ -1,7 +1,7 @@
 # FINAL_RELEASE_CHECKLIST
 
 版本：1.0.0  
-日期：2026-06-12
+日期：2026-06-17
 
 ## 安装包
 
@@ -34,8 +34,8 @@
 - [x] 在线版继续使用 FFmpeg WASM。
 - [x] 在线版不包含 sidecar exe / DLL。
 - [x] 离线专业版保留 FFmpeg WASM 回退。
-- [x] 离线专业版仅对 WAV 转 FLAC、MP4 转 WebM、ffprobe 信息读取使用 sidecar 优先。
-- [x] MP3、AAC/M4A、MP4/H.264、MOV、AVI、MKV 不进入 sidecar 默认范围。
+- [x] 离线专业版仅对 WAV 转 FLAC、MP4 / MOV / AVI / MKV / WebM 常用视频格式转换、ffprobe 信息读取使用 sidecar 优先。
+- [x] MP3、AAC/M4A 音频转换、视频提取音频和不在白名单内的音视频容器或编码组合不进入 sidecar 白名单范围。
 - [x] CloudBase 只用于下载授权，不接触用户处理文件。
 
 ## 发布前仍需人工确认

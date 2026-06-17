@@ -943,16 +943,14 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
       setSidecarStatus(status);
       if (!isSidecarReady(status)) {
         setSidecarExperimentEnabled(false);
-        window.localStorage.setItem(sidecarExperimentStorageKey, "disabled");
         return;
       }
-      const manuallyDisabled = window.localStorage.getItem(sidecarExperimentStorageKey) === "disabled";
+      const manuallyDisabled = window.localStorage.getItem(sidecarExperimentStorageKey) === "manual-disabled";
       setSidecarExperimentEnabled(!manuallyDisabled);
-      window.localStorage.setItem(sidecarExperimentStorageKey, manuallyDisabled ? "disabled" : "enabled");
+      window.localStorage.setItem(sidecarExperimentStorageKey, manuallyDisabled ? "manual-disabled" : "enabled");
     } catch {
       setSidecarStatus({ status: "sidecar_missing", message: "sidecar 未配置", sha256Verified: false });
       setSidecarExperimentEnabled(false);
-      window.localStorage.setItem(sidecarExperimentStorageKey, "disabled");
     }
   }
 
@@ -1292,6 +1290,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     if (!batchRunDirectory) throw new Error("无法创建批量结果文件夹，请检查输出目录权限后重试。");
     setProgressMessage(`准备处理 ${tasks.length} 个${modeFilter ? ` ${batchModeLabel(modeFilter)}` : "批量"}任务。`);
     const batchDownloadNames = new Set<string>();
+    const failedMessages: string[] = [];
     let failedInRun = 0;
     let successfulInRun = 0;
 
@@ -1336,6 +1335,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
         const message = friendlyError(reason);
         const failureBackend = getFailureBackend(reason) || task.backend || "wasm";
         failedInRun += 1;
+        if (message && !failedMessages.includes(message)) failedMessages.push(message);
         const completedAt = Date.now();
         const nextTask: BatchTask = {
           ...task,
@@ -1364,7 +1364,9 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
       setProgressMessage(`批量任务处理完成。结果目录：${outputDirectory.label}`);
     }
     setProgress(1);
-    if (failedInRun > 0) setError("部分任务处理失败，请在任务队列中查看失败原因并重试。");
+    if (failedInRun > 0) {
+      setError(failedMessages[0] ? `部分任务处理失败：${failedMessages[0]}` : "部分任务处理失败，请在任务队列中查看失败原因并重试。");
+    }
   }
 
   async function processBatchTask(
@@ -1541,18 +1543,23 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     }
 
     if (!sidecarMode || destination.kind !== "tauri" || !sourcePath) return null;
-    onProgress(0.05, `sidecar 低风险优先处理中：${task.fileName}`);
+    onProgress(0.05, `sidecar 本地优先处理中：${task.fileName}`);
     const result = await runSidecarExperiment(sidecarMode, {
       inputPath: sourcePath,
       outputDir: destination.path,
-      outputName: safeBaseName(task.fileName)
+      outputName: safeBaseName(task.fileName),
+      outputFormat: task.mode === "video-convert" ? videoFormat : task.mode === "audio-convert" ? audioFormat : undefined,
+      videoSize,
+      audioBitrate,
+      mediaQuality,
+      stripMetadata
     });
     if (result.status !== "ok" || !result.outputPath) {
       const sidecarError = new Error(`${result.message || "sidecar FFmpeg 处理失败"}。当前文件没有上传服务器。你可以关闭 sidecar 优先处理，改用 FFmpeg WASM 后重试。`) as Error & { backend?: "sidecar" };
       sidecarError.backend = "sidecar";
       throw sidecarError;
     }
-    onProgress(1, `sidecar 低风险优先完成：${result.sanitizedOutputPath || task.fileName}`);
+    onProgress(1, `sidecar 本地优先完成：${result.sanitizedOutputPath || task.fileName}`);
     return {
       name: fileNameFromPath(result.outputPath),
       outputPath: result.outputPath,
@@ -2040,7 +2047,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
                   disabled={!sidecarReady}
                   onChange={(event) => {
                     setSidecarExperimentEnabled(event.target.checked);
-                    window.localStorage.setItem(sidecarExperimentStorageKey, event.target.checked ? "enabled" : "disabled");
+                    window.localStorage.setItem(sidecarExperimentStorageKey, event.target.checked ? "enabled" : "manual-disabled");
                   }}
                 />
                 Sidecar 优先
@@ -2049,6 +2056,9 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
               <button type="button" onClick={() => void selectOutputDirectory()}>输出目录</button>
             </div>
             {error ? <p className="desktop-compact-error">处理失败：{error}</p> : null}
+            {selectedDesktopTask?.status === "failed" && selectedDesktopTask.error && selectedDesktopTask.error !== error ? (
+              <p className="desktop-compact-error">当前任务：{selectedDesktopTask.error}</p>
+            ) : null}
             {resultName ? <p className="desktop-compact-result">已生成：{resultName}</p> : null}
           </div>
         </section>
@@ -2622,8 +2632,8 @@ function DesktopReplicaInspector({
             <input
               className="desktop-backend-toggle shrink-0"
               type="checkbox"
-              aria-label="使用本地 sidecar FFmpeg 优先处理低风险格式"
-              title={`使用本地 sidecar FFmpeg 优先处理低风险格式。${sidecarStatusText(sidecarStatus || undefined)}`}
+              aria-label="使用本地 sidecar FFmpeg 优先处理白名单格式"
+              title={`使用本地 sidecar FFmpeg 优先处理白名单格式。${sidecarStatusText(sidecarStatus || undefined)}`}
               checked={sidecarExperimentEnabled}
               disabled={!sidecarReady}
               onChange={(event) => onToggleSidecar(event.target.checked)}
@@ -3246,13 +3256,29 @@ async function invokeTauri<T>(command: string, args?: Record<string, unknown>): 
   return invoke(command, args);
 }
 
-async function runSidecarExperiment(mode: SidecarCommandMode, options: { inputPath: string; outputDir?: string; outputName?: string }) {
+type SidecarExperimentOptions = {
+  inputPath: string;
+  outputDir?: string;
+  outputName?: string;
+  outputFormat?: VideoOutputFormat | AudioOutputFormat;
+  videoSize?: VideoSizeOption;
+  audioBitrate?: AudioBitrateOption;
+  mediaQuality?: MediaQuality;
+  stripMetadata?: boolean;
+};
+
+async function runSidecarExperiment(mode: SidecarCommandMode, options: SidecarExperimentOptions) {
   return invokeTauri<SidecarCommandResult>("run_ffmpeg_sidecar_poc", {
     request: {
       mode,
       inputPath: options.inputPath,
       outputDir: options.outputDir,
-      outputName: options.outputName
+      outputName: options.outputName,
+      outputFormat: options.outputFormat,
+      videoSize: options.videoSize,
+      audioBitrate: options.audioBitrate,
+      mediaQuality: options.mediaQuality,
+      stripMetadata: options.stripMetadata
     }
   });
 }

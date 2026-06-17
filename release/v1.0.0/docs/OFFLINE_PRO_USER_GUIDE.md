@@ -59,21 +59,21 @@
 
 支持音频格式转换、视频格式转换、视频提取音频。
 
-离线专业版保留 FFmpeg WASM 回退能力，并对低风险格式使用本地 sidecar FFmpeg 优先处理。
+离线专业版保留 FFmpeg WASM 回退能力，并对白名单格式使用本地 sidecar FFmpeg 优先处理。
 
-## sidecar 低风险格式优先
+## sidecar 白名单格式优先
 
-当前 sidecar 优先范围仅限：
+当前 sidecar 优先范围：
 
 1. WAV 转 FLAC。
-2. MP4 转 WebM。
+2. MP4、MOV、AVI、MKV、WebM 常用视频格式转换。
 3. ffprobe 媒体信息读取。
 
-其他音视频格式继续使用 FFmpeg WASM。
+其他音频格式转换、视频提取音频，以及不在白名单内的音视频容器或编码组合继续使用 FFmpeg WASM。
 
 ## 如何关闭 sidecar 优先
 
-在设置中心关闭“使用本地 sidecar FFmpeg 优先处理低风险格式”。关闭后，低风险格式也会回到 FFmpeg WASM。
+在设置中心关闭“使用本地 sidecar FFmpeg 优先处理白名单格式”。关闭后，白名单格式也会回到 FFmpeg WASM。
 
 如果 sidecar 处理失败，可以关闭该选项后重试。
 

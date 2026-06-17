@@ -1,5 +1,7 @@
 # LOW_RISK_SIDECAR_DEFAULT_REPORT
 
+> 历史报告说明：本文记录 2026-05-25 当时的低风险 sidecar 复核范围。2026-06-17 起，当前发布范围以 `release/v1.0.0/docs/RELEASE_NOTES.md` 和站内更新日志为准。
+
 生成时间：2026-05-25
 
 ## 1. 本轮目标
@@ -12,7 +14,7 @@
 2. MP4 转 WebM。
 3. ffprobe 媒体信息读取。
 
-其余音视频能力继续使用 FFmpeg WASM，不扩大 sidecar 默认范围。
+其余音视频能力在当时继续使用 FFmpeg WASM，不扩大当时的 sidecar 白名单范围。
 
 ## 2. 修改文件
 
@@ -48,7 +50,7 @@
    - 追加 2026-05-25 低风险 sidecar 优先策略说明。
    - 明确在线版继续使用 FFmpeg WASM。
    - 明确离线专业版仍保留 FFmpeg WASM。
-   - 明确 sidecar 优先范围仅限 WAV 转 FLAC、MP4 转 WebM、ffprobe 信息读取。
+   - 明确当时的 sidecar 优先范围为 WAV 转 FLAC、MP4 转 WebM、ffprobe 信息读取。
    - 明确 BtbN FFmpeg 候选仍未完成商业许可证最终复核。
 
 ## 3. 是否只影响离线专业版

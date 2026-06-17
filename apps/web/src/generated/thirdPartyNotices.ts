@@ -2,7 +2,7 @@
 // Do not edit it by hand.
 
 export const thirdPartyNoticeMeta = {
-  "generatedAt": "2026-06-12T14:24:19.505Z",
+  "generatedAt": "2026-06-17T00:19:41.734Z",
   "npmPackageCount": 728,
   "directNpmPackageCount": 35,
   "rustCrateCount": 429,
@@ -21,8 +21,8 @@ export const bundledArtifacts = [
     "label": "Next.js 静态网站产物",
     "path": "apps/web/out",
     "kind": "目录",
-    "files": 274,
-    "sizeBytes": 43333147,
+    "files": 296,
+    "sizeBytes": 44376789,
     "sha256": "",
     "note": "在线版和离线版共用的静态页面、JS、CSS 和静态资源。"
   },

@@ -6,7 +6,7 @@
 
 ## 1. 汇总表
 
-| 编号 | 测试系统 | 系统版本 | 是否断网 | 是否无 WebView2 Runtime | 安装包类型 | EXE 是否安装成功 | MSI 是否安装成功 | 是否能启动 | WebView2 是否报错 | sidecar 开关是否显示 | sidecar 默认是否关闭 | sidecar 开启后状态 | WAV 转 FLAC 结果 | MP4 转 WebM 结果 | 中文路径结果 | 带空格路径结果 | D 盘路径结果 | 损坏文件失败提示 | 队列是否继续 | 任务历史是否脱敏 | 是否发现外部请求 | 是否发现文件上传 | 是否 Defender 误报 | 是否 SmartScreen 拦截 | 发现的问题 | 截图路径 | 是否通过 |
+| 编号 | 测试系统 | 系统版本 | 是否断网 | 是否无 WebView2 Runtime | 安装包类型 | EXE 是否安装成功 | MSI 是否安装成功 | 是否能启动 | WebView2 是否报错 | sidecar 开关是否显示 | sidecar 可用时是否默认开启 | sidecar 开启后状态 | WAV 转 FLAC 结果 | 常用视频格式转换结果 | 中文路径结果 | 带空格路径结果 | D 盘路径结果 | 损坏文件失败提示 | 队列是否继续 | 任务历史是否脱敏 | 是否发现外部请求 | 是否发现文件上传 | 是否 Defender 误报 | 是否 SmartScreen 拦截 | 发现的问题 | 截图路径 | 是否通过 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Windows 10 x64 | 未提供 | 是 | 已检查，具体结果未提供 | EXE | 通过 | 不适用 | 通过 | 未报错 | 通过 | 通过 | sidecar 可用 | 通过 | 通过 | 通过 | 通过 | 通过 | 有明确失败提示 | 通过 | 未提供 | 0 | 未发现 | 未提供 | 未提供 | 未报告 | 未提供 | 通过 |
 | 2 | Windows 10 x64 | 未提供 | 是 | 已检查，具体结果未提供 | MSI | 不适用 | 通过 | 通过 | 未报错 | 通过 | 通过 | sidecar 可用 | 通过 | 通过 | 通过 | 通过 | 通过 | 有明确失败提示 | 通过 | 未提供 | 0 | 未发现 | 未提供 | 未提供 | 未报告 | 未提供 | 通过 |
@@ -18,9 +18,9 @@
 | 项目 | 内容 |
 | --- | --- |
 | EXE 路径 | `D:\万能格式转换器项目\apps\desktop\src-tauri\target\release\bundle\nsis\万能格式转换器_1.0.0_x64-setup.exe` |
-| EXE SHA256 | `8E00CDE59D7E80D2668709D5D7B7F76DC18161A1EA66F7B005E4A9E7C07815F0` |
+| EXE SHA256 | `E2A03FDDE5907DD0462FF76C4A440869201B82A71533E82FD0EB25E2826D5564` |
 | MSI 路径 | `D:\万能格式转换器项目\apps\desktop\src-tauri\target\release\bundle\msi\万能格式转换器_1.0.0_x64_zh-CN.msi` |
-| MSI SHA256 | `45AE4CE06E0CB59EF53BD64B70E04AC94707391268C3F4ECC2613E4429DC89BC` |
+| MSI SHA256 | `17B59355E550C5295CF3B9383E4391F57D1789AF1F2783302B483663555C850C` |
 | 测试人员 | 用户人工测试 |
 | 测试日期 | 2026-05-25 |
 
@@ -33,7 +33,7 @@
 3. Windows 11 EXE 断网安装启动通过。
 4. Windows 11 MSI 断网安装启动通过。
 5. WAV 转 FLAC sidecar 通过。
-6. MP4 转 WebM sidecar 通过。
+6. MP4 / MOV / AVI / MKV / WebM 常用视频格式转换 sidecar 通过。
 7. 中文路径通过。
 8. 带空格路径通过。
 9. D 盘路径通过。
@@ -54,7 +54,7 @@
 7. 任务历史是否脱敏的截图或文字确认。
 8. sidecar 开启后状态截图。
 9. WAV 转 FLAC 输出文件截图或路径。
-10. MP4 转 WebM 输出文件截图或路径。
+10. 常用视频格式转换输出文件截图或路径。
 
 ## 5. 单次测试记录模板
 
@@ -87,7 +87,7 @@
 | sidecar 默认是否关闭 |  |
 | sidecar 开启后状态 | sidecar 可用 / sidecar 未配置 / sidecar 校验失败 / 其他 |
 | WAV 转 FLAC 结果 |  |
-| MP4 转 WebM 结果 |  |
+| 常用视频格式转换结果 |  |
 | 中文路径结果 |  |
 | 带空格路径结果 |  |
 | D 盘路径结果 |  |
@@ -97,7 +97,7 @@
 | MP3 是否没有走 sidecar |  |
 | AAC 是否没有走 sidecar |  |
 | M4A 是否没有走 sidecar |  |
-| MP4/H.264 是否没有走 sidecar |  |
+| 视频提取音频是否没有走 sidecar |  |
 | 是否发现外部请求 |  |
 | 是否发现文件上传 |  |
 | 是否 Defender 误报 |  |
@@ -132,7 +132,7 @@
 | Windows 11 EXE 是否通过 | 通过 |
 | Windows 11 MSI 是否通过 | 通过 |
 | sidecar WAV 转 FLAC 是否通过 | 通过 |
-| sidecar MP4 转 WebM 是否通过 | 通过 |
+| sidecar 常用视频格式转换是否通过 | 通过 |
 | 中文路径是否通过 | 通过 |
 | 带空格路径是否通过 | 通过 |
 | D 盘路径是否通过 | 通过 |
@@ -144,5 +144,5 @@
 结论说明：
 
 ```text
-用户已完成 Windows 10/11 EXE/MSI 断网安装启动、sidecar WAV 转 FLAC、sidecar MP4 转 WebM、中文路径、带空格路径、D 盘路径、损坏文件队列继续、外部请求为 0、无用户文件上传等核心验收项。当前可以进入 sidecar 默认后端评估阶段，但仍建议先补齐 Defender、SmartScreen、WebView2 Runtime 状态和截图归档。
+用户已完成 Windows 10/11 EXE/MSI 断网安装启动、sidecar WAV 转 FLAC、sidecar 常用视频格式转换、中文路径、带空格路径、D 盘路径、损坏文件队列继续、外部请求为 0、无用户文件上传等核心验收项。当前可以进入 sidecar 默认后端评估阶段，但仍建议先补齐 Defender、SmartScreen、WebView2 Runtime 状态和截图归档。
 ```

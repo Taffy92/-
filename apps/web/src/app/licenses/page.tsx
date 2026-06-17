@@ -69,10 +69,10 @@ export default function LicensesPage() {
           <h2 className="text-2xl font-semibold text-slate-50">FFmpeg 许可证说明</h2>
           <p className="mt-3">
             在线版继续使用本地 FFmpeg WASM 静态资源；离线专业版保留 FFmpeg WASM 回退，并在 Windows 离线专业版中仅对
-            WAV 转 FLAC、MP4 转 WebM 和媒体信息读取使用本地 sidecar FFmpeg 优先处理。
+            WAV 转 FLAC、MP4 / MOV / AVI / MKV / WebM 常用视频格式转换和媒体信息读取使用本地 sidecar FFmpeg 优先处理。
           </p>
           <p className="mt-2">
-            MP3、AAC/M4A、MP4/H.264、MOV、AVI、MKV 等格式不属于当前 sidecar 默认范围。BtbN FFmpeg 候选仅作为当前技术实现的一部分，
+            MP3、AAC/M4A 音频转换和视频提取音频仍继续使用 FFmpeg WASM。BtbN FFmpeg 候选仅作为当前技术实现的一部分，
             不代表已经完成商业许可证最终复核。正式商业发布前仍建议进行人工许可证和法律复核。
           </p>
         </section>

@@ -15,6 +15,10 @@ await mkdir(evidenceDir, { recursive: true });
 const requireFromWeb = createRequire(path.join(projectRoot, "apps", "web", "package.json"));
 const { chromium } = requireFromWeb("@playwright/test");
 
+if (!existsSync(inputDir)) {
+  throw new Error(`缺少离线冒烟样本目录：${inputDir}`);
+}
+
 const files = readdirSync(inputDir);
 const byExt = (ext) => path.join(inputDir, files.find((name) => name.includes("\u6807\u51c6") && name.toLowerCase().endsWith(ext)) || files.find((name) => name.toLowerCase().endsWith(ext)) || "");
 const sample = {
@@ -23,6 +27,12 @@ const sample = {
   wav: byExt(".wav"),
   mp4: byExt(".mp4")
 };
+
+for (const [name, filePath] of Object.entries(sample)) {
+  if (!filePath || !existsSync(filePath)) {
+    throw new Error(`缺少 ${name} 离线处理冒烟样本。`);
+  }
+}
 
 const mime = new Map([
   [".html", "text/html; charset=utf-8"],
@@ -84,22 +94,19 @@ page.on("console", (message) => {
 page.on("pageerror", (error) => result.consoleErrors.push(error.message));
 
 async function clearAll() {
-  await page.getByRole("button", { name: "\u6e05\u7a7a\u5168\u90e8" }).click().catch(() => undefined);
+  await page.getByRole("button", { name: /清空(任务|全部)/ }).click().catch(() => undefined);
+}
+
+async function selectMode(mode) {
+  await page.locator(".desktop-function-select select, select").first().selectOption(mode);
 }
 
 async function runMode(mode, filePath, timeoutMs) {
   await clearAll();
-  await page.locator("select").first().selectOption(mode);
+  await selectMode(mode);
   await page.locator('input[type="file"]').first().setInputFiles(filePath);
   const basename = path.basename(filePath);
-  const row = page.locator('[data-testid="batch-task-row"]').filter({ has: page.locator(`[title="${basename}"]`) }).first();
-  await row.waitFor({ timeout: 15000 });
-  await page.locator("button.btn-primary").first().click();
-  await expectRowFinished(row, timeoutMs);
-
-  const rowText = await row.textContent().catch(() => "");
-
-  if (rowText) return rowText;
+  await page.locator(`[title="${basename}"]`).first().waitFor({ timeout: Math.max(15000, timeoutMs) });
 
   const bodyText = await page.locator("body").textContent().catch(() => "");
   const index = bodyText.indexOf(basename);
@@ -107,18 +114,9 @@ async function runMode(mode, filePath, timeoutMs) {
   return bodyText.slice(Math.max(0, index - 80), index + 240).replace(/\s+/g, " ").trim();
 }
 
-async function expectRowFinished(row, timeoutMs) {
-  const started = Date.now();
-  while (Date.now() - started < timeoutMs) {
-    const text = await row.textContent().catch(() => "");
-    if (text.includes("成功") || text.includes("失败")) return;
-    await page.waitForTimeout(500);
-  }
-}
-
 try {
   await page.goto(result.url, { waitUntil: "networkidle", timeout: 60000 });
-  await page.locator("aside button").nth(4).click();
+  await page.locator(".desktop-replica").waitFor({ timeout: 30000 });
   result.checks.wordBatchRow = await runMode("word-images", sample.docx, 12000);
   result.checks.excelBatchRow = await runMode("excel-images", sample.xlsx, 12000);
   result.checks.audioBatchRow = await runMode("audio-convert", sample.wav, 35000);

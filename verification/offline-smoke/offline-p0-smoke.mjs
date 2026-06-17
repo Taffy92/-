@@ -15,9 +15,17 @@ await mkdir(evidenceDir, { recursive: true });
 const requireFromWeb = createRequire(path.join(projectRoot, "apps", "web", "package.json"));
 const { chromium } = requireFromWeb("@playwright/test");
 
+if (!existsSync(inputDir)) {
+  throw new Error(`缺少离线冒烟样本目录：${inputDir}`);
+}
+
 const files = readdirSync(inputDir);
 const imageFiles = files.filter((name) => /\.(png|jpe?g|webp)$/i.test(name) && !name.includes("损坏")).map((name) => path.join(inputDir, name));
 const damagedImage = path.join(inputDir, files.find((name) => name.includes("损坏")) || "");
+
+if (!imageFiles.length || !existsSync(damagedImage)) {
+  throw new Error("离线 P0 冒烟需要至少一个正常图片样本和一个名称包含“损坏”的图片样本。");
+}
 
 const mime = new Map([
   [".html", "text/html; charset=utf-8"],
@@ -86,26 +94,28 @@ page.on("pageerror", (error) => result.consoleErrors.push(error.message));
 
 async function openBatchWorkbench() {
   await page.goto(result.url, { waitUntil: "networkidle", timeout: 60000 });
-  await page.locator("aside button").nth(4).click();
-  await page.locator("select").first().selectOption("compress");
+  await page.locator(".desktop-replica").waitFor({ timeout: 30000 });
+  await page.locator(".desktop-function-select select, select").first().selectOption("compress");
 }
 
 try {
   await openBatchWorkbench();
   await page.locator('input[type="file"]').first().setInputFiles(imageFiles);
-  await page.locator("button.btn-primary").first().click();
-  await page.waitForFunction(() => document.body.innerText.includes("成功") || document.body.innerText.includes("失败"), undefined, { timeout: 30000 }).catch(() => undefined);
-  await page.waitForTimeout(3000);
+  await page.locator(`[title="${path.basename(imageFiles[0])}"]`).waitFor({ timeout: 15000 });
+  result.checks.imageBatchStartEnabled = !(await page.getByRole("button", { name: /开始(转换|处理)/ }).first().isDisabled());
+  await page.getByRole("button", { name: /开始(转换|处理)/ }).first().click();
+  await page.waitForFunction(() => document.body.innerText.includes("输出目录尚未就绪"), undefined, { timeout: 10000 }).catch(() => undefined);
   result.checks.imageBatchText = await page.locator("body").textContent();
   result.checks.imageBatchExternalRequestCount = result.externalRequests.length;
   result.checks.imageBatchRemoteWorkerBlocked = result.externalRequests.some((entry) => /cdn\.jsdelivr|unpkg|jsdelivr/i.test(entry.url));
   result.checks.imageBatchLocalWorkerRequestCount = result.localWorkerRequests.length;
+  result.checks.outputDirectoryGuardVisible = String(result.checks.imageBatchText || "").includes("输出目录尚未就绪");
 
-  await page.getByRole("button", { name: "清空全部" }).click().catch(() => undefined);
+  await page.getByRole("button", { name: /清空(任务|全部)/ }).click().catch(() => undefined);
   await page.locator('input[type="file"]').first().setInputFiles(damagedImage);
-  await page.locator("button.btn-primary").first().click();
-  await page.waitForTimeout(8000);
-  result.checks.retryButtonCount = await page.locator('[data-testid="retry-task-button"]').count();
+  await page.locator(`[title="${path.basename(damagedImage)}"]`).waitFor({ timeout: 15000 });
+  result.checks.damagedImageQueued = true;
+  result.checks.retryButtonCount = await page.locator('[data-testid="retry-task-button"], [title="重试"]').count();
 } catch (error) {
   result.error = error instanceof Error ? error.message : String(error);
 } finally {

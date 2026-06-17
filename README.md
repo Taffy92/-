@@ -54,6 +54,10 @@ DocToolPlatform/
 
 ## 本地开发
 
+运行时版本：发布和打包环境固定为 Node.js 20 LTS 与 pnpm 9.15.4。根目录 `.nvmrc`、`package.json` 的 `engines` 和 `packageManager` 是准绳。
+
+Windows 工作区优先运行 npm 脚本，脚本会调用本地 `.pnpm-home\pnpm.CMD`。
+
 安装依赖：
 
 ```bash
@@ -212,15 +216,16 @@ Excel 转图片：支持 `.xlsx`、`.csv`。旧版 `.xls` 请先用 Excel/WPS �
 
 ## 发布新版本
 
-1. 更新 `apps/web/src/config/downloads.ts` 的版本号、文件名、大小、日期和 SHA256。
-2. 更新 `apps/web/src/app/changelog/page.tsx`。
-3. 运行 `npm test`。
-4. 运行 `npm run build:web`。
-5. 商业发布前确认离线授权生产公钥已替换，管理员私钥和授权记录没有进入客户包。
-6. 运行 `npm run package:desktop`。
-7. 将新 EXE/MSI 同步到 `release/<version>/installers/`，更新 SHA256；安装包默认上传到公开只读对象存储或 CDN，再更新下载链接。
-8. 确认 `licenseAdmin` 云函数环境变量中的私钥对应桌面端 `PUBLIC_KEY_RAW_B64`。
-9. 运行 `npm run build:web`，部署静态网站和 `licenseAdmin` 云函数。
+1. 确认 `node -v` 为 `v20.x`，`.\.pnpm-home\pnpm.CMD --version` 为 `9.15.4`。
+2. 更新 `apps/web/src/config/downloads.ts` 的版本号、文件名、大小、日期和 SHA256。
+3. 更新 `apps/web/src/app/changelog/page.tsx`。
+4. 运行 `npm test`。
+5. 运行 `npm run build:web`。
+6. 商业发布前确认离线授权生产公钥已替换，管理员私钥和授权记录没有进入客户包。
+7. 运行 `npm run package:desktop`。
+8. 将新 EXE/MSI 同步到 `release/<version>/installers/`，更新 SHA256；安装包默认上传到公开只读对象存储或 CDN，再更新下载链接。
+9. 确认 `licenseAdmin` 云函数环境变量中的私钥对应桌面端 `PUBLIC_KEY_RAW_B64`。
+10. 运行 `npm run build:web`，部署静态网站和 `licenseAdmin` 云函数。
 
 ## 第三方依赖许可证
 

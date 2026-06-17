@@ -11,8 +11,8 @@
 - [x] 在线版继续保留视频提取音频。
 - [x] 在线版继续保留 FFmpeg WASM。
 - [x] 在线版不显示 sidecar FFmpeg 实验开关。
-- [x] 离线专业版 sidecar FFmpeg 实验开关默认关闭。
-- [x] sidecar 实验只允许 WAV 转 FLAC、MP4 转 WebM 和内部检测。
+- [x] 离线专业版 sidecar FFmpeg 在校验通过且用户未手动关闭时，可对白名单格式优先处理。
+- [x] sidecar 白名单允许 WAV 转 FLAC、MP4 / MOV / AVI / MKV / WebM 常用视频格式转换和内部检测。
 - [ ] sidecar 候选 FFmpeg 的 LGPL v3 or later、DLL、libmp3lame、libopenh264、AAC / M4A 许可与专利风险已完成商业发布前人工复核。
 - [ ] sidecar 候选已在干净 Windows 10 / 11 断网虚拟机中验证。
 - [x] 在线版不开放批量音视频处理。
@@ -41,7 +41,7 @@
 - [x] 保留 FFmpeg / ffmpeg.wasm 上游链接和源码获取方式。
 - [x] 在线版继续分发 FFmpeg WASM，因此保留在线版许可证说明。
 - [ ] 正式商业发布前完成法律/许可证复核。
-- [ ] 若未来使用 sidecar FFmpeg，补充 `ffmpeg.exe` 来源、构建参数、许可证和 SHA256。
+- [x] 已补充 sidecar FFmpeg 的 `ffmpeg.exe` 来源、构建参数、许可证和 SHA256。
 
 ## 在线版检查
 
@@ -74,14 +74,14 @@
 - [ ] D 盘、中文路径、带空格路径测试。
 - [ ] FFmpeg / GPL / LGPL 法律和许可证复核。
 
-## 2026-05-25 低风险 sidecar 优先检查
+## 2026-06-17 sidecar 本地白名单优先检查
 
 - [x] 在线版继续使用 FFmpeg WASM。
 - [x] 在线版不显示 sidecar 设置。
 - [x] 离线专业版继续保留 FFmpeg WASM。
-- [x] 离线专业版低风险格式可 sidecar 优先。
-- [x] sidecar 优先范围仅限 WAV 转 FLAC、MP4 转 WebM、ffprobe 信息读取。
-- [x] MP3、AAC/M4A、MP4/H.264、MOV、AVI、MKV 继续排除在 sidecar 正式默认范围外。
+- [x] 离线专业版白名单格式可 sidecar 优先。
+- [x] sidecar 优先范围为 WAV 转 FLAC、MP4 / MOV / AVI / MKV / WebM 常用视频格式转换、ffprobe 信息读取。
+- [x] MP3、AAC/M4A 音频转换、视频提取音频和不在白名单内的音视频容器或编码组合继续使用 FFmpeg WASM。
 - [x] sidecar 缺失或 SHA256 校验失败时回退 WASM 或显示明确提示。
 - [x] 批量任务状态仅在本机工作台展示，不上传文件内容或转换结果。
 - [x] Tauri 权限未扩大，WebView2 offlineInstaller 未修改。

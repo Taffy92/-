@@ -12,10 +12,10 @@ export const downloadsConfig = {
   appName: "万能格式转换离线专业版",
   version: "1.0.0",
   fileName: exeFileName,
-  fileSize: "EXE 约 245.34 MB / MSI 约 255.84 MB",
-  releaseDate: "2026-06-12",
+  fileSize: "EXE 约 245.42 MB / MSI 约 255.93 MB",
+  releaseDate: "2026-06-17",
   sha256:
-    "EXE 961B344581C4C33D06D21A23A16E96E85E5508D3498321D4D88E5B797130B9A5 / MSI 8883D68A69C00929540EF0A1DB1C27E364F13FE55EB323D32CF10EC6E25F9F59",
+    "EXE E2A03FDDE5907DD0462FF76C4A440869201B82A71533E82FD0EB25E2826D5564 / MSI 17B59355E550C5295CF3B9383E4391F57D1789AF1F2783302B483663555C850C",
   primaryDownloadUrl: exeDownloadUrl,
   backupDownloadUrl: msiDownloadUrl,
   packages: [
@@ -24,8 +24,8 @@ export const downloadsConfig = {
       label: "EXE 安装包",
       fileName: exeFileName,
       downloadUrl: exeDownloadUrl,
-      fileSize: "245.34 MB",
-      sha256: "961B344581C4C33D06D21A23A16E96E85E5508D3498321D4D88E5B797130B9A5",
+      fileSize: "245.42 MB",
+      sha256: "E2A03FDDE5907DD0462FF76C4A440869201B82A71533E82FD0EB25E2826D5564",
       note: "推荐普通用户使用，安装后自动开启本机 3 天试用。"
     },
     {
@@ -33,12 +33,14 @@ export const downloadsConfig = {
       label: "MSI 安装包",
       fileName: msiFileName,
       downloadUrl: msiDownloadUrl,
-      fileSize: "255.84 MB",
-      sha256: "8883D68A69C00929540EF0A1DB1C27E364F13FE55EB323D32CF10EC6E25F9F59",
+      fileSize: "255.93 MB",
+      sha256: "17B59355E550C5295CF3B9383E4391F57D1789AF1F2783302B483663555C850C",
       note: "适合企业、管理员或批量部署场景，同样内置 3 天试用。"
     }
   ],
   changelog: [
+    "2026-06-17：重新打包并上传部署最新产物，更新离线 sidecar 白名单优先范围、EXE/MSI 校验信息、发布说明和在线站点",
+    "2026-06-12：上传 Windows EXE/MSI 安装包到公开只读对象存储，下载页展示文件大小、SHA256 和安装提示",
     "离线版升级为白色苹果风格工作台，选择文件区域同时承担预览功能，大号橙色选择文件按钮支持单选和多选",
     "多文件任务改为缩略图平铺预览，PDF、Word、Excel 显示第一页内容",
     "切换工具或重新处理前可一键清空任务，避免旧任务残留",

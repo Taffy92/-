@@ -8,7 +8,7 @@
 
 离线专业版包含一个默认关闭的 sidecar FFmpeg 内部实验开关。该实验资源只随 Windows 离线专业版打包，不进入在线版静态资源目录。当前候选为 BtbN FFmpeg-Builds win64-lgpl-shared-7.1，声明为 LGPL v3 or later，未发现 `--enable-gpl` 或 `--enable-nonfree`。
 
-该候选仍包含需要商业发布前复核的组件和能力，包括 `libmp3lame`、`libopenh264`、AAC / M4A 相关能力，以及各地区可能存在的专利和平台要求。实验阶段仅开放 WAV 转 FLAC、MP4 转 WebM、ffprobe 信息读取和版本/构建参数检查，不应宣传为已完成商业许可证复核。
+该候选仍包含需要商业发布前复核的组件和能力，包括 `libmp3lame`、`libopenh264`、AAC / M4A / Opus 相关能力，以及各地区可能存在的专利和平台要求。当前白名单阶段开放 WAV 转 FLAC、MP4 / MOV / AVI / MKV / WebM 常用视频格式转换、ffprobe 信息读取和版本/构建参数检查，不应宣传为已完成商业许可证复核。
 
 ## 必须保留的原则
 
@@ -62,11 +62,11 @@
 4. 所有第三方许可证文本是否已经随网站和安装包发布。
 5. 开源许可证页面是否能在断网离线专业版中查看。
 
-## 2026-05-25 低风险 sidecar 优先说明
+## 2026-06-17 sidecar 本地白名单优先说明
 
 1. 在线版继续保留 FFmpeg WASM，用于单文件或少量文件的音频转换、视频转换和视频提取音频。
-2. 离线专业版继续保留 FFmpeg WASM，并在低风险格式上增加 sidecar 优先处理能力。
-3. sidecar 优先范围仅限 WAV 转 FLAC、MP4 转 WebM 和 ffprobe 信息读取。
-4. MP3、AAC/M4A、MP4/H.264、MOV、AVI、MKV 不属于 sidecar 正式默认范围。
+2. 离线专业版继续保留 FFmpeg WASM，并在本地白名单格式上增加 sidecar 优先处理能力。
+3. sidecar 优先范围为 WAV 转 FLAC、MP4 / MOV / AVI / MKV / WebM 常用视频格式转换和 ffprobe 信息读取。
+4. MP3、AAC/M4A 音频转换、视频提取音频和不在白名单内的音视频容器或编码组合继续使用 FFmpeg WASM。
 5. 当前 BtbN FFmpeg 候选仅作为已验证可运行的候选资源，不代表商业许可证最终复核完成。
 6. 正式商业发布前仍建议进行人工许可证和法律复核；长期建议自建 LGPL FFmpeg 构建。

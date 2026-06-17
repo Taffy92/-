@@ -33,7 +33,12 @@ pub struct SidecarPocRequest {
   mode: String,
   input_path: Option<String>,
   output_dir: Option<String>,
-  output_name: Option<String>
+  output_name: Option<String>,
+  output_format: Option<String>,
+  video_size: Option<String>,
+  audio_bitrate: Option<String>,
+  media_quality: Option<String>,
+  strip_metadata: Option<bool>
 }
 
 #[derive(Debug, Serialize)]
@@ -76,7 +81,7 @@ pub fn check_ffmpeg_sidecar(app: AppHandle) -> SidecarCheck {
     configured,
     status: status.to_string(),
     message: match status {
-      "sidecar_ready" => "sidecar 可用，当前为实验功能。".to_string(),
+      "sidecar_ready" => "sidecar 可用，本地白名单格式可优先使用。".to_string(),
       "sidecar_checksum_failed" => "sidecar 校验失败：请检查 ffmpeg 资源来源和 SHA256SUMS.txt。".to_string(),
       _ => "sidecar 未配置：未找到可信 ffmpeg.exe / ffprobe.exe，现有功能仍继续使用 FFmpeg WASM。".to_string()
     },
@@ -98,7 +103,12 @@ pub fn get_ffmpeg_sidecar_version(app: AppHandle) -> SidecarCommandResult {
     mode: "version-check".to_string(),
     input_path: None,
     output_dir: None,
-    output_name: None
+    output_name: None,
+    output_format: None,
+    video_size: None,
+    audio_bitrate: None,
+    media_quality: None,
+    strip_metadata: None
   })
 }
 
@@ -176,6 +186,7 @@ enum PocMode {
   VersionCheck,
   BuildconfCheck,
   ProbeDuration,
+  ConvertVideo,
   ConvertMp4ToWebm,
   ConvertWavToFlac
 }
@@ -186,6 +197,7 @@ impl PocMode {
       "version-check" => Ok(Self::VersionCheck),
       "buildconf-check" => Ok(Self::BuildconfCheck),
       "probe-duration" => Ok(Self::ProbeDuration),
+      "convert-video-sidecar" => Ok(Self::ConvertVideo),
       "convert-mp4-to-webm-poc" => Ok(Self::ConvertMp4ToWebm),
       "convert-wav-to-flac-poc" => Ok(Self::ConvertWavToFlac),
       _ => Err("不支持的 sidecar POC 模式。".to_string())
@@ -197,6 +209,7 @@ impl PocMode {
       Self::VersionCheck => "version-check",
       Self::BuildconfCheck => "buildconf-check",
       Self::ProbeDuration => "probe-duration",
+      Self::ConvertVideo => "convert-video-sidecar",
       Self::ConvertMp4ToWebm => "convert-mp4-to-webm-poc",
       Self::ConvertWavToFlac => "convert-wav-to-flac-poc"
     }
@@ -244,35 +257,22 @@ fn build_whitelisted_command(
         output_path: None
       })
     },
+    PocMode::ConvertVideo => {
+      let input = validate_input_path(request.input_path.as_deref(), &["mp4", "mov", "avi", "mkv", "webm"])?;
+      let format = validate_output_format(request.output_format.as_deref(), &["mp4", "mov", "avi", "mkv", "webm"])?;
+      let output = validate_output_path(app, request.output_dir.as_deref(), request.output_name.as_deref(), &input, &format)?;
+      Ok(BuiltCommand {
+        program: ffmpeg,
+        args: video_conversion_args(&input, &output, &format, &request),
+        output_path: Some(output)
+      })
+    },
     PocMode::ConvertMp4ToWebm => {
       let input = validate_input_path(request.input_path.as_deref(), &["mp4"])?;
       let output = validate_output_path(app, request.output_dir.as_deref(), request.output_name.as_deref(), &input, "webm")?;
       Ok(BuiltCommand {
         program: ffmpeg,
-        args: vec![
-          "-hide_banner".into(),
-          "-nostdin".into(),
-          "-n".into(),
-          "-i".into(),
-          input.to_string_lossy().to_string(),
-          "-map".into(),
-          "0:v:0".into(),
-          "-map".into(),
-          "0:a?".into(),
-          "-c:v".into(),
-          "libvpx-vp9".into(),
-          "-b:v".into(),
-          "1200k".into(),
-          "-deadline".into(),
-          "realtime".into(),
-          "-cpu-used".into(),
-          "5".into(),
-          "-c:a".into(),
-          "libopus".into(),
-          "-b:a".into(),
-          "128k".into(),
-          output.to_string_lossy().to_string()
-        ],
+        args: video_conversion_args(&input, &output, "webm", &request),
         output_path: Some(output)
       })
     },
@@ -297,6 +297,123 @@ fn build_whitelisted_command(
         output_path: Some(output)
       })
     }
+  }
+}
+
+struct VideoQuality {
+  video_bitrate: &'static str,
+  qscale: &'static str,
+  audio_bitrate: &'static str
+}
+
+fn video_conversion_args(input: &Path, output: &Path, format: &str, request: &SidecarPocRequest) -> Vec<String> {
+  let quality = video_quality(request.media_quality.as_deref());
+  let audio_bitrate = validate_audio_bitrate(request.audio_bitrate.as_deref()).unwrap_or(quality.audio_bitrate);
+  let mut args = vec![
+    "-hide_banner".into(),
+    "-nostdin".into(),
+    "-n".into(),
+    "-i".into(),
+    input.to_string_lossy().to_string(),
+    "-map".into(),
+    "0:v:0".into(),
+    "-map".into(),
+    "0:a?".into()
+  ];
+
+  args.extend(video_scale_args(request.video_size.as_deref()));
+  args.extend(match format {
+    "webm" => vec![
+      "-c:v".into(),
+      "libvpx-vp9".into(),
+      "-b:v".into(),
+      quality.video_bitrate.into(),
+      "-deadline".into(),
+      "realtime".into(),
+      "-cpu-used".into(),
+      "5".into(),
+      "-c:a".into(),
+      "libopus".into(),
+      "-b:a".into(),
+      audio_bitrate.into()
+    ],
+    "avi" => vec![
+      "-c:v".into(),
+      "mpeg4".into(),
+      "-q:v".into(),
+      quality.qscale.into(),
+      "-c:a".into(),
+      "libmp3lame".into(),
+      "-b:a".into(),
+      audio_bitrate.into()
+    ],
+    _ => {
+      let mut common = vec![
+        "-c:v".into(),
+        "libopenh264".into(),
+        "-b:v".into(),
+        quality.video_bitrate.into(),
+        "-pix_fmt".into(),
+        "yuv420p".into(),
+        "-c:a".into(),
+        "aac".into(),
+        "-b:a".into(),
+        audio_bitrate.into()
+      ];
+      if format == "mp4" || format == "mov" {
+        common.extend(["-movflags".into(), "+faststart".into()]);
+      }
+      common
+    }
+  });
+  args.extend(metadata_args(request.strip_metadata.unwrap_or(true)));
+  args.push("-shortest".into());
+  args.push(output.to_string_lossy().to_string());
+  args
+}
+
+fn video_quality(value: Option<&str>) -> VideoQuality {
+  match value {
+    Some("small") => VideoQuality { video_bitrate: "1200k", qscale: "8", audio_bitrate: "96k" },
+    Some("high") => VideoQuality { video_bitrate: "5000k", qscale: "3", audio_bitrate: "192k" },
+    _ => VideoQuality { video_bitrate: "2500k", qscale: "5", audio_bitrate: "128k" }
+  }
+}
+
+fn video_scale_args(value: Option<&str>) -> Vec<String> {
+  match value {
+    Some("1080p") => vec!["-vf".into(), "scale=-2:'min(1080,ih)'".into()],
+    Some("720p") => vec!["-vf".into(), "scale=-2:'min(720,ih)'".into()],
+    Some("480p") => vec!["-vf".into(), "scale=-2:'min(480,ih)'".into()],
+    _ => vec!["-vf".into(), "scale=trunc(iw/2)*2:trunc(ih/2)*2".into()]
+  }
+}
+
+fn metadata_args(strip_metadata: bool) -> Vec<String> {
+  if strip_metadata {
+    vec!["-map_metadata".into(), "-1".into(), "-map_chapters".into(), "-1".into()]
+  } else {
+    Vec::new()
+  }
+}
+
+fn validate_audio_bitrate(value: Option<&str>) -> Option<&'static str> {
+  match value {
+    Some("96k") => Some("96k"),
+    Some("128k") => Some("128k"),
+    Some("192k") => Some("192k"),
+    Some("256k") => Some("256k"),
+    _ => None
+  }
+}
+
+fn validate_output_format(value: Option<&str>, allowed_extensions: &[&str]) -> Result<String, String> {
+  let raw = value.ok_or_else(|| "缺少输出格式。".to_string())?;
+  let normalized = raw.trim().trim_start_matches('.').to_ascii_lowercase();
+  if allowed_extensions.iter().any(|item| *item == normalized) {
+    Ok(normalized)
+  } else {
+    Err("输出格式不在 sidecar 白名单内。".to_string())
   }
 }
 

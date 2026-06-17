@@ -10,7 +10,7 @@ Windows 离线专业版新增 sidecar FFmpeg 内部实验开关，但默认关�
 
 当前 sidecar 候选为 BtbN FFmpeg-Builds win64-lgpl-shared-7.1。初步检查显示候选声明为 LGPL v3 or later，未发现 `--enable-gpl`，未发现 `--enable-nonfree`，未包含 `libx264` / `libx265`。但候选包含 `libmp3lame`、`libopenh264` 和 AAC 相关能力，正式商业发布前仍需人工复核许可证、专利、平台和地区要求。
 
-sidecar 实验阶段只允许 WAV 转 FLAC、MP4 转 WebM、ffprobe 读取媒体信息，以及 `ffmpeg -version` / `ffmpeg -buildconf` 内部检查。MP3、AAC/M4A、MP4/H.264、MOV、AVI、MKV 输出仍不作为 sidecar 正式能力开放。
+sidecar 白名单阶段允许 WAV 转 FLAC、MP4 / MOV / AVI / MKV / WebM 常用视频格式转换、ffprobe 读取媒体信息，以及 `ffmpeg -version` / `ffmpeg -buildconf` 内部检查。MP3、AAC/M4A 音频转换和视频提取音频仍不作为 sidecar 默认能力开放。
 
 ## 当前使用方式
 
@@ -60,14 +60,14 @@ sidecar 实验阶段只允许 WAV 转 FLAC、MP4 转 WebM、ffprobe 读取媒体
 1. 网站和软件内可以查看开源许可证页面。
 2. `THIRD_PARTY_NOTICES.md` 包含 FFmpeg WASM 说明。
 3. 发布包保留许可证说明和源码获取方式。
-4. 若未来改用 sidecar FFmpeg，需要重新记录 `ffmpeg.exe` 来源、许可证、构建参数、SHA256 和源码链接。
+4. sidecar FFmpeg 的 `ffmpeg.exe` 来源、许可证、构建参数、SHA256 和源码链接需要随发布包持续记录。
 
-## 2026-05-25 低风险 sidecar 优先策略
+## 2026-06-17 sidecar 本地白名单优先策略
 
 1. 在线版继续使用本地 FFmpeg WASM，不使用 sidecar，不上传音频、视频或转换结果。
 2. Windows 离线专业版仍保留 FFmpeg WASM 作为回退后端。
-3. Windows 离线专业版在 sidecar 校验通过、用户未关闭该选项、输入文件有本地路径且输出目录为本地 Tauri 输出目录时，可对低风险格式优先使用 sidecar FFmpeg。
-4. 当前 sidecar 优先范围仅限：WAV 转 FLAC、MP4 转 WebM、ffprobe 媒体信息读取。
-5. MP3、AAC/M4A、MP4/H.264、MOV、AVI、MKV 和视频提取音频不属于 sidecar 正式默认范围，继续使用 FFmpeg WASM。
+3. Windows 离线专业版在 sidecar 校验通过、用户未关闭该选项、输入文件有本地路径且输出目录为本地 Tauri 输出目录时，可对本地白名单格式优先使用 sidecar FFmpeg。
+4. 当前 sidecar 优先范围：WAV 转 FLAC、MP4 / MOV / AVI / MKV / WebM 常用视频格式转换、ffprobe 媒体信息读取。
+5. MP3、AAC/M4A 音频转换、视频提取音频和不在白名单内的音视频容器或编码组合继续使用 FFmpeg WASM。
 6. BtbN FFmpeg 候选仍未完成商业许可证最终复核。正式商业发布前仍建议人工复核许可证、专利、平台和地区要求。
 7. 长期仍建议自建 LGPL FFmpeg 构建，并保留构建参数、SHA256、许可证文本和源码获取方式。

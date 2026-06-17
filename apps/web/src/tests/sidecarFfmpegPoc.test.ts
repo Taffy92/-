@@ -11,7 +11,7 @@ const webPrepareStatic = readFileSync(path.join(repoRoot, "apps/web/scripts/prep
 const toolsClientSource = readFileSync(path.join(repoRoot, "apps/web/src/components/tools/ToolsClient.tsx"), "utf8");
 const sidecarHelperSource = readFileSync(path.join(repoRoot, "apps/web/src/lib/sidecarFfmpeg.ts"), "utf8");
 
-describe("sidecar FFmpeg low-risk backend safety boundary", () => {
+describe("sidecar FFmpeg backend safety boundary", () => {
   it("registers internal sidecar commands without replacing existing media flow", () => {
     expect(rustMain).toContain("check_ffmpeg_sidecar");
     expect(rustMain).toContain("get_ffmpeg_sidecar_version");
@@ -19,6 +19,7 @@ describe("sidecar FFmpeg low-risk backend safety boundary", () => {
     expect(sidecarSource).toContain("version-check");
     expect(sidecarSource).toContain("buildconf-check");
     expect(sidecarSource).toContain("probe-duration");
+    expect(sidecarSource).toContain("convert-video-sidecar");
     expect(sidecarSource).toContain("convert-mp4-to-webm-poc");
     expect(sidecarSource).toContain("convert-wav-to-flac-poc");
     expect(sidecarSource).toContain("verify_sidecar_hashes");
@@ -61,27 +62,43 @@ describe("sidecar FFmpeg low-risk backend safety boundary", () => {
     expect(readFileSync(path.join(repoRoot, "apps/desktop/src-tauri/resources/ffmpeg/SHA256SUMS.txt"), "utf8")).toContain("bin/ffmpeg.exe");
   });
 
-  it("shows the low-risk sidecar priority setting only in the desktop surface", () => {
-    expect(toolsClientSource).toContain("使用本地 sidecar FFmpeg 优先处理低风险格式");
+  it("shows the sidecar priority setting only in the desktop surface", () => {
     expect(toolsClientSource).toContain("if (!isDesktopSurface) return");
-    expect(toolsClientSource).toContain("const manuallyDisabled = window.localStorage.getItem(sidecarExperimentStorageKey) === \"disabled\"");
-    expect(toolsClientSource).toContain("setSidecarExperimentEnabled(!manuallyDisabled)");
-    expect(toolsClientSource).toContain("sidecar 低风险优先处理中");
+    expect(toolsClientSource).toContain("const manuallyDisabled = window.localStorage.getItem(sidecarExperimentStorageKey) === \"manual-disabled\"");
+    expect(toolsClientSource).toContain("window.localStorage.setItem(sidecarExperimentStorageKey, manuallyDisabled ? \"manual-disabled\" : \"enabled\")");
+    expect(toolsClientSource).toContain("window.localStorage.setItem(sidecarExperimentStorageKey, event.target.checked ? \"enabled\" : \"manual-disabled\")");
     expect(toolsClientSource).toContain("backend: \"sidecar\"");
     expect(toolsClientSource).toContain("backend: failureBackend");
     expect(toolsClientSource).toContain("probe-duration");
-    expect(toolsClientSource).toContain("sidecar FFmpeg 处理失败");
   });
 
-  it("limits sidecar priority to low-risk formats and keeps WASM as fallback path", () => {
+  it("passes only whitelisted sidecar request fields from the desktop UI", () => {
+    expect(toolsClientSource).toContain("outputFormat: task.mode === \"video-convert\" ? videoFormat : task.mode === \"audio-convert\" ? audioFormat : undefined");
+    expect(toolsClientSource).toContain("videoSize");
+    expect(toolsClientSource).toContain("audioBitrate");
+    expect(toolsClientSource).toContain("mediaQuality");
+    expect(toolsClientSource).toContain("stripMetadata");
+    expect(toolsClientSource).toContain("outputFormat: options.outputFormat");
+    expect(toolsClientSource).not.toContain("rawArgs");
+  });
+
+  it("limits sidecar priority to local safe formats and keeps WASM as fallback path", () => {
+    expect(sidecarHelperSource).toContain("convert-video-sidecar");
     expect(sidecarHelperSource).toContain("convert-wav-to-flac-poc");
     expect(sidecarHelperSource).toContain("convert-mp4-to-webm-poc");
     expect(sidecarHelperSource).toContain("probe-duration");
     expect(sidecarHelperSource).toContain("options.audioFormat === \"flac\"");
-    expect(sidecarHelperSource).toContain("options.videoFormat === \"webm\"");
-    expect(sidecarHelperSource).toContain("MP4/H.264");
-    expect(sidecarHelperSource).toContain("视频提取音频不属于 sidecar 低风险优先范围");
+    expect(sidecarHelperSource).toContain("sidecarVideoFormats.includes(extension)");
+    expect(sidecarHelperSource).toContain("sidecarVideoFormats.includes(options.videoFormat)");
     expect(sidecarHelperSource).not.toContain("mp3-to");
     expect(sidecarHelperSource).not.toContain("aac-to");
+  });
+
+  it("uses bundled FFmpeg codecs that are present in the offline sidecar build", () => {
+    expect(sidecarSource).toContain("libopenh264");
+    expect(sidecarSource).toContain("libvpx-vp9");
+    expect(sidecarSource).toContain("mpeg4");
+    expect(sidecarSource).toContain("libmp3lame");
+    expect(sidecarSource).not.toContain("libx264");
   });
 });

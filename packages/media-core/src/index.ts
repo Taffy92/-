@@ -269,7 +269,9 @@ function videoArgs(options: VideoConversionOptions) {
     return [...commonMap, "-c:v", "mpeg4", "-q:v", quality.qscale, "-c:a", "libmp3lame", "-b:a", audioBitrate];
   }
 
-  return [...commonMap, "-c:v", "libx264", "-preset", "veryfast", "-crf", quality.crf, "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", audioBitrate, "-movflags", "+faststart"];
+  const args = [...commonMap, "-c:v", "mpeg4", "-q:v", quality.qscale, "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", audioBitrate];
+  if (options.format === "mp4" || options.format === "mov") args.push("-movflags", "+faststart");
+  return args;
 }
 
 function audioArgs(format: AudioOutputFormat | ExtractedAudioOutputFormat, quality: MediaQuality, bitrate?: AudioBitrateOption) {

@@ -24,15 +24,16 @@ export type SidecarCommandResult = {
   durationMs?: number;
 };
 
-export type SidecarExperimentMode = "convert-wav-to-flac-poc" | "convert-mp4-to-webm-poc";
+export type SidecarExperimentMode = "convert-video-sidecar" | "convert-wav-to-flac-poc" | "convert-mp4-to-webm-poc";
 export type SidecarProbeMode = "probe-duration";
 export type SidecarCommandMode = SidecarExperimentMode | SidecarProbeMode;
 
 export const sidecarExperimentStorageKey = "format-converter.desktop.sidecar-ffmpeg-experiment.v1";
+const sidecarVideoFormats = ["mp4", "mov", "avi", "mkv", "webm"];
 
 export function sidecarStatusText(status?: SidecarCheckResult) {
   if (!status) return "sidecar 未检查";
-  if (isSidecarReady(status)) return "sidecar 可用，低风险格式可优先使用";
+  if (isSidecarReady(status)) return "sidecar 可用，本地白名单格式可优先使用";
   if (status.status === "sidecar_missing") return "sidecar 未配置";
   if (status.status === "sidecar_checksum_failed" || status.sha256Verified === false) return "sidecar 校验失败";
   return "sidecar 未配置";
@@ -52,8 +53,8 @@ export function getSidecarExperimentMode(options: {
   if (options.mode === "audio-convert" && extension === "wav" && options.audioFormat === "flac") {
     return "convert-wav-to-flac-poc";
   }
-  if (options.mode === "video-convert" && extension === "mp4" && options.videoFormat === "webm") {
-    return "convert-mp4-to-webm-poc";
+  if (options.mode === "video-convert" && sidecarVideoFormats.includes(extension) && options.videoFormat && sidecarVideoFormats.includes(options.videoFormat)) {
+    return "convert-video-sidecar";
   }
   return null;
 }
@@ -87,15 +88,15 @@ export function sidecarUnsupportedReason(options: {
 }) {
   if (getSidecarExperimentMode(options)) return "";
   if (options.mode === "audio-convert") {
-    return "sidecar 低风险优先当前仅适用于 WAV 转 FLAC，其他音频输出继续使用 FFmpeg WASM。";
+    return "sidecar 优先当前仅适用于 WAV 转 FLAC，其他音频输出继续使用 FFmpeg WASM。";
   }
   if (options.mode === "video-convert") {
-    return "sidecar 低风险优先当前仅适用于 MP4 转 WebM，MP4/H.264、MOV、AVI、MKV 等输出继续使用 FFmpeg WASM。";
+    return "sidecar 优先支持 MP4、MOV、AVI、MKV、WebM 常用视频转换；当前输入或输出格式不在本地白名单内，继续使用 FFmpeg WASM。";
   }
   if (options.mode === "video-audio") {
-    return "视频提取音频不属于 sidecar 低风险优先范围，继续使用 FFmpeg WASM。";
+    return "视频提取音频不属于 sidecar 优先范围，继续使用 FFmpeg WASM。";
   }
-  return "当前功能不属于 sidecar 低风险优先范围。";
+  return "当前功能不属于 sidecar 优先范围。";
 }
 
 function extensionOf(name: string) {

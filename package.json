@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": "20.x",
+    "pnpm": "9.15.4"
+  },
   "scripts": {
     "dev:web": "node scripts/run-pnpm.cjs --filter web dev",
     "build:web": "node scripts/run-pnpm.cjs --filter web build",
@@ -13,6 +17,8 @@
     "deploy:license-admin": "cd cloudbase/functions/licenseAdmin && echo. | tcb fn deploy licenseAdmin --dir . --httpFn --force -e format-converter-prod-x-d71bce41",
     "build:desktop": "node scripts/run-pnpm.cjs --filter desktop build",
     "package:desktop": "node scripts/run-pnpm.cjs --filter desktop package",
+    "package:desktop:msi": "node scripts/run-pnpm.cjs --filter desktop package:msi",
+    "package:desktop:all": "node scripts/run-pnpm.cjs --filter desktop build:all",
     "check:privacy": "node scripts/run-pnpm.cjs --filter web check:privacy",
     "check:network": "node scripts/run-pnpm.cjs --filter web check:network",
     "generate:notices": "node scripts/generate-third-party-notices.mjs",

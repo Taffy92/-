@@ -1,5 +1,7 @@
 # CLEAN_VM_USER_RESULT_SUMMARY
 
+> 历史结果说明：本文整理 2026-05-25 当时的人工验证反馈。2026-06-17 起，当前发布范围以 `release/v1.0.0/docs/RELEASE_NOTES.md` 和站内更新日志为准。
+
 生成时间：2026-05-25
 
 来源：用户人工回填的 Windows 10 / Windows 11 干净虚拟机测试结果。

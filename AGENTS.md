@@ -19,6 +19,8 @@
 
 当前 Windows 工作区优先使用 npm 脚本；脚本内部会通过 `scripts/run-pnpm.cjs` 调用本地 `.pnpm-home\pnpm.CMD`。
 
+发布和打包环境固定为 Node 20 LTS 与 pnpm 9.15.4，根目录 `.nvmrc`、`package.json` 的 `engines` 和 `packageManager` 是准绳；非 Node 20 环境只适合本地排查，正式构建前必须切回 Node 20。
+
 ```powershell
 npm test
 npm run build:web

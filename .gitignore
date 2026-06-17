@@ -127,6 +127,7 @@ release/*/verification/**/*.wasm
 # Local editor/system files
 .agents/
 .codex/
+.superpowers/
 skills-lock.json
 .idea/
 .vscode/*
