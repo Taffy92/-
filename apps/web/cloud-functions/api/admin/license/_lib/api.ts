@@ -90,7 +90,7 @@ export function createLicenseAdminApi(
         const customerName = cleanText(body.customerName, "客户名称", 120, true);
         const remark = cleanText(body.remark, "备注", 500, false);
         const duration = parseDuration(body.duration);
-        let machineCode = normalizeMachineCode(body.machineCode);
+        let machineCode: string;
         let previousExpiresAt: number | undefined;
         let parentLicenseId: string | null = null;
 
@@ -102,6 +102,8 @@ export function createLicenseAdminApi(
           if (!latest) throw new HttpError(404, "没有找到要续期的授权记录。");
           previousExpiresAt = latest.expiresAt;
           parentLicenseId = latest.licenseId;
+        } else {
+          machineCode = normalizeMachineCode(body.machineCode);
         }
 
         const generated = generateLicense({

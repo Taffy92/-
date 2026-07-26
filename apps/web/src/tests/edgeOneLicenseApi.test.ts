@@ -115,6 +115,7 @@ describe("EdgeOne license admin API", () => {
       cookie,
       body: JSON.stringify({
         ...validIssueInput(),
+        machineCode: "",
         duration: 90,
         parentRecordId: first.recordId
       })

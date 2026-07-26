@@ -79,6 +79,10 @@ export function Header({ desktop = isDesktopApp }: { desktop?: boolean }) {
     };
   }, { dependencies: [desktop] });
 
+  if (pathname.startsWith("/admin/license")) {
+    return null;
+  }
+
   return (
     <header className={headerClass}>
       <div className="apple-nav-inner">

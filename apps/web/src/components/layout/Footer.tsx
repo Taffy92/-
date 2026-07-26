@@ -65,7 +65,7 @@ export function Footer() {
   const pathname = usePathname();
   const footerGroups = desktop ? desktopFooterGroups : webFooterGroups;
 
-  if (pathname.startsWith(siteConfig.links.tools)) {
+  if (pathname.startsWith(siteConfig.links.tools) || pathname.startsWith("/admin/license")) {
     return null;
   }
 
