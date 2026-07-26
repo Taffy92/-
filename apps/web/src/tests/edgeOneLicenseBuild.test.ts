@@ -37,6 +37,7 @@ describe("EdgeOne private license admin build", () => {
     const config = JSON.parse(readFileSync(edgeOneConfigPath, "utf8"));
 
     expect(config.buildCommand).toBe("npm run build:edgeone");
+    expect(config.installCommand).toBe("pnpm install --frozen-lockfile");
     expect(config.outputDirectory).toBe("apps/web/out");
     expect(config.nodeVersion).toBe("20.18.0");
     expect(config.cloudFunctions?.mainlandRegions).toEqual(["ap-guangzhou"]);
