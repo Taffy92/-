@@ -51,8 +51,11 @@ describe("EdgeOne private license admin build", () => {
       "records/index.ts",
       "records/[id]/file.ts"
     ]) {
-      expect(existsSync(resolve(edgeOneFunctionRoot, relativePath))).toBe(true);
+      const functionPath = resolve(edgeOneFunctionRoot, relativePath);
+      expect(existsSync(functionPath)).toBe(true);
+      expect(readFileSync(functionPath, "utf8")).toContain("applyRuntimeEnv(context.env)");
     }
+    expect(existsSync(resolve(edgeOneFunctionRoot, "_runtime-env.ts"))).toBe(true);
   });
 
   it("pins a mainland region and disables caching and indexing for the admin surface", () => {
