@@ -2,9 +2,9 @@
 // Do not edit it by hand.
 
 export const thirdPartyNoticeMeta = {
-  "generatedAt": "2026-06-17T00:19:41.734Z",
-  "npmPackageCount": 728,
-  "directNpmPackageCount": 35,
+  "generatedAt": "2026-07-26T16:22:37.297Z",
+  "npmPackageCount": 749,
+  "directNpmPackageCount": 38,
   "rustCrateCount": 429,
   "bundledArtifactCount": 3,
   "sources": [
@@ -21,8 +21,8 @@ export const bundledArtifacts = [
     "label": "Next.js 静态网站产物",
     "path": "apps/web/out",
     "kind": "目录",
-    "files": 296,
-    "sizeBytes": 44376789,
+    "files": 352,
+    "sizeBytes": 570198467,
     "sha256": "",
     "note": "在线版和离线版共用的静态页面、JS、CSS 和静态资源。"
   },
@@ -39,7 +39,7 @@ export const bundledArtifacts = [
     "label": "FFmpeg WASM 静态资源",
     "path": "apps/web/out/ffmpeg",
     "kind": "目录",
-    "files": 2,
+    "files": 3,
     "sizeBytes": 32344478,
     "sha256": "",
     "note": "来自 @ffmpeg/core 的 ffmpeg-core.js 和 ffmpeg-core.wasm。"
@@ -51,6 +51,18 @@ export const directNpmPackages = [
     "name": "@cloudbase/cli",
     "version": "3.3.3",
     "license": "ISC",
+    "repository": "",
+    "homepage": "",
+    "author": "",
+    "licenseFiles": [],
+    "noticeFiles": [],
+    "direct": true,
+    "inLockfile": true
+  },
+  {
+    "name": "@edgeone/pages-blob",
+    "version": "0.0.14",
+    "license": "MIT",
     "repository": "",
     "homepage": "",
     "author": "",
@@ -195,6 +207,20 @@ export const directNpmPackages = [
     "license": "MIT",
     "repository": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
     "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/node",
+    "author": "",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": true,
+    "inLockfile": true
+  },
+  {
+    "name": "@types/qrcode",
+    "version": "1.5.5",
+    "license": "MIT",
+    "repository": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/qrcode",
     "author": "",
     "licenseFiles": [
       "LICENSE"
@@ -418,6 +444,20 @@ export const directNpmPackages = [
     "author": "Andrey Sitnik <andrey@sitnik.es>",
     "licenseFiles": [
       "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": true,
+    "inLockfile": true
+  },
+  {
+    "name": "qrcode",
+    "version": "1.5.4",
+    "license": "MIT",
+    "repository": "git://github.com/soldair/node-qrcode.git",
+    "homepage": "http://github.com/soldair/node-qrcode",
+    "author": "Ryan Day <soldair@gmail.com>",
+    "licenseFiles": [
+      "license"
     ],
     "noticeFiles": [],
     "direct": true,
@@ -716,6 +756,18 @@ export const npmPackages = [
     ],
     "noticeFiles": [],
     "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "@edgeone/pages-blob",
+    "version": "0.0.14",
+    "license": "MIT",
+    "repository": "",
+    "homepage": "",
+    "author": "",
+    "licenseFiles": [],
+    "noticeFiles": [],
+    "direct": true,
     "inLockfile": true
   },
   {
@@ -1538,6 +1590,20 @@ export const npmPackages = [
     ],
     "noticeFiles": [],
     "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "@types/qrcode",
+    "version": "1.5.5",
+    "license": "MIT",
+    "repository": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/qrcode",
+    "author": "",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": true,
     "inLockfile": true
   },
   {
@@ -3023,6 +3089,20 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "camelcase",
+    "version": "5.3.1",
+    "license": "MIT",
+    "repository": "sindresorhus/camelcase",
+    "homepage": "",
+    "author": "Sindre Sorhus sindresorhus@gmail.com",
+    "licenseFiles": [
+      "license"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
     "name": "camelcase-css",
     "version": "2.0.1",
     "license": "MIT",
@@ -3182,6 +3262,20 @@ export const npmPackages = [
     "homepage": "https://reactjs.org/",
     "author": "",
     "licenseFiles": [],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "cliui",
+    "version": "6.0.0",
+    "license": "ISC",
+    "repository": "http://github.com/yargs/cliui.git",
+    "homepage": "",
+    "author": "Ben Coe <ben@npmjs.com>",
+    "licenseFiles": [
+      "LICENSE.txt"
+    ],
     "noticeFiles": [],
     "direct": false,
     "inLockfile": true
@@ -3605,6 +3699,20 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "decamelize",
+    "version": "1.2.0",
+    "license": "MIT",
+    "repository": "sindresorhus/decamelize",
+    "homepage": "",
+    "author": "Sindre Sorhus sindresorhus@gmail.com",
+    "licenseFiles": [
+      "license"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
     "name": "decimal.js",
     "version": "10.6.0",
     "license": "MIT",
@@ -3767,6 +3875,20 @@ export const npmPackages = [
     "author": "",
     "licenseFiles": [
       "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "dijkstrajs",
+    "version": "1.0.3",
+    "license": "MIT",
+    "repository": "git://github.com/tcort/dijkstrajs",
+    "homepage": "https://github.com/tcort/dijkstrajs",
+    "author": "",
+    "licenseFiles": [
+      "LICENSE.md"
     ],
     "noticeFiles": [],
     "direct": false,
@@ -4648,6 +4770,20 @@ export const npmPackages = [
   },
   {
     "name": "find-up",
+    "version": "4.1.0",
+    "license": "MIT",
+    "repository": "sindresorhus/find-up",
+    "homepage": "",
+    "author": "Sindre Sorhus sindresorhus@gmail.com",
+    "licenseFiles": [
+      "license"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "find-up",
     "version": "5.0.0",
     "license": "MIT",
     "repository": "sindresorhus/find-up",
@@ -4906,6 +5042,20 @@ export const npmPackages = [
     "homepage": "",
     "author": "James Cooper <james@bitmechanic.com>",
     "licenseFiles": [],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "get-caller-file",
+    "version": "2.0.5",
+    "license": "ISC",
+    "repository": "git+https://github.com/stefanpenner/get-caller-file.git",
+    "homepage": "https://github.com/stefanpenner/get-caller-file#readme",
+    "author": "Stefan Penner",
+    "licenseFiles": [
+      "LICENSE.md"
+    ],
     "noticeFiles": [],
     "direct": false,
     "inLockfile": true
@@ -6374,6 +6524,20 @@ export const npmPackages = [
   },
   {
     "name": "locate-path",
+    "version": "5.0.0",
+    "license": "MIT",
+    "repository": "sindresorhus/locate-path",
+    "homepage": "",
+    "author": "Sindre Sorhus sindresorhus@gmail.com",
+    "licenseFiles": [
+      "license"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "locate-path",
     "version": "6.0.0",
     "license": "MIT",
     "repository": "sindresorhus/locate-path",
@@ -7492,6 +7656,20 @@ export const npmPackages = [
   },
   {
     "name": "p-limit",
+    "version": "2.3.0",
+    "license": "MIT",
+    "repository": "sindresorhus/p-limit",
+    "homepage": "",
+    "author": "Sindre Sorhus sindresorhus@gmail.com",
+    "licenseFiles": [
+      "license"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "p-limit",
     "version": "3.1.0",
     "license": "MIT",
     "repository": "sindresorhus/p-limit",
@@ -7520,9 +7698,37 @@ export const npmPackages = [
   },
   {
     "name": "p-locate",
+    "version": "4.1.0",
+    "license": "MIT",
+    "repository": "sindresorhus/p-locate",
+    "homepage": "",
+    "author": "Sindre Sorhus sindresorhus@gmail.com",
+    "licenseFiles": [
+      "license"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "p-locate",
     "version": "5.0.0",
     "license": "MIT",
     "repository": "sindresorhus/p-locate",
+    "homepage": "",
+    "author": "Sindre Sorhus sindresorhus@gmail.com",
+    "licenseFiles": [
+      "license"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "p-try",
+    "version": "2.2.0",
+    "license": "MIT",
+    "repository": "sindresorhus/p-try",
     "homepage": "",
     "author": "Sindre Sorhus sindresorhus@gmail.com",
     "licenseFiles": [
@@ -7929,6 +8135,20 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "pngjs",
+    "version": "5.0.0",
+    "license": "MIT",
+    "repository": "git://github.com/lukeapage/pngjs.git",
+    "homepage": "https://github.com/lukeapage/pngjs",
+    "author": "",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
     "name": "possible-typed-array-names",
     "version": "1.1.0",
     "license": "MIT",
@@ -8163,6 +8383,20 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "qrcode",
+    "version": "1.5.4",
+    "license": "MIT",
+    "repository": "git://github.com/soldair/node-qrcode.git",
+    "homepage": "http://github.com/soldair/node-qrcode",
+    "author": "Ryan Day <soldair@gmail.com>",
+    "licenseFiles": [
+      "license"
+    ],
+    "noticeFiles": [],
+    "direct": true,
+    "inLockfile": true
+  },
+  {
     "name": "querystringify",
     "version": "2.2.0",
     "license": "MIT",
@@ -8373,6 +8607,20 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "require-directory",
+    "version": "2.1.1",
+    "license": "MIT",
+    "repository": "git://github.com/troygoode/node-require-directory.git",
+    "homepage": "https://github.com/troygoode/node-require-directory/",
+    "author": "Troy Goode <troygoode@gmail.com> (http://github.com/troygoode/)",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
     "name": "require-from-string",
     "version": "2.0.2",
     "license": "MIT",
@@ -8381,6 +8629,20 @@ export const npmPackages = [
     "author": "Vsevolod Strukchinsky floatdrop@gmail.com",
     "licenseFiles": [
       "license"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "require-main-filename",
+    "version": "2.0.0",
+    "license": "ISC",
+    "repository": "git+ssh://git@github.com/yargs/require-main-filename.git",
+    "homepage": "https://github.com/yargs/require-main-filename#readme",
+    "author": "Ben Coe <ben@npmjs.com>",
+    "licenseFiles": [
+      "LICENSE.txt"
     ],
     "noticeFiles": [],
     "direct": false,
@@ -10347,6 +10609,20 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "which-module",
+    "version": "2.0.1",
+    "license": "ISC",
+    "repository": "git+https://github.com/nexdrew/which-module.git",
+    "homepage": "https://github.com/nexdrew/which-module#readme",
+    "author": "nexdrew",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
     "name": "which-typed-array",
     "version": "1.1.20",
     "license": "MIT",
@@ -10397,6 +10673,20 @@ export const npmPackages = [
     "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
     "licenseFiles": [
       "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "wrap-ansi",
+    "version": "6.2.0",
+    "license": "MIT",
+    "repository": "chalk/wrap-ansi",
+    "homepage": "",
+    "author": "Sindre Sorhus sindresorhus@gmail.com",
+    "licenseFiles": [
+      "license"
     ],
     "noticeFiles": [],
     "direct": false,
@@ -10487,6 +10777,20 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "y18n",
+    "version": "4.0.3",
+    "license": "ISC",
+    "repository": "git@github.com:yargs/y18n.git",
+    "homepage": "https://github.com/yargs/y18n",
+    "author": "Ben Coe <ben@npmjs.com>",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
     "name": "yallist",
     "version": "3.1.1",
     "license": "ISC",
@@ -10509,6 +10813,34 @@ export const npmPackages = [
     "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)",
     "licenseFiles": [
       "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "yargs",
+    "version": "15.4.1",
+    "license": "MIT",
+    "repository": "https://github.com/yargs/yargs.git",
+    "homepage": "https://yargs.js.org/",
+    "author": "",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "yargs-parser",
+    "version": "18.1.3",
+    "license": "ISC",
+    "repository": "https://github.com/yargs/yargs-parser.git",
+    "homepage": "",
+    "author": "Ben Coe <ben@npmjs.com>",
+    "licenseFiles": [
+      "LICENSE.txt"
     ],
     "noticeFiles": [],
     "direct": false,

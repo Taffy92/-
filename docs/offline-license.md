@@ -38,14 +38,17 @@ node tools/admin-license-generator/main.mjs --request activation_request.mrx --d
 
 ## 私有授权后台
 
-`cloudbase/functions/licenseAdmin` 是管理员手机可用的私有授权后台。它和本地生码器使用同一套授权格式：
+EdgeOne 私有授权后台位于 `https://gszhmrx.cn/admin/license/`，手机和电脑都可使用。它和本地生码器使用同一套授权格式：
 
-- 输入用户机器码，或粘贴 `activation_request.mrx` 内容。
+- 输入用户提供的机器码，选择授权期限。
 - 生成 `UFC1-` 激活码和 `license.mrx` 授权文件。
+- 可复制激活码、展示二维码、查询历史、续期或重新下载授权文件。
 - 用户电脑有互联网时，可复制激活码给用户；用户电脑无互联网时，也可通过电话、微信或 U 盘传递激活码/授权文件。
 - 桌面端只用内置公钥本地验签，不依赖后台在线可用性。
 
-后台私钥通过 CloudBase 函数环境变量 `LICENSE_PRIVATE_KEY_PEM_B64` 注入，管理员密码只保存 SHA256 到 `LICENSE_ADMIN_PASSWORD_SHA256`。不要把这些值写入代码、在线前端、客户安装包或 Git。
+后台使用 EdgeOne 服务端环境变量注入 scrypt 密码摘要、签名私钥、会话密钥和记录加密密钥。授权历史逐条加密保存在 EdgeOne Blob；列表只显示脱敏机器码。不要把任何实际秘密值写入代码、在线前端、客户安装包或 Git。
+
+旧 CloudBase 后台不再作为生产入口，但迁移不影响已经签发的授权。管理员密码允许 6 位纯数字，程序不设复杂度或连续错误锁定；因此地址和密码只应由管理员掌握。
 
 ## 发布前检查
 
@@ -53,9 +56,10 @@ node tools/admin-license-generator/main.mjs --request activation_request.mrx --d
 
 - 生成生产密钥对，替换桌面端公钥，确认开发测试公钥不用于正式安装包。
 - 确认 `tools/admin-license-generator/keys/`、`license_records.json`、`tools/admin-license-generator/out/` 和 `.mrx` 授权文件没有进入客户包。
-- 确认 `licenseAdmin` 云函数使用的私钥和桌面端生产公钥匹配。
-- 运行 `npm test`、`cargo check`、`cargo test`、`npm run build:web`。
-- 如执行过 `npm run package:desktop`，正式部署在线站点前必须重新运行 `npm run build:web`，确保 `apps/web/out` 是在线版产物。
+- 运行 `setup-edgeone-admin.ps1`，确认 EdgeOne 后台私钥与桌面端生产公钥匹配。
+- 备份记录加密密钥；密钥丢失后历史记录和加密备份无法恢复。
+- 运行 `npm test`、`cargo check`、`cargo test`、`npm run build:edgeone`。
+- 如执行过 `npm run package:desktop`，正式部署前必须重新运行 `npm run build:edgeone`，确保 `apps/web/out` 是完整在线产物。
 
 ## 已知限制
 

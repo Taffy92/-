@@ -1,6 +1,6 @@
 # 项目协作规则
 
-本项目是“万能格式转换器”，包含 `apps/web` 在线版、`apps/desktop` Tauri 离线版、`cloudbase/functions/licenseAdmin` 私有授权后台，以及备用的 `cloudbase/functions/createDownloadUrl` 下载口令云函数。
+本项目是“万能格式转换器”，包含 `apps/web` 在线版、`apps/desktop` Tauri 离线版、`apps/web/cloud-functions` EdgeOne 私有授权后台，以及备用的 `cloudbase/functions/createDownloadUrl` 下载口令云函数。旧 `cloudbase/functions/licenseAdmin` 仅保留为历史实现。
 
 ## 硬性边界
 
@@ -12,7 +12,7 @@
 - 离线版批量结果必须写入独立文件夹，PDF/Word/Excel 多页结果写入同名子文件夹，不得回退为 ZIP 或 7Z 汇总。
 - 离线商业授权只允许做 Tauri 本地 3 天试用、机器码、离线激活码或授权文件校验，不引入登录、会员或云端转换。
 - 授权私钥、客户记录、生成的 `.mrx` 授权文件不得进入在线站点、客户安装包或公开仓库。
-- `licenseAdmin` 只给管理员生成离线激活码和 `license.mrx`，不得接收或上传用户处理文件。
+- EdgeOne 授权后台只给管理员生成离线激活码和 `license.mrx`，不得接收或上传用户处理文件。
 - 发布说明、许可证、隐私说明、第三方组件声明等必要文件必须保留。
 
 ## 常用命令
@@ -38,5 +38,5 @@ npm run deploy:license-admin
 
 - 下载页不得直接链接原始 `.md` 发布文档，应链接站内 HTML 渲染页。
 - 根目录只保留 README、许可证、项目规则等入口文件；阶段性报告放入 `docs/reports/archive/`。
-- EdgeOne 是公开网站和试用安装包的正式分发渠道；CloudBase 仅保留私有授权后台、下载口令备用云函数和过渡托管能力。
+- EdgeOne 是公开网站、试用安装包和私有授权后台的正式渠道；CloudBase 仅保留历史授权实现、下载口令备用云函数和过渡托管能力。
 - CloudBase 环境 ID 如需替换，必须同步修改 `package.json` 与 `apps/web/cloudbaserc.json`。

@@ -2,9 +2,9 @@
 
 本文件为“万能格式转换器”在线版和 Windows 离线安装版的第三方开源软件 Notices。内容根据锁文件、本地依赖元数据和最终构建产物生成，用于正式发布前的许可证归档和产品内展示。
 
-- 生成时间：2026-06-17T00:19:41.734Z
-- npm 依赖数量：728
-- 直接 npm 依赖数量：35
+- 生成时间：2026-07-26T16:22:37.297Z
+- npm 依赖数量：749
+- 直接 npm 依赖数量：38
 - Rust crate 数量：429
 - 构建产物记录数量：5
 - 开发者：MR.谢
@@ -32,9 +32,9 @@
 
 | 名称 | 路径 | 类型 | 文件数 | 大小 | SHA256 | 说明 |
 | --- | --- | --- | --- | --- | --- | --- |
-| Next.js 静态网站产物 | `apps/web/out` | 目录 | 296 | 42.32 MB | - | 在线版和离线版共用的静态页面、JS、CSS 和静态资源。 |
+| Next.js 静态网站产物 | `apps/web/out` | 目录 | 352 | 543.78 MB | - | 在线版和离线版共用的静态页面、JS、CSS 和静态资源。 |
 | PDF.js 静态资源 | `apps/web/out/pdfjs` | 目录 | 189 | 3.80 MB | - | 来自 pdfjs-dist 的主模块、worker、CMaps 和字体资源。 |
-| FFmpeg WASM 静态资源 | `apps/web/out/ffmpeg` | 目录 | 2 | 30.85 MB | - | 来自 @ffmpeg/core 的 ffmpeg-core.js 和 ffmpeg-core.wasm。 |
+| FFmpeg WASM 静态资源 | `apps/web/out/ffmpeg` | 目录 | 3 | 30.85 MB | - | 来自 @ffmpeg/core 的 ffmpeg-core.js 和 ffmpeg-core.wasm。 |
 | Windows NSIS 安装包 | `release/v1.0.0/installers/万能格式转换离线专业版_1.0.0_x64-setup.exe` | 文件 | 1 | 245.42 MB | E2A03FDDE5907DD0462FF76C4A440869201B82A71533E82FD0EB25E2826D5564 | 离线版 Windows x64 EXE 安装包。 |
 | Windows MSI 安装包 | `release/v1.0.0/installers/万能格式转换离线专业版_1.0.0_x64_zh-CN.msi` | 文件 | 1 | 255.93 MB | 17B59355E550C5295CF3B9383E4391F57D1789AF1F2783302B483663555C850C | 离线版 Windows x64 MSI 安装包。 |
 
@@ -43,6 +43,7 @@
 | 包名 | 版本 | 许可证 | 仓库/主页 | 许可证文件 |
 | --- | --- | --- | --- | --- |
 | @cloudbase/cli | 3.3.3 | ISC | - | - |
+| @edgeone/pages-blob | 0.0.14 | MIT | - | - |
 | @ffmpeg/core | 0.12.10 | GPL-2.0-or-later | git+https://github.com/ffmpegwasm/ffmpeg.wasm.git | - |
 | @ffmpeg/ffmpeg | 0.12.15 | MIT | git+https://github.com/ffmpegwasm/ffmpeg.wasm.git | - |
 | @ffmpeg/util | 0.12.2 | MIT | git+https://github.com/ffmpegwasm/ffmpeg.wasm.git | - |
@@ -54,6 +55,7 @@
 | @types/node | 14.18.63 | MIT | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE |
 | @types/node | 16.18.11 | MIT | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE |
 | @types/node | 20.19.41 | MIT | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE |
+| @types/qrcode | 1.5.5 | MIT | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE |
 | @types/react | 18.3.28 | MIT | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE |
 | @types/react-dom | 18.3.7 | MIT | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE |
 | autoprefixer | 10.5.0 | MIT | postcss/autoprefixer | LICENSE |
@@ -70,6 +72,7 @@
 | next | 15.5.18 | MIT | vercel/next.js | license.md |
 | pdfjs-dist | 4.10.38 | Apache-2.0 | git+https://github.com/mozilla/pdf.js.git | LICENSE |
 | postcss | 8.5.10 | MIT | postcss/postcss | LICENSE |
+| qrcode | 1.5.4 | MIT | git://github.com/soldair/node-qrcode.git | license |
 | react | 18.3.1 | MIT | https://github.com/facebook/react.git | LICENSE |
 | react-dom | 18.3.1 | MIT | https://github.com/facebook/react.git | LICENSE |
 | tailwindcss | 3.4.19 | MIT | https://github.com/tailwindlabs/tailwindcss.git#v3 | LICENSE |
@@ -96,6 +99,7 @@
 | @edge-runtime/ponyfill | 2.4.2 | MPL-2.0 | 否 | 是 | git+https://github.com/vercel/edge-runtime.git | LICENSE.md | - |
 | @edge-runtime/primitives | 4.1.0 | MPL-2.0 | 否 | 是 | git+https://github.com/vercel/edge-runtime.git | LICENSE.md | - |
 | @edge-runtime/vm | 3.2.0 | MPL-2.0 | 否 | 是 | git+https://github.com/vercel/edge-runtime.git | LICENSE.md | - |
+| @edgeone/pages-blob | 0.0.14 | MIT | 是 | 是 | - | - | - |
 | @esbuild/win32-x64 | 0.21.5 | MIT | 否 | 是 | git+https://github.com/evanw/esbuild.git | - | - |
 | @eslint-community/eslint-utils | 4.9.1 | MIT | 否 | 是 | https://github.com/eslint-community/eslint-utils | LICENSE | - |
 | @eslint-community/regexpp | 4.12.2 | MIT | 否 | 是 | https://github.com/eslint-community/regexpp | LICENSE | - |
@@ -157,6 +161,7 @@
 | @types/node | 16.18.11 | MIT | 是 | 是 | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE | - |
 | @types/node | 20.19.41 | MIT | 是 | 是 | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE | - |
 | @types/prop-types | 15.7.15 | MIT | 否 | 是 | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE | - |
+| @types/qrcode | 1.5.5 | MIT | 是 | 是 | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE | - |
 | @types/react | 18.3.28 | MIT | 是 | 是 | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE | - |
 | @types/react-dom | 18.3.7 | MIT | 是 | 是 | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE | - |
 | @typescript-eslint/eslint-plugin | 8.59.3 | MIT | 否 | 是 | https://github.com/typescript-eslint/typescript-eslint.git | LICENSE | - |
@@ -264,6 +269,7 @@
 | call-bind-apply-helpers | 1.0.2 | MIT | 否 | 是 | git+https://github.com/ljharb/call-bind-apply-helpers.git | LICENSE | - |
 | call-bound | 1.0.4 | MIT | 否 | 是 | git+https://github.com/ljharb/call-bound.git | LICENSE | - |
 | callsites | 3.1.0 | MIT | 否 | 是 | sindresorhus/callsites | license | - |
+| camelcase | 5.3.1 | MIT | 否 | 是 | sindresorhus/camelcase | license | - |
 | camelcase-css | 2.0.1 | MIT | 否 | 是 | stevenvachon/camelcase-css | license | - |
 | caniuse-lite | 1.0.30001792 | CC-BY-4.0 | 否 | 是 | browserslist/caniuse-lite | LICENSE | - |
 | chai | 4.5.0 | MIT | 否 | 是 | https://github.com/chaijs/chai | LICENSE | - |
@@ -276,6 +282,7 @@
 | chownr | 2.0.0 | ISC | 否 | 是 | git://github.com/isaacs/chownr.git | LICENSE | - |
 | cjs-module-lexer | 1.2.3 | MIT | 否 | 是 | git+https://github.com/nodejs/cjs-module-lexer.git | LICENSE | - |
 | client-only | 0.0.1 | MIT | 否 | 是 | https://reactjs.org/ | - | - |
+| cliui | 6.0.0 | ISC | 否 | 是 | http://github.com/yargs/cliui.git | LICENSE.txt | - |
 | code-block-writer | 10.1.1 | MIT | 否 | 是 | git+https://github.com/dsherret/code-block-writer.git | LICENSE | - |
 | color-convert | 2.0.1 | MIT | 否 | 是 | Qix-/color-convert | LICENSE | - |
 | color-name | 1.1.4 | MIT | 否 | 是 | git@github.com:colorjs/color-name.git | LICENSE | - |
@@ -306,6 +313,7 @@
 | debug | 3.2.7 | MIT | 否 | 是 | git://github.com/visionmedia/debug.git | LICENSE | - |
 | debug | 4.1.1 | MIT | 否 | 是 | git://github.com/visionmedia/debug.git | LICENSE | - |
 | debug | 4.4.3 | MIT | 否 | 是 | git://github.com/debug-js/debug.git | LICENSE | - |
+| decamelize | 1.2.0 | MIT | 否 | 是 | sindresorhus/decamelize | license | - |
 | decimal.js | 10.6.0 | MIT | 否 | 是 | https://github.com/MikeMcl/decimal.js.git | LICENCE.md | - |
 | deep-eql | 4.1.4 | MIT | 否 | 是 | git@github.com:chaijs/deep-eql.git | LICENSE | - |
 | deep-is | 0.1.4 | MIT | 否 | 是 | http://github.com/thlorenz/deep-is.git | LICENSE | - |
@@ -318,6 +326,7 @@
 | didyoumean | 1.2.2 | Apache-2.0 | 否 | 是 | https://github.com/dcporter/didyoumean.js.git | LICENSE | - |
 | diff | 4.0.4 | BSD-3-Clause | 否 | 是 | git://github.com/kpdecker/jsdiff.git | LICENSE | - |
 | diff-sequences | 29.6.3 | MIT | 否 | 是 | https://github.com/jestjs/jest.git | LICENSE | - |
+| dijkstrajs | 1.0.3 | MIT | 否 | 是 | git://github.com/tcort/dijkstrajs | LICENSE.md | - |
 | dlv | 1.1.3 | MIT | 否 | 是 | developit/dlv | - | - |
 | doctrine | 2.1.0 | Apache-2.0 | 否 | 是 | eslint/doctrine | LICENSE, LICENSE.closure-compiler, LICENSE.esprima | - |
 | doctrine | 3.0.0 | Apache-2.0 | 否 | 是 | eslint/doctrine | LICENSE, LICENSE.closure-compiler, LICENSE.esprima | - |
@@ -381,6 +390,7 @@
 | file-saver | 2.0.5 | MIT | 是 | 是 | https://github.com/eligrey/FileSaver.js | LICENSE.md | - |
 | file-uri-to-path | 1.0.0 | MIT | 否 | 是 | git://github.com/TooTallNate/file-uri-to-path.git | LICENSE | - |
 | fill-range | 7.1.1 | MIT | 否 | 是 | jonschlinkert/fill-range | LICENSE | - |
+| find-up | 4.1.0 | MIT | 否 | 是 | sindresorhus/find-up | license | - |
 | find-up | 5.0.0 | MIT | 否 | 是 | sindresorhus/find-up | license | - |
 | flat-cache | 3.2.0 | MIT | 否 | 是 | jaredwray/flat-cache | LICENSE | - |
 | flatted | 3.4.2 | ISC | 否 | 是 | git+https://github.com/WebReflection/flatted.git | LICENSE | - |
@@ -400,6 +410,7 @@
 | gauge | 3.0.2 | ISC | 否 | 是 | https://github.com/iarna/gauge | LICENSE | - |
 | generator-function | 2.0.1 | MIT | 否 | 是 | git+https://github.com/TimothyGu/generator-function.git | LICENSE.md | - |
 | generic-pool | 3.4.2 | MIT | 否 | 是 | http://github.com/coopernurse/node-pool.git | - | - |
+| get-caller-file | 2.0.5 | ISC | 否 | 是 | git+https://github.com/stefanpenner/get-caller-file.git | LICENSE.md | - |
 | get-func-name | 2.0.2 | MIT | 否 | 是 | git+ssh://git@github.com/chaijs/get-func-name.git | LICENSE | - |
 | get-intrinsic | 1.3.0 | MIT | 否 | 是 | git+https://github.com/ljharb/get-intrinsic.git | LICENSE | - |
 | get-proto | 1.0.1 | MIT | 否 | 是 | git+https://github.com/ljharb/get-proto.git | LICENSE | - |
@@ -506,6 +517,7 @@
 | lines-and-columns | 1.2.4 | MIT | 否 | 是 | https://github.com/eventualbuddha/lines-and-columns.git | LICENSE | - |
 | listenercount | 1.0.1 | ISC | 否 | 是 | git@github.com:jden/node-listenercount.git | LICENSE.md | - |
 | local-pkg | 0.5.1 | MIT | 否 | 是 | git+https://github.com/antfu/local-pkg.git | LICENSE | - |
+| locate-path | 5.0.0 | MIT | 否 | 是 | sindresorhus/locate-path | license | - |
 | locate-path | 6.0.0 | MIT | 否 | 是 | sindresorhus/locate-path | license | - |
 | lodash.defaults | 4.2.0 | MIT | 否 | 是 | lodash/lodash | LICENSE | - |
 | lodash.difference | 4.5.0 | MIT | 否 | 是 | lodash/lodash | LICENSE | - |
@@ -586,9 +598,12 @@
 | os-paths | 4.4.0 | MIT | 否 | 是 | rivy/js.os-paths | LICENSE | - |
 | own-keys | 1.0.1 | MIT | 否 | 是 | git+https://github.com/ljharb/own-keys.git | LICENSE | - |
 | p-finally | 2.0.1 | MIT | 否 | 是 | sindresorhus/p-finally | license | - |
+| p-limit | 2.3.0 | MIT | 否 | 是 | sindresorhus/p-limit | license | - |
 | p-limit | 3.1.0 | MIT | 否 | 是 | sindresorhus/p-limit | license | - |
 | p-limit | 5.0.0 | MIT | 否 | 是 | sindresorhus/p-limit | license | - |
+| p-locate | 4.1.0 | MIT | 否 | 是 | sindresorhus/p-locate | license | - |
 | p-locate | 5.0.0 | MIT | 否 | 是 | sindresorhus/p-locate | license | - |
+| p-try | 2.2.0 | MIT | 否 | 是 | sindresorhus/p-try | license | - |
 | pako | 1.0.11 | (MIT AND Zlib) | 否 | 是 | nodeca/pako | LICENSE | - |
 | parent-module | 1.0.1 | MIT | 否 | 是 | sindresorhus/parent-module | license | - |
 | parse-ms | 2.1.0 | MIT | 否 | 是 | sindresorhus/parse-ms | license | - |
@@ -617,6 +632,7 @@
 | pkg-types | 1.3.1 | MIT | 否 | 是 | unjs/pkg-types | LICENSE | - |
 | playwright | 1.60.0 | Apache-2.0 | 否 | 是 | git+https://github.com/microsoft/playwright.git | LICENSE | NOTICE |
 | playwright-core | 1.60.0 | Apache-2.0 | 否 | 是 | git+https://github.com/microsoft/playwright.git | LICENSE | NOTICE |
+| pngjs | 5.0.0 | MIT | 否 | 是 | git://github.com/lukeapage/pngjs.git | LICENSE | - |
 | possible-typed-array-names | 1.1.0 | MIT | 否 | 是 | git+https://github.com/ljharb/possible-typed-array-names.git | LICENSE | - |
 | postcss | 8.5.10 | MIT | 是 | 是 | postcss/postcss | LICENSE | - |
 | postcss-import | 15.1.0 | MIT | 否 | 是 | https://github.com/postcss/postcss-import.git | LICENSE | - |
@@ -634,6 +650,7 @@
 | psl | 1.15.0 | MIT | 否 | 是 | git@github.com:lupomontero/psl.git | LICENSE | - |
 | pump | 3.0.4 | MIT | 否 | 是 | git://github.com/mafintosh/pump.git | LICENSE | - |
 | punycode | 2.3.1 | MIT | 否 | 是 | https://github.com/mathiasbynens/punycode.js.git | - | - |
+| qrcode | 1.5.4 | MIT | 是 | 是 | git://github.com/soldair/node-qrcode.git | license | - |
 | querystringify | 2.2.0 | MIT | 否 | 是 | https://github.com/unshiftio/querystringify | LICENSE | - |
 | queue-microtask | 1.2.3 | MIT | 否 | 是 | git://github.com/feross/queue-microtask.git | LICENSE | - |
 | raw-body | 2.4.1 | MIT | 否 | 是 | stream-utils/raw-body | LICENSE | - |
@@ -649,7 +666,9 @@
 | readdirp | 3.6.0 | MIT | 否 | 是 | git://github.com/paulmillr/readdirp.git | LICENSE | - |
 | reflect.getprototypeof | 1.0.10 | MIT | 否 | 是 | git+https://github.com/es-shims/Reflect.getPrototypeOf.git | LICENSE | - |
 | regexp.prototype.flags | 1.5.4 | MIT | 否 | 是 | git://github.com/es-shims/RegExp.prototype.flags.git | LICENSE | - |
+| require-directory | 2.1.1 | MIT | 否 | 是 | git://github.com/troygoode/node-require-directory.git | LICENSE | - |
 | require-from-string | 2.0.2 | MIT | 否 | 是 | floatdrop/require-from-string | license | - |
+| require-main-filename | 2.0.0 | ISC | 否 | 是 | git+ssh://git@github.com/yargs/require-main-filename.git | LICENSE.txt | - |
 | requires-port | 1.0.0 | MIT | 否 | 是 | https://github.com/unshiftio/requires-port | LICENSE | - |
 | resolve | 1.22.12 | MIT | 否 | 是 | ssh://github.com/browserify/resolve.git | LICENSE | - |
 | resolve | 2.0.0-next.7 | MIT | 否 | 是 | ssh://github.com/browserify/resolve.git | LICENSE | - |
@@ -791,18 +810,23 @@
 | which-boxed-primitive | 1.1.1 | MIT | 否 | 是 | git+https://github.com/inspect-js/which-boxed-primitive.git | LICENSE | - |
 | which-builtin-type | 1.2.1 | MIT | 否 | 是 | git+https://github.com/inspect-js/which-builtin-type.git | LICENSE | - |
 | which-collection | 1.0.2 | MIT | 否 | 是 | git+https://github.com/inspect-js/which-collection.git | LICENSE | - |
+| which-module | 2.0.1 | ISC | 否 | 是 | git+https://github.com/nexdrew/which-module.git | LICENSE | - |
 | which-typed-array | 1.1.20 | MIT | 否 | 是 | git://github.com/inspect-js/which-typed-array.git | LICENSE | - |
 | why-is-node-running | 2.3.0 | MIT | 否 | 是 | https://github.com/mafintosh/why-is-node-running.git | LICENSE | - |
 | wide-align | 1.1.5 | ISC | 否 | 是 | https://github.com/iarna/wide-align | LICENSE | - |
 | word-wrap | 1.2.5 | MIT | 否 | 是 | jonschlinkert/word-wrap | LICENSE | - |
+| wrap-ansi | 6.2.0 | MIT | 否 | 是 | chalk/wrap-ansi | license | - |
 | wrappy | 1.0.2 | ISC | 否 | 是 | https://github.com/npm/wrappy | LICENSE | - |
 | ws | 8.20.1 | MIT | 否 | 是 | git+https://github.com/websockets/ws.git | LICENSE | - |
 | xdg-app-paths | 5.1.0 | MIT | 否 | 是 | rivy/js.xdg-app-paths | license | - |
 | xdg-portable | 7.3.0 | MIT | 否 | 是 | rivy/js.xdg-portable | LICENSE | - |
 | xml-name-validator | 5.0.0 | Apache-2.0 | 否 | 是 | jsdom/xml-name-validator | LICENSE.txt | - |
 | xmlchars | 2.2.0 | MIT | 否 | 是 | https://github.com/lddubeau/xmlchars.git | LICENSE | - |
+| y18n | 4.0.3 | ISC | 否 | 是 | git@github.com:yargs/y18n.git | LICENSE | - |
 | yallist | 3.1.1 | ISC | 否 | 是 | git+https://github.com/isaacs/yallist.git | LICENSE | - |
 | yallist | 4.0.0 | ISC | 否 | 是 | git+https://github.com/isaacs/yallist.git | LICENSE | - |
+| yargs | 15.4.1 | MIT | 否 | 是 | https://github.com/yargs/yargs.git | LICENSE | - |
+| yargs-parser | 18.1.3 | ISC | 否 | 是 | https://github.com/yargs/yargs-parser.git | LICENSE.txt | - |
 | yauzl | 2.10.0 | MIT | 否 | 是 | https://github.com/thejoshwolfe/yauzl.git | LICENSE | - |
 | yauzl-clone | 1.0.4 | MIT | 否 | 是 | https://github.com/overlookmotel/yauzl-clone.git | License | - |
 | yauzl-promise | 2.1.3 | MIT | 否 | 是 | https://github.com/overlookmotel/yauzl-promise.git | License | - |

@@ -90,15 +90,13 @@ npm run build:edgeone
 
 ```bash
 NEXT_PUBLIC_SITE_URL=https://gszhmrx.cn
-LICENSE_ADMIN_PASSWORD_SHA256=
-LICENSE_PRIVATE_KEY_PEM_B64=
 ```
 
 当前正式域名为 `https://gszhmrx.cn`，`https://www.gszhmrx.cn` 绑定到同一 EdgeOne Pages 项目。所有 canonical、sitemap、Open Graph URL 都从 `apps/web/src/config/site.ts` 的 `siteConfig.url` 读取，构建前确认 `NEXT_PUBLIC_SITE_URL=https://gszhmrx.cn`。
 
 离线安装包按 3 天试用模式直接下载。下载页固定读取 EdgeOne 同源清单 `/release/v1.0.0/edgeone/manifest.json`，不再依赖可变的外部安装包 URL 环境变量。
 
-`LICENSE_ADMIN_PASSWORD_SHA256` 和 `LICENSE_PRIVATE_KEY_PEM_B64` 只用于 `cloudbase/functions/licenseAdmin` 私有授权后台，必须配置在 CloudBase 云函数环境变量中，不要写入在线前端或 Git。
+授权后台四项秘密值只配置在 EdgeOne 服务端环境变量中，不写入 `.env`、在线前端或 Git。使用 `tools/admin-license-generator/setup-edgeone-admin.ps1` 在本地安全生成。
 
 ## 广告配置
 
@@ -120,11 +118,11 @@ npm run deploy:edgeone
 
 EdgeOne 项目名为 `format-converter-web`。正式构建会从被 Git 忽略的 `release/v1.0.0/installers/` 读取 EXE/MSI，先核对整包 SHA256，再生成不超过 16 MiB 的同源分片。浏览器逐片校验并在本地拼装，避免国内用户被跳转到 GitHub。
 
-具体检查地址、故障处理和 CloudBase 保留边界见 `docs/operator-runbook.md`。
+正式构建还会纳入 EdgeOne 授权函数，并检查私钥、客户记录和 `.mrx` 没有进入发布产物。具体检查地址与故障处理见 `docs/operator-runbook.md`。
 
 ## 备用托管
 
-仓库仍保留 `deploy:vercel` 和 `deploy:cloudbase` 作为应急静态托管命令，但它们不是当前正式发布通道，也不会自动生成 EdgeOne 下载分片。CloudBase 环境 `format-converter-prod-x-d71bce41` 主要继续承载私有授权后台和备用下载口令云函数。
+仓库仍保留 `deploy:vercel` 和 `deploy:cloudbase` 作为应急静态托管命令，但它们不是当前正式发布通道，也不会自动生成 EdgeOne 下载分片。CloudBase 环境 `format-converter-prod-x-d71bce41` 已隔离，只保留历史授权实现和备用下载口令云函数。
 
 `apps/web/cloudbaserc.json` 使用 `apps/web/out` 作为静态托管目录。当前仓库已配置 CloudBase 环境 `format-converter-prod-x-d71bce41`。如果部署到其他环境，再同步修改根目录 `package.json` 的 `deploy:cloudbase` 脚本和 `apps/web/cloudbaserc.json` 的 `envId`。
 
@@ -140,7 +138,7 @@ EdgeOne 响应头配置位于 `apps/web/edgeone.json`。Vercel 备用配置由 `
 
 ## 私有授权后台
 
-私有授权后台位于 `cloudbase/functions/licenseAdmin`。部署后管理员可用手机浏览器打开 `/licenseAdmin`，输入管理员密码、用户机器码和授权天数，生成激活码或 `license.mrx`。生成结果仍按桌面端本地公钥验签，用户电脑有网或无网都可以授权。
+私有授权后台位于 `https://gszhmrx.cn/admin/license/`。管理员可在手机或电脑登录，粘贴用户机器码并选择期限，随后复制激活码、展示二维码或下载 `license.mrx`；历史记录支持搜索、续期和重新下载。桌面端始终使用本地公钥验签，用户电脑有网或无网都可以授权。
 
 部署命令：
 
@@ -148,14 +146,13 @@ EdgeOne 响应头配置位于 `apps/web/edgeone.json`。Vercel 备用配置由 `
 npm run deploy:license-admin
 ```
 
-部署前必须在 CloudBase 函数环境变量中配置：
+首次部署前，在管理员电脑运行：
 
-```text
-LICENSE_ADMIN_PASSWORD_SHA256=<管理员密码 sha256>
-LICENSE_PRIVATE_KEY_PEM_B64=<Ed25519 私钥 PEM 的 Base64>
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\admin-license-generator\setup-edgeone-admin.ps1
 ```
 
-不要把私钥、后台密码或授权记录提交到 Git。管理员本地生码器仍保留在 `tools/admin-license-generator`，可作为离线备用方案。
+把生成的四项值安全设置到 EdgeOne 生产环境变量后再部署。密码允许 6 位纯数字，程序不做复杂度限制或连续错误锁定；不要公开后台地址和密码。记录加密密钥丢失后历史记录无法恢复。管理员本地生码器继续作为完全离线的备用方案。
 
 ## 离线安装版
 
@@ -223,8 +220,8 @@ Excel 转图片：支持 `.xlsx`、`.csv`。旧版 `.xls` 请先用 Excel/WPS �
 6. 商业发布前确认离线授权生产公钥已替换，管理员私钥和授权记录没有进入客户包。
 7. 运行 `npm run package:desktop`。
 8. 将新 EXE/MSI 同步到 `release/<version>/installers/`，更新 SHA256，并同步下载配置和 EdgeOne 构建脚本中的版本、文件名与校验值。
-9. 确认 `licenseAdmin` 云函数环境变量中的私钥对应桌面端 `PUBLIC_KEY_RAW_B64`。
-10. 运行 `npm run build:edgeone` 和 `npm run deploy:edgeone`，完成国内站点与同源下载验证；仅在授权后台变更时部署 `licenseAdmin`。
+9. 运行本地秘密配置工具，确认 EdgeOne 后台私钥对应桌面端 `PUBLIC_KEY_RAW_B64`，并安全备份记录加密密钥。
+10. 运行 `npm run build:edgeone` 和 `npm run deploy:edgeone`，完成国内站点、同源下载与私有授权后台验证。
 
 ## 第三方依赖许可证
 

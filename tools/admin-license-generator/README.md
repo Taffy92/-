@@ -1,8 +1,20 @@
 # Admin License Generator
 
-This tool is for the administrator only. Do not put this directory, private
-keys, generated licenses, or `license_records.json` into the customer installer
-or the public website.
+Administrator-only tooling for the offline desktop license. Private keys,
+customer records, secret configuration, and generated `.mrx` files must never
+enter the public website, customer installer, or Git.
+
+## Private Web Admin
+
+The production admin is available on desktop and mobile at:
+
+```text
+https://gszhmrx.cn/admin/license/
+```
+
+It issues the same offline license format as this local tool. Existing licenses
+remain valid after the CloudBase-to-EdgeOne migration because the desktop app
+verifies them locally.
 
 ## Generate Keys
 
@@ -10,36 +22,34 @@ or the public website.
 node tools/admin-license-generator/keygen.mjs
 ```
 
-Copy the printed raw public key into `PUBLIC_KEY_RAW_B64` in:
+Copy the raw public key into `PUBLIC_KEY_RAW_B64` in
+`apps/desktop/src-tauri/src/license.rs`. Keep `keys/private_key.pem` offline.
 
-```text
-apps/desktop/src-tauri/src/license.rs
+## Prepare EdgeOne Secrets
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\admin-license-generator\setup-edgeone-admin.ps1
 ```
 
-The private key stays in `tools/admin-license-generator/keys/private_key.pem`.
+The hidden prompt accepts any non-empty password, including six digits. The
+tool verifies that the private key matches the desktop public key and writes
+four environment values to the ignored
+`.tmp/edgeone-admin-secrets.env` file. It never prints their values.
 
-## Generate A License
+Keep an offline backup of the record encryption key. Losing it makes stored
+license history and encrypted backups unreadable.
+
+## Emergency Local Issuing
 
 ```powershell
 node tools/admin-license-generator/main.mjs --machine XXXX-XXXX-XXXX-XXXX --days 30 --customer "Customer"
 ```
 
-Or use an exported activation request:
+Or issue from an exported activation request:
 
 ```powershell
 node tools/admin-license-generator/main.mjs --request activation_request.mrx --days 365 --customer "Customer"
 ```
 
-Outputs:
-
-- License code printed in the terminal.
-- `tools/admin-license-generator/out/license.mrx`.
-- A local `license_records.json` record.
-
-## Production Rule
-
-Before a real release, generate a production key pair, update the desktop public
-key, rebuild the desktop installer, and keep `private_key.pem` offline.
-
-Generated keys, records, output files, and `.mrx` files are local admin artifacts
-and must not be copied into `apps/web/out` or the customer installer.
+Outputs are the terminal activation code, `out/license.mrx`, and the local
+`license_records.json`. All are ignored local admin artifacts.

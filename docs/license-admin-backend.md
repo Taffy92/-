@@ -1,42 +1,57 @@
-# 私有授权后台说明
+# EdgeOne 私有授权后台
 
-公开下载页采用“直接下载 3 天试用版，试用结束后激活”的模式。私有授权后台只给管理员使用，用来签发离线激活码和 `license.mrx`。
+私有授权后台只给管理员签发离线激活码和 `license.mrx`，不接收用户处理的图片、文档、音视频或转换结果。
 
-## 访问方式
-
-部署后打开：
+## 访问地址
 
 ```text
-https://format-converter-prod-x-d71bce41.service.tcloudbase.com/licenseAdmin
+https://gszhmrx.cn/admin/license/
 ```
 
-手机和电脑浏览器都可以访问。后台页面需要管理员密码，密码本身不写入仓库，云函数只保存 SHA256 摘要。
+手机和电脑浏览器都可以使用。页面不会被搜索引擎收录，接口与页面都禁止缓存，但管理员仍需保管好地址和密码。
 
-## 授权流程
+## 日常流程
 
-1. 用户在离线专业版里复制机器码，或导出 `activation_request.mrx`。
-2. 管理员打开私有授权后台，输入机器码或粘贴请求文件内容。
-3. 管理员选择授权天数并生成授权。
-4. 后台返回激活码和 `license.mrx`。
-5. 用户在软件里输入激活码，或导入 `license.mrx`。
+1. 用户在离线专业版复制 `XXXX-XXXX-XXXX-XXXX` 机器码。
+2. 管理员登录后台，填写客户名称并粘贴机器码。
+3. 选择 30、90、180、365 天或永久授权。
+4. 生成后直接复制短激活码、展示二维码，或下载 `license.mrx` 发给用户。
+5. 需要续期时在历史记录选择“续期”；未到期授权会保留剩余时间。
+6. 用户输入激活码或导入 `license.mrx`，桌面端在本地完成验签。
 
-用户电脑有无互联网都可以完成授权，因为桌面端只校验本地签名，不调用云端授权接口。
+用户电脑无需连接授权后台。后台日后停用也不会让已签发的授权失效。
 
-## 云函数环境变量
+## 首次安全配置
+
+在管理员电脑运行：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\admin-license-generator\setup-edgeone-admin.ps1
+```
+
+输入内容不会显示。密码允许为 6 位纯数字，也允许其他非空内容；没有复杂度限制，也没有连续错误临时锁定。短密码更容易被猜中，因此不要向其他人公开后台地址或密码。
+
+工具会把以下四项写入被 Git 忽略的本地文件：
 
 ```text
-LICENSE_ADMIN_PASSWORD_SHA256=<管理员密码 sha256>
-LICENSE_PRIVATE_KEY_PEM_B64=<Ed25519 私钥 PEM 的 Base64>
+LICENSE_ADMIN_PASSWORD_SCRYPT
+LICENSE_PRIVATE_KEY_PEM_B64
+LICENSE_SESSION_SECRET_B64
+LICENSE_RECORD_ENCRYPTION_KEY_B64
 ```
 
-私钥必须与 `apps/desktop/src-tauri/src/license.rs` 中的 `PUBLIC_KEY_RAW_B64` 对应。不要把私钥、后台密码、授权记录或生成的 `.mrx` 文件提交到 Git。
+在 EdgeOne Pages 项目 `format-converter-web` 的生产环境变量中逐项添加，然后部署完整站点：
 
-## 本地备用
-
-如果 CloudBase 后台暂时不可用，可以继续使用：
-
-```text
-tools/admin-license-generator/generate-license.cmd
+```powershell
+npm run deploy:license-admin
 ```
 
-本地生码器和云端后台生成的授权格式相同。
+不要在聊天、截图、构建日志或 Git 中保存实际值。`LICENSE_RECORD_ENCRYPTION_KEY_B64` 用于解密历史记录；丢失后无法恢复 Blob 中的历史记录或后台导出的加密备份。四项值变更时，密码、现有会话、解密能力或签名身份也会相应改变。
+
+## 记录与备份
+
+授权记录逐条使用 AES-256-GCM 加密后写入 EdgeOne Blob。列表只显示脱敏机器码。后台右上角可导出加密备份；备份本身不含私钥，但仍应按敏感数据妥善保存。
+
+## 迁移边界
+
+旧 CloudBase `licenseAdmin` 已隔离并保留为历史代码，不再作为生产授权入口。备用下载口令云函数也不在公开下载主链路中。本地 `tools/admin-license-generator/generate-license.cmd` 继续作为完全离线的应急签发方式。
