@@ -16,6 +16,8 @@ const releaseInstallerDir = path.resolve(appRoot, "..", "..", "release", `v${rel
 const edgeOneReleaseDir = path.join(outDir, "release", `v${releaseVersion}`, "edgeone");
 const cloudFunctionsDir = path.join(appRoot, "cloud-functions");
 const edgeOneCloudFunctionsDir = path.join(outDir, "cloud-functions");
+const publishedReleaseBaseUrl =
+  process.env.EDGEONE_RELEASE_SOURCE_URL || "https://gszhmrx.cn";
 const installerPackages = [
   {
     type: "exe",
@@ -94,11 +96,27 @@ async function writeInstallerParts() {
     version: 1,
     packages: {}
   };
+  let publishedManifest;
 
   await mkdir(edgeOneReleaseDir, { recursive: true });
   for (const installer of installerPackages) {
     const sourcePath = path.join(releaseInstallerDir, installer.fileName);
-    const sourceBytes = await readFile(sourcePath);
+    let sourceBytes;
+    try {
+      sourceBytes = await readFile(sourcePath);
+    } catch (error) {
+      if (error?.code !== "ENOENT") throw error;
+    }
+
+    if (!sourceBytes) {
+      publishedManifest ??= await fetchPublishedInstallerManifest();
+      manifest.packages[installer.type] = await reusePublishedInstallerParts(
+        installer,
+        publishedManifest
+      );
+      continue;
+    }
+
     const sourceHash = sha256(sourceBytes);
     if (sourceHash !== installer.sha256) {
       throw new Error(`${installer.fileName} SHA256 mismatch: ${sourceHash}`);
@@ -132,6 +150,92 @@ async function writeInstallerParts() {
     path.join(edgeOneReleaseDir, "manifest.json"),
     `${JSON.stringify(manifest, null, 2)}\n`
   );
+}
+
+async function fetchPublishedInstallerManifest() {
+  const manifestUrl = new URL(
+    `/release/v${releaseVersion}/edgeone/manifest.json`,
+    publishedReleaseBaseUrl
+  );
+  console.log(`Local installers are unavailable; reusing verified parts from ${manifestUrl.origin}.`);
+  const response = await fetch(manifestUrl, {
+    signal: AbortSignal.timeout(120_000)
+  });
+  if (!response.ok) {
+    throw new Error(`Unable to fetch published installer manifest: HTTP ${response.status}`);
+  }
+  return response.json();
+}
+
+async function reusePublishedInstallerParts(installer, publishedManifest) {
+  const publishedPackage = publishedManifest?.packages?.[installer.type];
+  if (
+    !publishedPackage ||
+    publishedPackage.fileName !== installer.fileName ||
+    publishedPackage.sha256 !== installer.sha256 ||
+    !Array.isArray(publishedPackage.parts) ||
+    publishedPackage.parts.length === 0
+  ) {
+    throw new Error(`Published ${installer.type} installer manifest does not match this release.`);
+  }
+
+  const packageDir = path.join(edgeOneReleaseDir, installer.type);
+  const expectedPrefix = `/release/v${releaseVersion}/edgeone/${installer.type}/`;
+  const publishedBase = new URL(publishedReleaseBaseUrl);
+  const combinedHash = createHash("sha256");
+  const parts = [];
+  let totalSize = 0;
+  await mkdir(packageDir, { recursive: true });
+
+  for (const publishedPart of publishedPackage.parts) {
+    if (
+      typeof publishedPart?.url !== "string" ||
+      !publishedPart.url.startsWith(expectedPrefix)
+    ) {
+      throw new Error(`Published ${installer.type} installer contains an invalid part URL.`);
+    }
+
+    const partUrl = new URL(publishedPart.url, publishedBase);
+    if (partUrl.origin !== publishedBase.origin) {
+      throw new Error(`Published ${installer.type} installer part uses an unexpected origin.`);
+    }
+
+    const response = await fetch(partUrl, {
+      signal: AbortSignal.timeout(120_000)
+    });
+    if (!response.ok) {
+      throw new Error(`Unable to fetch ${partUrl.pathname}: HTTP ${response.status}`);
+    }
+
+    const partBytes = Buffer.from(await response.arrayBuffer());
+    const partHash = sha256(partBytes);
+    if (partBytes.length !== publishedPart.size || partHash !== publishedPart.sha256) {
+      throw new Error(`${partUrl.pathname} failed size or SHA256 verification.`);
+    }
+
+    const partName = path.basename(partUrl.pathname);
+    await writeFile(path.join(packageDir, partName), partBytes);
+    combinedHash.update(partBytes);
+    totalSize += partBytes.length;
+    parts.push({
+      url: `${expectedPrefix}${partName}`,
+      size: partBytes.length,
+      sha256: partHash
+    });
+  }
+
+  const combinedDigest = combinedHash.digest("hex").toUpperCase();
+  if (totalSize !== publishedPackage.size || combinedDigest !== installer.sha256) {
+    throw new Error(`Published ${installer.type} installer failed complete SHA256 verification.`);
+  }
+
+  return {
+    fileName: installer.fileName,
+    size: totalSize,
+    sha256: installer.sha256,
+    contentType: installer.contentType,
+    parts
+  };
 }
 
 async function writeFunctionRuntimePackage() {

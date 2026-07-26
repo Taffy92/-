@@ -24,6 +24,15 @@ describe("EdgeOne private license admin build", () => {
     expect(buildSource).toContain("license_records.json");
   });
 
+  it("recovers and verifies published installer parts when CI has no local installers", () => {
+    const buildSource = readFileSync(edgeOneBuildPath, "utf8");
+
+    expect(buildSource).toContain("fetchPublishedInstallerManifest");
+    expect(buildSource).toContain("reusePublishedInstallerParts");
+    expect(buildSource).toContain("failed size or SHA256 verification");
+    expect(buildSource).toContain("failed complete SHA256 verification");
+  });
+
   it("pins a mainland region and disables caching and indexing for the admin surface", () => {
     const config = JSON.parse(readFileSync(edgeOneConfigPath, "utf8"));
 
