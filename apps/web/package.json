@@ -26,6 +26,7 @@
     "@doctool/pdf-core": "workspace:*",
     "@doctool/shared": "workspace:*",
     "@doctool/ui": "workspace:*",
+    "@edgeone/pages-blob": "0.0.14",
     "@gsap/react": "^2.1.2",
     "browser-image-compression": "^2.0.2",
     "cropperjs": "^1.6.2",

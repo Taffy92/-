@@ -53,3 +53,27 @@ export type GeneratedLicense = {
   licenseFileContent: string;
   envelope: LicenseEnvelope;
 };
+
+export type LicenseRecord = {
+  recordId: string;
+  licenseId: string;
+  parentLicenseId: string | null;
+  customerName: string;
+  machineCode: string;
+  issuedAt: number;
+  previousExpiresAt: number | null;
+  expiresAt: number;
+  durationDays: number | null;
+  permanent: boolean;
+  edition: string;
+  features: string[];
+  licenseCode: string;
+  licenseFileContent: string;
+  remark: string;
+  createdAt: number;
+};
+
+export type LicenseRecordListItem = LicenseRecord & {
+  maskedMachineCode: string;
+  status: "active" | "expired";
+};
