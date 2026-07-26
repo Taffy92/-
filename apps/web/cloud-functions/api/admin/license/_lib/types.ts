@@ -73,7 +73,19 @@ export type LicenseRecord = {
   createdAt: number;
 };
 
-export type LicenseRecordListItem = LicenseRecord & {
+export type LicenseRecordListItem = {
+  recordId: string;
+  licenseId: string;
+  parentLicenseId: string | null;
+  customerName: string;
   maskedMachineCode: string;
+  issuedAt: number;
+  previousExpiresAt: number | null;
+  expiresAt: number;
+  durationDays: number | null;
+  permanent: boolean;
+  licenseCode: string;
+  remark: string;
+  createdAt: number;
   status: "active" | "expired";
 };

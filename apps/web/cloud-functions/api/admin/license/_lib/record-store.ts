@@ -158,8 +158,19 @@ function tryNormalizeMachineQuery(query: string): string {
 
 function toListItem(record: LicenseRecord): LicenseRecordListItem {
   return {
-    ...record,
+    recordId: record.recordId,
+    licenseId: record.licenseId,
+    parentLicenseId: record.parentLicenseId,
+    customerName: record.customerName,
     maskedMachineCode: maskMachineCode(record.machineCode),
+    issuedAt: record.issuedAt,
+    previousExpiresAt: record.previousExpiresAt,
+    expiresAt: record.expiresAt,
+    durationDays: record.durationDays,
+    permanent: record.permanent,
+    licenseCode: record.licenseCode,
+    remark: record.remark,
+    createdAt: record.createdAt,
     status: record.expiresAt > Math.floor(Date.now() / 1000) ? "active" : "expired"
   };
 }

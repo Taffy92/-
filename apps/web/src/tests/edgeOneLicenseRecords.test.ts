@@ -117,6 +117,8 @@ describe("EdgeOne encrypted license records", () => {
       customerName: "广州测试客户",
       maskedMachineCode: "TEST-****-****-TEST"
     });
+    expect(byCustomer.items[0]).not.toHaveProperty("machineCode");
+    expect(byCustomer.items[0]).not.toHaveProperty("licenseFileContent");
 
     const byMachine = await records.list({ query: "test test test test", page: 1, pageSize: 20 });
     expect(byMachine.total).toBe(1);
