@@ -1,4 +1,8 @@
 {
+  "buildCommand": "npm run build:edgeone",
+  "installCommand": "corepack enable && corepack prepare pnpm@9.15.4 --activate && pnpm install --frozen-lockfile",
+  "outputDirectory": "apps/web/out",
+  "nodeVersion": "20.18.0",
   "cloudFunctions": {
     "mainlandRegions": [
       "ap-guangzhou"

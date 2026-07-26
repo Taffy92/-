@@ -128,7 +128,7 @@ EdgeOne 项目名为 `format-converter-web`。正式构建会从被 Git 忽略�
 
 当前正式访问地址为 `https://gszhmrx.cn/` 和 `https://www.gszhmrx.cn/`。页脚备案号来自 `apps/web/src/config/site.ts` 的 `siteConfig.icp.text`，当前为 `鲁ICP备2026028326号`。
 
-EdgeOne 响应头配置位于 `apps/web/edgeone.json`。Vercel 备用配置由 `apps/web/src/config/securityHeaders.js` 生成，修改后执行 `npm run sync:security` 同步到 `apps/web/vercel.json`。
+EdgeOne 构建、函数地域和响应头配置位于根目录 `edgeone.json`。Vercel 备用配置由 `apps/web/src/config/securityHeaders.js` 生成，修改后执行 `npm run sync:security` 同步到 `apps/web/vercel.json`。
 
 ## 离线版试用下载
 

@@ -16,6 +16,7 @@ const releaseInstallerDir = path.resolve(appRoot, "..", "..", "release", `v${rel
 const edgeOneReleaseDir = path.join(outDir, "release", `v${releaseVersion}`, "edgeone");
 const cloudFunctionsDir = path.join(appRoot, "cloud-functions");
 const edgeOneCloudFunctionsDir = path.join(outDir, "cloud-functions");
+const edgeOneConfigPath = path.resolve(appRoot, "..", "..", "edgeone.json");
 const publishedReleaseBaseUrl =
   process.env.EDGEONE_RELEASE_SOURCE_URL || "https://gszhmrx.cn";
 const installerPackages = [
@@ -75,7 +76,7 @@ await rm(wasmPath);
 await writeInstallerParts();
 await cp(cloudFunctionsDir, edgeOneCloudFunctionsDir, { recursive: true });
 await writeFunctionRuntimePackage();
-await copyFile(path.join(appRoot, "edgeone.json"), path.join(outDir, "edgeone.json"));
+await copyFile(edgeOneConfigPath, path.join(outDir, "edgeone.json"));
 await assertNoPrivateLicenseMaterial();
 
 const oversizedFiles = [];
