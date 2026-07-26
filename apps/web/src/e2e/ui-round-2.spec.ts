@@ -78,7 +78,8 @@ test("download page keeps trial download copy clear and local-processing promise
   await expect(page.locator("h1").first()).toContainText(labels.downloadHeading);
   await expect(page.getByText(labels.trialDownloadCopy).first()).toBeVisible();
   await expect(page.getByText(labels.trialRunCopy).first()).toBeVisible();
-  await expect(page.getByRole("link", { name: labels.exeTrialDownload, exact: true })).toHaveAttribute("href", /x64-setup\.exe$/);
+  await expect(page.getByRole("button", { name: labels.exeTrialDownload, exact: true })).toBeVisible();
+  await expect(page.locator('a[href*="github.com"]')).toHaveCount(0);
   await expect(page.getByRole("link", { name: labels.releaseNotes })).toHaveAttribute("href", "/release/v1.0.0/docs/release-notes/");
   await expect(page.getByRole("link", { name: labels.installGuide })).toHaveAttribute("href", "/release/v1.0.0/docs/install-guide/");
   await expect(page.locator("#ad-container")).toHaveCount(0);
