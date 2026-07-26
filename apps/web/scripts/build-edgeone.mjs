@@ -1,4 +1,4 @@
-import { copyFile, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
+import { copyFile, cp, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import path from "node:path";
@@ -14,6 +14,8 @@ const installerPartSize = 16 * 1024 * 1024;
 const releaseVersion = "1.0.0";
 const releaseInstallerDir = path.resolve(appRoot, "..", "..", "release", `v${releaseVersion}`, "installers");
 const edgeOneReleaseDir = path.join(outDir, "release", `v${releaseVersion}`, "edgeone");
+const cloudFunctionsDir = path.join(appRoot, "cloud-functions");
+const edgeOneCloudFunctionsDir = path.join(outDir, "cloud-functions");
 const installerPackages = [
   {
     type: "exe",
@@ -69,7 +71,10 @@ if (wasmParts.length !== wasmPartUrls.length) {
 }
 await rm(wasmPath);
 await writeInstallerParts();
+await cp(cloudFunctionsDir, edgeOneCloudFunctionsDir, { recursive: true });
+await writeFunctionRuntimePackage();
 await copyFile(path.join(appRoot, "edgeone.json"), path.join(outDir, "edgeone.json"));
+await assertNoPrivateLicenseMaterial();
 
 const oversizedFiles = [];
 for (const filePath of await collectFiles(outDir)) {
@@ -127,6 +132,63 @@ async function writeInstallerParts() {
     path.join(edgeOneReleaseDir, "manifest.json"),
     `${JSON.stringify(manifest, null, 2)}\n`
   );
+}
+
+async function writeFunctionRuntimePackage() {
+  const runtimePackage = {
+    name: "format-converter-edgeone-functions",
+    version: "1.0.0",
+    private: true,
+    type: "module",
+    engines: {
+      node: "20.x"
+    },
+    dependencies: {
+      "@edgeone/pages-blob": "0.0.14"
+    }
+  };
+
+  await writeFile(
+    path.join(outDir, "package.json"),
+    `${JSON.stringify(runtimePackage, null, 2)}\n`
+  );
+}
+
+async function assertNoPrivateLicenseMaterial() {
+  const forbiddenNames = new Set([
+    "private_key.pem",
+    "license_records.json"
+  ]);
+  const textExtensions = new Set([
+    ".cjs",
+    ".env",
+    ".js",
+    ".json",
+    ".mjs",
+    ".pem",
+    ".ts",
+    ".txt"
+  ]);
+  const violations = [];
+
+  for (const filePath of await collectFiles(outDir)) {
+    const fileName = path.basename(filePath).toLowerCase();
+    if (forbiddenNames.has(fileName) || fileName.endsWith(".mrx")) {
+      violations.push(path.relative(outDir, filePath));
+      continue;
+    }
+
+    const fileStat = await stat(filePath);
+    if (fileStat.size > 1024 * 1024 || !textExtensions.has(path.extname(fileName))) continue;
+    const content = await readFile(filePath, "utf8");
+    if (/-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/.test(content)) {
+      violations.push(path.relative(outDir, filePath));
+    }
+  }
+
+  if (violations.length > 0) {
+    throw new Error(`EdgeOne output contains private license material:\n${violations.join("\n")}`);
+  }
 }
 
 function sha256(bytes) {
