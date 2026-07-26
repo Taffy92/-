@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 const projectRoot = resolve(process.cwd(), "..", "..");
 const edgeOneBuildPath = resolve(projectRoot, "apps", "web", "scripts", "build-edgeone.mjs");
 const edgeOneConfigPath = resolve(projectRoot, "edgeone.json");
+const rootPackagePath = resolve(projectRoot, "package.json");
 const edgeOneFunctionRoot = resolve(
   projectRoot,
   "cloud-functions",
@@ -14,12 +15,13 @@ const edgeOneFunctionRoot = resolve(
 );
 
 describe("EdgeOne private license admin build", () => {
-  it("packages the license functions with only their runtime dependency", () => {
+  it("keeps function source outside the public static output", () => {
     const buildSource = readFileSync(edgeOneBuildPath, "utf8");
+    const rootPackage = JSON.parse(readFileSync(rootPackagePath, "utf8"));
 
-    expect(buildSource).toContain('"cloud-functions"');
-    expect(buildSource).toContain('"@edgeone/pages-blob"');
-    expect(buildSource).toContain("writeFunctionRuntimePackage");
+    expect(buildSource).not.toContain("edgeOneCloudFunctionsDir");
+    expect(buildSource).not.toContain("writeFunctionRuntimePackage");
+    expect(rootPackage.dependencies?.["@edgeone/pages-blob"]).toBe("0.0.14");
   });
 
   it("rejects private keys, license files, and customer record exports", () => {

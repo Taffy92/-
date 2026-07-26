@@ -1,4 +1,4 @@
-import { copyFile, cp, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import path from "node:path";
@@ -14,9 +14,6 @@ const installerPartSize = 16 * 1024 * 1024;
 const releaseVersion = "1.0.0";
 const releaseInstallerDir = path.resolve(appRoot, "..", "..", "release", `v${releaseVersion}`, "installers");
 const edgeOneReleaseDir = path.join(outDir, "release", `v${releaseVersion}`, "edgeone");
-const cloudFunctionsDir = path.join(appRoot, "cloud-functions");
-const edgeOneCloudFunctionsDir = path.join(outDir, "cloud-functions");
-const edgeOneConfigPath = path.resolve(appRoot, "..", "..", "edgeone.json");
 const publishedReleaseBaseUrl =
   process.env.EDGEONE_RELEASE_SOURCE_URL || "https://gszhmrx.cn";
 const installerPackages = [
@@ -74,9 +71,6 @@ if (wasmParts.length !== wasmPartUrls.length) {
 }
 await rm(wasmPath);
 await writeInstallerParts();
-await cp(cloudFunctionsDir, edgeOneCloudFunctionsDir, { recursive: true });
-await writeFunctionRuntimePackage();
-await copyFile(edgeOneConfigPath, path.join(outDir, "edgeone.json"));
 await assertNoPrivateLicenseMaterial();
 
 const oversizedFiles = [];
@@ -237,26 +231,6 @@ async function reusePublishedInstallerParts(installer, publishedManifest) {
     contentType: installer.contentType,
     parts
   };
-}
-
-async function writeFunctionRuntimePackage() {
-  const runtimePackage = {
-    name: "format-converter-edgeone-functions",
-    version: "1.0.0",
-    private: true,
-    type: "module",
-    engines: {
-      node: "20.x"
-    },
-    dependencies: {
-      "@edgeone/pages-blob": "0.0.14"
-    }
-  };
-
-  await writeFile(
-    path.join(outDir, "package.json"),
-    `${JSON.stringify(runtimePackage, null, 2)}\n`
-  );
 }
 
 async function assertNoPrivateLicenseMaterial() {
