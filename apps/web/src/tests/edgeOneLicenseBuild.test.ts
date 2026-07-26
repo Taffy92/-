@@ -1,10 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const projectRoot = resolve(process.cwd(), "..", "..");
 const edgeOneBuildPath = resolve(projectRoot, "apps", "web", "scripts", "build-edgeone.mjs");
 const edgeOneConfigPath = resolve(projectRoot, "edgeone.json");
+const edgeOneFunctionRoot = resolve(
+  projectRoot,
+  "cloud-functions",
+  "api",
+  "admin",
+  "license"
+);
 
 describe("EdgeOne private license admin build", () => {
   it("packages the license functions with only their runtime dependency", () => {
@@ -31,6 +38,19 @@ describe("EdgeOne private license admin build", () => {
     expect(buildSource).toContain("reusePublishedInstallerParts");
     expect(buildSource).toContain("failed size or SHA256 verification");
     expect(buildSource).toContain("failed complete SHA256 verification");
+  });
+
+  it("exposes the private admin functions at the repository root for Git builds", () => {
+    for (const relativePath of [
+      "health.ts",
+      "session.ts",
+      "generate.ts",
+      "backup.ts",
+      "records/index.ts",
+      "records/[id]/file.ts"
+    ]) {
+      expect(existsSync(resolve(edgeOneFunctionRoot, relativePath))).toBe(true);
+    }
   });
 
   it("pins a mainland region and disables caching and indexing for the admin surface", () => {

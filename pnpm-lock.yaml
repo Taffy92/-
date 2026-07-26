@@ -11,6 +11,10 @@ overrides:
 importers:
 
   .:
+    dependencies:
+      '@edgeone/pages-blob':
+        specifier: 0.0.14
+        version: 0.0.14
     devDependencies:
       '@cloudbase/cli':
         specifier: ^3.3.3
@@ -55,9 +59,6 @@ importers:
       '@doctool/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      '@edgeone/pages-blob':
-        specifier: 0.0.14
-        version: 0.0.14
       '@gsap/react':
         specifier: ^2.1.2
         version: 2.1.2(gsap@3.15.0)(react@18.3.1)
