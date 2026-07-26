@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import InstallerDownloadButton from "@/components/download/InstallerDownloadButton";
 import { downloadsConfig } from "@/config/downloads";
 import { createPageMetadata } from "@/lib/seo";
 
@@ -53,13 +54,12 @@ export default function DownloadPage() {
                 <dd className="mt-1 break-all font-mono text-xs text-slate-200">{item.sha256}</dd>
               </div>
             </dl>
-            <a
-              href={item.downloadUrl}
-              download={item.fileName}
-              className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-sm border border-cyan-300/50 bg-cyan-400 px-5 text-sm font-semibold text-slate-950 hover:bg-cyan-300"
-            >
-              下载 {item.type.toUpperCase()} 3 天试用版
-            </a>
+            <InstallerDownloadButton
+              packageType={item.type}
+              fileName={item.fileName}
+              manifestUrl={downloadsConfig.manifestUrl}
+              label={`下载 ${item.type.toUpperCase()} 3 天试用版`}
+            />
           </div>
         ))}
       </section>
@@ -152,16 +152,15 @@ function TrialDownloadPanel() {
       </p>
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {downloadsConfig.packages.map((item) => (
-          <a
+          <InstallerDownloadButton
             key={item.type}
-            href={item.downloadUrl}
-            download={item.fileName}
-            className="rounded-sm border border-cyan-300/20 bg-slate-900/70 p-4 transition hover:border-cyan-300/50 hover:bg-cyan-400/10"
-          >
-            <span className="block text-sm font-semibold text-slate-50">下载 {item.label}</span>
-            <span className="mt-1 block text-xs text-slate-400">{item.fileName}</span>
-            <span className="mt-2 block text-xs text-cyan-200">无需口令，安装后自动试用 3 天</span>
-          </a>
+            packageType={item.type}
+            fileName={item.fileName}
+            manifestUrl={downloadsConfig.manifestUrl}
+            label={`下载 ${item.label}`}
+            detail="无需口令，安装后自动试用 3 天"
+            compact
+          />
         ))}
       </div>
       <div className="mt-5 rounded-sm border border-cyan-300/12 bg-slate-900/70 p-4 text-sm leading-7 text-slate-300">

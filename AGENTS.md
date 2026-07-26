@@ -24,16 +24,19 @@
 ```powershell
 npm test
 npm run build:web
+npm run build:edgeone
 npm run check:privacy
 npm run check:network
 npm run package:desktop
+npm run deploy:edgeone
 npm run deploy:license-admin
 ```
 
-在线构建产物位于 `apps/web/out`。离线构建会改写构建模式，正式部署前必须重新执行 `npm run build:web`，确保 `apps/web/out` 是在线版产物。发布直接下载试用版时，EXE/MSI 默认走公开只读 CloudBase/COS 对象存储或 CDN 链接；静态站安装包目录只保留 `SHA256SUMS.txt` 等轻量校验文件。安装包不得进入 Git。
+在线构建产物位于 `apps/web/out`。离线构建会改写构建模式，正式部署到 EdgeOne 前必须执行 `npm run build:edgeone`，由脚本校验本地正式 EXE/MSI、生成同源分片和下载清单。原始安装包与生成分片不得进入 Git；`npm run build:web` 仅用于普通在线构建，不包含 EdgeOne 安装包分片。
 
 ## 文档与发布
 
 - 下载页不得直接链接原始 `.md` 发布文档，应链接站内 HTML 渲染页。
 - 根目录只保留 README、许可证、项目规则等入口文件；阶段性报告放入 `docs/reports/archive/`。
+- EdgeOne 是公开网站和试用安装包的正式分发渠道；CloudBase 仅保留私有授权后台、下载口令备用云函数和过渡托管能力。
 - CloudBase 环境 ID 如需替换，必须同步修改 `package.json` 与 `apps/web/cloudbaserc.json`。

@@ -24,6 +24,8 @@ apps/web/playwright-report/
 apps/web/playwright-report
 **/playwright-report/
 apps/web/verification/
+.playwright-cli/
+output/
 
 # Tauri / Rust build outputs
 target/
@@ -101,7 +103,8 @@ verification/**/output/
 verification/**/输出 文件夹/
 verification/**/msi-admin-extract/
 
-# Release installers are distributed via CloudBase/COS/Release artifacts.
+# Raw release installers stay in the local release archive. EdgeOne builds create
+# same-origin chunks under the ignored apps/web/out directory.
 release/*/installers/*.exe
 release/*/installers/*.msi
 apps/web/public/release/*/installers/*.exe
@@ -136,3 +139,7 @@ skills-lock.json
 
 # Keep release documentation and SHA256SUMS tracked by policy.
 # EXE/MSI release artifacts are distributed outside ordinary Git.
+
+# Tencent Cloud EdgeOne
+.edgeone/*
+.tef_dist/*

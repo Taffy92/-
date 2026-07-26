@@ -59,7 +59,18 @@ export interface ExtractAudioOptions {
   signal?: AbortSignal;
 }
 
+interface MediaStreamInfo {
+  hasVideo: boolean;
+  hasAudio: boolean;
+  videoWidth?: number;
+  videoHeight?: number;
+}
+
 const ffmpegAssetBase = "/ffmpeg";
+const ffmpegWasmParts = (process.env.NEXT_PUBLIC_FFMPEG_WASM_PARTS || "")
+  .split(",")
+  .map((part) => part.trim())
+  .filter(Boolean);
 
 const videoMimeByFormat: Record<VideoOutputFormat, string> = {
   mp4: "video/mp4",
@@ -114,9 +125,10 @@ export function getAudioMime(format: AudioOutputFormat | ExtractedAudioOutputFor
 
 export async function convertVideoFormat(file: File, options: VideoConversionOptions): Promise<Blob> {
   const outputName = `output.${options.format}`;
+  const sameFormatStreamCopy = shouldStreamCopyVideo(file, options);
   const args = [
     ...inputArgs(file),
-    ...videoArgs(options),
+    ...(sameFormatStreamCopy ? streamCopyVideoArgs() : videoArgs(options)),
     ...metadataArgs(options.stripMetadata),
     outputName
   ];
@@ -180,10 +192,17 @@ async function runFfmpegConversion(
   const inputName = inputFileName(file);
   const ffmpeg = await loadFfmpeg(options.onProgress, options.loadingMessage, options.signal);
   const { fetchFile } = await import("@ffmpeg/util");
+  const logs: string[] = [];
 
   const onProgress = ({ progress }: { progress: number }) => {
     const safeProgress = Number.isFinite(progress) ? Math.max(0, Math.min(0.98, progress)) : 0;
     options.onProgress?.(0.18 + safeProgress * 0.8, options.runningMessage);
+  };
+  const onLog = ({ message }: { message: string }) => {
+    const nextMessage = message.trim();
+    if (!nextMessage) return;
+    logs.push(nextMessage);
+    if (logs.length > 20) logs.shift();
   };
   const onAbort = () => {
     ffmpeg.terminate();
@@ -192,14 +211,28 @@ async function runFfmpegConversion(
   };
 
   ffmpeg.on("progress", onProgress);
+  ffmpeg.on("log", onLog);
   options.signal?.addEventListener("abort", onAbort, { once: true });
 
   try {
     options.onProgress?.(0.12, "正在把文件写入浏览器本地内存");
     await ffmpeg.writeFile(inputName, await fetchFile(file), { signal: options.signal });
+    let argsToRun = args;
+    if (file.type.startsWith("video/")) {
+      const streamInfo = await probeMediaStreams(ffmpeg, inputName, options.signal);
+      if (!streamInfo.hasAudio && mimeType.startsWith("audio/")) {
+        throw new Error("该视频没有可提取的音频轨道。");
+      }
+      if (!streamInfo.hasAudio) argsToRun = argsForVideoWithoutAudio(args);
+      if (needsVideoTranscode(argsToRun) && isTinyVideo(streamInfo)) {
+        throw new Error("当前浏览器无法转码小于 32x32 的超小视频，请优先导出为 MP4、MOV、AVI、MKV，或改用 Windows 离线专业版。");
+      }
+    }
     options.onProgress?.(0.18, options.runningMessage);
-    const code = await ffmpeg.exec(args, undefined, { signal: options.signal });
-    if (code !== 0) throw new Error("本地转换失败，请更换输出格式、降低质量或使用离线版重试。");
+    const code = await ffmpeg.exec(argsToRun, undefined, { signal: options.signal });
+    if (code !== 0) {
+      throw new Error(logs.at(-1) || "本地转换失败，请更换输出格式、降低质量或使用离线版重试。");
+    }
     const data = await ffmpeg.readFile(outputName, undefined, { signal: options.signal });
     const bytes = typeof data === "string" ? new TextEncoder().encode(data) : data;
     const resultBuffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
@@ -207,9 +240,10 @@ async function runFfmpegConversion(
     return new Blob([resultBuffer], { type: mimeType });
   } catch (error) {
     if (options.signal?.aborted) throw new Error("用户取消处理。");
-    throw toFriendlyFfmpegError(error);
+    throw toFriendlyFfmpegError(error, logs);
   } finally {
     ffmpeg.off("progress", onProgress);
+    ffmpeg.off("log", onLog);
     options.signal?.removeEventListener("abort", onAbort);
     await ffmpeg.deleteFile(inputName).catch(() => undefined);
     await ffmpeg.deleteFile(outputName).catch(() => undefined);
@@ -222,14 +256,19 @@ async function loadFfmpeg(onProgress?: ProgressReporter, message = "正在加载
     ffmpegLoading = (async () => {
       const { FFmpeg } = await import("@ffmpeg/ffmpeg");
       const ffmpeg = new FFmpeg();
+      const wasmAsset = await resolveFfmpegWasmAsset(signal);
       onProgress?.(0.03, message);
-      await ffmpeg.load(
-        {
-          coreURL: assetUrl(`${ffmpegAssetBase}/ffmpeg-core.js`),
-          wasmURL: assetUrl(`${ffmpegAssetBase}/ffmpeg-core.wasm`)
-        },
-        { signal }
-      );
+      try {
+        await ffmpeg.load(
+          {
+            coreURL: assetUrl(`${ffmpegAssetBase}/ffmpeg-core.js`),
+            wasmURL: wasmAsset.url
+          },
+          { signal }
+        );
+      } finally {
+        wasmAsset.revoke?.();
+      }
       ffmpegInstance = ffmpeg;
       onProgress?.(0.1, "本地转换核心加载完成");
       return ffmpeg;
@@ -256,6 +295,18 @@ function inputFileName(file: File) {
   return `input.${extension}`;
 }
 
+function shouldStreamCopyVideo(file: File, options: VideoConversionOptions) {
+  const sourceFormat = file.name.match(/\.([a-z0-9]+)$/i)?.[1]?.toLowerCase();
+  if ((options.videoSize || "original") !== "original") return false;
+  if (options.quality !== "balanced") return sourceFormat === options.format;
+  if (options.audioBitrate && options.audioBitrate !== "128k") return sourceFormat === options.format;
+  return options.format !== "webm";
+}
+
+function streamCopyVideoArgs() {
+  return ["-map", "0:v:0", "-map", "0:a?", "-c:v", "copy", "-c:a", "copy"];
+}
+
 function videoArgs(options: VideoConversionOptions) {
   const quality = mediaQuality(options.quality);
   const audioBitrate = options.audioBitrate || quality.audioBitrate;
@@ -269,9 +320,26 @@ function videoArgs(options: VideoConversionOptions) {
     return [...commonMap, "-c:v", "mpeg4", "-q:v", quality.qscale, "-c:a", "libmp3lame", "-b:a", audioBitrate];
   }
 
-  const args = [...commonMap, "-c:v", "mpeg4", "-q:v", quality.qscale, "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", audioBitrate];
-  if (options.format === "mp4" || options.format === "mov") args.push("-movflags", "+faststart");
-  return args;
+  return [...commonMap, "-c:v", "mpeg4", "-q:v", quality.qscale, "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", audioBitrate];
+}
+
+function argsForVideoWithoutAudio(args: string[]) {
+  const nextArgs: string[] = [];
+  for (let index = 0; index < args.length; index += 1) {
+    const value = args[index];
+    const nextValue = args[index + 1];
+    if (value === "-map" && nextValue === "0:a?") {
+      index += 1;
+      continue;
+    }
+    if ((value === "-c:a" || value === "-b:a") && typeof nextValue === "string") {
+      index += 1;
+      continue;
+    }
+    if (value === "-shortest") continue;
+    nextArgs.push(value);
+  }
+  return nextArgs;
 }
 
 function audioArgs(format: AudioOutputFormat | ExtractedAudioOutputFormat, quality: MediaQuality, bitrate?: AudioBitrateOption) {
@@ -282,17 +350,68 @@ function audioArgs(format: AudioOutputFormat | ExtractedAudioOutputFormat, quali
   if (format === "flac") return [...base, "-c:a", "flac", "-compression_level", "5"];
   if (format === "mp3") return [...base, "-c:a", "libmp3lame", "-b:a", audioBitrate];
   if (format === "aac") return [...base, "-c:a", "aac", "-b:a", audioBitrate, "-f", "adts"];
-  return [...base, "-c:a", "aac", "-b:a", audioBitrate, "-movflags", "+faststart"];
+  return [...base, "-c:a", "aac", "-b:a", audioBitrate];
 }
 
 function scaleArgs(size: VideoSizeOption = "original") {
-  if (size === "original") return ["-vf", "scale=trunc(iw/2)*2:trunc(ih/2)*2"];
+  if (size === "original") {
+    return ["-vf", "scale=trunc(iw*max(1\\,32/min(iw\\,ih))/2)*2:trunc(ih*max(1\\,32/min(iw\\,ih))/2)*2"];
+  }
   const height = size === "1080p" ? 1080 : size === "720p" ? 720 : 480;
   return ["-vf", `scale=-2:'min(${height},ih)'`];
 }
 
 function metadataArgs(stripMetadata = true) {
   return stripMetadata ? ["-map_metadata", "-1", "-map_chapters", "-1"] : [];
+}
+
+async function probeMediaStreams(ffmpeg: FFmpeg, inputName: string, signal?: AbortSignal): Promise<MediaStreamInfo> {
+  const outputName = `${inputName}.streams.txt`;
+  try {
+    const code = await ffmpeg.ffprobe(
+      [
+        "-v",
+        "error",
+        "-show_entries",
+        "stream=codec_type,width,height",
+        "-of",
+        "json",
+        inputName,
+        "-o",
+        outputName
+      ],
+      undefined,
+      { signal }
+    );
+    if (code !== 0) return { hasVideo: true, hasAudio: true };
+    const data = await ffmpeg.readFile(outputName, "utf8", { signal });
+    const payload = JSON.parse(String(data)) as {
+      streams?: Array<{ codec_type?: string; width?: number; height?: number }>;
+    };
+    const streams = payload.streams || [];
+    const videoStream = streams.find((stream) => String(stream.codec_type).toLowerCase() === "video");
+    return {
+      hasVideo: streams.some((stream) => String(stream.codec_type).toLowerCase() === "video"),
+      hasAudio: streams.some((stream) => String(stream.codec_type).toLowerCase() === "audio"),
+      videoWidth: typeof videoStream?.width === "number" ? videoStream.width : undefined,
+      videoHeight: typeof videoStream?.height === "number" ? videoStream.height : undefined
+    };
+  } catch {
+    return { hasVideo: true, hasAudio: true };
+  } finally {
+    await ffmpeg.deleteFile(outputName).catch(() => undefined);
+  }
+}
+
+function needsVideoTranscode(args: string[]) {
+  for (let index = 0; index < args.length; index += 1) {
+    if (args[index] === "-c:v") return args[index + 1] !== "copy";
+  }
+  return true;
+}
+
+function isTinyVideo(streamInfo: MediaStreamInfo) {
+  return Boolean(streamInfo.videoWidth && streamInfo.videoHeight && (streamInfo.videoWidth < 32 || streamInfo.videoHeight < 32));
 }
 
 function mediaQuality(quality: MediaQuality) {
@@ -306,11 +425,37 @@ function assetUrl(path: string) {
   return new URL(path, window.location.href).toString();
 }
 
-function toFriendlyFfmpegError(error: unknown) {
+async function resolveFfmpegWasmAsset(signal?: AbortSignal) {
+  if (ffmpegWasmParts.length === 0) {
+    return { url: assetUrl(`${ffmpegAssetBase}/ffmpeg-core.wasm`) };
+  }
+
+  const buffers = await Promise.all(
+    ffmpegWasmParts.map(async (part) => {
+      const response = await fetch(assetUrl(part), { signal });
+      if (!response.ok) throw new Error(`本地转换核心分片加载失败（HTTP ${response.status}）。`);
+      return response.arrayBuffer();
+    })
+  );
+  const url = URL.createObjectURL(new Blob(buffers, { type: "application/wasm" }));
+  return { url, revoke: () => URL.revokeObjectURL(url) };
+}
+
+function toFriendlyFfmpegError(error: unknown, logs: string[] = []) {
   const message = error instanceof Error ? error.message : String(error);
-  if (/AbortError|aborted|cancel/i.test(message)) return new Error("用户取消处理。");
+  if (/AbortError|signal.*aborted|cancelled by user|user cancelled/i.test(message)) return new Error("用户取消处理。");
+  const logText = logs.join("\n");
+  const diagnosticText = `${message}\n${logText}`;
+  if (/Stream map ['"]?0:a(?::0)?['"]? matches no streams|does not contain any stream|Output file does not contain any stream/i.test(diagnosticText)) {
+    return new Error("该视频没有可提取的音频轨道。");
+  }
+  if (/Image too small, temporary buffers cannot function|get_buffer\(\) failed to allocate context scratch buffers/i.test(logText)) {
+    return new Error("当前浏览器无法转码过小的视频分辨率，请优先导出为 MP4、MOV、AVI、MKV，或改用 Windows 离线专业版。");
+  }
+  if (/Conversion failed!|Aborted\(\)/i.test(message)) {
+    return new Error("当前浏览器本地视频转码失败，请尝试切换输出格式或改用 Windows 离线专业版。");
+  }
   if (/memory|allocation/i.test(message)) return new Error("浏览器内存不足，请换用较小文件、降低输出质量，或使用离线版处理。");
-  if (/Stream map '0:a:0' matches no streams|does not contain any stream/i.test(message)) return new Error("该视频没有可提取的音频轨道。");
   if (/Invalid data|could not find codec|Decoder|demux/i.test(message)) {
     return new Error("本地转换核心无法读取该文件编码，请换用常见清晰文件，或先用原软件重新导出后再转换。");
   }

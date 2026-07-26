@@ -2,7 +2,7 @@
 
 当前公开下载页已改为“直接下载 3 天试用版，试用结束后激活”。本文件只作为备用内部分发方案保留；除非明确恢复口令下载，不应把它作为公开下载页主流程。
 
-在线版当前使用 CloudBase 公开只读对象路径分发 3 天试用安装包。以下方案仅在需要临时收紧下载渠道时启用：
+在线版当前通过 EdgeOne 同源静态分片分发 3 天试用安装包，浏览器逐片校验并在本地拼装。以下 CloudBase 方案仅在需要临时收紧下载渠道时启用：
 
 ```text
 CloudBase 私有云存储安装包 + 统一下载口令 + 云函数临时下载链接
@@ -10,10 +10,9 @@ CloudBase 私有云存储安装包 + 统一下载口令 + 云函数临时下载�
 
 备用方案不需要给每个用户新增数据库授权码，只维护一个下载口令即可。正式授权仍由 `licenseAdmin` 或本地生码器签发离线激活码。
 
-## 当前线上信息
+## 备用环境信息
 
 - CloudBase 环境：`format-converter-prod-x-d71bce41`
-- 静态网站地址：`https://gszhmrx.cn`（`https://www.gszhmrx.cn` 同站点）
 - 下载页：`https://gszhmrx.cn/download/`
 - 云函数：`createDownloadUrl`
 - 云函数地址：`https://format-converter-prod-x-d71bce41.service.tcloudbase.com/createDownloadUrl`

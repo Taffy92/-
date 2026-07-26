@@ -44,7 +44,6 @@ describe("privacy and product boundary checks", () => {
     expect(toolsSource).toContain("convertVideoFormat");
     expect(toolsSource).toContain("convertAudioFormat");
     expect(toolsSource).toContain("extractAudioFromVideo");
-    expect(toolsSource).toContain("AdSlot");
   });
 
   it("keeps batch processing exclusive to the offline desktop surface", () => {

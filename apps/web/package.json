@@ -10,6 +10,7 @@
     "dev": "next dev",
     "prebuild": "npm run prepare:static",
     "build": "next build",
+    "build:edgeone": "node scripts/build-edgeone.mjs",
     "build:desktop": "node scripts/build-desktop.mjs",
     "start": "next start",
     "lint": "next lint",

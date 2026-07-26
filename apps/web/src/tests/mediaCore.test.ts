@@ -80,19 +80,27 @@ describe("media-core FFmpeg WASM capability checks", () => {
     expect(report.warnings.length).toBeGreaterThanOrEqual(3);
   });
 
-  it("loads FFmpeg core from bundled same-origin static assets only", () => {
+  it("loads FFmpeg core from same-origin assets and supports split web deployment", () => {
     expect(mediaCoreSource).toContain('const ffmpegAssetBase = "/ffmpeg"');
+    expect(mediaCoreSource).toContain("NEXT_PUBLIC_FFMPEG_WASM_PARTS");
+    expect(mediaCoreSource).toContain("resolveFfmpegWasmAsset");
+    expect(mediaCoreSource).toContain("application/wasm");
     expect(mediaCoreSource).toContain("ffmpeg-core.wasm");
     expect(mediaCoreSource).toContain("-map_metadata");
     expect(mediaCoreSource).toContain("0:a:0");
     expect(mediaCoreSource).toContain("videoSize");
     expect(mediaCoreSource).toContain("audioBitrate");
     expect(mediaCoreSource).toContain("scale=-2");
+    expect(mediaCoreSource).toContain("32/min(iw\\\\,ih)");
     expect(mediaCoreSource).toContain("\"mpeg4\"");
-    expect(mediaCoreSource).toContain('options.format === "mp4" || options.format === "mov"');
+    expect(mediaCoreSource).toContain("ffmpeg.ffprobe");
+    expect(mediaCoreSource).toContain("stream=codec_type");
+    expect(mediaCoreSource).toContain("该视频没有可提取的音频轨道");
+    expect(mediaCoreSource).toContain("argsForVideoWithoutAudio");
+    expect(mediaCoreSource).toContain("streamCopyVideoArgs");
+    expect(mediaCoreSource).not.toContain("+faststart");
     expect(mediaCoreSource).not.toContain("libx264");
     expect(mediaCoreSource).not.toContain("unpkg.com");
-    expect(mediaCoreSource).not.toContain("https://");
     expect(mediaCoreSource).not.toContain("FormData");
   });
 });

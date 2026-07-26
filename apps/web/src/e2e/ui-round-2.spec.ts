@@ -54,7 +54,7 @@ for (const viewport of viewports) {
     await expect(page.getByText(new RegExp(`${labels.dropzoneCurrent}|${labels.dropzoneLegacy}`)).first()).toBeVisible();
     await expect(page.getByRole("button", { name: new RegExp(labels.start) }).first()).toBeVisible();
     await expect(page.getByRole("button", { name: new RegExp(labels.stop) }).first()).toBeVisible();
-    await expect(page.locator("#ad-container")).toHaveCount(1);
+    await expect(page.locator("#ad-container")).toHaveCount(0);
 
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
     expect(overflow).toBe(false);
@@ -65,6 +65,12 @@ for (const viewport of viewports) {
     });
   });
 }
+
+test("home page renders the homepage ad slot", async ({ page }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+
+  await expect(page.locator("#ad-container")).toHaveCount(1);
+});
 
 test("download page keeps trial download copy clear and local-processing promise visible", async ({ page }) => {
   await page.goto("/download/", { waitUntil: "domcontentloaded" });

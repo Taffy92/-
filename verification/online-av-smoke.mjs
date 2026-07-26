@@ -18,6 +18,11 @@ const sample = {
   mp4: path.join(inputDir, files.find((name) => name.toLowerCase().endsWith(".mp4")) || "")
 };
 
+const videoFormats = (process.env.SMOKE_VIDEO_FORMATS || "mp4,mov,avi,mkv,webm")
+  .split(",")
+  .map((value) => value.trim())
+  .filter(Boolean);
+
 const mime = new Map([
   [".html", "text/html; charset=utf-8"],
   [".js", "text/javascript; charset=utf-8"],
@@ -49,7 +54,7 @@ const server = createServer((req, res) => {
   createReadStream(filePath).pipe(res);
 });
 
-const port = 41875;
+const port = Number(process.env.SMOKE_PORT || 41875);
 await new Promise((resolve) => server.listen(port, "127.0.0.1", resolve));
 
 const result = {
@@ -78,21 +83,67 @@ page.on("console", (message) => {
 });
 page.on("pageerror", (error) => result.consoleErrors.push(error.message));
 
-async function runSingleMode(label, filePath, timeoutMs) {
+async function expandSectionIfPresent(label) {
+  const section = page.getByRole("button", { name: new RegExp(label) }).first();
+  try {
+    await section.waitFor({ state: "visible", timeout: 5_000 });
+  } catch {
+    return;
+  }
+  if ((await section.getAttribute("aria-expanded")) !== "true") {
+    await section.click();
+  }
+}
+
+async function runSingleMode(label, filePath, timeoutMs, outputFormat) {
+  await page.goto(result.url, { waitUntil: "networkidle", timeout: 60_000 });
+  await expandSectionIfPresent("音视频工具");
   await page.locator("button").filter({ hasText: label }).first().click();
   await page.locator('input[type="file"]').first().setInputFiles(filePath);
-  await page.locator("button.btn-primary").first().click();
-  await page.getByText("已生成").waitFor({ timeout: timeoutMs });
+  if (outputFormat) {
+    await page.getByLabel("输出格式").selectOption(outputFormat);
+  }
+  await page.getByRole("button", { name: /开始|开始转换|处理/ }).first().click();
+  const success = page.getByText("已生成");
+  const failure = page.getByText(/处理失败|当前浏览器无法转码|当前浏览器本地视频转码失败/);
+  const outcome = await Promise.race([
+    success.waitFor({ timeout: timeoutMs }).then(() => "success"),
+    failure.waitFor({ timeout: timeoutMs }).then(() => "failure")
+  ]);
+  if (outcome === "failure") {
+    throw new Error((await captureBodyText()).slice(0, 400));
+  }
   return true;
 }
 
+async function captureBodyText() {
+  return page.locator("body").textContent().catch(() => "");
+}
+
 try {
-  await page.goto(result.url, { waitUntil: "networkidle", timeout: 60000 });
-  result.checks.audioConvert = await runSingleMode("音频格式转换", sample.wav, 45000);
-  result.checks.videoConvert = await runSingleMode("视频格式转换", sample.mp4, 60000);
-  result.checks.videoExtractAudio = await runSingleMode("视频提取音频", sample.mp4, 60000);
+  result.checks.audioConvert = await runSingleMode("音频格式转换", sample.wav, 45_000);
+  result.checks.videoConvert = {};
+  for (const format of videoFormats) {
+    try {
+      result.checks.videoConvert[format] = await runSingleMode("视频格式转换", sample.mp4, 60_000, format);
+    } catch (error) {
+      result.checks.videoConvert[format] = {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+        bodyText: await captureBodyText()
+      };
+    }
+  }
+  try {
+    result.checks.videoExtractAudio = await runSingleMode("视频提取音频", sample.mp4, 60_000);
+  } catch (error) {
+    const bodyText = await captureBodyText();
+    if (!bodyText.includes("该视频没有可提取的音频轨道")) throw error;
+    result.checks.videoExtractAudio = "expected-no-audio";
+  }
 } catch (error) {
   result.error = error instanceof Error ? error.message : String(error);
+  result.bodyText = await captureBodyText();
 } finally {
   await browser.close();
   server.close();

@@ -92,7 +92,7 @@ export function Footer() {
               联系邮箱：{siteConfig.email}
             </p>
             <p>
-              安全声明：CloudBase 底座仅用于网络凭证拉取与授权分发文件包，全系列不执行任何网络端二进制文件流的数据中转。
+              安全声明：网站与安装包由 EdgeOne 分发；用户处理文件和转换结果始终在本机处理，不上传服务器。
             </p>
           </div>
           <div className="footer-filing">

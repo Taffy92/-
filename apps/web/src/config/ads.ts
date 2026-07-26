@@ -1,19 +1,10 @@
 import { isDesktopApp } from "@/config/appMode";
 
-let activeProvider: "google" | "baidu" | "placeholder" | "none" = "google";
-
-if (typeof window !== "undefined") {
-  const host = window.location.hostname;
-  if (host === "gszhmrx.cn" || host === "www.gszhmrx.cn") {
-    activeProvider = "baidu";
-  } else if (host === "web-npyt.vercel.app" || host.includes("vercel.app")) {
-    activeProvider = "google";
-  } else {
-    activeProvider = (process.env.NEXT_PUBLIC_ADS_PROVIDER || "google") as "google" | "baidu" | "placeholder" | "none";
-  }
-} else {
-  activeProvider = (process.env.NEXT_PUBLIC_ADS_PROVIDER || "google") as "google" | "baidu" | "placeholder" | "none";
-}
+const activeProvider = (process.env.NEXT_PUBLIC_ADS_PROVIDER || "google") as
+  | "google"
+  | "baidu"
+  | "placeholder"
+  | "none";
 
 export const adsConfig = {
   enabled: !isDesktopApp && process.env.NEXT_PUBLIC_ADS_ENABLED !== "false",

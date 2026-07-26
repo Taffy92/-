@@ -1,12 +1,6 @@
 const exeFileName = "万能格式转换离线专业版_1.0.0_x64-setup.exe";
 const msiFileName = "万能格式转换离线专业版_1.0.0_x64_zh-CN.msi";
-const objectStorageBaseUrl = "https://666f-format-converter-prod-x-d71bce41-1434109188.tcb.qcloud.la/installers/v1.0.0";
-const exeStorageDownloadUrl =
-  `${objectStorageBaseUrl}/%E4%B8%87%E8%83%BD%E6%A0%BC%E5%BC%8F%E8%BD%AC%E6%8D%A2%E7%A6%BB%E7%BA%BF%E4%B8%93%E4%B8%9A%E7%89%88_1.0.0_x64-setup.exe`;
-const msiStorageDownloadUrl =
-  `${objectStorageBaseUrl}/%E4%B8%87%E8%83%BD%E6%A0%BC%E5%BC%8F%E8%BD%AC%E6%8D%A2%E7%A6%BB%E7%BA%BF%E4%B8%93%E4%B8%9A%E7%89%88_1.0.0_x64_zh-CN.msi`;
-const exeDownloadUrl = process.env.NEXT_PUBLIC_OFFLINE_EXE_DOWNLOAD_URL || exeStorageDownloadUrl;
-const msiDownloadUrl = process.env.NEXT_PUBLIC_OFFLINE_MSI_DOWNLOAD_URL || msiStorageDownloadUrl;
+const edgeOneManifestUrl = "/release/v1.0.0/edgeone/manifest.json";
 
 export const downloadsConfig = {
   appName: "万能格式转换离线专业版",
@@ -16,14 +10,12 @@ export const downloadsConfig = {
   releaseDate: "2026-06-17",
   sha256:
     "EXE E2A03FDDE5907DD0462FF76C4A440869201B82A71533E82FD0EB25E2826D5564 / MSI 17B59355E550C5295CF3B9383E4391F57D1789AF1F2783302B483663555C850C",
-  primaryDownloadUrl: exeDownloadUrl,
-  backupDownloadUrl: msiDownloadUrl,
+  manifestUrl: edgeOneManifestUrl,
   packages: [
     {
       type: "exe",
       label: "EXE 安装包",
       fileName: exeFileName,
-      downloadUrl: exeDownloadUrl,
       fileSize: "245.42 MB",
       sha256: "E2A03FDDE5907DD0462FF76C4A440869201B82A71533E82FD0EB25E2826D5564",
       note: "推荐普通用户使用，安装后自动开启本机 3 天试用。"
@@ -32,7 +24,6 @@ export const downloadsConfig = {
       type: "msi",
       label: "MSI 安装包",
       fileName: msiFileName,
-      downloadUrl: msiDownloadUrl,
       fileSize: "255.93 MB",
       sha256: "17B59355E550C5295CF3B9383E4391F57D1789AF1F2783302B483663555C850C",
       note: "适合企业、管理员或批量部署场景，同样内置 3 天试用。"

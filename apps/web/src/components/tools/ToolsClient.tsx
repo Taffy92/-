@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ComponentType, RefObject } from "react";
-import { AdSlot } from "@doctool/ui";
 import Cropper from "cropperjs";
 import { CheckCircle2, ChevronDown, Crop, Download, FileImage, FileText, Files, FolderOpen, Gauge, HardDrive, Image, ListChecks, Loader2, Maximize2, Music, Play, Scissors, ShieldCheck, SlidersHorizontal, Square, Table2, Trash2, Type, Video, Zap } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -13,7 +12,6 @@ import { audioBitrateOptions, audioOutputFormats, convertAudioFormat, convertVid
 import type { AudioBitrateOption, AudioOutputFormat, ExtractedAudioOutputFormat, MediaCapabilityReport, MediaQuality, VideoOutputFormat, VideoSizeOption } from "@doctool/media-core";
 import { audioAccept, excelAccept, fileNameWithSuffix, formatBytes, imageAccept, isAudioFile, isExcelFile, isImageFile, isPdfFile, isVideoFile, isWordFile, maxOnlineFileSize, pdfAccept, safeBaseName, videoAccept, wordAccept } from "@doctool/shared";
 import type { ExportImageFormat, FileSummary, PdfOutputFormat, ProcessState } from "@doctool/shared";
-import { adsConfig } from "@/config/ads";
 import { isDesktopApp } from "@/config/appMode";
 import { currentReleaseVersion } from "@/config/version";
 import { GsapScene } from "@/components/motion/GsapScene";
@@ -194,6 +192,13 @@ type DesktopTilePreview = {
   note: string;
 };
 
+type ResultPreviewState = {
+  name: string;
+  kind: "video" | "audio";
+  url: string;
+  objectUrl: boolean;
+};
+
 type DesktopLicenseGateComponent = ComponentType<{
   status: DesktopLicenseStatus;
   onStatusChange: (status: DesktopLicenseStatus) => void;
@@ -249,6 +254,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   const [resultBlob, setResultBlob] = useState<Blob | null>(null);
   const [resultName, setResultName] = useState("");
   const [resultFolderPath, setResultFolderPath] = useState("");
+  const [resultPreview, setResultPreview] = useState<ResultPreviewState | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
   const [previewMessage, setPreviewMessage] = useState("");
   const [documentPreview, setDocumentPreview] = useState<DocumentPreviewState>({ url: "", title: "", message: "" });
@@ -340,6 +346,10 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   useEffect(() => () => {
     if (documentPreview.url) URL.revokeObjectURL(documentPreview.url);
   }, [documentPreview.url]);
+
+  useEffect(() => () => {
+    if (resultPreview?.objectUrl) URL.revokeObjectURL(resultPreview.url);
+  }, [resultPreview]);
 
   useEffect(() => {
     if (!isDesktopSurface) {
@@ -637,6 +647,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     setResultBlob(null);
     setResultName("");
     setResultFolderPath("");
+    setResultPreview(null);
     setPreviewUrl((current) => {
       if (current) URL.revokeObjectURL(current);
       return "";
@@ -697,6 +708,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     setResultBlob(null);
     setResultName("");
     setResultFolderPath("");
+    setResultPreview(null);
     setCompressionStats("");
     const allFiles = Array.from(fileList);
     const nextFiles = allFiles.filter((item) => isBatchFileAllowed(item, mode));
@@ -803,6 +815,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     setResultBlob(null);
     setResultName("");
     setResultFolderPath("");
+    setResultPreview(null);
     cancelRef.current = false;
     try {
       await ensureDesktopLicenseAllowed();
@@ -988,6 +1001,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     setResultBlob(null);
     setResultName("");
     setResultFolderPath("");
+    setResultPreview(null);
     setPreviewMessage("");
     setCompressionStats("");
     setStatus("idle");
@@ -1016,6 +1030,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     setResultBlob(blob);
     setResultName(name);
     setResultFolderPath("");
+    setResultPreviewFromBlob(blob, name);
     setProgressMessage(message);
   }
 
@@ -1023,7 +1038,23 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     setResultBlob(null);
     setResultName(name);
     setResultFolderPath(folderPath);
+    setResultPreview(null);
     setProgressMessage(message);
+  }
+
+  function setResultPreviewFromBlob(blob: Blob, name: string) {
+    const kind = getResultPreviewKind(name, blob.type);
+    if (!kind) {
+      setResultPreview(null);
+      return;
+    }
+    setResultPreview({ name, kind, url: URL.createObjectURL(blob), objectUrl: true });
+  }
+
+  function setResultPreviewFromOutputPath(outputPath: string, name: string) {
+    const kind = getResultPreviewKind(name);
+    const url = getLocalFilePreviewUrl(outputPath);
+    setResultPreview(kind && url ? { name, kind, url, objectUrl: false } : null);
   }
 
   async function runCrop() {
@@ -1331,6 +1362,10 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
           completedAt
         };
         updateBatchTask(task.id, nextTask);
+        if (tasks.length === 1) {
+          if (result.blob) setResultPreviewFromBlob(result.blob, resultName);
+          else setResultPreviewFromOutputPath(outputPath, resultName);
+        }
       } catch (reason) {
         const message = friendlyError(reason);
         const failureBackend = getFailureBackend(reason) || task.backend || "wasm";
@@ -1731,7 +1766,6 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   const desktopPreviewMode = activeTab === "batch" ? batchMode : activeTab;
   const navigationSections = isDesktopSurface ? desktopNavSections : onlineNavSections;
   const activeDesktopSection = desktopNavSections.find((section) => section.items.some((item) => item.id === activeTab));
-  const shouldRenderAds = !isDesktopSurface;
   const sidecarReady = isSidecarReady(sidecarStatus || undefined);
   const selectedDesktopTask = visibleBatchTasks.find((task) => task.id === activeTaskId) || visibleBatchTasks[0] || null;
   const desktopInspectorFile = selectedDesktopTask?.file || file || null;
@@ -2012,6 +2046,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
                   file={desktopInspectorFile}
                   fileUrl={desktopInspectorPreviewUrl}
                   previewUrl={desktopInspectorFile === file ? previewUrl : ""}
+                  resultPreview={resultPreview}
                   previewMessage={previewMessage}
                   documentPreview={desktopInspectorFile === file ? documentPreview : { url: "", title: "", message: "" }}
                   summary={desktopInspectorFile === file ? summary : null}
@@ -2209,17 +2244,6 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
               <div className="apple-control-panel">
                 {controlPanel}
               </div>
-              {shouldRenderAds ? (
-                <div id="ad-container" className="apple-adsense-container" data-animate="tools-ad">
-                  <div className="adsense-telemetry-header">
-                    <span>[ Sandboxed Ad Component ]</span>
-                    <span>Secure //</span>
-                  </div>
-                  <div className="adsense-core-viewport">
-                    <AdSlot config={adsConfig} name="toolBottom" />
-                  </div>
-                </div>
-              ) : null}
             </aside>
           </div>
         </section>
@@ -2519,6 +2543,7 @@ function DesktopReplicaInspector({
   file,
   fileUrl,
   previewUrl,
+  resultPreview,
   previewMessage,
   documentPreview,
   summary,
@@ -2552,6 +2577,7 @@ function DesktopReplicaInspector({
   file: File | null;
   fileUrl: string;
   previewUrl: string;
+  resultPreview: ResultPreviewState | null;
   previewMessage: string;
   documentPreview: DocumentPreviewState;
   summary: FileSummary | null;
@@ -2615,6 +2641,7 @@ function DesktopReplicaInspector({
           file={file}
           fileUrl={fileUrl}
           previewUrl={previewUrl}
+          resultPreview={resultPreview}
           previewMessage={previewMessage}
           documentPreview={documentPreview}
           summary={summary}
@@ -2696,6 +2723,7 @@ function DesktopInspectorPreview({
   file,
   fileUrl,
   previewUrl,
+  resultPreview,
   previewMessage,
   documentPreview,
   summary,
@@ -2708,6 +2736,7 @@ function DesktopInspectorPreview({
   file: File | null;
   fileUrl: string;
   previewUrl: string;
+  resultPreview: ResultPreviewState | null;
   previewMessage: string;
   documentPreview: DocumentPreviewState;
   summary: FileSummary | null;
@@ -2728,6 +2757,21 @@ function DesktopInspectorPreview({
             <span>选择文件</span>
           </button>
         </div>
+      </div>
+    );
+  }
+
+  if (resultPreview) {
+    return (
+      <div className="desktop-preview-stage desktop-preview-single">
+        {resultPreview.kind === "video" ? (
+          <video key={resultPreview.url} className="desktop-preview-single-media bg-[#05090B]" src={resultPreview.url} controls preload="metadata" playsInline />
+        ) : (
+          <div className="desktop-preview-audio-shell">
+            <audio key={resultPreview.url} className="w-full" src={resultPreview.url} controls preload="metadata" />
+          </div>
+        )}
+        <strong className="desktop-preview-file-name" title={resultPreview.name}>已生成：{resultPreview.name}</strong>
       </div>
     );
   }
@@ -3249,6 +3293,17 @@ function getTauriApi() {
   return (window as any).__TAURI__;
 }
 
+function getLocalFilePreviewUrl(pathValue: string) {
+  const tauri = getTauriApi();
+  const convertFileSrc = tauri?.tauri?.convertFileSrc || tauri?.convertFileSrc;
+  if (typeof convertFileSrc !== "function") return "";
+  try {
+    return convertFileSrc(pathValue);
+  } catch {
+    return "";
+  }
+}
+
 async function invokeTauri<T>(command: string, args?: Record<string, unknown>): Promise<T> {
   const tauri = getTauriApi();
   const invoke = tauri?.tauri?.invoke || tauri?.invoke;
@@ -3420,6 +3475,14 @@ function guessMimeType(name: string) {
   if (lower.endsWith(".wav")) return "audio/wav";
   if (lower.endsWith(".m4a")) return "audio/mp4";
   return "application/octet-stream";
+}
+
+function getResultPreviewKind(name: string, mime = ""): ResultPreviewState["kind"] | null {
+  const lowerName = name.toLowerCase();
+  const lowerMime = mime.toLowerCase();
+  if (lowerMime.startsWith("video/") || /\.(mp4|mov|webm|avi|mkv)$/.test(lowerName)) return "video";
+  if (lowerMime.startsWith("audio/") || /\.(mp3|wav|aac|m4a|flac)$/.test(lowerName)) return "audio";
+  return null;
 }
 
 function joinLocalPath(directory: string, name: string) {

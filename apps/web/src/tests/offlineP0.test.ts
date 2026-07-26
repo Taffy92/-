@@ -54,17 +54,29 @@ describe("offline P0 release checks", () => {
     expect(readFileSync(workerAssetPath, "utf8")).toContain("browser-image-compression");
   });
 
-  it("keeps release downloads on object storage and static installer folders checksum-only", () => {
+  it("keeps release downloads on same-origin EdgeOne chunks without raw installers", () => {
     const downloadsConfigPath = resolve(projectRoot, "apps", "web", "src", "config", "downloads.ts");
     const downloadsConfigSource = readFileSync(downloadsConfigPath, "utf8");
+    const downloadPageSource = readFileSync(resolve(projectRoot, "apps", "web", "src", "app", "download", "page.tsx"), "utf8");
+    const downloadButtonSource = readFileSync(resolve(projectRoot, "apps", "web", "src", "components", "download", "InstallerDownloadButton.tsx"), "utf8");
+    const edgeOneBuildSource = readFileSync(resolve(projectRoot, "apps", "web", "scripts", "build-edgeone.mjs"), "utf8");
     const versionSource = readFileSync(resolve(projectRoot, "apps", "web", "src", "config", "version.ts"), "utf8");
     const publicInstallerDir = resolve(projectRoot, "apps", "web", "public", "release", "v1.0.0", "installers");
     const outInstallerDir = resolve(projectRoot, "apps", "web", "out", "release", "v1.0.0", "installers");
     const releaseSumsPath = resolve(projectRoot, "release", "v1.0.0", "installers", "SHA256SUMS.txt");
     const publicSumsPath = resolve(publicInstallerDir, "SHA256SUMS.txt");
 
-    expect(downloadsConfigSource).toContain("tcb.qcloud.la/installers/v1.0.0");
+    expect(downloadsConfigSource).toContain("/release/v1.0.0/edgeone/manifest.json");
+    expect(downloadsConfigSource).not.toContain("github.com");
     expect(downloadsConfigSource).not.toContain('"/release/v1.0.0/installers"');
+    expect(downloadPageSource).toContain("InstallerDownloadButton");
+    expect(downloadPageSource).not.toContain("item.downloadUrl");
+    expect(downloadButtonSource).toContain("showSaveFilePicker");
+    expect(downloadButtonSource).toContain("fetchVerifiedPart");
+    expect(downloadButtonSource).toContain('crypto.subtle.digest("SHA-256"');
+    expect(edgeOneBuildSource).toContain("installerPartSize");
+    expect(edgeOneBuildSource).toContain("writeInstallerParts");
+    expect(edgeOneBuildSource).toContain("part-");
     expect(downloadsConfigSource).toContain('version: "1.0.0"');
     expect(versionSource).toContain('currentReleaseVersion = "1.0.0"');
     const releaseSums = readFileSync(releaseSumsPath, "utf8");
@@ -118,6 +130,34 @@ describe("offline P0 release checks", () => {
     expect(source).toContain("if (isDesktopSurface && tabId !== activeTab) clearAllLocalTasks");
     expect(actionBarBlock).toContain("清空任务");
     expect(actionBarBlock.indexOf("清空任务")).toBeLessThan(actionBarBlock.indexOf("输出目录"));
+  });
+
+  it("keeps generated desktop media results previewable", () => {
+    const toolsClientPath = resolve(projectRoot, "apps", "web", "src", "components", "tools", "ToolsClient.tsx");
+    const source = readFileSync(toolsClientPath, "utf8");
+    const finishTaskBlock = source.slice(
+      source.indexOf("function finishTask"),
+      source.indexOf("async function runCrop")
+    );
+    const runBatchBlock = source.slice(
+      source.indexOf("async function runBatch"),
+      source.indexOf("async function processBatchTask")
+    );
+    const desktopPreviewBlock = source.slice(
+      source.indexOf("function DesktopInspectorPreview"),
+      source.indexOf("function DesktopTiledPreview")
+    );
+
+    expect(source).toContain("type ResultPreviewState");
+    expect(source).toContain("function getLocalFilePreviewUrl");
+    expect(source).toContain("convertFileSrc(pathValue)");
+    expect(source).toContain("function getResultPreviewKind");
+    expect(finishTaskBlock).toContain("setResultPreviewFromBlob(blob, name)");
+    expect(runBatchBlock).toContain("if (tasks.length === 1)");
+    expect(runBatchBlock).toContain("setResultPreviewFromBlob(result.blob, resultName)");
+    expect(runBatchBlock).toContain("setResultPreviewFromOutputPath(outputPath, resultName)");
+    expect(desktopPreviewBlock).toContain("resultPreview");
+    expect(desktopPreviewBlock).toContain("src={resultPreview.url}");
   });
 
   it("keeps the reviewed desktop UI copy and crop preview constraints", () => {

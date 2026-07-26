@@ -10,9 +10,11 @@
   "scripts": {
     "dev:web": "node scripts/run-pnpm.cjs --filter web dev",
     "build:web": "node scripts/run-pnpm.cjs --filter web build",
+    "build:edgeone": "node scripts/run-pnpm.cjs --filter web build:edgeone",
     "export:web": "node scripts/run-pnpm.cjs --filter web build",
     "sync:security": "node scripts/run-pnpm.cjs --filter web sync:security",
     "deploy:vercel": "vercel --prod",
+    "deploy:edgeone": "edgeone makers deploy apps/web/out -n format-converter-web -e production",
     "deploy:cloudbase": "tcb hosting deploy apps/web/out -e format-converter-prod-x-d71bce41",
     "deploy:license-admin": "cd cloudbase/functions/licenseAdmin && echo. | tcb fn deploy licenseAdmin --dir . --httpFn --force -e format-converter-prod-x-d71bce41",
     "build:desktop": "node scripts/run-pnpm.cjs --filter desktop build",

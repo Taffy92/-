@@ -1951,6 +1951,20 @@ textarea {
   min-width: 0;
 }
 
+.apple-home-ad-shell {
+  width: min(100%, 1420px);
+  margin: 0 auto;
+  padding: 0 6% 76px;
+}
+
+.apple-home-ad-viewport {
+  min-height: 128px;
+}
+
+.apple-home-ad-slot {
+  min-height: 96px !important;
+}
+
 .apple-home-matrix-title {
   align-items: center;
   gap: 18px;

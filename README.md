@@ -46,7 +46,7 @@ DocToolPlatform/
 │   ├── export-core/
 │   └── shared/
 ├── docs/
-├── public/
+├── release/        # 发布说明、校验清单与本地安装包归档
 ├── package.json
 ├── pnpm-workspace.yaml
 └── README.md
@@ -70,29 +70,33 @@ Windows 工作区优先运行 npm 脚本，脚本会调用本地 `.pnpm-home\pnp
 npm run dev:web
 ```
 
-构建在线版：
+普通在线构建：
 
 ```bash
 npm run build:web
 ```
 
-构建结果位于 `apps/web/out`，可直接用于 Vercel 或 CloudBase 静态托管。
+EdgeOne 正式构建：
+
+```bash
+npm run build:edgeone
+```
+
+两种构建结果都位于 `apps/web/out`。正式域名必须使用 `build:edgeone`，它会同时生成 FFmpeg WASM 分片、安装包分片和下载清单；普通 `build:web` 不包含试用安装包分片。
 
 ## 环境变量
 
-`.env.example` 中保留：
+`.env.example` 中主要保留：
 
 ```bash
 NEXT_PUBLIC_SITE_URL=https://gszhmrx.cn
-NEXT_PUBLIC_OFFLINE_EXE_DOWNLOAD_URL=
-NEXT_PUBLIC_OFFLINE_MSI_DOWNLOAD_URL=
 LICENSE_ADMIN_PASSWORD_SHA256=
 LICENSE_PRIVATE_KEY_PEM_B64=
 ```
 
-当前正式域名为 `https://gszhmrx.cn`，`https://www.gszhmrx.cn` 绑定到同一 CloudBase 静态托管站点。所有 canonical、sitemap、Open Graph URL 都从 `apps/web/src/config/site.ts` 的 `siteConfig.url` 读取，构建前确认 `NEXT_PUBLIC_SITE_URL=https://gszhmrx.cn`。
+当前正式域名为 `https://gszhmrx.cn`，`https://www.gszhmrx.cn` 绑定到同一 EdgeOne Pages 项目。所有 canonical、sitemap、Open Graph URL 都从 `apps/web/src/config/site.ts` 的 `siteConfig.url` 读取，构建前确认 `NEXT_PUBLIC_SITE_URL=https://gszhmrx.cn`。
 
-离线安装包现在按 3 天试用模式直接下载。生产环境可以把 `NEXT_PUBLIC_OFFLINE_EXE_DOWNLOAD_URL` 和 `NEXT_PUBLIC_OFFLINE_MSI_DOWNLOAD_URL` 配成公开对象存储或 CDN 地址；不配置时，EXE/MSI 默认使用当前 CloudBase 公开只读对象路径 `/installers/v1.0.0/`。
+离线安装包按 3 天试用模式直接下载。下载页固定读取 EdgeOne 同源清单 `/release/v1.0.0/edgeone/manifest.json`，不再依赖可变的外部安装包 URL 环境变量。
 
 `LICENSE_ADMIN_PASSWORD_SHA256` 和 `LICENSE_PRIVATE_KEY_PEM_B64` 只用于 `cloudbase/functions/licenseAdmin` 私有授权后台，必须配置在 CloudBase 云函数环境变量中，不要写入在线前端或 Git。
 
@@ -107,37 +111,32 @@ LICENSE_PRIVATE_KEY_PEM_B64=
 
 开发环境默认建议使用 placeholder，不真实请求广告脚本。离线版不渲染在线广告容器，也不强制联网加载广告。
 
-## Vercel 部署
+## EdgeOne 正式部署
 
 ```bash
-npm run build:web
-npm run deploy:vercel
+npm run build:edgeone
+npm run deploy:edgeone
 ```
 
-在 Vercel 环境变量中配置：
+EdgeOne 项目名为 `format-converter-web`。正式构建会从被 Git 忽略的 `release/v1.0.0/installers/` 读取 EXE/MSI，先核对整包 SHA256，再生成不超过 16 MiB 的同源分片。浏览器逐片校验并在本地拼装，避免国内用户被跳转到 GitHub。
 
-```bash
-NEXT_PUBLIC_SITE_URL=https://gszhmrx.cn
-```
+具体检查地址、故障处理和 CloudBase 保留边界见 `docs/operator-runbook.md`。
 
-## CloudBase 部署
+## 备用托管
 
-```bash
-npm run build:web
-npm run deploy:cloudbase
-```
+仓库仍保留 `deploy:vercel` 和 `deploy:cloudbase` 作为应急静态托管命令，但它们不是当前正式发布通道，也不会自动生成 EdgeOne 下载分片。CloudBase 环境 `format-converter-prod-x-d71bce41` 主要继续承载私有授权后台和备用下载口令云函数。
 
 `apps/web/cloudbaserc.json` 使用 `apps/web/out` 作为静态托管目录。当前仓库已配置 CloudBase 环境 `format-converter-prod-x-d71bce41`。如果部署到其他环境，再同步修改根目录 `package.json` 的 `deploy:cloudbase` 脚本和 `apps/web/cloudbaserc.json` 的 `envId`。
 
 当前正式访问地址为 `https://gszhmrx.cn/` 和 `https://www.gszhmrx.cn/`。页脚备案号来自 `apps/web/src/config/site.ts` 的 `siteConfig.icp.text`，当前为 `鲁ICP备2026028326号`。
 
-Vercel 安全响应头由 `apps/web/src/config/securityHeaders.js` 生成，修改后执行 `npm run sync:security` 同步到 `apps/web/vercel.json`。
+EdgeOne 响应头配置位于 `apps/web/edgeone.json`。Vercel 备用配置由 `apps/web/src/config/securityHeaders.js` 生成，修改后执行 `npm run sync:security` 同步到 `apps/web/vercel.json`。
 
 ## 离线版试用下载
 
 离线专业版采用“直接下载 3 天试用，试用结束后激活”的模式。下载入口不再要求统一下载口令，授权控制发生在桌面端启动和试用到期之后。
 
-如果使用 CloudBase/COS 分发安装包，建议把 EXE/MSI 放在公开下载路径或 CDN 后面，再通过 `NEXT_PUBLIC_OFFLINE_EXE_DOWNLOAD_URL`、`NEXT_PUBLIC_OFFLINE_MSI_DOWNLOAD_URL` 指向实际地址。当前 EXE/MSI 默认都走公开只读 CloudBase 对象存储，静态站只保留 `SHA256SUMS.txt` 等轻量发布校验文件。旧的 `cloudbase/functions/createDownloadUrl` 口令云函数可作为备用内部分发方案保留，但不再是公开下载页主流程。
+当前 EXE/MSI 由 EdgeOne 同源分片分发。原始安装包只保存在本地发布归档，构建产物和安装包都不会提交到 Git。旧的 `cloudbase/functions/createDownloadUrl` 口令云函数作为备用内部分发方案保留，但不是公开下载页主流程。
 
 ## 私有授权后台
 
@@ -223,9 +222,9 @@ Excel 转图片：支持 `.xlsx`、`.csv`。旧版 `.xls` 请先用 Excel/WPS �
 5. 运行 `npm run build:web`。
 6. 商业发布前确认离线授权生产公钥已替换，管理员私钥和授权记录没有进入客户包。
 7. 运行 `npm run package:desktop`。
-8. 将新 EXE/MSI 同步到 `release/<version>/installers/`，更新 SHA256；安装包默认上传到公开只读对象存储或 CDN，再更新下载链接。
+8. 将新 EXE/MSI 同步到 `release/<version>/installers/`，更新 SHA256，并同步下载配置和 EdgeOne 构建脚本中的版本、文件名与校验值。
 9. 确认 `licenseAdmin` 云函数环境变量中的私钥对应桌面端 `PUBLIC_KEY_RAW_B64`。
-10. 运行 `npm run build:web`，部署静态网站和 `licenseAdmin` 云函数。
+10. 运行 `npm run build:edgeone` 和 `npm run deploy:edgeone`，完成国内站点与同源下载验证；仅在授权后台变更时部署 `licenseAdmin`。
 
 ## 第三方依赖许可证
 

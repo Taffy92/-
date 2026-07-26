@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { AdSlot } from "@doctool/ui";
 import { ArrowRight, Download, FileAudio, FileImage, FileText, ShieldCheck, Video } from "lucide-react";
 import { GsapScene } from "@/components/motion/GsapScene";
 import { ToolsClient } from "@/components/tools/ToolsClient";
+import { adsConfig } from "@/config/ads";
 import { isDesktopApp } from "@/config/appMode";
 import { siteConfig } from "@/config/site";
 
@@ -82,6 +84,20 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        {adsConfig.enabled ? (
+          <section className="apple-home-ad-shell">
+            <div id="ad-container" className="apple-adsense-container" data-animate="home-ad">
+              <div className="adsense-telemetry-header">
+                <span>[ Sandboxed Ad Component ]</span>
+                <span>Secure //</span>
+              </div>
+              <div className="adsense-core-viewport apple-home-ad-viewport">
+                <AdSlot config={adsConfig} name="homeMiddle" className="apple-home-ad-slot" />
+              </div>
+            </div>
+          </section>
+        ) : null}
       </GsapScene>
     </main>
   );
