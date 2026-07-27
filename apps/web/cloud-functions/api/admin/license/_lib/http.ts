@@ -26,7 +26,19 @@ export function errorResponse(status: number, message: string): Response {
 
 export function assertSameOrigin(request: Request): void {
   const origin = request.headers.get("origin");
-  if (!origin || new URL(origin).origin !== new URL(request.url).origin) {
+  if (!origin) {
+    throw new HttpError(403, "请求来源不正确。");
+  }
+
+  const originUrl = new URL(origin);
+  const requestUrl = new URL(request.url);
+  const isLocalHttp =
+    originUrl.protocol === "http:" &&
+    ["localhost", "127.0.0.1", "[::1]"].includes(originUrl.hostname);
+  if (
+    originUrl.host !== requestUrl.host ||
+    (originUrl.protocol !== "https:" && !isLocalHttp)
+  ) {
     throw new HttpError(403, "请求来源不正确。");
   }
 }

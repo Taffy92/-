@@ -57,6 +57,12 @@ describe("EdgeOne license admin authentication", () => {
     });
     expect(() => assertSameOrigin(valid)).not.toThrow();
 
+    const proxied = new Request("http://gszhmrx.cn/api/admin/license/generate", {
+      method: "POST",
+      headers: { Origin: "https://gszhmrx.cn" }
+    });
+    expect(() => assertSameOrigin(proxied)).not.toThrow();
+
     const missing = new Request("https://gszhmrx.cn/api/admin/license/generate", {
       method: "POST"
     });
