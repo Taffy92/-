@@ -1,4 +1,9 @@
 const MAX_BODY_BYTES = 64 * 1024;
+const ADMIN_ORIGIN_HOSTS = new Set([
+  "gszhmrx.cn",
+  "www.gszhmrx.cn",
+  "format-converter-web-s1e4ymen.edgeone.cool"
+]);
 
 export class HttpError extends Error {
   constructor(
@@ -34,11 +39,13 @@ export function assertSameOrigin(request: Request): void {
   const requestUrl = new URL(request.url);
   const isLocalHttp =
     originUrl.protocol === "http:" &&
-    ["localhost", "127.0.0.1", "[::1]"].includes(originUrl.hostname);
-  if (
-    originUrl.host !== requestUrl.host ||
-    (originUrl.protocol !== "https:" && !isLocalHttp)
-  ) {
+    ["localhost", "127.0.0.1", "[::1]"].includes(originUrl.hostname) &&
+    originUrl.host === requestUrl.host;
+  const isAllowedProductionOrigin =
+    originUrl.protocol === "https:" &&
+    !originUrl.port &&
+    ADMIN_ORIGIN_HOSTS.has(originUrl.hostname);
+  if (!isAllowedProductionOrigin && !isLocalHttp) {
     throw new HttpError(403, "请求来源不正确。");
   }
 }
