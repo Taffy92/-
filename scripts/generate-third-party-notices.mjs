@@ -21,7 +21,7 @@ const directNames = await collectDirectDependencyNames();
 const npmPackages = await collectPnpmPackages(lockPackages, directNames);
 const rustCrates = await collectRustCrates();
 const bundledArtifacts = await collectBundledArtifacts();
-const embeddedArtifacts = bundledArtifacts.filter((item) => !item.path.startsWith("release/v1.0.0/installers/"));
+const embeddedArtifacts = bundledArtifacts.filter((item) => !item.path.startsWith("release/v2.0.0/installers/"));
 const directNpmPackages = npmPackages.filter((item) => item.direct);
 
 const meta = {
@@ -36,7 +36,7 @@ const meta = {
     "apps/desktop/src-tauri/Cargo.lock",
     "本机 Cargo registry manifest（可用时）",
     "apps/web/out",
-    "release/v1.0.0/installers"
+    "release/v2.0.0/installers"
   ]
 };
 
@@ -50,7 +50,7 @@ await writeUtf8Bom(paths.docsLicenses, markdown);
 await writeUtf8Bom(paths.generatedTs, renderTypescript({
   ...meta,
   bundledArtifactCount: embeddedArtifacts.length,
-  sources: meta.sources.filter((source) => source !== "release/v1.0.0/installers")
+  sources: meta.sources.filter((source) => source !== "release/v2.0.0/installers")
 }, embeddedArtifacts, directNpmPackages, npmPackages, rustCrates));
 
 console.log(`Generated ${paths.rootNotices}`);
@@ -69,6 +69,7 @@ async function collectDirectDependencyNames() {
     "packages/pdf-core/package.json",
     "packages/export-core/package.json",
     "packages/media-core/package.json",
+    "packages/ocr-core/package.json",
     "packages/shared/package.json"
   ];
   const names = new Set();
@@ -217,8 +218,8 @@ async function collectBundledArtifacts() {
   await addDirArtifact(artifacts, "Next.js 静态网站产物", "apps/web/out", "在线版和离线版共用的静态页面、JS、CSS 和静态资源。");
   await addDirArtifact(artifacts, "PDF.js 静态资源", "apps/web/out/pdfjs", "来自 pdfjs-dist 的主模块、worker、CMaps 和字体资源。");
   await addDirArtifact(artifacts, "FFmpeg WASM 静态资源", "apps/web/out/ffmpeg", "来自 @ffmpeg/core 的 ffmpeg-core.js 和 ffmpeg-core.wasm。");
-  await addBundleFiles(artifacts, "release/v1.0.0/installers", /\.exe$/i, "Windows NSIS 安装包", "离线版 Windows x64 EXE 安装包。");
-  await addBundleFiles(artifacts, "release/v1.0.0/installers", /\.msi$/i, "Windows MSI 安装包", "离线版 Windows x64 MSI 安装包。");
+  await addBundleFiles(artifacts, "release/v2.0.0/installers", /\.exe$/i, "Windows NSIS 安装包", "离线版 Windows x64 EXE 安装包。");
+  await addBundleFiles(artifacts, "release/v2.0.0/installers", /\.msi$/i, "Windows MSI 安装包", "离线版 Windows x64 MSI 安装包。");
   return artifacts;
 }
 

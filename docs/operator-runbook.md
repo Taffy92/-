@@ -8,9 +8,9 @@
 - EdgeOne 项目：`format-converter-web`
 - 授权后台：`https://gszhmrx.cn/admin/license/`
 - 静态与函数产物：`apps/web/out`
-- 原始安装包：`release/v1.0.0/installers/`，仅保存在本地并被 Git 忽略
-- 下载清单：`/release/v1.0.0/edgeone/manifest.json`
-- 安装包分片：`/release/v1.0.0/edgeone/{exe|msi}/part-*.bin`
+- 原始安装包：`release/v2.0.0/installers/`，仅保存在本地并被 Git 忽略
+- 下载清单：`/release/v2.0.0/edgeone/manifest.json`
+- 安装包分片：`/release/v2.0.0/edgeone/{exe|msi}/part-*.bin`
 
 浏览器从同源地址逐片下载并校验 SHA256。用户处理文件始终留在本机，不会进入 EdgeOne 函数或 Blob。
 
@@ -58,8 +58,8 @@ https://gszhmrx.cn/
 https://gszhmrx.cn/download/
 https://gszhmrx.cn/admin/license/
 https://gszhmrx.cn/api/admin/license/health
-https://gszhmrx.cn/release/v1.0.0/edgeone/manifest.json
-https://gszhmrx.cn/release/v1.0.0/edgeone/exe/part-001.bin
+https://gszhmrx.cn/release/v2.0.0/edgeone/manifest.json
+https://gszhmrx.cn/release/v2.0.0/edgeone/exe/part-001.bin
 https://www.gszhmrx.cn/
 ```
 

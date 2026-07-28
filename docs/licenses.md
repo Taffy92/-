@@ -2,9 +2,9 @@
 
 本文件为“万能格式转换器”在线版和 Windows 离线安装版的第三方开源软件 Notices。内容根据锁文件、本地依赖元数据和最终构建产物生成，用于正式发布前的许可证归档和产品内展示。
 
-- 生成时间：2026-07-28T14:49:11.637Z
+- 生成时间：2026-07-28T17:55:55.405Z
 - npm 依赖数量：774
-- 直接 npm 依赖数量：41
+- 直接 npm 依赖数量：45
 - Rust crate 数量：429
 - 构建产物记录数量：5
 - 开发者：MR.谢
@@ -17,7 +17,7 @@
 - `apps/desktop/src-tauri/Cargo.lock`
 - `本机 Cargo registry manifest（可用时）`
 - `apps/web/out`
-- `release/v1.0.0/installers`
+- `release/v2.0.0/installers`
 
 ## 发布前必须保留的重点说明
 
@@ -32,11 +32,11 @@
 
 | 名称 | 路径 | 类型 | 文件数 | 大小 | SHA256 | 说明 |
 | --- | --- | --- | --- | --- | --- | --- |
-| Next.js 静态网站产物 | `apps/web/out` | 目录 | 335 | 91.87 MB | - | 在线版和离线版共用的静态页面、JS、CSS 和静态资源。 |
+| Next.js 静态网站产物 | `apps/web/out` | 目录 | 360 | 584.77 MB | - | 在线版和离线版共用的静态页面、JS、CSS 和静态资源。 |
 | PDF.js 静态资源 | `apps/web/out/pdfjs` | 目录 | 189 | 3.80 MB | - | 来自 pdfjs-dist 的主模块、worker、CMaps 和字体资源。 |
-| FFmpeg WASM 静态资源 | `apps/web/out/ffmpeg` | 目录 | 2 | 30.85 MB | - | 来自 @ffmpeg/core 的 ffmpeg-core.js 和 ffmpeg-core.wasm。 |
-| Windows NSIS 安装包 | `release/v1.0.0/installers/万能格式转换离线专业版_1.0.0_x64-setup.exe` | 文件 | 1 | 245.42 MB | E2A03FDDE5907DD0462FF76C4A440869201B82A71533E82FD0EB25E2826D5564 | 离线版 Windows x64 EXE 安装包。 |
-| Windows MSI 安装包 | `release/v1.0.0/installers/万能格式转换离线专业版_1.0.0_x64_zh-CN.msi` | 文件 | 1 | 255.93 MB | 17B59355E550C5295CF3B9383E4391F57D1789AF1F2783302B483663555C850C | 离线版 Windows x64 MSI 安装包。 |
+| FFmpeg WASM 静态资源 | `apps/web/out/ffmpeg` | 目录 | 3 | 30.85 MB | - | 来自 @ffmpeg/core 的 ffmpeg-core.js 和 ffmpeg-core.wasm。 |
+| Windows NSIS 安装包 | `release/v2.0.0/installers/万能格式转换器_2.0.0_x64-setup.exe` | 文件 | 1 | 256.83 MB | 124A522682E5855632E06A2B494ACFC026F1C6AF4A29831AECE12962FBD1777B | 离线版 Windows x64 EXE 安装包。 |
+| Windows MSI 安装包 | `release/v2.0.0/installers/万能格式转换器_2.0.0_x64_zh-CN.msi` | 文件 | 1 | 267.27 MB | 717B9B557F5FADC84BE284561525EC542F51BF06DE672E09365E2B9C124F0753 | 离线版 Windows x64 MSI 安装包。 |
 
 ## 直接 npm 依赖
 
@@ -51,6 +51,8 @@
 | @playwright/test | 1.60.0 | Apache-2.0 | git+https://github.com/microsoft/playwright.git | LICENSE |
 | @tauri-apps/api | 1.6.0 | Apache-2.0 OR MIT | git+https://github.com/tauri-apps/tauri.git | - |
 | @tauri-apps/cli | 1.6.3 | Apache-2.0 OR MIT | git+https://github.com/tauri-apps/tauri.git | - |
+| @tesseract.js-data/chi_sim | 1.0.0 | MIT | https://github.com/naptha/tessdata.git | - |
+| @tesseract.js-data/eng | 1.0.0 | MIT | https://github.com/naptha/tessdata.git | - |
 | @types/file-saver | 2.0.7 | MIT | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE |
 | @types/node | 14.18.63 | MIT | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE |
 | @types/node | 16.18.11 | MIT | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE |
@@ -62,6 +64,7 @@
 | autoprefixer | 10.5.0 | MIT | postcss/autoprefixer | LICENSE |
 | browser-image-compression | 2.0.2 | MIT | https://github.com/Donaldcwl/browser-image-compression | LICENSE |
 | cropperjs | 1.6.2 | MIT | git+https://github.com/fengyuanchen/cropperjs.git | LICENSE |
+| docx | 9.7.1 | MIT | git+https://github.com/dolanmiu/docx.git | LICENSE |
 | eslint | 8.57.1 | MIT | eslint/eslint | LICENSE |
 | eslint-config-next | 15.5.18 | MIT | vercel/next.js | - |
 | exceljs | 4.4.0 | MIT | https://github.com/exceljs/exceljs.git | LICENSE |
@@ -79,6 +82,7 @@
 | react | 18.3.1 | MIT | https://github.com/facebook/react.git | LICENSE |
 | react-dom | 18.3.1 | MIT | https://github.com/facebook/react.git | LICENSE |
 | tailwindcss | 3.4.19 | MIT | https://github.com/tailwindlabs/tailwindcss.git#v3 | LICENSE |
+| tesseract.js | 7.0.0 | Apache-2.0 | https://github.com/naptha/tesseract.js.git | LICENSE.md |
 | typescript | 4.9.5 | Apache-2.0 | https://github.com/Microsoft/TypeScript.git | LICENSE.txt |
 | typescript | 5.9.3 | Apache-2.0 | https://github.com/microsoft/TypeScript.git | LICENSE.txt |
 | vercel | 34.4.0 | Apache-2.0 | https://github.com/vercel/vercel.git | LICENSE |
@@ -151,8 +155,8 @@
 | @tauri-apps/api | 1.6.0 | Apache-2.0 OR MIT | 是 | 是 | git+https://github.com/tauri-apps/tauri.git | - | - |
 | @tauri-apps/cli | 1.6.3 | Apache-2.0 OR MIT | 是 | 是 | git+https://github.com/tauri-apps/tauri.git | - | - |
 | @tauri-apps/cli-win32-x64-msvc | 1.6.3 | MIT | 否 | 是 | - | - | - |
-| @tesseract.js-data/chi_sim | 1.0.0 | MIT | 否 | 是 | https://github.com/naptha/tessdata.git | - | - |
-| @tesseract.js-data/eng | 1.0.0 | MIT | 否 | 是 | https://github.com/naptha/tessdata.git | - | - |
+| @tesseract.js-data/chi_sim | 1.0.0 | MIT | 是 | 是 | https://github.com/naptha/tessdata.git | - | - |
+| @tesseract.js-data/eng | 1.0.0 | MIT | 是 | 是 | https://github.com/naptha/tessdata.git | - | - |
 | @tootallnate/once | 2.0.0 | MIT | 否 | 是 | git://github.com/TooTallNate/once.git | LICENSE | - |
 | @ts-morph/common | 0.11.1 | MIT | 否 | 是 | git+https://github.com/dsherret/ts-morph.git | LICENSE | - |
 | @tsconfig/node10 | 1.0.12 | MIT | 否 | 是 | https://github.com/tsconfig/bases.git | LICENSE | - |
@@ -339,7 +343,7 @@
 | dlv | 1.1.3 | MIT | 否 | 是 | developit/dlv | - | - |
 | doctrine | 2.1.0 | Apache-2.0 | 否 | 是 | eslint/doctrine | LICENSE, LICENSE.closure-compiler, LICENSE.esprima | - |
 | doctrine | 3.0.0 | Apache-2.0 | 否 | 是 | eslint/doctrine | LICENSE, LICENSE.closure-compiler, LICENSE.esprima | - |
-| docx | 9.7.1 | MIT | 否 | 是 | git+https://github.com/dolanmiu/docx.git | LICENSE | - |
+| docx | 9.7.1 | MIT | 是 | 是 | git+https://github.com/dolanmiu/docx.git | LICENSE | - |
 | dunder-proto | 1.0.1 | MIT | 否 | 是 | git+https://github.com/es-shims/dunder-proto.git | LICENSE | - |
 | duplexer2 | 0.1.4 | BSD-3-Clause | 否 | 是 | deoxxa/duplexer2 | LICENSE.md | - |
 | edge-runtime | 2.5.9 | MPL-2.0 | 否 | 是 | git+https://github.com/vercel/edge-runtime.git | LICENSE.md | - |
@@ -764,7 +768,7 @@
 | tar | 4.4.18 | ISC | 否 | 是 | https://github.com/npm/node-tar.git | LICENSE | - |
 | tar | 6.2.1 | ISC | 否 | 是 | https://github.com/isaacs/node-tar.git | LICENSE | - |
 | tar-stream | 2.2.0 | MIT | 否 | 是 | git+https://github.com/mafintosh/tar-stream.git | LICENSE | - |
-| tesseract.js | 7.0.0 | Apache-2.0 | 否 | 是 | https://github.com/naptha/tesseract.js.git | LICENSE.md | - |
+| tesseract.js | 7.0.0 | Apache-2.0 | 是 | 是 | https://github.com/naptha/tesseract.js.git | LICENSE.md | - |
 | tesseract.js-core | 7.0.0 | Apache-2.0 | 否 | 是 | https://github.com/naptha/tesseract.js-core.git | LICENSE | - |
 | text-table | 0.2.0 | MIT | 否 | 是 | git://github.com/substack/text-table.git | LICENSE | - |
 | thenify | 3.3.1 | MIT | 否 | 是 | thenables/thenify | LICENSE | - |

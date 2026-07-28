@@ -2,9 +2,9 @@
 // Do not edit it by hand.
 
 export const thirdPartyNoticeMeta = {
-  "generatedAt": "2026-07-28T14:49:11.637Z",
+  "generatedAt": "2026-07-28T17:55:55.405Z",
   "npmPackageCount": 774,
-  "directNpmPackageCount": 41,
+  "directNpmPackageCount": 45,
   "rustCrateCount": 429,
   "bundledArtifactCount": 3,
   "sources": [
@@ -21,8 +21,8 @@ export const bundledArtifacts = [
     "label": "Next.js 静态网站产物",
     "path": "apps/web/out",
     "kind": "目录",
-    "files": 335,
-    "sizeBytes": 96336561,
+    "files": 360,
+    "sizeBytes": 613170839,
     "sha256": "",
     "note": "在线版和离线版共用的静态页面、JS、CSS 和静态资源。"
   },
@@ -39,7 +39,7 @@ export const bundledArtifacts = [
     "label": "FFmpeg WASM 静态资源",
     "path": "apps/web/out/ffmpeg",
     "kind": "目录",
-    "files": 2,
+    "files": 3,
     "sizeBytes": 32344478,
     "sha256": "",
     "note": "来自 @ffmpeg/core 的 ffmpeg-core.js 和 ffmpeg-core.wasm。"
@@ -154,6 +154,30 @@ export const directNpmPackages = [
     "repository": "git+https://github.com/tauri-apps/tauri.git",
     "homepage": "https://github.com/tauri-apps/tauri#readme",
     "author": "",
+    "licenseFiles": [],
+    "noticeFiles": [],
+    "direct": true,
+    "inLockfile": true
+  },
+  {
+    "name": "@tesseract.js-data/chi_sim",
+    "version": "1.0.0",
+    "license": "MIT",
+    "repository": "https://github.com/naptha/tessdata.git",
+    "homepage": "https://github.com/naptha/tessdata",
+    "author": "Balearica <admin@scribeocr.com>",
+    "licenseFiles": [],
+    "noticeFiles": [],
+    "direct": true,
+    "inLockfile": true
+  },
+  {
+    "name": "@tesseract.js-data/eng",
+    "version": "1.0.0",
+    "license": "MIT",
+    "repository": "https://github.com/naptha/tessdata.git",
+    "homepage": "https://github.com/naptha/tessdata",
+    "author": "Balearica <admin@scribeocr.com>",
     "licenseFiles": [],
     "noticeFiles": [],
     "direct": true,
@@ -306,6 +330,20 @@ export const directNpmPackages = [
     "repository": "git+https://github.com/fengyuanchen/cropperjs.git",
     "homepage": "https://fengyuanchen.github.io/cropperjs",
     "author": "Chen Fengyuan",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": true,
+    "inLockfile": true
+  },
+  {
+    "name": "docx",
+    "version": "9.7.1",
+    "license": "MIT",
+    "repository": "git+https://github.com/dolanmiu/docx.git",
+    "homepage": "https://docx.js.org",
+    "author": "Dolan Miu",
     "licenseFiles": [
       "LICENSE"
     ],
@@ -542,6 +580,20 @@ export const directNpmPackages = [
     "author": "",
     "licenseFiles": [
       "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": true,
+    "inLockfile": true
+  },
+  {
+    "name": "tesseract.js",
+    "version": "7.0.0",
+    "license": "Apache-2.0",
+    "repository": "https://github.com/naptha/tesseract.js.git",
+    "homepage": "https://github.com/naptha/tesseract.js",
+    "author": "",
+    "licenseFiles": [
+      "LICENSE.md"
     ],
     "noticeFiles": [],
     "direct": true,
@@ -1463,7 +1515,7 @@ export const npmPackages = [
     "author": "Balearica <admin@scribeocr.com>",
     "licenseFiles": [],
     "noticeFiles": [],
-    "direct": false,
+    "direct": true,
     "inLockfile": true
   },
   {
@@ -1475,7 +1527,7 @@ export const npmPackages = [
     "author": "Balearica <admin@scribeocr.com>",
     "licenseFiles": [],
     "noticeFiles": [],
-    "direct": false,
+    "direct": true,
     "inLockfile": true
   },
   {
@@ -4071,7 +4123,7 @@ export const npmPackages = [
       "LICENSE"
     ],
     "noticeFiles": [],
-    "direct": false,
+    "direct": true,
     "inLockfile": true
   },
   {
@@ -9971,7 +10023,7 @@ export const npmPackages = [
       "LICENSE.md"
     ],
     "noticeFiles": [],
-    "direct": false,
+    "direct": true,
     "inLockfile": true
   },
   {
