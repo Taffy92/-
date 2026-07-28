@@ -23,12 +23,14 @@ const installerPackages = [
   {
     type: "exe",
     fileName: "万能格式转换器_2.0.0_x64-setup.exe",
+    assetName: "format-converter_2.0.0_x64-setup.exe",
     sha256: "124A522682E5855632E06A2B494ACFC026F1C6AF4A29831AECE12962FBD1777B",
     contentType: "application/vnd.microsoft.portable-executable"
   },
   {
     type: "msi",
     fileName: "万能格式转换器_2.0.0_x64_zh-CN.msi",
+    assetName: "format-converter_2.0.0_x64_zh-CN.msi",
     sha256: "717B9B557F5FADC84BE284561525EC542F51BF06DE672E09365E2B9C124F0753",
     contentType: "application/x-msi"
   }
@@ -174,7 +176,7 @@ async function fetchPublishedInstallerManifest() {
 
 async function fetchVerifiedInstallerAsset(installer, publishedPartsError) {
   const assetUrl = new URL(
-    encodeURIComponent(installer.fileName),
+    installer.assetName,
     installerAssetBaseUrl.endsWith("/") ? installerAssetBaseUrl : `${installerAssetBaseUrl}/`
   );
   const response = await fetch(assetUrl, {
