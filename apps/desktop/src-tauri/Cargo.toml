@@ -1,6 +1,6 @@
 [package]
 name = "doctool_desktop"
-version = "1.0.0"
+version = "2.0.0"
 description = "万能格式转换器 离线版"
 authors = ["MR.谢 <370298218@qq.com>"]
 license = "MIT"

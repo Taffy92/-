@@ -2,9 +2,9 @@
 // Do not edit it by hand.
 
 export const thirdPartyNoticeMeta = {
-  "generatedAt": "2026-07-26T16:22:37.297Z",
-  "npmPackageCount": 749,
-  "directNpmPackageCount": 38,
+  "generatedAt": "2026-07-28T14:49:11.637Z",
+  "npmPackageCount": 774,
+  "directNpmPackageCount": 41,
   "rustCrateCount": 429,
   "bundledArtifactCount": 3,
   "sources": [
@@ -21,8 +21,8 @@ export const bundledArtifacts = [
     "label": "Next.js 静态网站产物",
     "path": "apps/web/out",
     "kind": "目录",
-    "files": 352,
-    "sizeBytes": 570198467,
+    "files": 335,
+    "sizeBytes": 96336561,
     "sha256": "",
     "note": "在线版和离线版共用的静态页面、JS、CSS 和静态资源。"
   },
@@ -39,7 +39,7 @@ export const bundledArtifacts = [
     "label": "FFmpeg WASM 静态资源",
     "path": "apps/web/out/ffmpeg",
     "kind": "目录",
-    "files": 3,
+    "files": 2,
     "sizeBytes": 32344478,
     "sha256": "",
     "note": "来自 @ffmpeg/core 的 ffmpeg-core.js 和 ffmpeg-core.wasm。"
@@ -216,6 +216,20 @@ export const directNpmPackages = [
     "inLockfile": true
   },
   {
+    "name": "@types/node",
+    "version": "25.9.5",
+    "license": "MIT",
+    "repository": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/node",
+    "author": "",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": true,
+    "inLockfile": true
+  },
+  {
     "name": "@types/qrcode",
     "version": "1.5.5",
     "license": "MIT",
@@ -340,6 +354,20 @@ export const directNpmPackages = [
     "inLockfile": true
   },
   {
+    "name": "exifr",
+    "version": "7.1.3",
+    "license": "MIT",
+    "repository": "https://github.com/MikeKovarik/exifr.git",
+    "homepage": "https://mutiny.cz/exifr/",
+    "author": "Mike Kovarik",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": true,
+    "inLockfile": true
+  },
+  {
     "name": "file-saver",
     "version": "2.0.5",
     "license": "MIT",
@@ -416,6 +444,20 @@ export const directNpmPackages = [
     "author": "",
     "licenseFiles": [
       "license.md"
+    ],
+    "noticeFiles": [],
+    "direct": true,
+    "inLockfile": true
+  },
+  {
+    "name": "pdf-lib",
+    "version": "1.17.1",
+    "license": "MIT",
+    "repository": "git+https://github.com/Hopding/pdf-lib.git",
+    "homepage": "https://pdf-lib.js.org",
+    "author": "Andrew Dillon <andrew.dillon.j@gmail.com>",
+    "licenseFiles": [
+      "LICENSE.md"
     ],
     "noticeFiles": [],
     "direct": true,
@@ -1227,6 +1269,34 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "@pdf-lib/standard-fonts",
+    "version": "1.0.0",
+    "license": "MIT",
+    "repository": "https://github.com/Hopding/standard-fonts.git",
+    "homepage": "https://github.com/Hopding/standard-fonts",
+    "author": "Andrew Dillon <andrew.dillon.j@gmail.com>",
+    "licenseFiles": [
+      "LICENSE.md"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "@pdf-lib/upng",
+    "version": "1.0.1",
+    "license": "MIT",
+    "repository": "https://github.com/Hopding/upng",
+    "homepage": "",
+    "author": "photopea (https://github.com/photopea)",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
     "name": "@playwright/test",
     "version": "1.60.0",
     "license": "Apache-2.0",
@@ -1379,6 +1449,30 @@ export const npmPackages = [
     "repository": "",
     "homepage": "",
     "author": "",
+    "licenseFiles": [],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "@tesseract.js-data/chi_sim",
+    "version": "1.0.0",
+    "license": "MIT",
+    "repository": "https://github.com/naptha/tessdata.git",
+    "homepage": "https://github.com/naptha/tessdata",
+    "author": "Balearica <admin@scribeocr.com>",
+    "licenseFiles": [],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "@tesseract.js-data/eng",
+    "version": "1.0.0",
+    "license": "MIT",
+    "repository": "https://github.com/naptha/tessdata.git",
+    "homepage": "https://github.com/naptha/tessdata",
+    "author": "Balearica <admin@scribeocr.com>",
     "licenseFiles": [],
     "noticeFiles": [],
     "direct": false,
@@ -1567,6 +1661,20 @@ export const npmPackages = [
   {
     "name": "@types/node",
     "version": "20.19.41",
+    "license": "MIT",
+    "repository": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/node",
+    "author": "",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": true,
+    "inLockfile": true
+  },
+  {
+    "name": "@types/node",
+    "version": "25.9.5",
     "license": "MIT",
     "repository": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
     "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/node",
@@ -2867,6 +2975,20 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "bmp-js",
+    "version": "0.1.0",
+    "license": "MIT",
+    "repository": "https://github.com/shaozilee/bmp-js",
+    "homepage": "",
+    "author": "shaozilee shaozilee@gmail.com",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
     "name": "brace-expansion",
     "version": "1.1.14",
     "license": "MIT",
@@ -3939,6 +4061,20 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "docx",
+    "version": "9.7.1",
+    "license": "MIT",
+    "repository": "git+https://github.com/dolanmiu/docx.git",
+    "homepage": "https://docx.js.org",
+    "author": "Dolan Miu",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
     "name": "dunder-proto",
     "version": "1.0.1",
     "license": "MIT",
@@ -4584,6 +4720,20 @@ export const npmPackages = [
     ],
     "noticeFiles": [],
     "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "exifr",
+    "version": "7.1.3",
+    "license": "MIT",
+    "repository": "https://github.com/MikeKovarik/exifr.git",
+    "homepage": "https://mutiny.cz/exifr/",
+    "author": "Mike Kovarik",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": true,
     "inLockfile": true
   },
   {
@@ -5381,6 +5531,18 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "hash.js",
+    "version": "1.1.7",
+    "license": "MIT",
+    "repository": "git@github.com:indutny/hash.js",
+    "homepage": "https://github.com/indutny/hash.js",
+    "author": "Fedor Indutny <fedor@indutny.com>",
+    "licenseFiles": [],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
     "name": "hasown",
     "version": "2.0.3",
     "license": "MIT",
@@ -5527,6 +5689,20 @@ export const npmPackages = [
     "author": "Alexander Shtuchkin <ashtuchkin@gmail.com>",
     "licenseFiles": [
       "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "idb-keyval",
+    "version": "6.3.0",
+    "license": "Apache-2.0",
+    "repository": "git+https://github.com/jakearchibald/idb-keyval.git",
+    "homepage": "https://github.com/jakearchibald/idb-keyval#readme",
+    "author": "Jake Archibald",
+    "licenseFiles": [
+      "LICENCE"
     ],
     "noticeFiles": [],
     "direct": false,
@@ -6066,6 +6242,18 @@ export const npmPackages = [
     "licenseFiles": [
       "LICENSE"
     ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "is-url",
+    "version": "1.2.4",
+    "license": "MIT",
+    "repository": "https://github.com/segmentio/is-url",
+    "homepage": "",
+    "author": "",
+    "licenseFiles": [],
     "noticeFiles": [],
     "direct": false,
     "inLockfile": true
@@ -6985,6 +7173,20 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "minimalistic-assert",
+    "version": "1.0.1",
+    "license": "ISC",
+    "repository": "https://github.com/calvinmetcalf/minimalistic-assert.git",
+    "homepage": "https://github.com/calvinmetcalf/minimalistic-assert",
+    "author": "",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
     "name": "minimatch",
     "version": "10.2.5",
     "license": "BlueOak-1.0.0",
@@ -7215,6 +7417,20 @@ export const npmPackages = [
     "repository": "ai/nanoid",
     "homepage": "",
     "author": "Andrey Sitnik <andrey@sitnik.ru>",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "nanoid",
+    "version": "5.1.16",
+    "license": "MIT",
+    "repository": "ai/nanoid",
+    "homepage": "",
+    "author": "Andrey Sitnik <andrey@sitnik.es>",
     "licenseFiles": [
       "LICENSE"
     ],
@@ -7599,6 +7815,20 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "opencollective-postinstall",
+    "version": "2.0.3",
+    "license": "MIT",
+    "repository": "git+https://github.com/opencollective/opencollective-postinstall.git",
+    "homepage": "https://github.com/opencollective/opencollective-postinstall#readme",
+    "author": "Xavier Damman (@xdamman)",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
     "name": "optionator",
     "version": "0.9.4",
     "license": "MIT",
@@ -7974,6 +8204,20 @@ export const npmPackages = [
     ],
     "noticeFiles": [],
     "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "pdf-lib",
+    "version": "1.17.1",
+    "license": "MIT",
+    "repository": "git+https://github.com/Hopding/pdf-lib.git",
+    "homepage": "https://pdf-lib.js.org",
+    "author": "Andrew Dillon <andrew.dillon.j@gmail.com>",
+    "licenseFiles": [
+      "LICENSE.md"
+    ],
+    "noticeFiles": [],
+    "direct": true,
     "inLockfile": true
   },
   {
@@ -8593,6 +8837,20 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "regenerator-runtime",
+    "version": "0.13.11",
+    "license": "MIT",
+    "repository": "https://github.com/facebook/regenerator/tree/main/packages/runtime",
+    "homepage": "",
+    "author": "Ben Newman <bn@cs.stanford.edu>",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
     "name": "regexp.prototype.flags",
     "version": "1.5.4",
     "license": "MIT",
@@ -8909,6 +9167,20 @@ export const npmPackages = [
     "author": "Nikita Skovoroda chalkerx@gmail.com",
     "licenseFiles": [
       "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "sax",
+    "version": "1.6.1",
+    "license": "BlueOak-1.0.0",
+    "repository": "git+ssh://git@github.com/isaacs/sax-js.git",
+    "homepage": "",
+    "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)",
+    "licenseFiles": [
+      "LICENSE.md"
     ],
     "noticeFiles": [],
     "direct": false,
@@ -9689,6 +9961,34 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "tesseract.js",
+    "version": "7.0.0",
+    "license": "Apache-2.0",
+    "repository": "https://github.com/naptha/tesseract.js.git",
+    "homepage": "https://github.com/naptha/tesseract.js",
+    "author": "",
+    "licenseFiles": [
+      "LICENSE.md"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "tesseract.js-core",
+    "version": "7.0.0",
+    "license": "Apache-2.0",
+    "repository": "https://github.com/naptha/tesseract.js-core.git",
+    "homepage": "https://github.com/naptha/tesseract.js-core",
+    "author": "antimatter15",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
     "name": "text-table",
     "version": "0.2.0",
     "license": "MIT",
@@ -9996,6 +10296,20 @@ export const npmPackages = [
   },
   {
     "name": "tslib",
+    "version": "1.14.1",
+    "license": "0BSD",
+    "repository": "https://github.com/Microsoft/tslib.git",
+    "homepage": "https://www.typescriptlang.org/",
+    "author": "Microsoft Corp.",
+    "licenseFiles": [
+      "LICENSE.txt"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "tslib",
     "version": "2.8.1",
     "license": "0BSD",
     "repository": "https://github.com/Microsoft/tslib.git",
@@ -10193,6 +10507,20 @@ export const npmPackages = [
   {
     "name": "undici-types",
     "version": "6.21.0",
+    "license": "MIT",
+    "repository": "git+https://github.com/nodejs/undici.git",
+    "homepage": "https://undici.nodejs.org",
+    "author": "",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "undici-types",
+    "version": "7.24.6",
     "license": "MIT",
     "repository": "git+https://github.com/nodejs/undici.git",
     "homepage": "https://undici.nodejs.org",
@@ -10449,6 +10777,20 @@ export const npmPackages = [
     "author": "",
     "licenseFiles": [
       "LICENSE.md"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "wasm-feature-detect",
+    "version": "1.8.0",
+    "license": "Apache-2.0",
+    "repository": "GoogleChromeLabs/wasm-feature-detect",
+    "homepage": "",
+    "author": "Surma <surma@surma.link>",
+    "licenseFiles": [
+      "LICENSE"
     ],
     "noticeFiles": [],
     "direct": false,
@@ -10749,6 +11091,34 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "xml",
+    "version": "1.0.1",
+    "license": "MIT",
+    "repository": "http://github.com/dylang/node-xml",
+    "homepage": "http://github.com/dylang/node-xml",
+    "author": "Dylan Greene (https://github.com/dylang)",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "xml-js",
+    "version": "1.6.11",
+    "license": "MIT",
+    "repository": "git+https://github.com/nashwaan/xml-js.git",
+    "homepage": "https://github.com/nashwaan/xml-js#readme",
+    "author": "Yousuf Almarzooqi <ysf953@gmail.com>",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
     "name": "xml-name-validator",
     "version": "5.0.0",
     "license": "Apache-2.0",
@@ -10937,6 +11307,20 @@ export const npmPackages = [
     "repository": "https://github.com/archiverjs/node-zip-stream.git",
     "homepage": "https://github.com/archiverjs/node-zip-stream",
     "author": "Chris Talkington",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "zlibjs",
+    "version": "0.3.1",
+    "license": "MIT",
+    "repository": "git://github.com/imaya/zlib.js.git",
+    "homepage": "https://github.com/imaya/zlib.js",
+    "author": "Yuta Imaya imaya.devel@gmail.com",
     "licenseFiles": [
       "LICENSE"
     ],

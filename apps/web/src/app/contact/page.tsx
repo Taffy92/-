@@ -16,10 +16,21 @@ export default function ContactPage() {
         <h1 className="mt-2 text-3xl font-bold text-slate-50">联系我们</h1>
         <p className="mt-6 text-slate-300">感谢你使用“万能格式转换器”。</p>
         <p className="mt-4 text-slate-300">
-          如果你有功能建议、问题反馈、离线安装包使用问题、广告合作、商务合作、版权或侵权投诉、隐私相关问题、网站错误反馈，欢迎通过邮箱联系我们。
+          如果你有功能建议、问题反馈、离线安装包使用问题、广告合作、商务合作、版权或侵权投诉、隐私相关问题、网站错误反馈，欢迎通过微信或邮箱联系我们。
         </p>
+        <div className="contact-method-grid mt-6">
+          <section>
+            <span>微信号</span>
+            <strong>{siteConfig.wechat}</strong>
+            <p>添加时请简单说明来意，不要发送敏感原始文件。</p>
+          </section>
+          <section>
+            <span>联系邮箱</span>
+            <strong>{siteConfig.email}</strong>
+            <a href={`mailto:${siteConfig.email}`}>发送邮件</a>
+          </section>
+        </div>
         <div className="mt-6 rounded-sm border border-cyan-300/12 bg-slate-900/70 p-5 text-slate-300">
-          <p>联系邮箱：{siteConfig.email}</p>
           <p>开发者：{siteConfig.developer}</p>
         </div>
         <h2 className="mt-8 text-xl font-bold text-slate-50">反馈时建议提供</h2>

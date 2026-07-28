@@ -11,7 +11,7 @@ const nextBin = path.join(appRoot, "node_modules", "next", "dist", "bin", "next"
 const maxEdgeOneFileSize = 25 * 1024 * 1024;
 const wasmPartSize = 16 * 1024 * 1024;
 const installerPartSize = 16 * 1024 * 1024;
-const releaseVersion = "1.0.0";
+const releaseVersion = "2.0.0";
 const releaseInstallerDir = path.resolve(appRoot, "..", "..", "release", `v${releaseVersion}`, "installers");
 const edgeOneReleaseDir = path.join(outDir, "release", `v${releaseVersion}`, "edgeone");
 const publishedReleaseBaseUrl =
@@ -19,14 +19,14 @@ const publishedReleaseBaseUrl =
 const installerPackages = [
   {
     type: "exe",
-    fileName: "万能格式转换离线专业版_1.0.0_x64-setup.exe",
-    sha256: "E2A03FDDE5907DD0462FF76C4A440869201B82A71533E82FD0EB25E2826D5564",
+    fileName: "万能格式转换器_2.0.0_x64-setup.exe",
+    sha256: "124A522682E5855632E06A2B494ACFC026F1C6AF4A29831AECE12962FBD1777B",
     contentType: "application/vnd.microsoft.portable-executable"
   },
   {
     type: "msi",
-    fileName: "万能格式转换离线专业版_1.0.0_x64_zh-CN.msi",
-    sha256: "17B59355E550C5295CF3B9383E4391F57D1789AF1F2783302B483663555C850C",
+    fileName: "万能格式转换器_2.0.0_x64_zh-CN.msi",
+    sha256: "717B9B557F5FADC84BE284561525EC542F51BF06DE672E09365E2B9C124F0753",
     contentType: "application/x-msi"
   }
 ];

@@ -19,7 +19,7 @@ test("local processing page does not upload user files while ads and download au
         /upload|ocr|convert|process/i.test(url));
 
     if (looksLikeUserFileUpload) fileUploadRequests.push(url);
-    if (/googlesyndication|baidu|cloudbase|createDownloadUrl/i.test(url)) allowedNetworkRequests.push(url);
+    if (/baidu|cloudbase|createDownloadUrl/i.test(url)) allowedNetworkRequests.push(url);
   });
 
   await page.goto("/tools/", { waitUntil: "domcontentloaded" });

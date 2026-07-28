@@ -72,7 +72,7 @@ export default function InstallerDownloadButton({
     try {
       const manifest = await loadManifest(manifestUrl);
       const packageInfo = manifest.packages[packageType];
-      validatePackage(packageInfo, fileName);
+      validatePackage(packageInfo, fileName, manifestUrl, packageType);
 
       const picker = (window as typeof window & { showSaveFilePicker?: SaveFilePicker }).showSaveFilePicker;
       const bufferedParts: ArrayBuffer[] = [];
@@ -188,7 +188,12 @@ async function loadManifest(url: string): Promise<DownloadManifest> {
   return manifest;
 }
 
-function validatePackage(packageInfo: ManifestPackage | undefined, expectedFileName: string) {
+function validatePackage(
+  packageInfo: ManifestPackage | undefined,
+  expectedFileName: string,
+  manifestUrl: string,
+  packageType: PackageType
+) {
   if (!packageInfo || packageInfo.fileName !== expectedFileName) {
     throw new Error("安装包信息与页面不一致。");
   }
@@ -199,8 +204,10 @@ function validatePackage(packageInfo: ManifestPackage | undefined, expectedFileN
   if (totalPartSize !== packageInfo.size) {
     throw new Error("安装包分片大小不完整。");
   }
+  const manifestPath = new URL(manifestUrl, window.location.origin).pathname;
+  const expectedPartPrefix = `${manifestPath.replace(/manifest\.json$/, "")}${packageType}/`;
   for (const part of packageInfo.parts) {
-    if (!part.url.startsWith("/release/v1.0.0/edgeone/") || !/^[A-F0-9]{64}$/.test(part.sha256)) {
+    if (!part.url.startsWith(expectedPartPrefix) || !/^[A-F0-9]{64}$/.test(part.sha256)) {
       throw new Error("安装包分片地址或校验值无效。");
     }
   }

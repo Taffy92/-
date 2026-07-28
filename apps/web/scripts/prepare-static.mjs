@@ -1,4 +1,4 @@
-import { cp, mkdir, readdir, stat } from "node:fs/promises";
+import { cp, mkdir, readdir, rm, stat } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -43,6 +43,7 @@ await copyDirIfExists(firstExistingDir([
 
 await copyFfmpegCoreFiles();
 await copyBrowserImageCompressionWorker();
+await copyOcrAssets();
 
 async function copyDirIfExists(src, dest) {
   if (!src || !existsSync(src)) return;
@@ -101,6 +102,41 @@ async function copyBrowserImageCompressionWorker() {
       pnpmPackageDir ? path.join(pnpmPackageDir, "dist/browser-image-compression.js") : undefined
     ].filter(Boolean),
     path.join(appPublic, "vendor/browser-image-compression/browser-image-compression.js")
+  );
+}
+
+async function copyOcrAssets() {
+  const tesseractDir = await findPnpmPackageDir("tesseract.js");
+  const coreDir = await findPnpmPackageDir("tesseract.js-core");
+  const chineseDataDir = await findPnpmPackageDir("@tesseract.js-data/chi_sim");
+  const englishDataDir = await findPnpmPackageDir("@tesseract.js-data/eng");
+  if (!tesseractDir || !coreDir || !chineseDataDir || !englishDataDir) {
+    console.warn("[prepare-static] OCR assets are incomplete. Install tesseract.js and local language packages before building.");
+    return;
+  }
+
+  await copyFirstExisting(
+    [path.join(tesseractDir, "dist/worker.min.js")],
+    path.join(appPublic, "ocr/worker.min.js")
+  );
+  const coreOutputDir = path.join(appPublic, "ocr/core");
+  await rm(coreOutputDir, { recursive: true, force: true });
+  await mkdir(coreOutputDir, { recursive: true });
+  for (const name of [
+    "tesseract-core-lstm.wasm.js",
+    "tesseract-core-simd-lstm.wasm.js",
+    "tesseract-core-relaxedsimd-lstm.wasm.js",
+    "LICENSE"
+  ]) {
+    await copyFirstExisting([path.join(coreDir, name)], path.join(coreOutputDir, name));
+  }
+  await copyFirstExisting(
+    [path.join(chineseDataDir, "4.0.0_best_int/chi_sim.traineddata.gz")],
+    path.join(appPublic, "ocr/lang/chi_sim.traineddata.gz")
+  );
+  await copyFirstExisting(
+    [path.join(englishDataDir, "4.0.0_best_int/eng.traineddata.gz")],
+    path.join(appPublic, "ocr/lang/eng.traineddata.gz")
   );
 }
 

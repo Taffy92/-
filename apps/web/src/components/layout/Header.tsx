@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { HeartHandshake, Menu, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useGSAP } from "@gsap/react";
@@ -9,18 +9,24 @@ import gsap from "gsap";
 import { isDesktopApp } from "@/config/appMode";
 import { siteConfig } from "@/config/site";
 import { MatrixLogo } from "./MatrixLogo";
+import { SupportDialog } from "@/components/support/SupportDialog";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(useGSAP);
 }
 
 const webNavItems = [
-  { href: siteConfig.links.home, label: "产品首页" },
-  { href: siteConfig.links.tools, label: "在线工具台" }
+  { href: siteConfig.links.home, label: "首页" },
+  { href: siteConfig.links.tools, label: "在线工具" },
+  { href: siteConfig.links.localTools, label: "增强工具" },
+  { href: siteConfig.links.tutorials, label: "使用教程" },
+  { href: siteConfig.links.download, label: "离线版" },
+  { href: siteConfig.links.about, label: "关于" }
 ] as const;
 
 const desktopNavItems = [
   { href: siteConfig.links.tools, label: "专业工作台" },
+  { href: siteConfig.links.localTools, label: "增强工具" },
   { href: siteConfig.links.tutorials, label: "使用教程" },
   { href: siteConfig.links.privacy, label: "隐私政策" },
   { href: siteConfig.links.licenses, label: "开源许可证" },
@@ -29,6 +35,7 @@ const desktopNavItems = [
 
 export function Header({ desktop = isDesktopApp }: { desktop?: boolean }) {
   const [open, setOpen] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
   const pathname = usePathname();
   const brandRef = useRef<HTMLAnchorElement | null>(null);
   const navItems = desktop ? desktopNavItems : webNavItems;
@@ -84,8 +91,9 @@ export function Header({ desktop = isDesktopApp }: { desktop?: boolean }) {
   }
 
   return (
-    <header className={headerClass}>
-      <div className="apple-nav-inner">
+    <>
+      <header className={headerClass}>
+        <div className="apple-nav-inner">
         <Link ref={brandRef} href={homeHref} className="apple-brand" onClick={() => setOpen(false)}>
           <MatrixLogo />
           <span className="logo-text truncate">
@@ -105,31 +113,48 @@ export function Header({ desktop = isDesktopApp }: { desktop?: boolean }) {
             </Link>
           ))}
         </nav>
-        <button
-          type="button"
-          className={menuButtonClass}
-          aria-label={open ? "关闭导航菜单" : "打开导航菜单"}
-          onClick={() => setOpen((value) => !value)}
-        >
-          {open ? <X size={20} /> : <Menu size={20} />}
-        </button>
-      </div>
-      {open ? (
-        <div className="apple-mobile-nav">
-          <nav>
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className={`apple-mobile-nav-link ${isActive(item.href) ? "primary" : ""}`}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+          {!desktop ? (
+            <button className="nav-support-button" type="button" onClick={() => setSupportOpen(true)}>
+              <HeartHandshake size={16} />
+              赞赏支持
+            </button>
+          ) : null}
+          <button
+            type="button"
+            className={menuButtonClass}
+            aria-label={open ? "关闭导航菜单" : "打开导航菜单"}
+            aria-expanded={open}
+            onClick={() => setOpen((value) => !value)}
+          >
+            {open ? <X size={20} /> : <Menu size={20} />}
+          </button>
         </div>
-      ) : null}
-    </header>
+        {open ? (
+          <div className="apple-mobile-nav">
+            <nav>
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  className={`apple-mobile-nav-link ${isActive(item.href) ? "primary" : ""}`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+              {!desktop ? (
+                <button type="button" className="apple-mobile-nav-link" onClick={() => {
+                  setOpen(false);
+                  setSupportOpen(true);
+                }}>
+                  赞赏支持
+                </button>
+              ) : null}
+            </nav>
+          </div>
+        ) : null}
+      </header>
+      <SupportDialog open={supportOpen} onClose={() => setSupportOpen(false)} />
+    </>
   );
 }

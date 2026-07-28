@@ -89,6 +89,8 @@ export function Footer() {
             <p>
               开发者：{siteConfig.developer}
               <span> | </span>
+              微信：{siteConfig.wechat}
+              <span> | </span>
               联系邮箱：{siteConfig.email}
             </p>
             <p>

@@ -9,40 +9,51 @@ export const metadata: Metadata = createPageMetadata({
 
 const releases = [
   {
-    version: "v1.0.0",
-    date: "2026-06-17",
-    title: "重新打包并上传部署最新产物",
-    changes: [
-      "离线专业版 sidecar FFmpeg 白名单优先范围扩展为 WAV 转 FLAC、MP4 / MOV / AVI / MKV / WebM 常用视频格式转换和 ffprobe 信息读取",
-      "修复离线版视频 sidecar 参数传递、批量错误提示和手动关闭 sidecar 后的回退逻辑",
-      "移除视频转换对 libx264 的依赖路径，WASM fallback 使用 mpeg4 / VP9 等本地可用编码组合",
-      "修正 MKV fallback 不再附加仅适用于 MP4 / MOV 的 faststart 参数",
-      "更新下载页、发布说明、许可证说明、第三方组件声明和安装包 SHA256 记录",
-      "重新执行在线版与离线版隐私、网络、转换和打包验证后上传部署"
+    version: "v2.0.0",
+    date: "2026-07-29",
+    previousFeatures: [
+      "图片、PDF、办公文档和音视频本地转换",
+      "离线批量队列、独立文件夹输出和本地授权",
+      "图片与 PDF 本地 OCR，支持 TXT 和 Word 导出",
+      "图片、PDF、音视频增强处理工具"
+    ],
+    newFeatures: [
+      "在线版首页、基础工具台和增强工具台全新界面",
+      "离线版工作台、文件平铺预览和授权界面全新设计",
+      "在线版仅保留百度联盟广告位，离线版不加载广告",
+      "新增微信与支付宝赞赏入口",
+      "新增作者微信号和邮箱联系方式"
     ]
   },
   {
-    version: "v1.0.0",
-    date: "2026-06-12",
-    title: "离线安装包与下载页发布",
-    changes: [
-      "上传 Windows EXE / MSI 安装包到公开只读对象存储",
-      "下载页展示 EXE / MSI 文件大小、SHA256 和安装提示",
-      "补充发布说明、安装指南、开源许可证和第三方组件声明",
-      "在线站点保持轻量单文件处理，批量处理入口引导下载离线专业版"
+    version: "v1.1.0",
+    date: "2026-07-28",
+    previousFeatures: [
+      "图片裁切、尺寸调整、添加水印和图片压缩",
+      "PDF、Word、Excel 转图片",
+      "视频格式转换、音频格式转换和视频提取音频",
+      "离线批量处理与本地文件夹输出"
+    ],
+    newFeatures: [
+      "图片格式转换、旋转翻转、EXIF 查看与元数据清理",
+      "图片合成 PDF、PDF 合并拆分、页面重排旋转",
+      "PDF 文字或图片水印、页码、页眉和页脚",
+      "音视频裁剪、视频静音、视频截图、视频转 GIF",
+      "音频拼接、音量调整、淡入和淡出",
+      "图片与 PDF 本地 OCR，支持导出 TXT、可编辑 Word 和原样 Word"
     ]
   },
   {
     version: "v1.0.0",
     date: "2026-05-17",
-    title: "首次功能发布",
-    changes: [
-      "上线图片裁切、图片尺寸调整、图片加水印和图片压缩",
-      "上线 PDF 转图片、Word 转图片和 Excel 转图片",
-      "上线视频格式转换、音频格式转换和视频提取音频",
-      "新增下载离线安装版、关于我们、隐私政策、使用条款和联系我们页面",
-      "预留百度广告和 Google 广告位，支持 Vercel 和 CloudBase 部署",
-      "完成移动端适配并保留开发者信息：MR.谢"
+    previousFeatures: [
+      "首次发布，无更早版本功能"
+    ],
+    newFeatures: [
+      "图片裁切、尺寸调整、添加水印和图片压缩",
+      "PDF、Word、Excel 转图片",
+      "视频格式转换、音频格式转换和视频提取音频",
+      "在线版与 Windows 离线专业版"
     ]
   }
 ];
@@ -58,9 +69,13 @@ export default function ChangelogPage() {
             <section key={`${release.version}-${release.date}`} className="rounded-sm border border-cyan-300/12 bg-slate-950/60 p-5">
               <h2 className="text-xl font-bold text-slate-50">{release.version}</h2>
               <p className="mt-2 text-sm text-slate-400">更新日期：{release.date}</p>
-              <h3 className="mt-5 font-bold text-slate-50">{release.title}</h3>
+              <h3 className="mt-5 font-bold text-slate-50">原有功能</h3>
               <ol className="mt-3 list-decimal space-y-2 pl-6 text-sm leading-6 text-slate-300">
-                {release.changes.map((item) => <li key={item}>{item}</li>)}
+                {release.previousFeatures.map((item) => <li key={item}>{item}</li>)}
+              </ol>
+              <h3 className="mt-5 font-bold text-slate-50">新增功能</h3>
+              <ol className="mt-3 list-decimal space-y-2 pl-6 text-sm leading-6 text-slate-300">
+                {release.newFeatures.map((item) => <li key={item}>{item}</li>)}
               </ol>
             </section>
           ))}

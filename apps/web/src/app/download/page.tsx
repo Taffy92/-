@@ -116,12 +116,12 @@ export default function DownloadPage() {
           可能出现提示，请核对 SHA256 后再安装。
         </p>
         <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <DocLink href="/release/v1.0.0/docs/release-notes" label="发布说明" />
-          <DocLink href="/release/v1.0.0/docs/install-guide" label="安装指南" />
+          <DocLink href="/release/v2.0.0/docs/release-notes" label="发布说明" />
+          <DocLink href="/release/v2.0.0/docs/install-guide" label="安装指南" />
           <DocLink href="/privacy" label="隐私说明" />
           <DocLink href="/licenses" label="开源许可证" />
-          <DocLink href="/release/v1.0.0/docs/third-party-notices" label="第三方组件声明" />
-          <DocLink href="/release/v1.0.0/docs/ffmpeg-license" label="FFmpeg 许可证说明" />
+          <DocLink href="/release/v2.0.0/docs/third-party-notices" label="第三方组件声明" />
+          <DocLink href="/release/v2.0.0/docs/ffmpeg-license" label="FFmpeg 许可证说明" />
         </div>
       </section>
 

@@ -14,11 +14,12 @@ describe("adsConfig", () => {
   it("does not switch the initial ad provider from the browser hostname", () => {
     expect(adsConfigSource).not.toContain("window.location.hostname");
     expect(adsConfigSource).not.toContain('typeof window !== "undefined"');
-    expect(adsConfigSource).toContain('process.env.NEXT_PUBLIC_ADS_PROVIDER || "google"');
+    expect(adsConfigSource).toContain('process.env.NEXT_PUBLIC_ADS_PROVIDER || "baidu"');
+    expect(adsConfigSource).not.toContain("GOOGLE_AD");
   });
 
   it("renders the configured homepage slot on the landing page", () => {
-    expect(homePageSource).toContain('<AdSlot config={adsConfig} name="homeMiddle" className="apple-home-ad-slot" />');
+    expect(homePageSource).toContain('<AdSlot config={adsConfig} name="homeMiddle" className="v2-home-ad-slot" />');
   });
 
   it("does not render the tool page ad slot in the online tools panel", () => {

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, BookOpen, CheckCircle2 } from "lucide-react";
+import { AdSlot } from "@doctool/ui";
 import { isDesktopApp } from "@/config/appMode";
+import { adsConfig } from "@/config/ads";
 import { siteConfig } from "@/config/site";
 import { createPageMetadata } from "@/lib/seo";
 
@@ -303,6 +305,12 @@ export default function TutorialsPage() {
           </article>
         ))}
       </div>
+      {!isDesktopApp ? (
+        <section id="baidu-tutorial-ad-container" className="v2-ad-section mt-6" aria-label="百度联盟广告区域" data-ad-provider="baidu">
+          <span>广告</span>
+          <AdSlot config={adsConfig} name="tutorialBottom" className="v2-home-ad-slot" />
+        </section>
+      ) : null}
     </main>
   );
 }

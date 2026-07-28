@@ -28,9 +28,11 @@ const releaseDocs = {
 } as const;
 
 type ReleaseDocSlug = keyof typeof releaseDocs;
+type ReleaseVersion = "v1.0.0" | "v2.0.0";
 
 type PageProps = {
   params: Promise<{
+    version: string;
     doc: string;
   }>;
 };
@@ -38,31 +40,33 @@ type PageProps = {
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return Object.keys(releaseDocs).map((doc) => ({ doc }));
+  return (["v1.0.0", "v2.0.0"] as const).flatMap((version) =>
+    Object.keys(releaseDocs).map((doc) => ({ version, doc }))
+  );
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { doc } = await params;
+  const { version, doc } = await params;
   const entry = getReleaseDoc(doc);
-  if (!entry) {
+  if (!entry || !isReleaseVersion(version)) {
     return {};
   }
 
   return createPageMetadata({
     title: `${entry.title} - 万能格式转换器`,
-    path: `/release/v1.0.0/docs/${doc}`,
+    path: `/release/${version}/docs/${doc}`,
     description: entry.description
   });
 }
 
 export default async function ReleaseDocPage({ params }: PageProps) {
-  const { doc } = await params;
+  const { version, doc } = await params;
   const entry = getReleaseDoc(doc);
-  if (!entry) {
+  if (!entry || !isReleaseVersion(version)) {
     notFound();
   }
 
-  const content = readFileSync(join(process.cwd(), "public", "release", "v1.0.0", "docs", entry.fileName), "utf8");
+  const content = readFileSync(getReleaseDocPath(version, doc as ReleaseDocSlug), "utf8");
 
   return (
     <main className="document-page apple-document-page mx-auto max-w-5xl px-4 py-10 text-slate-900 sm:px-6 lg:px-8">
@@ -70,7 +74,7 @@ export default async function ReleaseDocPage({ params }: PageProps) {
         <p className="document-kicker text-sm font-semibold text-cyan-300">发布文档</p>
         <h1 className="mt-2 text-3xl font-bold text-slate-50">{entry.title}</h1>
         <p className="document-meta mt-3 text-sm text-slate-300">
-          万能格式转换器离线专业版 v1.0.0 · 站内阅读版
+          万能格式转换器离线专业版 {version.slice(1)} · 站内阅读版
         </p>
         <div className="document-body mt-8 space-y-4 text-sm leading-7 text-slate-200">{renderMarkdown(content)}</div>
       </article>
@@ -83,6 +87,24 @@ function getReleaseDoc(doc: string) {
     return releaseDocs[doc as ReleaseDocSlug];
   }
   return null;
+}
+
+function isReleaseVersion(version: string): version is ReleaseVersion {
+  return version === "v1.0.0" || version === "v2.0.0";
+}
+
+function getReleaseDocPath(version: ReleaseVersion, doc: ReleaseDocSlug) {
+  const entry = releaseDocs[doc];
+  if (version === "v1.0.0") {
+    return join(process.cwd(), "public", "release", version, "docs", entry.fileName);
+  }
+  if (doc === "third-party-notices") {
+    return join(process.cwd(), "..", "..", "docs", "third-party-notices.md");
+  }
+  if (doc === "ffmpeg-license") {
+    return join(process.cwd(), "..", "..", "release", "v1.0.0", "docs", "FFMPEG_LICENSE_NOTICE.md");
+  }
+  return join(process.cwd(), "..", "..", "release", version, "docs", entry.fileName);
 }
 
 function renderMarkdown(content: string) {

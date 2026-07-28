@@ -26,7 +26,7 @@ export default function PrivacyPage() {
       </p>
       <h2>二、广告和第三方服务</h2>
       <p>
-        网站可能接入 Google AdSense、百度广告或其他第三方广告服务。广告服务可能使用 Cookie、设备信息、浏览器信息、
+        网站在线版可能接入百度联盟广告服务。广告服务可能使用 Cookie、设备信息、浏览器信息、
         IP 地址、页面访问情况、广告展示记录、广告点击记录等信息。
       </p>
       <p>
@@ -34,7 +34,7 @@ export default function PrivacyPage() {
         用户可以通过浏览器设置管理 Cookie，也可以使用广告拦截工具或离线专业版。
       </p>
       <p>
-        第三方服务可能包括 EdgeOne、CloudBase、静态资源 CDN、Google AdSense、百度广告。EdgeOne 用于分发网站静态资源和离线安装包分片；
+        第三方服务可能包括 EdgeOne、CloudBase、静态资源 CDN 和百度联盟。EdgeOne 用于分发网站静态资源和离线安装包分片；
         CloudBase 仅保留管理员私有授权后台和备用下载授权能力。上述服务均不接收用户正在处理的文件或转换结果。
       </p>
       <h2>三、功能边界</h2>

@@ -10,7 +10,8 @@ const nextConfig = {
     "@doctool/image-core",
     "@doctool/pdf-core",
     "@doctool/export-core",
-    "@doctool/media-core"
+    "@doctool/media-core",
+    "@doctool/ocr-core"
   ],
   webpack(config) {
     config.resolve.alias.canvas = false;

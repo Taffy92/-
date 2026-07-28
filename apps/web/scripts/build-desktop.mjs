@@ -34,7 +34,7 @@ await Promise.all([
   rm(path.join(outDir, "_next", "static", "chunks", "app", "release"), { recursive: true, force: true })
 ]);
 
-const releaseSumsPath = path.resolve(appRoot, "..", "..", "release", "v1.0.0", "installers", "SHA256SUMS.txt");
+const releaseSumsPath = path.resolve(appRoot, "..", "..", "release", "v2.0.0", "installers", "SHA256SUMS.txt");
 const releaseSums = await readFile(releaseSumsPath, "utf8");
 const installerHashes = releaseSums.match(/\b[A-F0-9]{64}\b/g) || [];
 const textExtensions = new Set([".css", ".html", ".js", ".json", ".map", ".md", ".txt"]);

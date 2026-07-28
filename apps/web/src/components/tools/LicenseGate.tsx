@@ -74,9 +74,9 @@ export function LicenseGate({ status, onStatusChange }: LicenseGateProps) {
   }
 
   return (
-    <main className="min-h-screen bg-[#0F1418] px-6 py-8 text-[#EDF3F7]">
+    <main className="desktop-license-gate min-h-screen bg-[#0F1418] px-6 py-8 text-[#EDF3F7]">
       <section className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-4xl flex-col justify-center">
-        <div className="border border-[#50646F] bg-[#182229] p-6 shadow-2xl">
+        <div className="desktop-license-card border border-[#50646F] bg-[#182229] p-6 shadow-2xl">
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center border border-[#D56A6A]/60 bg-[#2C1D20] text-[#FFB4B4]">
               <AlertTriangle className="h-6 w-6" />
@@ -89,7 +89,7 @@ export function LicenseGate({ status, onStatusChange }: LicenseGateProps) {
           </div>
 
           <div className="mt-6 grid gap-4 md:grid-cols-[1.1fr_0.9fr]">
-            <section className="border border-[#50646F] bg-[#111A20] p-4">
+            <section className="desktop-license-panel border border-[#50646F] bg-[#111A20] p-4">
               <div className="flex items-center gap-2 text-sm font-semibold">
                 <ShieldCheck className="h-4 w-4 text-[#76C77D]" />
                 当前设备
@@ -114,7 +114,7 @@ export function LicenseGate({ status, onStatusChange }: LicenseGateProps) {
               </div>
             </section>
 
-            <section className="border border-[#50646F] bg-[#111A20] p-4">
+            <section className="desktop-license-panel border border-[#50646F] bg-[#111A20] p-4">
               <div className="flex items-center gap-2 text-sm font-semibold">
                 <KeyRound className="h-4 w-4 text-[#76C77D]" />
                 输入授权码

@@ -25,9 +25,10 @@ export function BaiduAdSlot({ enabled = false, slot, className = "" }: BaiduAdSl
     };
   }, [enabled, slot]);
 
-  if (!enabled || !slot || process.env.NODE_ENV !== "production") {
+  if (process.env.NODE_ENV !== "production") {
     return <PlaceholderAdSlot className={className} label="百度广告位" />;
   }
+  if (!enabled || !slot) return null;
 
   return <div id={`baidu-ad-${id}`} ref={ref} className={`min-h-[100px] w-full rounded-sm bg-white ${className}`} />;
 }

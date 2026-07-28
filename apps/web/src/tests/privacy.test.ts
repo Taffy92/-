@@ -4,9 +4,12 @@ import path from "node:path";
 
 const root = process.cwd();
 const toolsSource = readFileSync(path.join(root, "src/components/tools/ToolsClient.tsx"), "utf8");
+const localToolsSource = readFileSync(path.join(root, "src/components/tools/LocalToolsClient.tsx"), "utf8");
 const pdfCoreSource = readFileSync(path.join(root, "../../packages/pdf-core/src/pdf.ts"), "utf8");
 const exportCoreSource = readFileSync(path.join(root, "../../packages/export-core/src/officeImages.ts"), "utf8");
 const mediaCoreSource = readFileSync(path.join(root, "../../packages/media-core/src/index.ts"), "utf8");
+const ocrCoreSource = readFileSync(path.join(root, "../../packages/ocr-core/src/index.ts"), "utf8");
+const pdfToolsSource = readFileSync(path.join(root, "../../packages/pdf-core/src/pdf-tools.ts"), "utf8");
 const cloudFunctionSource = readFileSync(path.join(root, "../../cloudbase/functions/createDownloadUrl/index.js"), "utf8");
 const cloudFunctionSecuritySource = readFileSync(path.join(root, "../../cloudbase/functions/createDownloadUrl/security.js"), "utf8");
 
@@ -36,7 +39,7 @@ describe("privacy and product boundary checks", () => {
   });
 
   it("keeps local file processing code free of upload endpoints", () => {
-    for (const source of [toolsSource, pdfCoreSource, exportCoreSource, mediaCoreSource]) {
+    for (const source of [toolsSource, localToolsSource, pdfCoreSource, pdfToolsSource, exportCoreSource, mediaCoreSource, ocrCoreSource]) {
       expect(source).not.toMatch(/fetch\(["'`]https?:\/\/.+upload/i);
       expect(source).not.toMatch(/new\s+FormData\(/);
     }

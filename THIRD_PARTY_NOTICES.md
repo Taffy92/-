@@ -2,9 +2,9 @@
 
 本文件为“万能格式转换器”在线版和 Windows 离线安装版的第三方开源软件 Notices。内容根据锁文件、本地依赖元数据和最终构建产物生成，用于正式发布前的许可证归档和产品内展示。
 
-- 生成时间：2026-07-26T16:22:37.297Z
-- npm 依赖数量：749
-- 直接 npm 依赖数量：38
+- 生成时间：2026-07-28T14:49:11.637Z
+- npm 依赖数量：774
+- 直接 npm 依赖数量：41
 - Rust crate 数量：429
 - 构建产物记录数量：5
 - 开发者：MR.谢
@@ -32,9 +32,9 @@
 
 | 名称 | 路径 | 类型 | 文件数 | 大小 | SHA256 | 说明 |
 | --- | --- | --- | --- | --- | --- | --- |
-| Next.js 静态网站产物 | `apps/web/out` | 目录 | 352 | 543.78 MB | - | 在线版和离线版共用的静态页面、JS、CSS 和静态资源。 |
+| Next.js 静态网站产物 | `apps/web/out` | 目录 | 335 | 91.87 MB | - | 在线版和离线版共用的静态页面、JS、CSS 和静态资源。 |
 | PDF.js 静态资源 | `apps/web/out/pdfjs` | 目录 | 189 | 3.80 MB | - | 来自 pdfjs-dist 的主模块、worker、CMaps 和字体资源。 |
-| FFmpeg WASM 静态资源 | `apps/web/out/ffmpeg` | 目录 | 3 | 30.85 MB | - | 来自 @ffmpeg/core 的 ffmpeg-core.js 和 ffmpeg-core.wasm。 |
+| FFmpeg WASM 静态资源 | `apps/web/out/ffmpeg` | 目录 | 2 | 30.85 MB | - | 来自 @ffmpeg/core 的 ffmpeg-core.js 和 ffmpeg-core.wasm。 |
 | Windows NSIS 安装包 | `release/v1.0.0/installers/万能格式转换离线专业版_1.0.0_x64-setup.exe` | 文件 | 1 | 245.42 MB | E2A03FDDE5907DD0462FF76C4A440869201B82A71533E82FD0EB25E2826D5564 | 离线版 Windows x64 EXE 安装包。 |
 | Windows MSI 安装包 | `release/v1.0.0/installers/万能格式转换离线专业版_1.0.0_x64_zh-CN.msi` | 文件 | 1 | 255.93 MB | 17B59355E550C5295CF3B9383E4391F57D1789AF1F2783302B483663555C850C | 离线版 Windows x64 MSI 安装包。 |
 
@@ -55,6 +55,7 @@
 | @types/node | 14.18.63 | MIT | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE |
 | @types/node | 16.18.11 | MIT | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE |
 | @types/node | 20.19.41 | MIT | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE |
+| @types/node | 25.9.5 | MIT | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE |
 | @types/qrcode | 1.5.5 | MIT | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE |
 | @types/react | 18.3.28 | MIT | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE |
 | @types/react-dom | 18.3.7 | MIT | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE |
@@ -64,12 +65,14 @@
 | eslint | 8.57.1 | MIT | eslint/eslint | LICENSE |
 | eslint-config-next | 15.5.18 | MIT | vercel/next.js | - |
 | exceljs | 4.4.0 | MIT | https://github.com/exceljs/exceljs.git | LICENSE |
+| exifr | 7.1.3 | MIT | https://github.com/MikeKovarik/exifr.git | LICENSE |
 | file-saver | 2.0.5 | MIT | https://github.com/eligrey/FileSaver.js | LICENSE.md |
 | gsap | 3.15.0 | Standard 'no charge' license: https://gsap.com/standard-license. | git+https://github.com/greensock/GSAP.git | - |
 | jsdom | 24.1.3 | MIT | git+https://github.com/jsdom/jsdom.git | LICENSE.txt |
 | jszip | 3.10.1 | (MIT OR GPL-3.0-or-later) | https://github.com/Stuk/jszip.git | LICENSE.markdown |
 | lucide-react | 0.468.0 | ISC | https://github.com/lucide-icons/lucide.git | LICENSE |
 | next | 15.5.18 | MIT | vercel/next.js | license.md |
+| pdf-lib | 1.17.1 | MIT | git+https://github.com/Hopding/pdf-lib.git | LICENSE.md |
 | pdfjs-dist | 4.10.38 | Apache-2.0 | git+https://github.com/mozilla/pdf.js.git | LICENSE |
 | postcss | 8.5.10 | MIT | postcss/postcss | LICENSE |
 | qrcode | 1.5.4 | MIT | git://github.com/soldair/node-qrcode.git | license |
@@ -134,6 +137,8 @@
 | @nodelib/fs.stat | 2.0.5 | MIT | 否 | 是 | https://github.com/nodelib/nodelib/tree/master/packages/fs/fs.stat | LICENSE | - |
 | @nodelib/fs.walk | 1.2.8 | MIT | 否 | 是 | https://github.com/nodelib/nodelib/tree/master/packages/fs/fs.walk | LICENSE | - |
 | @nolyfill/is-core-module | 1.0.39 | MIT | 否 | 是 | https://github.com/SukkaW/nolyfill | LICENSE | - |
+| @pdf-lib/standard-fonts | 1.0.0 | MIT | 否 | 是 | https://github.com/Hopding/standard-fonts.git | LICENSE.md | - |
+| @pdf-lib/upng | 1.0.1 | MIT | 否 | 是 | https://github.com/Hopding/upng | LICENSE | - |
 | @playwright/test | 1.60.0 | Apache-2.0 | 是 | 是 | git+https://github.com/microsoft/playwright.git | LICENSE | NOTICE |
 | @rollup/pluginutils | 4.2.1 | MIT | 否 | 是 | rollup/plugins | - | - |
 | @rollup/rollup-win32-x64-gnu | 4.60.4 | MIT | 否 | 是 | git+https://github.com/rollup/rollup.git | - | - |
@@ -146,6 +151,8 @@
 | @tauri-apps/api | 1.6.0 | Apache-2.0 OR MIT | 是 | 是 | git+https://github.com/tauri-apps/tauri.git | - | - |
 | @tauri-apps/cli | 1.6.3 | Apache-2.0 OR MIT | 是 | 是 | git+https://github.com/tauri-apps/tauri.git | - | - |
 | @tauri-apps/cli-win32-x64-msvc | 1.6.3 | MIT | 否 | 是 | - | - | - |
+| @tesseract.js-data/chi_sim | 1.0.0 | MIT | 否 | 是 | https://github.com/naptha/tessdata.git | - | - |
+| @tesseract.js-data/eng | 1.0.0 | MIT | 否 | 是 | https://github.com/naptha/tessdata.git | - | - |
 | @tootallnate/once | 2.0.0 | MIT | 否 | 是 | git://github.com/TooTallNate/once.git | LICENSE | - |
 | @ts-morph/common | 0.11.1 | MIT | 否 | 是 | git+https://github.com/dsherret/ts-morph.git | LICENSE | - |
 | @tsconfig/node10 | 1.0.12 | MIT | 否 | 是 | https://github.com/tsconfig/bases.git | LICENSE | - |
@@ -160,6 +167,7 @@
 | @types/node | 14.18.63 | MIT | 是 | 是 | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE | - |
 | @types/node | 16.18.11 | MIT | 是 | 是 | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE | - |
 | @types/node | 20.19.41 | MIT | 是 | 是 | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE | - |
+| @types/node | 25.9.5 | MIT | 是 | 是 | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE | - |
 | @types/prop-types | 15.7.15 | MIT | 否 | 是 | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE | - |
 | @types/qrcode | 1.5.5 | MIT | 是 | 是 | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE | - |
 | @types/react | 18.3.28 | MIT | 是 | 是 | https://github.com/DefinitelyTyped/DefinitelyTyped.git | LICENSE | - |
@@ -253,6 +261,7 @@
 | bindings | 1.5.0 | MIT | 否 | 是 | git://github.com/TooTallNate/node-bindings.git | LICENSE.md | - |
 | bl | 4.1.0 | MIT | 否 | 是 | https://github.com/rvagg/bl.git | LICENSE.md | - |
 | bluebird | 3.4.7 | MIT | 否 | 是 | git://github.com/petkaantonov/bluebird.git | LICENSE | - |
+| bmp-js | 0.1.0 | MIT | 否 | 是 | https://github.com/shaozilee/bmp-js | LICENSE | - |
 | brace-expansion | 1.1.14 | MIT | 否 | 是 | git://github.com/juliangruber/brace-expansion.git | LICENSE | - |
 | brace-expansion | 2.1.0 | MIT | 否 | 是 | git://github.com/juliangruber/brace-expansion.git | LICENSE | - |
 | brace-expansion | 5.0.6 | MIT | 否 | 是 | git+ssh://git@github.com/juliangruber/brace-expansion.git | LICENSE | - |
@@ -330,6 +339,7 @@
 | dlv | 1.1.3 | MIT | 否 | 是 | developit/dlv | - | - |
 | doctrine | 2.1.0 | Apache-2.0 | 否 | 是 | eslint/doctrine | LICENSE, LICENSE.closure-compiler, LICENSE.esprima | - |
 | doctrine | 3.0.0 | Apache-2.0 | 否 | 是 | eslint/doctrine | LICENSE, LICENSE.closure-compiler, LICENSE.esprima | - |
+| docx | 9.7.1 | MIT | 否 | 是 | git+https://github.com/dolanmiu/docx.git | LICENSE | - |
 | dunder-proto | 1.0.1 | MIT | 否 | 是 | git+https://github.com/es-shims/dunder-proto.git | LICENSE | - |
 | duplexer2 | 0.1.4 | BSD-3-Clause | 否 | 是 | deoxxa/duplexer2 | LICENSE.md | - |
 | edge-runtime | 2.5.9 | MPL-2.0 | 否 | 是 | git+https://github.com/vercel/edge-runtime.git | LICENSE.md | - |
@@ -377,6 +387,7 @@
 | exceljs | 4.4.0 | MIT | 是 | 是 | https://github.com/exceljs/exceljs.git | LICENSE | - |
 | execa | 3.2.0 | MIT | 否 | 是 | sindresorhus/execa | license | - |
 | execa | 8.0.1 | MIT | 否 | 是 | sindresorhus/execa | license | - |
+| exifr | 7.1.3 | MIT | 是 | 是 | https://github.com/MikeKovarik/exifr.git | LICENSE | - |
 | fast-csv | 4.3.6 | MIT | 否 | 是 | git+https://github.com/C2FO/fast-csv.git | LICENSE | - |
 | fast-deep-equal | 3.1.3 | MIT | 否 | 是 | git+https://github.com/epoberezkin/fast-deep-equal.git | LICENSE | - |
 | fast-glob | 3.3.1 | MIT | 否 | 是 | mrmlnc/fast-glob | LICENSE | - |
@@ -434,6 +445,7 @@
 | has-symbols | 1.1.0 | MIT | 否 | 是 | git://github.com/inspect-js/has-symbols.git | LICENSE | - |
 | has-tostringtag | 1.0.2 | MIT | 否 | 是 | git+https://github.com/inspect-js/has-tostringtag.git | LICENSE | - |
 | has-unicode | 2.0.1 | ISC | 否 | 是 | https://github.com/iarna/has-unicode | LICENSE | - |
+| hash.js | 1.1.7 | MIT | 否 | 是 | git@github.com:indutny/hash.js | - | - |
 | hasown | 2.0.3 | MIT | 否 | 是 | git+https://github.com/inspect-js/hasOwn.git | LICENSE | - |
 | html-encoding-sniffer | 4.0.0 | MIT | 否 | 是 | jsdom/html-encoding-sniffer | LICENSE.txt | - |
 | http-errors | 1.4.0 | MIT | 否 | 是 | jshttp/http-errors | LICENSE | - |
@@ -445,6 +457,7 @@
 | human-signals | 5.0.0 | Apache-2.0 | 否 | 是 | ehmicky/human-signals | LICENSE | - |
 | iconv-lite | 0.4.24 | MIT | 否 | 是 | git://github.com/ashtuchkin/iconv-lite.git | LICENSE | - |
 | iconv-lite | 0.6.3 | MIT | 否 | 是 | git://github.com/ashtuchkin/iconv-lite.git | LICENSE | - |
+| idb-keyval | 6.3.0 | Apache-2.0 | 否 | 是 | git+https://github.com/jakearchibald/idb-keyval.git | LICENCE | - |
 | ieee754 | 1.2.1 | BSD-3-Clause | 否 | 是 | git://github.com/feross/ieee754.git | LICENSE | - |
 | ignore | 5.3.2 | MIT | 否 | 是 | git@github.com:kaelzhang/node-ignore.git | - | - |
 | ignore | 7.0.5 | MIT | 否 | 是 | git@github.com:kaelzhang/node-ignore.git | - | - |
@@ -484,6 +497,7 @@
 | is-string | 1.1.1 | MIT | 否 | 是 | git://github.com/inspect-js/is-string.git | LICENSE | - |
 | is-symbol | 1.1.1 | MIT | 否 | 是 | git://github.com/inspect-js/is-symbol.git | LICENSE | - |
 | is-typed-array | 1.1.15 | MIT | 否 | 是 | git://github.com/inspect-js/is-typed-array.git | LICENSE | - |
+| is-url | 1.2.4 | MIT | 否 | 是 | https://github.com/segmentio/is-url | - | - |
 | is-weakmap | 2.0.2 | MIT | 否 | 是 | git+https://github.com/inspect-js/is-weakmap.git | LICENSE | - |
 | is-weakref | 1.1.1 | MIT | 否 | 是 | git+https://github.com/inspect-js/is-weakref.git | LICENSE | - |
 | is-weakset | 2.0.4 | MIT | 否 | 是 | git+https://github.com/inspect-js/is-weakset.git | LICENSE | - |
@@ -550,6 +564,7 @@
 | mime-types | 2.1.35 | MIT | 否 | 是 | jshttp/mime-types | LICENSE | - |
 | mimic-fn | 2.1.0 | MIT | 否 | 是 | sindresorhus/mimic-fn | license | - |
 | mimic-fn | 4.0.0 | MIT | 否 | 是 | sindresorhus/mimic-fn | license | - |
+| minimalistic-assert | 1.0.1 | ISC | 否 | 是 | https://github.com/calvinmetcalf/minimalistic-assert.git | LICENSE | - |
 | minimatch | 10.2.5 | BlueOak-1.0.0 | 否 | 是 | git@github.com:isaacs/minimatch | LICENSE.md | - |
 | minimatch | 3.1.5 | ISC | 否 | 是 | git://github.com/isaacs/minimatch.git | LICENSE | - |
 | minimatch | 5.1.9 | ISC | 否 | 是 | git://github.com/isaacs/minimatch.git | LICENSE | - |
@@ -567,6 +582,7 @@
 | ms | 2.1.3 | MIT | 否 | 是 | vercel/ms | license.md | - |
 | mz | 2.7.0 | MIT | 否 | 是 | normalize/mz | LICENSE | - |
 | nanoid | 3.3.12 | MIT | 否 | 是 | ai/nanoid | LICENSE | - |
+| nanoid | 5.1.16 | MIT | 否 | 是 | ai/nanoid | LICENSE | - |
 | napi-postinstall | 0.3.4 | MIT | 否 | 是 | git+https://github.com/un-ts/napi-postinstall.git | LICENSE | - |
 | natural-compare | 1.4.0 | MIT | 否 | 是 | git://github.com/litejs/natural-compare-lite.git | - | - |
 | next | 15.5.18 | MIT | 是 | 是 | vercel/next.js | license.md | - |
@@ -594,6 +610,7 @@
 | once | 1.4.0 | ISC | 否 | 是 | git://github.com/isaacs/once | LICENSE | - |
 | onetime | 5.1.2 | MIT | 否 | 是 | sindresorhus/onetime | license | - |
 | onetime | 6.0.0 | MIT | 否 | 是 | sindresorhus/onetime | license | - |
+| opencollective-postinstall | 2.0.3 | MIT | 否 | 是 | git+https://github.com/opencollective/opencollective-postinstall.git | LICENSE | - |
 | optionator | 0.9.4 | MIT | 否 | 是 | git://github.com/gkz/optionator.git | LICENSE | - |
 | os-paths | 4.4.0 | MIT | 否 | 是 | rivy/js.os-paths | LICENSE | - |
 | own-keys | 1.0.1 | MIT | 否 | 是 | git+https://github.com/ljharb/own-keys.git | LICENSE | - |
@@ -621,6 +638,7 @@
 | pathe | 1.1.2 | MIT | 否 | 是 | unjs/pathe | LICENSE | - |
 | pathe | 2.0.3 | MIT | 否 | 是 | unjs/pathe | LICENSE | - |
 | pathval | 1.1.1 | MIT | 否 | 是 | git+ssh://git@github.com/chaijs/pathval.git | LICENSE | - |
+| pdf-lib | 1.17.1 | MIT | 是 | 是 | git+https://github.com/Hopding/pdf-lib.git | LICENSE.md | - |
 | pdfjs-dist | 4.10.38 | Apache-2.0 | 是 | 是 | git+https://github.com/mozilla/pdf.js.git | LICENSE | - |
 | pend | 1.2.0 | MIT | 否 | 是 | git://github.com/andrewrk/node-pend.git | LICENSE | - |
 | picocolors | 1.0.0 | ISC | 否 | 是 | alexeyraspopov/picocolors | LICENSE | - |
@@ -665,6 +683,7 @@
 | readdirp | 3.3.0 | MIT | 否 | 是 | git://github.com/paulmillr/readdirp.git | LICENSE | - |
 | readdirp | 3.6.0 | MIT | 否 | 是 | git://github.com/paulmillr/readdirp.git | LICENSE | - |
 | reflect.getprototypeof | 1.0.10 | MIT | 否 | 是 | git+https://github.com/es-shims/Reflect.getPrototypeOf.git | LICENSE | - |
+| regenerator-runtime | 0.13.11 | MIT | 否 | 是 | https://github.com/facebook/regenerator/tree/main/packages/runtime | LICENSE | - |
 | regexp.prototype.flags | 1.5.4 | MIT | 否 | 是 | git://github.com/es-shims/RegExp.prototype.flags.git | LICENSE | - |
 | require-directory | 2.1.1 | MIT | 否 | 是 | git://github.com/troygoode/node-require-directory.git | LICENSE | - |
 | require-from-string | 2.0.2 | MIT | 否 | 是 | floatdrop/require-from-string | license | - |
@@ -688,6 +707,7 @@
 | safe-push-apply | 1.0.0 | MIT | 否 | 是 | git+https://github.com/ljharb/safe-push-apply.git | LICENSE | - |
 | safe-regex-test | 1.1.0 | MIT | 否 | 是 | git+https://github.com/ljharb/safe-regex-test.git | LICENSE | - |
 | safer-buffer | 2.1.2 | MIT | 否 | 是 | git+https://github.com/ChALkeR/safer-buffer.git | LICENSE | - |
+| sax | 1.6.1 | BlueOak-1.0.0 | 否 | 是 | git+ssh://git@github.com/isaacs/sax-js.git | LICENSE.md | - |
 | saxes | 5.0.1 | ISC | 否 | 是 | https://github.com/lddubeau/saxes.git | - | - |
 | saxes | 6.0.0 | ISC | 否 | 是 | https://github.com/lddubeau/saxes.git | - | - |
 | scheduler | 0.23.2 | MIT | 否 | 是 | https://github.com/facebook/react.git | LICENSE | - |
@@ -744,6 +764,8 @@
 | tar | 4.4.18 | ISC | 否 | 是 | https://github.com/npm/node-tar.git | LICENSE | - |
 | tar | 6.2.1 | ISC | 否 | 是 | https://github.com/isaacs/node-tar.git | LICENSE | - |
 | tar-stream | 2.2.0 | MIT | 否 | 是 | git+https://github.com/mafintosh/tar-stream.git | LICENSE | - |
+| tesseract.js | 7.0.0 | Apache-2.0 | 否 | 是 | https://github.com/naptha/tesseract.js.git | LICENSE.md | - |
+| tesseract.js-core | 7.0.0 | Apache-2.0 | 否 | 是 | https://github.com/naptha/tesseract.js-core.git | LICENSE | - |
 | text-table | 0.2.0 | MIT | 否 | 是 | git://github.com/substack/text-table.git | LICENSE | - |
 | thenify | 3.3.1 | MIT | 否 | 是 | thenables/thenify | LICENSE | - |
 | thenify-all | 1.6.0 | MIT | 否 | 是 | thenables/thenify-all | LICENSE | - |
@@ -766,6 +788,7 @@
 | ts-node | 10.9.1 | MIT | 否 | 是 | git://github.com/TypeStrong/ts-node.git | LICENSE | - |
 | ts-toolbelt | 6.15.5 | Apache-2.0 | 否 | 是 | https://github.com/millsp/ts-toolbelt | LICENSE | - |
 | tsconfig-paths | 3.15.0 | MIT | 否 | 是 | https://github.com/dividab/tsconfig-paths | LICENSE | - |
+| tslib | 1.14.1 | 0BSD | 否 | 是 | https://github.com/Microsoft/tslib.git | LICENSE.txt | - |
 | tslib | 2.8.1 | 0BSD | 否 | 是 | https://github.com/Microsoft/tslib.git | LICENSE.txt | - |
 | type-check | 0.4.0 | MIT | 否 | 是 | git://github.com/gkz/type-check.git | LICENSE | - |
 | type-detect | 4.1.0 | MIT | 否 | 是 | git+ssh://git@github.com/chaijs/type-detect.git | LICENSE | - |
@@ -781,6 +804,7 @@
 | unbox-primitive | 1.1.0 | MIT | 否 | 是 | git+https://github.com/ljharb/unbox-primitive.git | LICENSE | - |
 | undici | 5.28.4 | MIT | 否 | 是 | git+https://github.com/nodejs/undici.git | LICENSE | - |
 | undici-types | 6.21.0 | MIT | 否 | 是 | git+https://github.com/nodejs/undici.git | LICENSE | - |
+| undici-types | 7.24.6 | MIT | 否 | 是 | git+https://github.com/nodejs/undici.git | LICENSE | - |
 | universalify | 0.1.2 | MIT | 否 | 是 | git+https://github.com/RyanZim/universalify.git | LICENSE | - |
 | universalify | 0.2.0 | MIT | 否 | 是 | git+https://github.com/RyanZim/universalify.git | LICENSE | - |
 | universalify | 2.0.1 | MIT | 否 | 是 | git+https://github.com/RyanZim/universalify.git | LICENSE | - |
@@ -799,6 +823,7 @@
 | vite-node | 1.6.1 | MIT | 否 | 是 | git+https://github.com/vitest-dev/vitest.git | LICENSE | - |
 | vitest | 1.6.1 | MIT | 是 | 是 | git+https://github.com/vitest-dev/vitest.git | LICENSE.md | - |
 | w3c-xmlserializer | 5.0.0 | MIT | 否 | 是 | jsdom/w3c-xmlserializer | LICENSE.md | - |
+| wasm-feature-detect | 1.8.0 | Apache-2.0 | 否 | 是 | GoogleChromeLabs/wasm-feature-detect | LICENSE | - |
 | web-vitals | 0.2.4 | Apache-2.0 | 否 | 是 | https://github.com/GoogleChrome/web-vitals.git | LICENSE | - |
 | webidl-conversions | 3.0.1 | BSD-2-Clause | 否 | 是 | jsdom/webidl-conversions | LICENSE.md | - |
 | webidl-conversions | 7.0.0 | BSD-2-Clause | 否 | 是 | jsdom/webidl-conversions | LICENSE.md | - |
@@ -820,6 +845,8 @@
 | ws | 8.20.1 | MIT | 否 | 是 | git+https://github.com/websockets/ws.git | LICENSE | - |
 | xdg-app-paths | 5.1.0 | MIT | 否 | 是 | rivy/js.xdg-app-paths | license | - |
 | xdg-portable | 7.3.0 | MIT | 否 | 是 | rivy/js.xdg-portable | LICENSE | - |
+| xml | 1.0.1 | MIT | 否 | 是 | http://github.com/dylang/node-xml | LICENSE | - |
+| xml-js | 1.6.11 | MIT | 否 | 是 | git+https://github.com/nashwaan/xml-js.git | LICENSE | - |
 | xml-name-validator | 5.0.0 | Apache-2.0 | 否 | 是 | jsdom/xml-name-validator | LICENSE.txt | - |
 | xmlchars | 2.2.0 | MIT | 否 | 是 | https://github.com/lddubeau/xmlchars.git | LICENSE | - |
 | y18n | 4.0.3 | ISC | 否 | 是 | git@github.com:yargs/y18n.git | LICENSE | - |
@@ -834,6 +861,7 @@
 | yocto-queue | 0.1.0 | MIT | 否 | 是 | sindresorhus/yocto-queue | license | - |
 | yocto-queue | 1.2.2 | MIT | 否 | 是 | sindresorhus/yocto-queue | license | - |
 | zip-stream | 4.1.1 | MIT | 否 | 是 | https://github.com/archiverjs/node-zip-stream.git | LICENSE | - |
+| zlibjs | 0.3.1 | MIT | 否 | 是 | git://github.com/imaya/zlib.js.git | LICENSE | - |
 
 ## Rust / Tauri 依赖 Notices
 

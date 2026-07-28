@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ComponentType, RefObject } from "react";
 import Cropper from "cropperjs";
-import { CheckCircle2, ChevronDown, Crop, Download, FileImage, FileText, Files, FolderOpen, Gauge, HardDrive, Image, ListChecks, Loader2, Maximize2, Music, Play, Scissors, ShieldCheck, SlidersHorizontal, Square, Table2, Trash2, Type, Video, Zap } from "lucide-react";
+import { CheckCircle2, ChevronDown, Crop, Download, FileImage, FileText, Files, FolderOpen, Gauge, HardDrive, HeartHandshake, Image, ListChecks, Loader2, Maximize2, Music, Play, Scissors, ShieldCheck, SlidersHorizontal, Square, Table2, Trash2, Type, Video, Zap } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { addImageWatermark, addTextWatermark, canvasToBlob, compressImage, loadImageElement, resizeImage } from "@doctool/image-core";
 import { combineImagePages, renderDocxToImagePages, renderExcelToImagePages } from "@doctool/export-core";
@@ -16,6 +16,7 @@ import { isDesktopApp } from "@/config/appMode";
 import { currentReleaseVersion } from "@/config/version";
 import { GsapScene } from "@/components/motion/GsapScene";
 import { MatrixLogo } from "@/components/layout/MatrixLogo";
+import { SupportDialog } from "@/components/support/SupportDialog";
 import { batchModeLabel, batchTaskStatusLabel, buildImportSummary, createBatchTask, defaultOutputDirectory, getBatchCounts, getSupportedExtensions, isSupportedBatchName, sanitizeLocalPath } from "@/lib/batchQueue";
 import type { BatchImportSummary, BatchMode, BatchOutputDirectory, BatchTask, BatchTaskStatus } from "@/lib/batchQueue";
 import type { DesktopLicenseStatus } from "@/lib/desktopLicense";
@@ -259,6 +260,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   const [previewMessage, setPreviewMessage] = useState("");
   const [documentPreview, setDocumentPreview] = useState<DocumentPreviewState>({ url: "", title: "", message: "" });
   const [compressionStats, setCompressionStats] = useState("");
+  const [supportOpen, setSupportOpen] = useState(false);
 
   const [cropFormat, setCropFormat] = useState<ExportImageFormat>("jpg");
   const [cropQuality, setCropQuality] = useState(90);
@@ -1955,6 +1957,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
 
   if (isDesktopSurface) {
     return (
+      <>
       <main className="desktop-replica desktop-compact-frame">
         <input
           ref={inputRef}
@@ -1994,6 +1997,12 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
               ))}
             </select>
           </label>
+
+          <a className="desktop-local-tools-link" href="/local-tools">增强工具</a>
+          <button className="desktop-support-button" type="button" onClick={() => setSupportOpen(true)}>
+            <HeartHandshake className="h-4 w-4" />
+            支持作者
+          </button>
 
           <div className="desktop-compact-top-status">
             <span>{activeDesktopSection?.title || "转换工具"} // {currentTab.label}</span>
@@ -2101,8 +2110,12 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
         <footer className="desktop-compact-footer">
           <span>本地运行，保护隐私安全</span>
           <span>开发者：MR.谢</span>
+          <span>微信：___Skyblue</span>
+          <span>邮箱：370298218@qq.com</span>
         </footer>
       </main>
+      <SupportDialog open={supportOpen} onClose={() => setSupportOpen(false)} desktop />
+      </>
     );
   }
 

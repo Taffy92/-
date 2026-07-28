@@ -7,6 +7,12 @@ export interface PdfRenderOptions {
   onProgress?: ProgressReporter;
 }
 
+export interface PdfTextPage {
+  pageNumber: number;
+  text: string;
+  itemCount: number;
+}
+
 export async function getPdfPageCount(file: File): Promise<number> {
   const pdf = await loadPdf(file);
   return pdf.numPages;
@@ -50,6 +56,34 @@ export async function renderPdfPages(file: File, options: PdfRenderOptions): Pro
     const blob = await renderPage(page, options.format, options.scale);
     results.push({ pageNumber, blob });
     options.onProgress?.((index + 1) / options.pages.length, `正在渲染第 ${pageNumber} 页`);
+  }
+  return results;
+}
+
+export async function extractPdfTextPages(file: File): Promise<PdfTextPage[]> {
+  const pdf = await loadPdf(file);
+  const results: PdfTextPage[] = [];
+  for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+    const page = await pdf.getPage(pageNumber);
+    const content = await page.getTextContent();
+    const items = Array.isArray(content?.items) ? content.items : [];
+    const lines: string[] = [];
+    let currentLine = "";
+    for (const item of items) {
+      if (!isPdfTextItem(item)) continue;
+      const value = item.str.trim();
+      if (value) currentLine += `${currentLine ? " " : ""}${value}`;
+      if (item.hasEOL && currentLine) {
+        lines.push(currentLine);
+        currentLine = "";
+      }
+    }
+    if (currentLine) lines.push(currentLine);
+    results.push({
+      pageNumber,
+      text: lines.join("\n").trim(),
+      itemCount: items.length
+    });
   }
   return results;
 }
@@ -124,4 +158,11 @@ async function renderPage(page: any, format: PdfOutputFormat, scale: number): Pr
       else reject(new Error("PDF 页面渲染失败，请降低清晰度后重试。"));
     }, mime, 0.92);
   });
+}
+
+function isPdfTextItem(value: unknown): value is { str: string; hasEOL?: boolean } {
+  return typeof value === "object"
+    && value !== null
+    && "str" in value
+    && typeof (value as { str?: unknown }).str === "string";
 }

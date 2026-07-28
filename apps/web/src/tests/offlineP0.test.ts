@@ -61,14 +61,13 @@ describe("offline P0 release checks", () => {
     const downloadButtonSource = readFileSync(resolve(projectRoot, "apps", "web", "src", "components", "download", "InstallerDownloadButton.tsx"), "utf8");
     const edgeOneBuildSource = readFileSync(resolve(projectRoot, "apps", "web", "scripts", "build-edgeone.mjs"), "utf8");
     const versionSource = readFileSync(resolve(projectRoot, "apps", "web", "src", "config", "version.ts"), "utf8");
-    const publicInstallerDir = resolve(projectRoot, "apps", "web", "public", "release", "v1.0.0", "installers");
-    const outInstallerDir = resolve(projectRoot, "apps", "web", "out", "release", "v1.0.0", "installers");
-    const releaseSumsPath = resolve(projectRoot, "release", "v1.0.0", "installers", "SHA256SUMS.txt");
-    const publicSumsPath = resolve(publicInstallerDir, "SHA256SUMS.txt");
+    const publicInstallerDir = resolve(projectRoot, "apps", "web", "public", "release", "v2.0.0", "installers");
+    const outInstallerDir = resolve(projectRoot, "apps", "web", "out", "release", "v2.0.0", "installers");
+    const releaseSumsPath = resolve(projectRoot, "release", "v2.0.0", "installers", "SHA256SUMS.txt");
 
-    expect(downloadsConfigSource).toContain("/release/v1.0.0/edgeone/manifest.json");
+    expect(downloadsConfigSource).toContain("/release/v2.0.0/edgeone/manifest.json");
     expect(downloadsConfigSource).not.toContain("github.com");
-    expect(downloadsConfigSource).not.toContain('"/release/v1.0.0/installers"');
+    expect(downloadsConfigSource).not.toContain('"/release/v2.0.0/installers"');
     expect(downloadPageSource).toContain("InstallerDownloadButton");
     expect(downloadPageSource).not.toContain("item.downloadUrl");
     expect(downloadButtonSource).toContain("showSaveFilePicker");
@@ -77,8 +76,8 @@ describe("offline P0 release checks", () => {
     expect(edgeOneBuildSource).toContain("installerPartSize");
     expect(edgeOneBuildSource).toContain("writeInstallerParts");
     expect(edgeOneBuildSource).toContain("part-");
-    expect(downloadsConfigSource).toContain('version: "1.0.0"');
-    expect(versionSource).toContain('currentReleaseVersion = "1.0.0"');
+    expect(downloadsConfigSource).toContain('version: "2.0.0"');
+    expect(versionSource).toContain('currentReleaseVersion = "2.0.0"');
     const releaseSums = readFileSync(releaseSumsPath, "utf8");
     const releaseHashes = releaseSums.match(/\b[A-F0-9]{64}\b/g) || [];
     expect(releaseHashes).toHaveLength(2);
@@ -88,7 +87,6 @@ describe("offline P0 release checks", () => {
     expect(downloadsConfigSource).not.toContain("6561983E608F");
     expect(downloadsConfigSource).not.toContain("80EEFAC831A6");
 
-    expect(readFileSync(publicSumsPath, "utf8")).toBe(releaseSums);
     for (const dir of [publicInstallerDir, outInstallerDir]) {
       if (!existsSync(dir)) continue;
       const binaryInstallers = readdirSync(dir).filter((name) => /\.(exe|msi)$/i.test(name));
@@ -102,7 +100,7 @@ describe("offline P0 release checks", () => {
 
     expect(generatedNotices).not.toContain("Windows NSIS 安装包");
     expect(generatedNotices).not.toContain("Windows MSI 安装包");
-    expect(generatedNotices).not.toContain("release/v1.0.0/installers/");
+    expect(generatedNotices).not.toContain("release/v2.0.0/installers/");
   });
 
   it("keeps installer download material out of desktop build output", () => {

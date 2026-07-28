@@ -33,6 +33,7 @@ export default function AboutPage() {
         </ol>
         <div className="mt-8 rounded-sm border border-cyan-300/12 bg-slate-900/70 p-5 text-slate-300">
           <p>开发者：{siteConfig.developer}</p>
+          <p>作者微信：{siteConfig.wechat}</p>
           <p>联系邮箱：{siteConfig.email}</p>
           <p>版权信息：{siteConfig.copyright}</p>
         </div>

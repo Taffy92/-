@@ -69,7 +69,56 @@ for (const viewport of viewports) {
 test("home page renders the homepage ad slot", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
 
-  await expect(page.locator("#ad-container")).toHaveCount(1);
+  await expect(page.locator("#baidu-home-ad-container")).toHaveAttribute("data-ad-provider", "baidu");
+  await expect(page.locator('script[src*="googlesyndication"], script[src*="doubleclick"]')).toHaveCount(0);
+});
+
+for (const viewport of [
+  { name: "mobile-375", width: 375, height: 812 },
+  { name: "desktop-1440", width: 1440, height: 960 }
+]) {
+  test(`home and support dialog are usable at ${viewport.name}`, async ({ page }) => {
+    await page.setViewportSize({ width: viewport.width, height: viewport.height });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+
+    await expect(page.getByRole("heading", { name: /处理文件/ })).toBeVisible();
+    if (viewport.width < 800) {
+      await page.getByRole("button", { name: "打开导航菜单" }).click();
+    }
+    await page.getByRole("button", { name: "赞赏支持" }).click();
+    await expect(page.getByRole("dialog", { name: "支持作者" })).toBeVisible();
+    await expect(page.getByText("___Skyblue", { exact: true })).toBeVisible();
+    await expect(page.getByText("370298218@qq.com", { exact: true })).toBeVisible();
+    await expect(page.getByAltText("微信赞赏二维码")).toBeVisible();
+    await expect(page.getByAltText("支付宝赞赏二维码")).toBeVisible();
+
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
+    expect(overflow).toBe(false);
+
+    await page.screenshot({
+      path: `../../verification/ui-v2-home-${viewport.name}.png`,
+      fullPage: true
+    });
+  });
+}
+
+test("enhanced tools page keeps the three-part workbench usable", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 960 });
+  await page.goto("/local-tools/", { waitUntil: "domcontentloaded" });
+
+  await expect(page.getByRole("heading", { name: "新增本地处理工具" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /选择一个本地文件/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "处理参数" })).toBeVisible();
+  await page.getByRole("button", { name: "支持作者" }).click();
+  await expect(page.getByRole("dialog", { name: "支持作者" })).toBeVisible();
+
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
+  expect(overflow).toBe(false);
+
+  await page.screenshot({
+    path: "../../verification/ui-v2-local-tools-desktop.png",
+    fullPage: true
+  });
 });
 
 test("download page keeps trial download copy clear and local-processing promise visible", async ({ page }) => {
@@ -80,13 +129,13 @@ test("download page keeps trial download copy clear and local-processing promise
   await expect(page.getByText(labels.trialRunCopy).first()).toBeVisible();
   await expect(page.getByRole("button", { name: labels.exeTrialDownload, exact: true })).toBeVisible();
   await expect(page.locator('a[href*="github.com"]')).toHaveCount(0);
-  await expect(page.getByRole("link", { name: labels.releaseNotes })).toHaveAttribute("href", "/release/v1.0.0/docs/release-notes/");
-  await expect(page.getByRole("link", { name: labels.installGuide })).toHaveAttribute("href", "/release/v1.0.0/docs/install-guide/");
+  await expect(page.getByRole("link", { name: labels.releaseNotes })).toHaveAttribute("href", "/release/v2.0.0/docs/release-notes/");
+  await expect(page.getByRole("link", { name: labels.installGuide })).toHaveAttribute("href", "/release/v2.0.0/docs/install-guide/");
   await expect(page.locator("#ad-container")).toHaveCount(0);
 });
 
 test("release compliance documents render as site pages instead of raw markdown", async ({ page }) => {
-  await page.goto("/release/v1.0.0/docs/release-notes", { waitUntil: "domcontentloaded" });
+  await page.goto("/release/v2.0.0/docs/release-notes", { waitUntil: "domcontentloaded" });
 
   await expect(page.getByRole("heading", { name: labels.releaseNotes, exact: true })).toBeVisible();
   await expect(page.getByText(labels.siteReading)).toBeVisible();

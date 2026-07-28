@@ -24,7 +24,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; frame-ancestors 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.doubleclick.net https://hm.baidu.com https://*.baidu.com https://*.bdstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' blob: data: https://*.tcloudbase.com https://*.tcloudbaseapp.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://hm.baidu.com https://*.baidu.com https://*.bdstatic.com; media-src 'self' blob: data:; manifest-src 'self'; worker-src 'self' blob: data:; frame-src 'self' https://googleads.g.doubleclick.net https://*.googlesyndication.com https://*.doubleclick.net; upgrade-insecure-requests"
+          "value": "default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; frame-ancestors 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https://hm.baidu.com https://*.baidu.com https://*.bdstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' blob: data: https://*.tcloudbase.com https://*.tcloudbaseapp.com https://hm.baidu.com https://*.baidu.com https://*.bdstatic.com; media-src 'self' blob: data:; manifest-src 'self'; worker-src 'self' blob: data:; frame-src 'self' https://*.baidu.com https://*.bdstatic.com; upgrade-insecure-requests"
         }
       ]
     },
