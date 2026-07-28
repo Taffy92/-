@@ -16,6 +16,9 @@ const releaseInstallerDir = path.resolve(appRoot, "..", "..", "release", `v${rel
 const edgeOneReleaseDir = path.join(outDir, "release", `v${releaseVersion}`, "edgeone");
 const publishedReleaseBaseUrl =
   process.env.EDGEONE_RELEASE_SOURCE_URL || "https://gszhmrx.cn";
+const installerAssetBaseUrl =
+  process.env.EDGEONE_INSTALLER_SOURCE_URL ||
+  `https://github.com/Taffy92/-/releases/download/v${releaseVersion}/`;
 const installerPackages = [
   {
     type: "exe",
@@ -104,12 +107,19 @@ async function writeInstallerParts() {
     }
 
     if (!sourceBytes) {
-      publishedManifest ??= await fetchPublishedInstallerManifest();
-      manifest.packages[installer.type] = await reusePublishedInstallerParts(
-        installer,
-        publishedManifest
-      );
-      continue;
+      try {
+        publishedManifest ??= await fetchPublishedInstallerManifest();
+        manifest.packages[installer.type] = await reusePublishedInstallerParts(
+          installer,
+          publishedManifest
+        );
+        continue;
+      } catch (error) {
+        console.warn(
+          `Published EdgeOne parts are unavailable for ${installer.type}; downloading the signed release asset.`
+        );
+        sourceBytes = await fetchVerifiedInstallerAsset(installer, error);
+      }
     }
 
     const sourceHash = sha256(sourceBytes);
@@ -160,6 +170,33 @@ async function fetchPublishedInstallerManifest() {
     throw new Error(`Unable to fetch published installer manifest: HTTP ${response.status}`);
   }
   return response.json();
+}
+
+async function fetchVerifiedInstallerAsset(installer, publishedPartsError) {
+  const assetUrl = new URL(
+    encodeURIComponent(installer.fileName),
+    installerAssetBaseUrl.endsWith("/") ? installerAssetBaseUrl : `${installerAssetBaseUrl}/`
+  );
+  const response = await fetch(assetUrl, {
+    redirect: "follow",
+    signal: AbortSignal.timeout(600_000)
+  });
+  if (!response.ok) {
+    throw new AggregateError(
+      [publishedPartsError, new Error(`HTTP ${response.status} from ${assetUrl.origin}`)],
+      `Unable to recover ${installer.type} installer for the EdgeOne build.`
+    );
+  }
+
+  const sourceBytes = Buffer.from(await response.arrayBuffer());
+  const sourceHash = sha256(sourceBytes);
+  if (sourceHash !== installer.sha256) {
+    throw new Error(
+      `Downloaded ${installer.type} installer failed complete SHA256 verification: ${sourceHash}`
+    );
+  }
+  console.log(`Recovered and verified ${installer.type} installer from the v${releaseVersion} release.`);
+  return sourceBytes;
 }
 
 async function reusePublishedInstallerParts(installer, publishedManifest) {

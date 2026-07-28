@@ -38,8 +38,12 @@ describe("EdgeOne private license admin build", () => {
 
     expect(buildSource).toContain("fetchPublishedInstallerManifest");
     expect(buildSource).toContain("reusePublishedInstallerParts");
+    expect(buildSource).toContain("fetchVerifiedInstallerAsset");
+    expect(buildSource).toContain("EDGEONE_INSTALLER_SOURCE_URL");
+    expect(buildSource).toContain("releases/download/v${releaseVersion}/");
     expect(buildSource).toContain("failed size or SHA256 verification");
     expect(buildSource).toContain("failed complete SHA256 verification");
+    expect(buildSource).toContain("Downloaded ${installer.type} installer failed complete SHA256 verification");
   });
 
   it("exposes the private admin functions at the repository root for Git builds", () => {
