@@ -1,0 +1,1486 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>万能格式转换器离线专业版 - 完整重设计审阅稿</title>
+  <link rel="icon" href="data:," />
+  <style>
+    :root {
+      color-scheme: dark;
+      --app-bg: #161b20;
+      --chrome: #1c2228;
+      --panel: #20272e;
+      --panel-2: #262e36;
+      --panel-3: #303a44;
+      --canvas: #11161a;
+      --ink: #eef3f7;
+      --muted: #a7b1bb;
+      --faint: #75818d;
+      --line: #343e48;
+      --line-strong: #46525f;
+      --accent: #4e91dc;
+      --accent-strong: #3479c5;
+      --accent-soft: #223b56;
+      --success: #55b88b;
+      --warning: #d9a256;
+      --danger: #dc6c70;
+      --title-h: 42px;
+      --status-h: 28px;
+      --rail-w: 232px;
+      --radius: 9px;
+      --radius-small: 6px;
+      --shadow: 0 18px 48px rgba(0,0,0,.28);
+      --preview-zoom: 1;
+    }
+    * { box-sizing: border-box; }
+    html { min-width: 1080px; min-height: 700px; background: #0d1115; }
+    body {
+      margin: 0;
+      min-width: 1080px;
+      min-height: 100dvh;
+      overflow: hidden;
+      background: #0d1115;
+      color: var(--ink);
+      font-family: "Segoe UI Variable", "Segoe UI", "Microsoft YaHei UI", sans-serif;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    button, input, select, textarea { font: inherit; }
+    button { color: inherit; }
+    img { display: block; max-width: 100%; }
+    [hidden] { display: none !important; }
+    button:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .desktop-app {
+      width: 100vw;
+      height: 100dvh;
+      min-height: 700px;
+      display: grid;
+      grid-template-rows: var(--title-h) minmax(0, 1fr) var(--status-h);
+      background: var(--app-bg);
+    }
+    .titlebar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      border-bottom: 1px solid #0f1317;
+      background: #181e24;
+      user-select: none;
+    }
+    .title-brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+      padding-left: 14px;
+    }
+    .title-brand img { width: 21px; height: 21px; }
+    .title-brand strong { font-size: 12px; font-weight: 650; }
+    .title-brand span { color: var(--faint); font-size: 11px; margin-left: 3px; }
+    .window-controls { display: flex; height: 100%; }
+    .window-controls button {
+      width: 46px; height: 100%;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .window-controls button:hover { background: var(--panel-2); color: var(--ink); }
+    .window-controls button:last-child:hover { background: #b93f45; color: #ffffff; }
+
+    .body-shell {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: var(--rail-w) minmax(0, 1fr);
+    }
+    .app-rail {
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #101419;
+      background: var(--chrome);
+    }
+    .rail-top { padding: 16px 12px 10px; }
+    .new-task {
+      width: 100%;
+      height: 42px;
+      border: 1px solid var(--accent-strong);
+      border-radius: var(--radius-small);
+      background: var(--accent);
+      color: #ffffff;
+      font-weight: 650;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: inset 0 1px rgba(255,255,255,.15);
+    }
+    .new-task:hover { background: var(--accent-strong); }
+    .new-task:active { transform: translateY(1px); }
+    .rail-nav { padding: 4px 8px; }
+    .rail-label { color: var(--faint); font-size: 10px; padding: 14px 10px 6px; }
+    .rail-button {
+      width: 100%;
+      min-height: 39px;
+      display: grid;
+      grid-template-columns: 29px 1fr auto;
+      gap: 8px;
+      align-items: center;
+      border: 0;
+      border-radius: var(--radius-small);
+      background: transparent;
+      color: var(--muted);
+      padding: 5px 9px;
+      text-align: left;
+      cursor: pointer;
+      margin: 1px 0;
+    }
+    .rail-button:hover { color: var(--ink); background: var(--panel-2); }
+    .rail-button.active { color: var(--ink); background: var(--accent-soft); }
+    .rail-button b {
+      width: 27px; height: 27px;
+      display: grid; place-items: center;
+      border-radius: 5px;
+      color: inherit;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: -.03em;
+    }
+    .rail-button.active b { color: var(--accent); }
+    .rail-button small { color: var(--faint); }
+    .rail-bottom {
+      margin-top: auto;
+      padding: 10px 8px 12px;
+      border-top: 1px solid var(--line);
+    }
+    .license-chip {
+      margin: 6px 8px 2px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-small);
+      background: var(--panel);
+    }
+    .license-chip strong { display: block; font-size: 11px; }
+    .license-chip span { color: var(--muted); font-size: 10px; }
+
+    .main-area {
+      min-width: 0;
+      min-height: 0;
+      position: relative;
+      background: var(--app-bg);
+    }
+    .screen {
+      position: absolute;
+      inset: 0;
+      display: none;
+      min-width: 0;
+      min-height: 0;
+    }
+    .screen.active { display: grid; }
+    .screen-standard { grid-template-rows: 58px minmax(0, 1fr); }
+    .commandbar {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 0 17px;
+      border-bottom: 1px solid var(--line);
+      background: var(--chrome);
+    }
+    .command-title { min-width: 0; }
+    .command-title strong { display: block; font-size: 14px; }
+    .command-title span { color: var(--muted); font-size: 11px; }
+    .command-actions { display: flex; align-items: center; gap: 7px; }
+    .button {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-small);
+      background: var(--panel);
+      color: var(--ink);
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .button:hover { border-color: var(--line-strong); background: var(--panel-2); }
+    .button:active { transform: translateY(1px); }
+    .button.primary { border-color: var(--accent-strong); background: var(--accent); color: #ffffff; }
+    .button.primary:hover { background: var(--accent-strong); }
+    .button.danger { color: var(--danger); }
+    .button.small { min-height: 29px; padding: 0 9px; font-size: 11px; }
+    .button.icon { width: 34px; padding: 0; }
+    .button.block { width: 100%; }
+
+    .home-content {
+      min-height: 0;
+      overflow: auto;
+      display: grid;
+      grid-template-columns: minmax(560px, 1.25fr) minmax(340px, .75fr);
+      gap: 0;
+    }
+    .home-primary { padding: clamp(28px, 4vw, 58px); border-right: 1px solid var(--line); }
+    .home-primary h1 { margin: 0; font-size: clamp(31px, 3.4vw, 48px); line-height: 1.08; letter-spacing: -.035em; }
+    .home-primary > p { margin: 13px 0 0; max-width: 52em; color: var(--muted); font-size: 14px; }
+    .quick-start { margin-top: 38px; }
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 10px;
+    }
+    .section-title strong { font-size: 12px; }
+    .section-title span { color: var(--faint); font-size: 10px; }
+    .start-list {
+      border-top: 1px solid var(--line);
+    }
+    .start-item {
+      width: 100%;
+      min-height: 76px;
+      display: grid;
+      grid-template-columns: 46px minmax(0, 1fr) 150px 36px;
+      gap: 14px;
+      align-items: center;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink);
+      text-align: left;
+      cursor: pointer;
+      padding: 9px 7px;
+      transition: background .16s ease, padding .16s ease;
+    }
+    .start-item:hover { background: var(--panel); padding-left: 13px; padding-right: 13px; }
+    .start-symbol {
+      width: 42px; height: 42px; border-radius: 8px;
+      display: grid; place-items: center;
+      background: var(--panel-2); color: var(--accent);
+      border: 1px solid var(--line);
+      font-size: 10px; font-weight: 750;
+    }
+    .start-item strong { display: block; }
+    .start-item small { color: var(--muted); }
+    .start-formats { color: var(--faint); font-size: 11px; text-align: right; }
+    .start-arrow { color: var(--faint); text-align: center; }
+    .home-secondary { padding: 28px 24px; min-width: 0; overflow: auto; }
+    .system-summary {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      overflow: hidden;
+    }
+    .summary-head { padding: 15px 16px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 12px; }
+    .summary-head span { color: var(--success); font-size: 11px; }
+    .summary-row { min-height: 44px; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 14px; padding: 0 16px; border-bottom: 1px solid var(--line); }
+    .summary-row:last-child { border-bottom: 0; }
+    .summary-row span { color: var(--muted); }
+    .summary-row strong { font-size: 11px; font-family: "Cascadia Mono", Consolas, monospace; }
+    .recent-section { margin-top: 28px; }
+    .recent-row {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 56px 1fr auto;
+      gap: 11px;
+      align-items: center;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink);
+      text-align: left;
+      padding: 10px 2px;
+      cursor: pointer;
+    }
+    .recent-row:hover { background: var(--panel); }
+    .recent-row img { width: 56px; height: 40px; border-radius: 5px; border: 1px solid var(--line); object-fit: cover; }
+    .recent-row strong { display: block; font-size: 11px; }
+    .recent-row span { color: var(--muted); font-size: 10px; }
+    .recent-row b { color: var(--success); font-size: 10px; font-weight: 600; }
+
+    .workbench-screen {
+      grid-template-rows: 52px minmax(0, 1fr);
+    }
+    .workbench-commandbar {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: auto minmax(180px, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--line);
+      background: var(--chrome);
+    }
+    .tool-select {
+      height: 34px;
+      min-width: 184px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-small);
+      background: var(--panel);
+      color: var(--ink);
+      padding: 0 10px;
+    }
+    .file-breadcrumb {
+      min-width: 0;
+      color: var(--muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 11px;
+    }
+    .workbench-actions { display: flex; gap: 6px; }
+    .workbench-body {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 190px minmax(460px, 1fr) 302px;
+    }
+    .asset-panel, .property-panel { min-height: 0; background: var(--chrome); overflow: auto; }
+    .asset-panel { border-right: 1px solid var(--line); }
+    .property-panel { border-left: 1px solid var(--line); }
+    .panel-head {
+      height: 43px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--line);
+    }
+    .panel-head strong { font-size: 11px; }
+    .panel-head span { color: var(--faint); font-size: 10px; }
+    .asset-list { padding: 8px; display: grid; gap: 6px; }
+    .asset {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 54px 1fr;
+      gap: 9px;
+      align-items: center;
+      border: 1px solid transparent;
+      border-radius: var(--radius-small);
+      background: transparent;
+      color: var(--ink);
+      text-align: left;
+      padding: 7px;
+      cursor: pointer;
+    }
+    .asset:hover { background: var(--panel); }
+    .asset.active { border-color: var(--accent); background: var(--accent-soft); }
+    .asset img { width: 54px; height: 43px; object-fit: cover; border: 1px solid var(--line); border-radius: 4px; background: var(--canvas); }
+    .asset strong { display: block; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .asset span { color: var(--muted); font-size: 9px; }
+    .asset-add {
+      margin: 4px 8px 10px;
+      width: calc(100% - 16px);
+      min-height: 36px;
+      border: 1px dashed var(--line-strong);
+      border-radius: var(--radius-small);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .asset-add:hover { color: var(--ink); border-color: var(--accent); }
+
+    .editing-area {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: 43px minmax(0, 1fr) 112px;
+      background: var(--canvas);
+    }
+    .edit-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 0 10px;
+      border-bottom: 1px solid #2b333b;
+      background: var(--panel);
+    }
+    .tool-group { display: flex; align-items: center; gap: 3px; }
+    .edit-tool {
+      min-width: 32px; height: 31px;
+      border: 0;
+      border-radius: 5px;
+      background: transparent;
+      color: var(--muted);
+      padding: 0 8px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+    .edit-tool:hover, .edit-tool.active { background: var(--panel-3); color: var(--ink); }
+    .edit-tool.active { color: var(--accent); }
+    .toolbar-divider { width: 1px; height: 20px; background: var(--line); margin: 0 4px; }
+    .canvas-stage {
+      min-height: 0;
+      overflow: auto;
+      display: grid;
+      place-items: center;
+      padding: 26px;
+      background:
+        linear-gradient(45deg, #151b20 25%, transparent 25%),
+        linear-gradient(-45deg, #151b20 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #151b20 75%),
+        linear-gradient(-45deg, transparent 75%, #151b20 75%),
+        #11161a;
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+    }
+    .document-canvas {
+      position: relative;
+      width: min(860px, 96%);
+      aspect-ratio: 16 / 10;
+      border: 1px solid #4a5662;
+      background: #eef2f5;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transform: scale(var(--preview-zoom));
+      transform-origin: center;
+      transition: transform .18s ease;
+    }
+    .document-canvas > img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+    .selection-box {
+      position: absolute;
+      left: 19%; top: 18%;
+      width: 48%; height: 43%;
+      border: 2px solid #287ed5;
+      background: rgba(40,126,213,.07);
+    }
+    .selection-box::before, .selection-box::after {
+      content: "";
+      position: absolute;
+      width: 8px; height: 8px;
+      background: #ffffff;
+      border: 2px solid #287ed5;
+    }
+    .selection-box::before { left: -5px; top: -5px; }
+    .selection-box::after { right: -5px; bottom: -5px; }
+    .annotation-arrow {
+      position: absolute;
+      left: 64%; top: 61%;
+      width: 22%; height: 4px;
+      background: #d84444;
+      transform: rotate(-17deg);
+      transform-origin: left center;
+    }
+    .annotation-arrow::after {
+      content: "";
+      position: absolute;
+      right: -1px; top: -6px;
+      border-left: 13px solid #d84444;
+      border-top: 7px solid transparent;
+      border-bottom: 7px solid transparent;
+    }
+    .blur-block {
+      position: absolute;
+      right: 8%; top: 16%;
+      width: 21%; height: 15%;
+      backdrop-filter: blur(8px);
+      background: repeating-linear-gradient(90deg, rgba(70,85,98,.42) 0 4px, rgba(142,153,164,.5) 4px 8px);
+    }
+    .processing-sweep {
+      position: absolute;
+      left: 0; right: 0; top: 6%;
+      height: 2px;
+      background: #2c85dc;
+      box-shadow: 0 0 14px rgba(44,133,220,.65);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .filmstrip {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      border-top: 1px solid #2b333b;
+      background: var(--panel);
+      padding: 10px;
+    }
+    .filmstrip-copy { min-width: 0; }
+    .filmstrip-copy strong { display: block; font-size: 10px; }
+    .filmstrip-copy span { color: var(--muted); font-size: 9px; }
+    .filmstrip-items { min-width: 0; display: flex; gap: 7px; overflow-x: auto; }
+    .film-thumb {
+      width: 92px; min-width: 92px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: var(--chrome);
+      padding: 4px;
+      cursor: pointer;
+    }
+    .film-thumb.active { border-color: var(--accent); }
+    .film-thumb img { width: 100%; height: 54px; object-fit: cover; border-radius: 3px; }
+    .film-thumb span { display: block; color: var(--muted); font-size: 8px; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .zoom-tools { display: flex; align-items: center; gap: 3px; }
+
+    .property-tabs { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--line); }
+    .property-tab {
+      height: 41px;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 11px;
+    }
+    .property-tab.active { color: var(--accent); border-color: var(--accent); }
+    .property-view { display: none; padding: 15px 14px 24px; }
+    .property-view.active { display: block; }
+    .property-group { margin-bottom: 20px; }
+    .property-group > strong { display: block; color: var(--muted); font-size: 10px; margin-bottom: 9px; }
+    .field { margin-bottom: 12px; }
+    .field label { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 10px; margin-bottom: 5px; }
+    .select, .input {
+      width: 100%;
+      height: 34px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-small);
+      background: var(--panel);
+      color: var(--ink);
+      padding: 0 9px;
+    }
+    .field input[type="range"] { width: 100%; accent-color: var(--accent); }
+    .option-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+    .option-button {
+      min-height: 48px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-small);
+      background: var(--panel);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 10px;
+    }
+    .option-button:hover { border-color: var(--line-strong); color: var(--ink); }
+    .option-button.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+    .switch-row { min-height: 40px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); }
+    .switch { width: 36px; height: 20px; border: 0; border-radius: 10px; background: var(--panel-3); padding: 2px; cursor: pointer; }
+    .switch::after { content: ""; display: block; width: 16px; height: 16px; border-radius: 50%; background: #dfe6ed; transition: transform .16s ease; }
+    .switch.on { background: var(--accent); }
+    .switch.on::after { transform: translateX(16px); }
+    .result-panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-small);
+      background: var(--panel);
+      padding: 11px;
+      min-height: 92px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+    .queue-mini-row { min-height: 45px; border-bottom: 1px solid var(--line); padding: 7px 0; }
+    .queue-mini-row strong { display: block; font-size: 10px; }
+    .queue-mini-row span { color: var(--muted); font-size: 9px; }
+
+    .queue-content, .history-content, .preset-content, .about-content {
+      min-height: 0;
+      overflow: auto;
+      padding: 18px;
+    }
+    .queue-summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 18px;
+    }
+    .queue-stat { padding: 14px 16px; background: var(--panel); }
+    .queue-stat span { display: block; color: var(--muted); font-size: 10px; }
+    .queue-stat strong { display: block; margin-top: 4px; font-size: 19px; font-family: "Cascadia Mono", Consolas, monospace; }
+    .task-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--panel);
+    }
+    .task-table th {
+      height: 36px;
+      padding: 0 11px;
+      background: var(--panel-2);
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 500;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+    }
+    .task-table td { height: 54px; padding: 0 11px; border-bottom: 1px solid var(--line); font-size: 11px; }
+    .task-table tr:last-child td { border-bottom: 0; }
+    .task-table tr:hover td { background: var(--panel-2); }
+    .task-name { display: flex; align-items: center; gap: 9px; }
+    .task-name img { width: 40px; height: 31px; border: 1px solid var(--line); border-radius: 4px; object-fit: cover; }
+    .task-name strong { display: block; font-size: 10px; }
+    .task-name span { color: var(--muted); font-size: 9px; }
+    .status-text { font-weight: 650; }
+    .status-text.waiting { color: var(--muted); }
+    .status-text.running { color: var(--accent); }
+    .status-text.done { color: var(--success); }
+    .status-text.failed { color: var(--danger); }
+    .mini-progress { width: 76px; height: 3px; background: var(--panel-3); border-radius: 2px; overflow: hidden; }
+    .mini-progress span { display: block; height: 100%; width: 0; background: var(--accent); transition: width .18s ease; }
+    .row-actions { display: flex; gap: 4px; }
+    .row-action { width: 26px; height: 26px; border: 0; border-radius: 4px; background: transparent; color: var(--muted); cursor: pointer; }
+    .row-action:hover { background: var(--panel-3); color: var(--ink); }
+
+    .history-layout { display: grid; grid-template-columns: 340px minmax(0, 1fr); min-height: 100%; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--panel); }
+    .history-list { border-right: 1px solid var(--line); }
+    .history-search { padding: 10px; border-bottom: 1px solid var(--line); }
+    .history-day { padding: 12px 12px 6px; color: var(--faint); font-size: 10px; }
+    .history-item {
+      width: 100%;
+      min-height: 63px;
+      display: grid;
+      grid-template-columns: 58px 1fr;
+      gap: 10px;
+      align-items: center;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink);
+      padding: 8px 10px;
+      text-align: left;
+      cursor: pointer;
+    }
+    .history-item:hover { background: var(--panel-2); }
+    .history-item.active { background: var(--accent-soft); }
+    .history-item img { width: 58px; height: 42px; object-fit: cover; border: 1px solid var(--line); border-radius: 4px; }
+    .history-item strong { display: block; font-size: 10px; }
+    .history-item span { color: var(--muted); font-size: 9px; }
+    .history-detail { min-width: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; }
+    .history-preview { min-height: 0; display: grid; place-items: center; padding: 30px; background: var(--canvas); }
+    .history-preview img { max-width: 86%; max-height: 62vh; object-fit: contain; border: 1px solid var(--line-strong); box-shadow: var(--shadow); }
+    .history-info { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center; padding: 14px 16px; border-top: 1px solid var(--line); }
+    .history-info strong { display: block; }
+    .history-info span { color: var(--muted); font-size: 10px; }
+
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(320px, 1fr));
+      gap: 12px;
+    }
+    .preset {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      overflow: hidden;
+    }
+    .preset-head { padding: 14px 16px 10px; display: flex; justify-content: space-between; gap: 14px; }
+    .preset-head strong { display: block; }
+    .preset-head span { color: var(--muted); font-size: 10px; }
+    .preset-body { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .preset-value { padding: 11px; border-right: 1px solid var(--line); }
+    .preset-value:last-child { border-right: 0; }
+    .preset-value span { display: block; color: var(--muted); font-size: 9px; }
+    .preset-value strong { display: block; margin-top: 3px; font-size: 11px; font-family: "Cascadia Mono", Consolas, monospace; }
+    .preset-actions { padding: 10px 12px; display: flex; justify-content: flex-end; gap: 6px; }
+
+    .settings-screen { grid-template-rows: 58px minmax(0, 1fr); }
+    .settings-layout { min-height: 0; display: grid; grid-template-columns: 230px minmax(0, 680px); gap: 38px; padding: 24px; overflow: auto; }
+    .settings-nav { border-right: 1px solid var(--line); padding-right: 18px; }
+    .settings-nav button {
+      width: 100%; min-height: 38px; border: 0; border-radius: var(--radius-small); background: transparent; color: var(--muted); text-align: left; padding: 0 11px; cursor: pointer; margin: 1px 0;
+    }
+    .settings-nav button:hover { background: var(--panel); color: var(--ink); }
+    .settings-nav button.active { background: var(--accent-soft); color: var(--ink); }
+    .settings-page { display: none; }
+    .settings-page.active { display: block; }
+    .settings-page h2 { margin: 0 0 6px; font-size: 21px; }
+    .settings-page > p { margin: 0 0 24px; color: var(--muted); }
+    .settings-group { border-top: 1px solid var(--line); }
+    .settings-row { min-height: 58px; display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center; border-bottom: 1px solid var(--line); }
+    .settings-row strong { display: block; }
+    .settings-row span { display: block; color: var(--muted); font-size: 10px; margin-top: 2px; }
+    .path-field { display: flex; gap: 7px; }
+    .path-field .input { width: 330px; }
+    .radio-list { display: grid; gap: 6px; }
+    .radio-option {
+      width: 240px; min-height: 42px; border: 1px solid var(--line); border-radius: var(--radius-small); background: var(--panel); color: var(--muted); text-align: left; padding: 0 11px; cursor: pointer;
+    }
+    .radio-option.active { border-color: var(--accent); color: var(--ink); background: var(--accent-soft); }
+
+    .about-content { display: grid; grid-template-columns: minmax(440px, 1fr) minmax(360px, .8fr); gap: 18px; }
+    .about-hero, .license-panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      padding: 28px;
+    }
+    .about-logo { display: flex; align-items: center; gap: 15px; }
+    .about-logo img { width: 54px; height: 54px; }
+    .about-logo h1 { margin: 0; font-size: 24px; }
+    .about-logo p { margin: 3px 0 0; color: var(--muted); }
+    .about-copy { margin: 30px 0 0; color: var(--muted); max-width: 58em; line-height: 1.75; }
+    .about-facts { margin-top: 28px; border-top: 1px solid var(--line); }
+    .about-fact { min-height: 46px; display: grid; grid-template-columns: 150px 1fr; align-items: center; border-bottom: 1px solid var(--line); }
+    .about-fact span { color: var(--muted); }
+    .license-panel h2 { margin: 0; font-size: 18px; }
+    .license-state {
+      margin-top: 18px;
+      padding: 16px;
+      border: 1px solid color-mix(in srgb, var(--success) 45%, var(--line));
+      border-radius: var(--radius-small);
+      background: color-mix(in srgb, var(--success) 8%, var(--panel));
+    }
+    .license-state strong { display: block; color: var(--success); }
+    .license-state span { color: var(--muted); }
+    .machine-code { margin-top: 18px; }
+    .machine-code span { display: block; color: var(--muted); font-size: 10px; margin-bottom: 6px; }
+    .machine-code code { display: block; padding: 11px; border: 1px solid var(--line); border-radius: var(--radius-small); background: var(--canvas); color: var(--ink); font-family: "Cascadia Mono", Consolas, monospace; }
+    .license-actions { margin-top: 14px; display: grid; gap: 7px; }
+
+    .statusbar {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 20px;
+      padding: 0 10px;
+      border-top: 1px solid #0f1317;
+      background: #171d22;
+      color: var(--faint);
+      font-size: 9px;
+      font-family: "Cascadia Mono", Consolas, monospace;
+    }
+    .status-left, .status-right { display: flex; align-items: center; gap: 15px; }
+    .status-local { color: var(--success); }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(4, 8, 12, .62);
+      backdrop-filter: blur(7px);
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      width: min(560px, 100%);
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: var(--chrome);
+      box-shadow: 0 28px 90px rgba(0,0,0,.48);
+      overflow: hidden;
+    }
+    .modal-head { height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-bottom: 1px solid var(--line); }
+    .modal-head button { border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: 18px; }
+    .modal-body { padding: 18px; }
+    .source-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .source-button {
+      min-height: 125px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-small);
+      background: var(--panel);
+      color: var(--ink);
+      padding: 14px;
+      text-align: left;
+      cursor: pointer;
+    }
+    .source-button:hover { border-color: var(--accent); background: var(--accent-soft); }
+    .source-button b { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 7px; background: var(--panel-3); color: var(--accent); font-size: 10px; }
+    .source-button strong { display: block; margin-top: 16px; }
+    .source-button span { display: block; color: var(--muted); font-size: 10px; margin-top: 4px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 7px; margin-top: 16px; }
+    .drop-zone {
+      min-height: 180px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      border: 1px dashed var(--line-strong);
+      border-radius: var(--radius-small);
+      background: var(--panel);
+      color: var(--muted);
+      cursor: pointer;
+      padding: 24px;
+    }
+    .drop-zone:hover { border-color: var(--accent); color: var(--ink); }
+    .drop-zone b { width: 50px; height: 50px; display: grid; place-items: center; margin: 0 auto 12px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); font-size: 20px; }
+    .drop-zone strong { display: block; color: var(--ink); }
+    .drop-zone span { display: block; font-size: 10px; margin-top: 5px; }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 44px;
+      z-index: 70;
+      max-width: 360px;
+      padding: 11px 13px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-small);
+      background: var(--panel-2);
+      color: var(--ink);
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+    }
+
+    body[data-density="comfortable"] {
+      --rail-w: 250px;
+    }
+    body[data-density="comfortable"] .rail-button { min-height: 44px; }
+    body[data-density="comfortable"] .task-table td { height: 62px; }
+
+    @media (max-width: 1260px) {
+      :root { --rail-w: 198px; }
+      .workbench-body { grid-template-columns: 164px minmax(420px, 1fr) 274px; }
+      .home-content { grid-template-columns: minmax(520px, 1.2fr) minmax(320px, .8fr); }
+      .home-primary { padding: 34px; }
+      .start-item { grid-template-columns: 42px 1fr 110px 28px; }
+      .settings-layout { grid-template-columns: 210px minmax(0, 650px); gap: 26px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+<body data-density="compact">
+  <div class="desktop-app">
+    <header class="titlebar">
+      <div class="title-brand"><img src="../../apps/web/public/icons/matrix-logo.svg" alt="万能格式转换器 LOGO" /><strong>万能格式转换器</strong><span>离线专业版</span></div>
+      <div class="window-controls" aria-label="窗口控制"><button data-window-action="最小化">−</button><button data-window-action="最大化">□</button><button data-window-action="关闭">×</button></div>
+    </header>
+
+    <div class="body-shell">
+      <aside class="app-rail">
+        <div class="rail-top"><button class="new-task" id="newTaskButton"><span>＋</span>新建任务</button></div>
+        <nav class="rail-nav" aria-label="应用导航">
+          <div class="rail-label">工作区</div>
+          <button class="rail-button active" data-screen="home"><b>HOME</b><span>开始</span></button>
+          <button class="rail-button" data-screen="workbench"><b>EDIT</b><span>处理工作台</span></button>
+          <button class="rail-button" data-screen="queue"><b>QUEUE</b><span>任务队列</span><small id="queueBadge">3</small></button>
+          <button class="rail-button" data-screen="history"><b>LOG</b><span>本地历史</span></button>
+          <button class="rail-button" data-screen="presets"><b>SET</b><span>预设方案</span></button>
+          <div class="rail-label">应用</div>
+          <button class="rail-button" data-screen="settings"><b>CFG</b><span>设置</span></button>
+          <button class="rail-button" data-screen="about"><b>INFO</b><span>关于与授权</span></button>
+        </nav>
+        <div class="rail-bottom">
+          <button class="rail-button" id="openOutputFolder"><b>DIR</b><span>输出文件夹</span></button>
+          <div class="license-chip"><strong>本地试用可用</strong><span>授权状态只保存在本机</span></div>
+        </div>
+      </aside>
+
+      <main class="main-area">
+        <section class="screen screen-standard active" data-screen-view="home">
+          <header class="commandbar">
+            <div class="command-title"><strong>开始</strong><span>选择任务或继续最近的本地处理</span></div>
+            <div class="command-actions"><button class="button" id="homeAddFolder">导入文件夹</button><button class="button primary" id="homeAddFiles">选择文件</button></div>
+          </header>
+          <div class="home-content">
+            <div class="home-primary">
+              <h1>把文件放进来，剩下的都在本机完成。</h1>
+              <p>批量图片、PDF、Word、Excel 和音视频任务统一进入本地队列。每个任务都会写入独立结果文件夹。</p>
+              <section class="quick-start">
+                <div class="section-title"><strong>常用处理</strong><span>选择后进入工作台</span></div>
+                <div class="start-list">
+                  <button class="start-item" data-start-tool="图片压缩"><span class="start-symbol">JPG</span><span><strong>图片压缩</strong><small>批量按质量或目标大小导出</small></span><span class="start-formats">JPG / PNG / WEBP</span><span class="start-arrow">→</span></button>
+                  <button class="start-item" data-start-tool="PDF 转图片"><span class="start-symbol">PDF</span><span><strong>PDF 转图片</strong><small>逐页输出到同名子文件夹</small></span><span class="start-formats">JPG / PNG</span><span class="start-arrow">→</span></button>
+                  <button class="start-item" data-start-tool="视频格式转换"><span class="start-symbol">MP4</span><span><strong>视频格式转换</strong><small>本地 FFmpeg 内核处理</small></span><span class="start-formats">MP4 / MOV / MKV</span><span class="start-arrow">→</span></button>
+                  <button class="start-item" data-start-tool="截图与标注"><span class="start-symbol">CAP</span><span><strong>截图与标注</strong><small>区域、窗口、全屏和隐私模糊</small></span><span class="start-formats">PNG / JPG</span><span class="start-arrow">→</span></button>
+                  <button class="start-item" data-start-tool="OCR 文字识别"><span class="start-symbol">OCR</span><span><strong>OCR 文字识别</strong><small>本地模型提取中文和英文</small></span><span class="start-formats">TXT / 复制</span><span class="start-arrow">→</span></button>
+                </div>
+              </section>
+            </div>
+            <aside class="home-secondary">
+              <div class="system-summary">
+                <div class="summary-head"><strong>本机处理环境</strong><span>全部就绪</span></div>
+                <div class="summary-row"><span>图片处理核心</span><strong>READY</strong></div>
+                <div class="summary-row"><span>PDF 与 Office 预览</span><strong>READY</strong></div>
+                <div class="summary-row"><span>FFmpeg 本地内核</span><strong>READY</strong></div>
+                <div class="summary-row"><span>输出目录</span><strong>WRITABLE</strong></div>
+              </div>
+              <section class="recent-section">
+                <div class="section-title"><strong>最近处理</strong><button class="button small" data-screen="history">查看全部</button></div>
+                <button class="recent-row" data-open-history="标准表格.xlsx"><img src="../desktop-current-import-smoke.png" alt="" /><span><strong>标准表格.xlsx</strong><span>Excel 转图片，刚刚</span></span><b>已完成</b></button>
+                <button class="recent-row" data-open-history="在线工具台.png"><img src="../ui-round-2-tools-desktop-1440.png" alt="" /><span><strong>在线工具台.png</strong><span>图片压缩，10:26</span></span><b>已完成</b></button>
+                <button class="recent-row" data-open-history="桌面工作台.png"><img src="../desktop-ui-after-fixes.png" alt="" /><span><strong>桌面工作台.png</strong><span>添加水印，昨天</span></span><b>已完成</b></button>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <section class="screen workbench-screen" data-screen-view="workbench">
+          <header class="workbench-commandbar">
+            <select class="tool-select" id="desktopToolSelect" aria-label="当前处理工具">
+              <option>图片压缩</option><option>图片裁切</option><option>尺寸调整</option><option>添加水印</option><option>PDF 转图片</option><option>Word 转图片</option><option>Excel 转图片</option><option>视频格式转换</option><option>音频格式转换</option><option>视频提取音频</option><option>截图与标注</option><option>OCR 文字识别</option><option>二维码识别</option><option>图片对比</option>
+            </select>
+            <div class="file-breadcrumb">D:\万能格式转换器\待处理\示例任务</div>
+            <div class="workbench-actions"><button class="button small" id="captureButton">开始截图</button><button class="button small" id="clearAssets">清空任务</button><button class="button small" id="addAssetButton">添加文件</button><button class="button primary small" id="processAllButton">处理全部</button></div>
+          </header>
+          <div class="workbench-body">
+            <aside class="asset-panel">
+              <header class="panel-head"><strong>文件</strong><span id="assetCount">3 个</span></header>
+              <div class="asset-list" id="assetList">
+                <button class="asset active" data-file="标准表格.xlsx" data-image="../desktop-current-import-smoke.png"><img src="../desktop-current-import-smoke.png" alt="" /><span><strong>标准表格.xlsx</strong><span>工作表第一页</span></span></button>
+                <button class="asset" data-file="在线工具台.png" data-image="../ui-round-2-tools-desktop-1440.png"><img src="../ui-round-2-tools-desktop-1440.png" alt="" /><span><strong>在线工具台.png</strong><span>1440 × 1100</span></span></button>
+                <button class="asset" data-file="桌面工作台.png" data-image="../desktop-ui-after-fixes.png"><img src="../desktop-ui-after-fixes.png" alt="" /><span><strong>桌面工作台.png</strong><span>1280 × 822</span></span></button>
+              </div>
+              <button class="asset-add" id="assetAddInline">＋ 添加文件或文件夹</button>
+            </aside>
+
+            <section class="editing-area">
+              <div class="edit-toolbar">
+                <div class="tool-group">
+                  <button class="edit-tool active" data-edit-tool="选择">选择</button><button class="edit-tool" data-edit-tool="箭头">箭头</button><button class="edit-tool" data-edit-tool="矩形">矩形</button><button class="edit-tool" data-edit-tool="文字">文字</button><button class="edit-tool" data-edit-tool="序号">序号</button><span class="toolbar-divider"></span><button class="edit-tool" data-edit-tool="模糊">模糊</button><button class="edit-tool" data-edit-tool="像素化">像素化</button><button class="edit-tool" data-edit-tool="裁切">裁切</button>
+                </div>
+                <div class="tool-group"><button class="edit-tool" id="undoButton">撤销</button><button class="edit-tool" id="redoButton">重做</button><button class="edit-tool active" id="layerButton">图层</button></div>
+              </div>
+              <div class="canvas-stage">
+                <div class="document-canvas" id="documentCanvas">
+                  <img id="mainPreviewImage" src="../desktop-current-import-smoke.png" alt="当前文件预览" />
+                  <div class="selection-box" id="selectionBox"></div>
+                  <div class="annotation-arrow" id="annotationArrow"></div>
+                  <div class="blur-block" id="blurBlock"></div>
+                  <div class="processing-sweep" id="processingSweep"></div>
+                </div>
+              </div>
+              <div class="filmstrip">
+                <div class="filmstrip-copy"><strong>平铺预览</strong><span>所有文件保持可见</span></div>
+                <div class="filmstrip-items" id="filmstripItems">
+                  <button class="film-thumb active" data-film-file="标准表格.xlsx" data-image="../desktop-current-import-smoke.png"><img src="../desktop-current-import-smoke.png" alt="" /><span>标准表格.xlsx</span></button>
+                  <button class="film-thumb" data-film-file="在线工具台.png" data-image="../ui-round-2-tools-desktop-1440.png"><img src="../ui-round-2-tools-desktop-1440.png" alt="" /><span>在线工具台.png</span></button>
+                  <button class="film-thumb" data-film-file="桌面工作台.png" data-image="../desktop-ui-after-fixes.png"><img src="../desktop-ui-after-fixes.png" alt="" /><span>桌面工作台.png</span></button>
+                </div>
+                <div class="zoom-tools"><button class="button icon small" id="desktopZoomOut">−</button><button class="button small" id="desktopZoomValue">84%</button><button class="button icon small" id="desktopZoomIn">＋</button></div>
+              </div>
+            </section>
+
+            <aside class="property-panel">
+              <div class="property-tabs"><button class="property-tab active" data-property="settings">参数</button><button class="property-tab" data-property="result">结果</button><button class="property-tab" data-property="queue">队列</button></div>
+              <div class="property-view active" data-property-panel="settings">
+                <div class="property-group"><strong>输出设置</strong><div class="field"><label><span>输出格式</span></label><select class="select"><option>JPG</option><option>PNG</option><option>WEBP</option></select></div><div class="field"><label><span>压缩质量</span><b id="desktopQualityValue">82</b></label><input id="desktopQuality" type="range" min="20" max="100" value="82" /></div><div class="field"><label><span>目标大小</span></label><select class="select"><option>不限制</option><option>500 KB</option><option>300 KB</option><option>100 KB</option><option>50 KB</option></select></div></div>
+                <div class="property-group"><strong>处理方式</strong><div class="option-grid"><button class="option-button">轻度</button><button class="option-button active">推荐</button><button class="option-button">极限</button></div></div>
+                <div class="property-group"><strong>文件行为</strong><div class="switch-row"><span>移除元数据</span><button class="switch on" aria-label="移除元数据"></button></div><div class="switch-row"><span>保持文件夹结构</span><button class="switch on" aria-label="保持文件夹结构"></button></div><div class="switch-row"><span>完成后打开目录</span><button class="switch" aria-label="完成后打开目录"></button></div></div>
+                <div class="property-group"><strong>结果目录</strong><div class="field"><input class="input" value="D:\万能格式转换器\批量结果" /></div><button class="button block small" id="browseOutput">浏览输出目录</button></div>
+              </div>
+              <div class="property-view" data-property-panel="result">
+                <div class="result-panel" id="desktopResult">当前任务尚未处理。运行后会显示结果文件夹、成功数量和失败原因。</div>
+                <button class="button block" style="margin-top:10px" id="openResultFolder">打开结果文件夹</button>
+                <button class="button block" style="margin-top:7px" id="copyResultPath">复制结果路径</button>
+              </div>
+              <div class="property-view" data-property-panel="queue">
+                <div class="queue-mini-row"><strong>标准表格.xlsx</strong><span>等待处理</span></div>
+                <div class="queue-mini-row"><strong>在线工具台.png</strong><span>等待处理</span></div>
+                <div class="queue-mini-row"><strong>桌面工作台.png</strong><span>等待处理</span></div>
+                <button class="button block small" style="margin-top:12px" data-screen="queue">打开完整队列</button>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="screen screen-standard" data-screen-view="queue">
+          <header class="commandbar">
+            <div class="command-title"><strong>任务队列</strong><span>批量任务按当前工具和输出目录执行</span></div>
+            <div class="command-actions"><button class="button" id="pauseQueue">暂停</button><button class="button" id="queueAddFiles">添加文件</button><button class="button primary" id="queueRunAll">开始全部</button></div>
+          </header>
+          <div class="queue-content">
+            <div class="queue-summary">
+              <div class="queue-stat"><span>全部任务</span><strong id="statAll">3</strong></div>
+              <div class="queue-stat"><span>等待</span><strong id="statWaiting">3</strong></div>
+              <div class="queue-stat"><span>处理中</span><strong id="statRunning">0</strong></div>
+              <div class="queue-stat"><span>已完成</span><strong id="statDone">0</strong></div>
+            </div>
+            <table class="task-table">
+              <thead><tr><th style="width:38%">文件</th><th>工具</th><th>输出</th><th>状态</th><th>进度</th><th style="width:78px">操作</th></tr></thead>
+              <tbody id="taskRows">
+                <tr data-task-row><td><div class="task-name"><img src="../desktop-current-import-smoke.png" alt="" /><span><strong>标准表格.xlsx</strong><span>18.4 KB</span></span></div></td><td>Excel 转图片</td><td>PNG</td><td><span class="status-text waiting">等待</span></td><td><div class="mini-progress"><span></span></div></td><td><div class="row-actions"><button class="row-action" data-row-action="运行">▶</button><button class="row-action" data-row-action="移除">×</button></div></td></tr>
+                <tr data-task-row><td><div class="task-name"><img src="../ui-round-2-tools-desktop-1440.png" alt="" /><span><strong>在线工具台.png</strong><span>94.3 KB</span></span></div></td><td>图片压缩</td><td>JPG</td><td><span class="status-text waiting">等待</span></td><td><div class="mini-progress"><span></span></div></td><td><div class="row-actions"><button class="row-action" data-row-action="运行">▶</button><button class="row-action" data-row-action="移除">×</button></div></td></tr>
+                <tr data-task-row><td><div class="task-name"><img src="../desktop-ui-after-fixes.png" alt="" /><span><strong>桌面工作台.png</strong><span>54.5 KB</span></span></div></td><td>图片压缩</td><td>JPG</td><td><span class="status-text waiting">等待</span></td><td><div class="mini-progress"><span></span></div></td><td><div class="row-actions"><button class="row-action" data-row-action="运行">▶</button><button class="row-action" data-row-action="移除">×</button></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="screen screen-standard" data-screen-view="history">
+          <header class="commandbar">
+            <div class="command-title"><strong>本地历史</strong><span>只记录本机任务结果，不进行云端同步</span></div>
+            <div class="command-actions"><input class="input" id="historySearch" placeholder="搜索文件或工具" style="width:240px" /><button class="button danger" id="clearHistory">清除历史</button></div>
+          </header>
+          <div class="history-content">
+            <div class="history-layout">
+              <div class="history-list" id="historyList">
+                <div class="history-day">今天</div>
+                <button class="history-item active" data-history-file="标准表格.xlsx" data-history-image="../desktop-current-import-smoke.png"><img src="../desktop-current-import-smoke.png" alt="" /><span><strong>标准表格.xlsx</strong><span>Excel 转图片，刚刚</span></span></button>
+                <button class="history-item" data-history-file="在线工具台.png" data-history-image="../ui-round-2-tools-desktop-1440.png"><img src="../ui-round-2-tools-desktop-1440.png" alt="" /><span><strong>在线工具台.png</strong><span>图片压缩，10:26</span></span></button>
+                <div class="history-day">昨天</div>
+                <button class="history-item" data-history-file="桌面工作台.png" data-history-image="../desktop-ui-after-fixes.png"><img src="../desktop-ui-after-fixes.png" alt="" /><span><strong>桌面工作台.png</strong><span>添加水印，18:42</span></span></button>
+              </div>
+              <div class="history-detail">
+                <div class="history-preview"><img id="historyPreviewImage" src="../desktop-current-import-smoke.png" alt="历史结果预览" /></div>
+                <div class="history-info"><div><strong id="historyFileName">标准表格.xlsx</strong><span>结果保存在本机独立文件夹中</span></div><div class="command-actions"><button class="button" id="historyOpenFolder">打开目录</button><button class="button primary" id="historyReprocess">再次处理</button></div></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen screen-standard" data-screen-view="presets">
+          <header class="commandbar">
+            <div class="command-title"><strong>预设方案</strong><span>保存常用输出参数，快速用于后续任务</span></div>
+            <div class="command-actions"><button class="button primary" id="createPresetButton">新建预设</button></div>
+          </header>
+          <div class="preset-content">
+            <div class="preset-grid" id="presetGrid">
+              <article class="preset"><div class="preset-head"><span><strong>网页图片压缩</strong><span>图片压缩</span></span><button class="row-action" data-preset-menu>•••</button></div><div class="preset-body"><div class="preset-value"><span>格式</span><strong>JPG</strong></div><div class="preset-value"><span>质量</span><strong>82</strong></div><div class="preset-value"><span>元数据</span><strong>清理</strong></div></div><div class="preset-actions"><button class="button small" data-preset-use="网页图片压缩">应用</button><button class="button small" data-preset-edit="网页图片压缩">编辑</button></div></article>
+              <article class="preset"><div class="preset-head"><span><strong>文档逐页导出</strong><span>PDF / Word / Excel</span></span><button class="row-action" data-preset-menu>•••</button></div><div class="preset-body"><div class="preset-value"><span>方式</span><strong>逐页</strong></div><div class="preset-value"><span>格式</span><strong>PNG</strong></div><div class="preset-value"><span>目录</span><strong>同名</strong></div></div><div class="preset-actions"><button class="button small" data-preset-use="文档逐页导出">应用</button><button class="button small" data-preset-edit="文档逐页导出">编辑</button></div></article>
+              <article class="preset"><div class="preset-head"><span><strong>视频通用输出</strong><span>视频格式转换</span></span><button class="row-action" data-preset-menu>•••</button></div><div class="preset-body"><div class="preset-value"><span>格式</span><strong>MP4</strong></div><div class="preset-value"><span>尺寸</span><strong>原始</strong></div><div class="preset-value"><span>质量</span><strong>推荐</strong></div></div><div class="preset-actions"><button class="button small" data-preset-use="视频通用输出">应用</button><button class="button small" data-preset-edit="视频通用输出">编辑</button></div></article>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen settings-screen" data-screen-view="settings">
+          <header class="commandbar"><div class="command-title"><strong>设置</strong><span>应用偏好和本地处理行为</span></div><div class="command-actions"><button class="button primary" id="saveSettings">保存设置</button></div></header>
+          <div class="settings-layout">
+            <aside class="settings-nav">
+              <button class="active" data-settings-page="general">常规</button>
+              <button data-settings-page="output">输出与文件夹</button>
+              <button data-settings-page="performance">性能</button>
+              <button data-settings-page="shortcuts">快捷键</button>
+              <button data-settings-page="privacy">隐私</button>
+            </aside>
+            <div>
+              <section class="settings-page active" data-settings-panel="general">
+                <h2>常规</h2><p>调整界面密度、启动行为和历史记录。</p>
+                <div class="settings-group">
+                  <div class="settings-row"><span><strong>界面密度</strong><span>紧凑模式适合同时查看更多任务</span></span><div class="radio-list"><button class="radio-option active" data-density-option="compact">紧凑</button><button class="radio-option" data-density-option="comfortable">舒适</button></div></div>
+                  <div class="settings-row"><span><strong>启动后恢复上次任务</strong><span>仅恢复本地界面状态</span></span><button class="switch on"></button></div>
+                  <div class="settings-row"><span><strong>保留本地历史</strong><span>记录文件名、工具和结果目录</span></span><button class="switch on"></button></div>
+                  <div class="settings-row"><span><strong>完成时播放提示音</strong><span>长任务结束后发出系统提示</span></span><button class="switch"></button></div>
+                </div>
+              </section>
+              <section class="settings-page" data-settings-panel="output">
+                <h2>输出与文件夹</h2><p>批量结果始终写入独立文件夹，多页文档写入同名子文件夹。</p>
+                <div class="settings-group"><div class="settings-row"><span><strong>默认输出目录</strong><span>所有任务的基础保存位置</span></span><div class="path-field"><input class="input" value="D:\万能格式转换器\批量结果" /><button class="button">浏览</button></div></div><div class="settings-row"><span><strong>按任务创建独立文件夹</strong><span>防止不同批次的结果相互覆盖</span></span><button class="switch on"></button></div><div class="settings-row"><span><strong>文档使用同名子文件夹</strong><span>适用于 PDF、Word 和 Excel 多页结果</span></span><button class="switch on"></button></div><div class="settings-row"><span><strong>完成后打开结果目录</strong><span>全部任务完成后自动打开</span></span><button class="switch"></button></div></div>
+              </section>
+              <section class="settings-page" data-settings-panel="performance">
+                <h2>性能</h2><p>根据电脑性能调整并行任务数量和预览质量。</p>
+                <div class="settings-group"><div class="settings-row"><span><strong>并行任务</strong><span>建议保留自动模式</span></span><select class="select" style="width:180px"><option>自动</option><option>1 个</option><option>2 个</option><option>3 个</option></select></div><div class="settings-row"><span><strong>预览质量</strong><span>只影响界面预览，不影响最终结果</span></span><select class="select" style="width:180px"><option>推荐</option><option>清晰</option><option>节省内存</option></select></div><div class="settings-row"><span><strong>硬件加速</strong><span>使用 WebView2 可用的图形能力</span></span><button class="switch on"></button></div></div>
+              </section>
+              <section class="settings-page" data-settings-panel="shortcuts">
+                <h2>快捷键</h2><p>截图快捷键只在离线专业版运行时生效。</p>
+                <div class="settings-group"><div class="settings-row"><span><strong>区域截图</strong><span>捕获屏幕任意区域</span></span><input class="input" style="width:180px" value="Ctrl+Shift+A" /></div><div class="settings-row"><span><strong>窗口截图</strong><span>识别当前窗口边界</span></span><input class="input" style="width:180px" value="Ctrl+Shift+W" /></div><div class="settings-row"><span><strong>全屏截图</strong><span>捕获当前显示器</span></span><input class="input" style="width:180px" value="Ctrl+Shift+S" /></div><div class="settings-row"><span><strong>打开历史</strong><span>快速查看本地结果</span></span><input class="input" style="width:180px" value="Ctrl+Shift+H" /></div></div>
+              </section>
+              <section class="settings-page" data-settings-panel="privacy">
+                <h2>隐私</h2><p>离线版不会上传用户文件，也不会加载在线广告容器。</p>
+                <div class="settings-group"><div class="settings-row"><span><strong>网络访问</strong><span>核心处理不需要网络连接</span></span><strong style="color:var(--success)">不需要</strong></div><div class="settings-row"><span><strong>用户文件上传</strong><span>图片、文档、音视频和结果均留在本机</span></span><strong style="color:var(--success)">已禁止</strong></div><div class="settings-row"><span><strong>广告容器</strong><span>离线版不会渲染在线广告</span></span><strong style="color:var(--success)">未加载</strong></div></div>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen screen-standard" data-screen-view="about">
+          <header class="commandbar"><div class="command-title"><strong>关于与授权</strong><span>版本信息、本地试用和离线激活</span></div><div class="command-actions"><button class="button" id="checkUpdate">检查更新</button></div></header>
+          <div class="about-content">
+            <section class="about-hero">
+              <div class="about-logo"><img src="../../apps/web/public/icons/app-icon.png" alt="万能格式转换器图标" /><span><h1>万能格式转换器</h1><p>Windows 离线专业版</p></span></div>
+              <p class="about-copy">图片、文档和音视频处理均在本机完成。软件不提供登录、会员或云端转换能力，也不会接收用户处理文件。</p>
+              <div class="about-facts"><div class="about-fact"><span>当前版本</span><strong>1.0.0</strong></div><div class="about-fact"><span>发布日期</span><strong>2026-06-17</strong></div><div class="about-fact"><span>支持系统</span><strong>Windows 10 / 11 x64</strong></div><div class="about-fact"><span>处理核心</span><strong>本地 WebView2 与 FFmpeg</strong></div></div>
+              <div class="command-actions" style="margin-top:18px;justify-content:flex-start"><button class="button" data-about-link="隐私说明">隐私说明</button><button class="button" data-about-link="开源许可证">开源许可证</button><button class="button" data-about-link="第三方组件声明">第三方组件声明</button></div>
+            </section>
+            <aside class="license-panel">
+              <h2>本地授权</h2>
+              <div class="license-state"><strong>3 天试用可用</strong><span>试用状态和授权文件只保存在当前电脑。</span></div>
+              <div class="machine-code"><span>机器码</span><code>MRX7-C84P-K2Q9-LOCAL</code></div>
+              <div class="license-actions"><button class="button primary" id="activateCode">输入激活码</button><button class="button" id="importLicense">导入 license.mrx</button><button class="button" id="copyMachineCode">复制机器码</button></div>
+            </aside>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <footer class="statusbar">
+      <div class="status-left"><span class="status-local">文件仅在本机处理</span><span id="statusTask">任务：空闲</span><span>快捷键：Ctrl+Shift+A</span></div>
+      <div class="status-right"><span>图片核心：就绪</span><span>OCR：本地模型</span><span>FFmpeg：就绪</span></div>
+    </footer>
+  </div>
+
+  <div class="modal-backdrop" id="sourceModal" role="dialog" aria-modal="true" aria-labelledby="sourceTitle">
+    <div class="modal">
+      <header class="modal-head"><strong id="sourceTitle">新建任务</strong><button data-close-modal="sourceModal" aria-label="关闭">×</button></header>
+      <div class="modal-body">
+        <div class="source-grid">
+          <button class="source-button" data-source="文件"><b>FILE</b><strong>选择文件</strong><span>选择一个或多个本地文件</span></button>
+          <button class="source-button" data-source="文件夹"><b>DIR</b><strong>导入文件夹</strong><span>递归查找当前工具支持的文件</span></button>
+          <button class="source-button" data-source="截图"><b>CAP</b><strong>开始截图</strong><span>区域、窗口或全屏截图</span></button>
+        </div>
+        <div class="modal-actions"><button class="button" data-close-modal="sourceModal">取消</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="addFilesModal" role="dialog" aria-modal="true" aria-labelledby="addFilesTitle">
+    <div class="modal">
+      <header class="modal-head"><strong id="addFilesTitle">添加本地文件</strong><button data-close-modal="addFilesModal" aria-label="关闭">×</button></header>
+      <div class="modal-body">
+        <button class="drop-zone" id="loadDesktopSamples"><span><b>＋</b><strong>拖入文件或点击选择</strong><span>审阅稿会加入内置示例，不会读取真实文件。</span></span></button>
+        <div class="modal-actions"><button class="button" data-close-modal="addFilesModal">取消</button><button class="button primary" id="confirmDesktopSamples">加入示例文件</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="captureModal" role="dialog" aria-modal="true" aria-labelledby="captureTitle">
+    <div class="modal">
+      <header class="modal-head"><strong id="captureTitle">选择截图方式</strong><button data-close-modal="captureModal" aria-label="关闭">×</button></header>
+      <div class="modal-body">
+        <div class="source-grid">
+          <button class="source-button" data-capture="区域截图"><b>REG</b><strong>区域截图</strong><span>拖动框选屏幕区域</span></button>
+          <button class="source-button" data-capture="窗口截图"><b>WIN</b><strong>窗口截图</strong><span>自动识别窗口边界</span></button>
+          <button class="source-button" data-capture="全屏截图"><b>ALL</b><strong>全屏截图</strong><span>选择一个显示器</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="presetModal" role="dialog" aria-modal="true" aria-labelledby="presetTitle">
+    <div class="modal">
+      <header class="modal-head"><strong id="presetTitle">新建预设</strong><button data-close-modal="presetModal" aria-label="关闭">×</button></header>
+      <div class="modal-body">
+        <div class="field"><label><span>预设名称</span></label><input class="input" id="presetNameInput" value="我的图片预设" /></div>
+        <div class="field"><label><span>处理工具</span></label><select class="select"><option>图片压缩</option><option>PDF 转图片</option><option>视频格式转换</option></select></div>
+        <div class="field"><label><span>输出格式</span></label><select class="select"><option>JPG</option><option>PNG</option><option>WEBP</option></select></div>
+        <div class="modal-actions"><button class="button" data-close-modal="presetModal">取消</button><button class="button primary" id="savePresetButton">保存预设</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="activateModal" role="dialog" aria-modal="true" aria-labelledby="activateTitle">
+    <div class="modal">
+      <header class="modal-head"><strong id="activateTitle">输入离线激活码</strong><button data-close-modal="activateModal" aria-label="关闭">×</button></header>
+      <div class="modal-body">
+        <div class="field"><label><span>激活码</span></label><input class="input" id="activationInput" placeholder="请输入管理员提供的离线激活码" /></div>
+        <p style="color:var(--muted);font-size:11px">审阅稿不会校验或保存激活信息。</p>
+        <div class="modal-actions"><button class="button" data-close-modal="activateModal">取消</button><button class="button primary" id="confirmActivation">验证激活码</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="desktopToast" role="status" aria-live="polite"></div>
+
+  <script src="../../apps/web/node_modules/gsap/dist/gsap.min.js"></script>
+  <script>
+    (() => {
+      const $ = (selector, root = document) => root.querySelector(selector);
+      const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+      const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const hasGsap = typeof window.gsap !== "undefined";
+      let currentScreen = "home";
+      let currentFile = "标准表格.xlsx";
+      let desktopZoom = 84;
+      let queueRunning = false;
+      let toastTimer;
+
+      function toast(message) {
+        const element = $("#desktopToast");
+        element.textContent = message;
+        clearTimeout(toastTimer);
+        if (hasGsap && !reduceMotion) {
+          gsap.killTweensOf(element);
+          gsap.to(element, { autoAlpha: 1, y: 0, duration: .24, ease: "power2.out" });
+          toastTimer = setTimeout(() => gsap.to(element, { autoAlpha: 0, y: 10, duration: .22 }), 2100);
+        } else {
+          element.style.opacity = "1";
+          element.style.transform = "translateY(0)";
+          toastTimer = setTimeout(() => element.style.opacity = "0", 2100);
+        }
+      }
+
+      function showScreen(name) {
+        const target = $(`[data-screen-view="${name}"]`);
+        if (!target) return;
+        currentScreen = name;
+        $$(".screen").forEach(screen => screen.classList.toggle("active", screen === target));
+        $$(".rail-button[data-screen]").forEach(button => button.classList.toggle("active", button.dataset.screen === name));
+        if (hasGsap && !reduceMotion) {
+          const content = target.children[1] || target;
+          gsap.fromTo(content, { autoAlpha: 0, y: 8 }, { autoAlpha: 1, y: 0, duration: .32, ease: "power3.out", clearProps: "all" });
+        }
+      }
+
+      $$("[data-screen]").forEach(button => button.addEventListener("click", () => showScreen(button.dataset.screen)));
+
+      function setTool(tool) {
+        $("#desktopToolSelect").value = tool;
+        $("#statusTask").textContent = `任务：${tool}`;
+        showScreen("workbench");
+        toast(`已切换到${tool}`);
+      }
+      $$("[data-start-tool]").forEach(button => button.addEventListener("click", () => setTool(button.dataset.startTool)));
+      $("#desktopToolSelect").addEventListener("change", event => {
+        $("#statusTask").textContent = `任务：${event.target.value}`;
+        toast(`当前工具：${event.target.value}`);
+      });
+
+      function openModal(id) {
+        const modal = $(`#${id}`);
+        modal.classList.add("open");
+        if (hasGsap && !reduceMotion) gsap.fromTo($(".modal", modal), { autoAlpha: 0, y: 14, scale: .985 }, { autoAlpha: 1, y: 0, scale: 1, duration: .27, ease: "power3.out" });
+      }
+      function closeModal(id) { $(`#${id}`).classList.remove("open"); }
+      $$("[data-close-modal]").forEach(button => button.addEventListener("click", () => closeModal(button.dataset.closeModal)));
+      $$(".modal-backdrop").forEach(backdrop => backdrop.addEventListener("click", event => { if (event.target === backdrop) closeModal(backdrop.id); }));
+
+      $("#newTaskButton").addEventListener("click", () => openModal("sourceModal"));
+      $("#homeAddFiles").addEventListener("click", () => openModal("addFilesModal"));
+      $("#homeAddFolder").addEventListener("click", () => openModal("addFilesModal"));
+      $("#addAssetButton").addEventListener("click", () => openModal("addFilesModal"));
+      $("#assetAddInline").addEventListener("click", () => openModal("addFilesModal"));
+      $("#queueAddFiles").addEventListener("click", () => openModal("addFilesModal"));
+      $("#captureButton").addEventListener("click", () => openModal("captureModal"));
+      $("#createPresetButton").addEventListener("click", () => openModal("presetModal"));
+      $("#activateCode").addEventListener("click", () => openModal("activateModal"));
+
+      $$("[data-source]").forEach(button => button.addEventListener("click", () => {
+        closeModal("sourceModal");
+        if (button.dataset.source === "截图") openModal("captureModal");
+        else openModal("addFilesModal");
+      }));
+      $$("[data-capture]").forEach(button => button.addEventListener("click", () => {
+        closeModal("captureModal");
+        setTool("截图与标注");
+        toast(`${button.dataset.capture}已启动，审阅稿不会捕获真实屏幕`);
+      }));
+
+      function selectFile(file, image) {
+        currentFile = file;
+        $("#mainPreviewImage").src = image;
+        $$(".asset").forEach(item => item.classList.toggle("active", item.dataset.file === file));
+        $$(".film-thumb").forEach(item => item.classList.toggle("active", item.dataset.filmFile === file));
+      }
+      $$(".asset").forEach(button => button.addEventListener("click", () => selectFile(button.dataset.file, button.dataset.image)));
+      $$(".film-thumb").forEach(button => button.addEventListener("click", () => selectFile(button.dataset.filmFile, button.dataset.image)));
+
+      function addSample() {
+        closeModal("addFilesModal");
+        showScreen("workbench");
+        toast("示例文件已加入当前任务");
+      }
+      $("#loadDesktopSamples").addEventListener("click", addSample);
+      $("#confirmDesktopSamples").addEventListener("click", addSample);
+
+      $("#clearAssets").addEventListener("click", () => {
+        const list = $("#assetList");
+        const film = $("#filmstripItems");
+        const isVisible = list.style.display !== "none";
+        if (isVisible) {
+          list.style.display = "none";
+          film.style.display = "none";
+          $("#assetCount").textContent = "0 个";
+          $("#mainPreviewImage").style.opacity = ".12";
+          toast("当前任务已清空，再次点击可恢复示例");
+        } else {
+          list.style.display = "grid";
+          film.style.display = "flex";
+          $("#assetCount").textContent = `${list.children.length} 个`;
+          $("#mainPreviewImage").style.opacity = "1";
+          toast("示例任务已恢复");
+        }
+      });
+      $("#assetCount").addEventListener("click", () => {});
+
+      $$("[data-edit-tool]").forEach(button => button.addEventListener("click", () => {
+        $$("[data-edit-tool]").forEach(item => item.classList.toggle("active", item === button));
+        toast(`当前标注工具：${button.dataset.editTool}`);
+      }));
+      $("#undoButton").addEventListener("click", () => {
+        $("#annotationArrow").hidden = true;
+        toast("已撤销上一步标注");
+      });
+      $("#redoButton").addEventListener("click", () => {
+        $("#annotationArrow").hidden = false;
+        toast("已恢复标注");
+      });
+      $("#layerButton").addEventListener("click", () => {
+        const hidden = $("#selectionBox").hidden;
+        $("#selectionBox").hidden = !hidden;
+        $("#annotationArrow").hidden = !hidden;
+        $("#blurBlock").hidden = !hidden;
+        toast(hidden ? "标注图层已显示" : "标注图层已隐藏");
+      });
+
+      function updateDesktopZoom() {
+        $("#desktopZoomValue").textContent = `${desktopZoom}%`;
+        document.documentElement.style.setProperty("--preview-zoom", desktopZoom / 84);
+      }
+      $("#desktopZoomIn").addEventListener("click", () => { desktopZoom = Math.min(120, desktopZoom + 5); updateDesktopZoom(); });
+      $("#desktopZoomOut").addEventListener("click", () => { desktopZoom = Math.max(55, desktopZoom - 5); updateDesktopZoom(); });
+      $("#desktopZoomValue").addEventListener("click", () => { desktopZoom = 84; updateDesktopZoom(); });
+
+      $$(".property-tab").forEach(button => button.addEventListener("click", () => {
+        $$(".property-tab").forEach(item => item.classList.toggle("active", item === button));
+        $$(".property-view").forEach(panel => panel.classList.toggle("active", panel.dataset.propertyPanel === button.dataset.property));
+      }));
+      $$(".option-grid").forEach(group => $$(".option-button", group).forEach(button => button.addEventListener("click", () => {
+        $$(".option-button", group).forEach(item => item.classList.toggle("active", item === button));
+      })));
+      $$(".switch").forEach(button => button.addEventListener("click", () => button.classList.toggle("on")));
+      $("#desktopQuality").addEventListener("input", event => $("#desktopQualityValue").textContent = event.target.value);
+
+      function finishWorkbenchProcessing() {
+        $("#desktopResult").textContent = "处理完成。3 个示例文件已写入独立结果文件夹，文档页输出到同名子文件夹。";
+        $("#statusTask").textContent = "任务：处理完成";
+        $$(".property-tab").forEach(item => item.classList.toggle("active", item.dataset.property === "result"));
+        $$(".property-view").forEach(panel => panel.classList.toggle("active", panel.dataset.propertyPanel === "result"));
+        toast("全部任务处理完成");
+      }
+      $("#processAllButton").addEventListener("click", () => {
+        $("#statusTask").textContent = "任务：处理中";
+        const sweep = $("#processingSweep");
+        if (hasGsap && !reduceMotion) {
+          gsap.set(sweep, { autoAlpha: 1, top: "6%" });
+          gsap.to(sweep, { top: "94%", duration: 1.2, ease: "power1.inOut", onComplete: () => { gsap.set(sweep, { autoAlpha: 0 }); finishWorkbenchProcessing(); } });
+        } else {
+          setTimeout(finishWorkbenchProcessing, 500);
+        }
+      });
+
+      function updateQueueStats() {
+        const rows = $$("[data-task-row]");
+        const done = rows.filter(row => $(".status-text", row).classList.contains("done")).length;
+        const running = rows.filter(row => $(".status-text", row).classList.contains("running")).length;
+        $("#statAll").textContent = rows.length;
+        $("#statDone").textContent = done;
+        $("#statRunning").textContent = running;
+        $("#statWaiting").textContent = Math.max(0, rows.length - done - running);
+        $("#queueBadge").textContent = rows.length;
+      }
+      function runQueueRow(row, delay = 0) {
+        setTimeout(() => {
+          const status = $(".status-text", row);
+          const fill = $(".mini-progress span", row);
+          status.textContent = "处理中";
+          status.className = "status-text running";
+          fill.style.width = "18%";
+          updateQueueStats();
+          let progress = 18;
+          const timer = setInterval(() => {
+            progress = Math.min(100, progress + 21);
+            fill.style.width = `${progress}%`;
+            if (progress >= 100) {
+              clearInterval(timer);
+              status.textContent = "已完成";
+              status.className = "status-text done";
+              updateQueueStats();
+              if ($$("[data-task-row]").every(item => $(".status-text", item).classList.contains("done"))) {
+                queueRunning = false;
+                $("#queueRunAll").textContent = "再次运行";
+                toast("队列中的示例任务已全部完成");
+              }
+            }
+          }, 170);
+        }, delay);
+      }
+      $("#queueRunAll").addEventListener("click", () => {
+        if (queueRunning) return;
+        queueRunning = true;
+        $("#queueRunAll").textContent = "处理中";
+        $$("[data-task-row]").forEach((row, index) => runQueueRow(row, index * 180));
+      });
+      $$("[data-row-action]").forEach(button => button.addEventListener("click", () => {
+        const row = button.closest("[data-task-row]");
+        if (button.dataset.rowAction === "运行") runQueueRow(row);
+        else {
+          row.remove();
+          updateQueueStats();
+          toast("任务已从队列移除");
+        }
+      }));
+      $("#pauseQueue").addEventListener("click", () => {
+        queueRunning = false;
+        toast("审阅稿已记录暂停操作");
+      });
+
+      function selectHistory(button) {
+        $$(".history-item").forEach(item => item.classList.toggle("active", item === button));
+        $("#historyPreviewImage").src = button.dataset.historyImage;
+        $("#historyFileName").textContent = button.dataset.historyFile;
+      }
+      $$(".history-item").forEach(button => button.addEventListener("click", () => selectHistory(button)));
+      $$("[data-open-history]").forEach(button => button.addEventListener("click", () => {
+        showScreen("history");
+        const item = $(`.history-item[data-history-file="${button.dataset.openHistory}"]`);
+        if (item) selectHistory(item);
+      }));
+      $("#historySearch").addEventListener("input", event => {
+        const value = event.target.value.trim().toLowerCase();
+        $$(".history-item").forEach(item => item.hidden = value && !item.textContent.toLowerCase().includes(value));
+      });
+      $("#clearHistory").addEventListener("click", () => toast("审阅稿不会删除真实历史记录"));
+      $("#historyOpenFolder").addEventListener("click", () => toast("结果文件夹入口已触发"));
+      $("#historyReprocess").addEventListener("click", () => {
+        setTool("图片压缩");
+        toast(`${$("#historyFileName").textContent}已加入工作台`);
+      });
+
+      $("#savePresetButton").addEventListener("click", () => {
+        closeModal("presetModal");
+        toast(`预设“${$("#presetNameInput").value || "未命名预设"}”已保存到审阅稿`);
+      });
+      $$("[data-preset-use]").forEach(button => button.addEventListener("click", () => {
+        setTool(button.dataset.presetUse.includes("视频") ? "视频格式转换" : button.dataset.presetUse.includes("文档") ? "PDF 转图片" : "图片压缩");
+        toast(`已应用预设：${button.dataset.presetUse}`);
+      }));
+      $$("[data-preset-edit]").forEach(button => button.addEventListener("click", () => {
+        $("#presetNameInput").value = button.dataset.presetEdit;
+        openModal("presetModal");
+      }));
+      $$("[data-preset-menu]").forEach(button => button.addEventListener("click", () => toast("预设菜单：重命名、复制或删除")));
+
+      $$(".settings-nav button").forEach(button => button.addEventListener("click", () => {
+        $$(".settings-nav button").forEach(item => item.classList.toggle("active", item === button));
+        $$(".settings-page").forEach(panel => panel.classList.toggle("active", panel.dataset.settingsPanel === button.dataset.settingsPage));
+        if (hasGsap && !reduceMotion) gsap.fromTo($(`.settings-page[data-settings-panel="${button.dataset.settingsPage}"]`), { autoAlpha: 0, y: 6 }, { autoAlpha: 1, y: 0, duration: .24 });
+      }));
+      $$("[data-density-option]").forEach(button => button.addEventListener("click", () => {
+        $$("[data-density-option]").forEach(item => item.classList.toggle("active", item === button));
+        document.body.dataset.density = button.dataset.densityOption;
+        toast(`界面密度已切换为${button.textContent}`);
+      }));
+      $("#saveSettings").addEventListener("click", () => toast("设置已保存到审阅稿"));
+
+      $("#confirmActivation").addEventListener("click", () => {
+        if (!$("#activationInput").value.trim()) {
+          toast("请先输入激活码");
+          return;
+        }
+        closeModal("activateModal");
+        toast("审阅稿不执行真实授权校验");
+      });
+      $("#importLicense").addEventListener("click", () => toast("授权文件选择入口已触发"));
+      $("#copyMachineCode").addEventListener("click", () => toast("示例机器码已复制"));
+      $("#checkUpdate").addEventListener("click", () => toast("当前版本为 1.0.0，审阅稿不访问网络"));
+      $$("[data-about-link]").forEach(button => button.addEventListener("click", () => toast(`${button.dataset.aboutLink}入口已触发`)));
+
+      $("#openOutputFolder").addEventListener("click", () => toast("输出文件夹入口已触发"));
+      $("#browseOutput").addEventListener("click", () => toast("请选择本地输出目录"));
+      $("#openResultFolder").addEventListener("click", () => toast("结果文件夹入口已触发"));
+      $("#copyResultPath").addEventListener("click", () => toast("示例结果路径已复制"));
+      $$("[data-window-action]").forEach(button => button.addEventListener("click", () => toast(`窗口${button.dataset.windowAction}按钮已点击，审阅稿不会改变真实窗口`)));
+
+      if (hasGsap && !reduceMotion) {
+        gsap.timeline({ defaults: { duration: .42, ease: "power3.out" } })
+          .from(".titlebar", { y: -12, autoAlpha: 0 })
+          .from(".app-rail", { x: -18, autoAlpha: 0 }, "-=.22")
+          .from(".home-primary > *", { y: 15, autoAlpha: 0, stagger: .06 }, "-=.25")
+          .from(".home-secondary > *", { x: 12, autoAlpha: 0, stagger: .07 }, "-=.3");
+      }
+    })();
+  </script>
+</body>
+</html>

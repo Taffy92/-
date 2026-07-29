@@ -1,0 +1,1480 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>万能格式转换器在线版 - 完整重设计审阅稿</title>
+  <link rel="icon" href="data:," />
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f5f7fa;
+      --surface: #ffffff;
+      --surface-2: #eef2f7;
+      --surface-3: #e4eaf1;
+      --ink: #18202a;
+      --muted: #657180;
+      --faint: #8c97a5;
+      --line: #d8dee7;
+      --line-strong: #bdc7d3;
+      --accent: #1469d3;
+      --accent-2: #0c56b1;
+      --accent-soft: #e6f0fc;
+      --success: #16805b;
+      --warning: #a76113;
+      --danger: #be3f45;
+      --shadow: 0 22px 55px rgba(31, 48, 69, .12);
+      --shadow-small: 0 8px 24px rgba(31, 48, 69, .09);
+      --radius: 14px;
+      --radius-small: 9px;
+      --header-h: 68px;
+      --compare: 54%;
+    }
+
+    body[data-theme="dark"] {
+      color-scheme: dark;
+      --paper: #11161c;
+      --surface: #171d24;
+      --surface-2: #1d252e;
+      --surface-3: #25303b;
+      --ink: #edf3fa;
+      --muted: #a7b3c1;
+      --faint: #7f8b98;
+      --line: #2d3844;
+      --line-strong: #3c4a58;
+      --accent: #5d9de9;
+      --accent-2: #80b6f5;
+      --accent-soft: #162d48;
+      --success: #58be96;
+      --warning: #e0a960;
+      --danger: #e8777c;
+      --shadow: 0 24px 58px rgba(0, 0, 0, .3);
+      --shadow-small: 0 8px 24px rgba(0, 0, 0, .22);
+    }
+
+    * { box-sizing: border-box; }
+    html { min-width: 320px; background: var(--paper); }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Microsoft YaHei UI", "PingFang SC", "Segoe UI Variable", "Segoe UI", sans-serif;
+      font-size: 14px;
+      line-height: 1.55;
+      transition: background-color .25s ease, color .25s ease;
+    }
+    button, input, select, textarea { font: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button { color: inherit; }
+    button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--accent) 28%, transparent);
+      outline-offset: 2px;
+    }
+    img { display: block; max-width: 100%; }
+    [hidden] { display: none !important; }
+
+    .app {
+      min-height: 100dvh;
+      background:
+        radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 29rem),
+        var(--paper);
+    }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      height: var(--header-h);
+      display: grid;
+      grid-template-columns: minmax(220px, .8fr) auto minmax(220px, .8fr);
+      align-items: center;
+      gap: 24px;
+      padding: 0 clamp(20px, 4vw, 64px);
+      border-bottom: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+      background: color-mix(in srgb, var(--paper) 88%, transparent);
+      backdrop-filter: blur(18px) saturate(130%);
+    }
+
+    .brand {
+      appearance: none;
+      border: 0;
+      padding: 0;
+      background: transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      width: max-content;
+      cursor: pointer;
+      text-align: left;
+    }
+    .brand img { width: 27px; height: 27px; }
+    .brand strong { display: block; font-size: 15px; letter-spacing: -.02em; }
+    .brand small { display: block; color: var(--muted); font-size: 11px; margin-top: -2px; }
+
+    .main-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+    .nav-button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      border-radius: 7px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: background .18s ease, color .18s ease, transform .18s ease;
+    }
+    .nav-button:hover { background: var(--surface-2); color: var(--ink); }
+    .nav-button:active { transform: translateY(1px); }
+    .nav-button.active { color: var(--ink); background: var(--surface-2); font-weight: 650; }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    .icon-button, .button {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-small);
+      background: var(--surface);
+      color: var(--ink);
+      min-height: 38px;
+      padding: 0 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 1px 0 rgba(255,255,255,.3) inset;
+      transition: border-color .18s ease, background .18s ease, transform .18s ease, color .18s ease;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .icon-button { width: 38px; padding: 0; }
+    .button:hover, .icon-button:hover { border-color: var(--line-strong); background: var(--surface-2); }
+    .button:active, .icon-button:active { transform: translateY(1px); }
+    .button.primary {
+      color: #f7fbff;
+      border-color: var(--accent-2);
+      background: var(--accent);
+      box-shadow: 0 1px 0 rgba(255,255,255,.18) inset, 0 7px 18px color-mix(in srgb, var(--accent) 22%, transparent);
+    }
+    .button.primary:hover { background: var(--accent-2); color: #ffffff; }
+    .button.quiet { background: transparent; }
+    .button.danger { color: var(--danger); }
+    .button.small { min-height: 32px; padding: 0 11px; font-size: 12px; }
+    .button.block { width: 100%; }
+
+    .view {
+      display: none;
+      min-height: calc(100dvh - var(--header-h));
+    }
+    .view.active { display: block; }
+    .page-wrap { width: min(1320px, calc(100% - 48px)); margin: 0 auto; }
+
+    .home-view { overflow: clip; }
+    .home-hero {
+      min-height: min(760px, calc(100dvh - var(--header-h)));
+      display: grid;
+      grid-template-columns: minmax(0, .88fr) minmax(480px, 1.12fr);
+      align-items: center;
+      gap: clamp(48px, 7vw, 110px);
+      padding: 64px 0 72px;
+    }
+    .hero-copy { max-width: 590px; }
+    .eyebrow {
+      margin: 0 0 18px;
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: .03em;
+    }
+    .hero-copy h1 {
+      margin: 0;
+      max-width: 10.5em;
+      font-size: clamp(44px, 5.5vw, 78px);
+      line-height: 1.04;
+      letter-spacing: -.055em;
+      font-weight: 760;
+    }
+    .hero-copy h1 span { color: var(--accent); }
+    .hero-copy > p:not(.eyebrow) {
+      margin: 26px 0 0;
+      max-width: 36em;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.85;
+    }
+    .hero-actions { display: flex; gap: 10px; margin-top: 34px; flex-wrap: wrap; }
+    .trust-line {
+      display: grid;
+      grid-template-columns: repeat(3, max-content);
+      gap: 22px;
+      margin-top: 32px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .trust-line span { display: inline-flex; gap: 7px; align-items: center; }
+    .trust-mark {
+      width: 17px; height: 17px; border-radius: 50%;
+      display: inline-grid; place-items: center;
+      background: var(--accent-soft); color: var(--accent);
+      font-size: 10px; font-weight: 800;
+    }
+
+    .hero-product {
+      position: relative;
+      min-height: 570px;
+      display: grid;
+      place-items: center;
+    }
+    .hero-product::before {
+      content: "";
+      position: absolute;
+      inset: 9% -8% 5% 12%;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--accent) 10%, transparent);
+      filter: blur(70px);
+      pointer-events: none;
+    }
+    .product-window {
+      position: relative;
+      width: min(720px, 100%);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transform: rotate(-1.25deg);
+      transform-origin: center;
+    }
+    .window-bar {
+      height: 46px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px 0 18px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .window-title { display: flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 650; }
+    .window-logo { width: 19px; height: 19px; }
+    .window-tools { display: flex; gap: 5px; }
+    .window-tools span { width: 24px; height: 22px; border-radius: 5px; display: grid; place-items: center; background: var(--surface-2); }
+    .launcher {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      min-height: 430px;
+    }
+    .launcher-categories {
+      background: var(--surface-2);
+      border-right: 1px solid var(--line);
+      padding: 17px 10px;
+    }
+    .launcher-categories strong { display: block; padding: 0 9px 12px; font-size: 12px; }
+    .launch-category {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      text-align: left;
+      padding: 9px;
+      border-radius: 7px;
+      cursor: pointer;
+      margin: 1px 0;
+    }
+    .launch-category.active { background: var(--surface); color: var(--ink); font-weight: 650; }
+    .launcher-main { padding: 18px; }
+    .launcher-search {
+      height: 40px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      border-radius: var(--radius-small);
+      padding: 0 12px;
+      color: var(--faint);
+    }
+    .launcher-search input {
+      flex: 1; border: 0; outline: 0; background: transparent; color: var(--ink); min-width: 0;
+    }
+    .quick-tools { margin-top: 17px; display: grid; gap: 7px; }
+    .quick-tool {
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--ink);
+      border-radius: var(--radius-small);
+      display: grid;
+      grid-template-columns: 38px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 9px 10px;
+      text-align: left;
+      cursor: pointer;
+      transition: background .18s ease, border-color .18s ease, transform .18s ease;
+    }
+    .quick-tool:hover { background: var(--surface-2); border-color: var(--line); transform: translateX(3px); }
+    .tool-symbol {
+      width: 38px; height: 38px; border-radius: 9px;
+      display: grid; place-items: center;
+      background: var(--accent-soft); color: var(--accent);
+      font-size: 11px; font-weight: 800; letter-spacing: -.02em;
+    }
+    .quick-tool strong { display: block; font-size: 13px; }
+    .quick-tool small { color: var(--muted); font-size: 11px; }
+    .quick-tool b { color: var(--faint); font-weight: 500; }
+    .float-note {
+      position: absolute;
+      right: -20px;
+      bottom: 22px;
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      align-items: center;
+      gap: 9px;
+      min-width: 210px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: var(--surface);
+      box-shadow: var(--shadow-small);
+      transform: rotate(2.2deg);
+    }
+    .float-note strong { font-size: 12px; }
+    .float-note small { color: var(--muted); }
+    .safe-icon { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; color: var(--success); background: color-mix(in srgb, var(--success) 12%, transparent); font-weight: 800; }
+
+    .home-section {
+      padding: 96px 0;
+      border-top: 1px solid var(--line);
+    }
+    .section-heading { max-width: 660px; }
+    .section-heading h2 {
+      margin: 0;
+      font-size: clamp(30px, 3.6vw, 52px);
+      line-height: 1.13;
+      letter-spacing: -.04em;
+    }
+    .section-heading p { margin: 18px 0 0; color: var(--muted); font-size: 16px; }
+    .workflow-strip {
+      margin-top: 52px;
+      display: grid;
+      grid-template-columns: 1.05fr 1px 1fr 1px .92fr;
+      gap: 28px;
+      align-items: stretch;
+    }
+    .workflow-line { background: var(--line); }
+    .workflow-item { padding: 4px 0 18px; }
+    .workflow-item b {
+      width: 42px; height: 42px; border-radius: 11px;
+      display: grid; place-items: center;
+      color: var(--accent); background: var(--accent-soft);
+      font-size: 12px;
+    }
+    .workflow-item h3 { margin: 22px 0 8px; font-size: 20px; letter-spacing: -.02em; }
+    .workflow-item p { margin: 0; color: var(--muted); max-width: 30em; }
+    .privacy-panel {
+      margin-top: 80px;
+      min-height: 390px;
+      display: grid;
+      grid-template-columns: .8fr 1.2fr;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      overflow: hidden;
+      box-shadow: var(--shadow-small);
+    }
+    .privacy-copy { padding: clamp(34px, 5vw, 70px); display: flex; flex-direction: column; justify-content: center; }
+    .privacy-copy h3 { margin: 0; font-size: clamp(28px, 3vw, 43px); line-height: 1.15; letter-spacing: -.035em; }
+    .privacy-copy p { margin: 18px 0 0; color: var(--muted); font-size: 15px; }
+    .privacy-map {
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(90deg, transparent 49.8%, var(--line) 50%, transparent 50.2%),
+        linear-gradient(transparent 49.8%, var(--line) 50%, transparent 50.2%),
+        var(--surface-2);
+      background-size: 72px 72px;
+      position: relative;
+      overflow: hidden;
+    }
+    .privacy-core {
+      width: 210px; height: 210px;
+      border-radius: 50%;
+      display: grid; place-items: center;
+      text-align: center;
+      color: var(--ink);
+      background: var(--surface);
+      border: 1px solid var(--line-strong);
+      box-shadow: 0 0 0 18px color-mix(in srgb, var(--accent) 6%, transparent), var(--shadow-small);
+    }
+    .privacy-core img { width: 42px; margin: 0 auto 12px; }
+    .privacy-core strong { display: block; font-size: 16px; }
+    .privacy-core small { color: var(--muted); }
+
+    .page-head {
+      padding: 54px 0 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 28px;
+      border-bottom: 1px solid var(--line);
+    }
+    .page-head h1 { margin: 0; font-size: clamp(32px, 4vw, 54px); line-height: 1.08; letter-spacing: -.045em; }
+    .page-head p { margin: 12px 0 0; color: var(--muted); max-width: 52em; }
+    .page-head-side { min-width: min(380px, 40%); }
+    .search-field {
+      width: 100%;
+      height: 46px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-small);
+      background: var(--surface);
+      color: var(--ink);
+      padding: 0 14px;
+    }
+
+    .catalog {
+      display: grid;
+      grid-template-columns: 230px 1fr;
+      gap: 42px;
+      padding: 38px 0 80px;
+    }
+    .catalog-nav { position: sticky; top: calc(var(--header-h) + 22px); align-self: start; }
+    .catalog-nav p { margin: 0 0 10px; color: var(--faint); font-size: 12px; }
+    .filter-button {
+      width: 100%;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      padding: 10px 12px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 2px 0;
+    }
+    .filter-button:hover { background: var(--surface-2); color: var(--ink); }
+    .filter-button.active { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+    .catalog-note { margin-top: 26px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    .catalog-list { display: grid; grid-template-columns: 1fr 1fr; column-gap: 20px; align-content: start; }
+    .catalog-group { grid-column: 1 / -1; margin: 14px 0 5px; padding: 0 4px 11px; border-bottom: 1px solid var(--line); color: var(--faint); font-size: 12px; }
+    .catalog-item {
+      min-height: 102px;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      background: transparent;
+      display: grid;
+      grid-template-columns: 42px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 16px 6px;
+      color: var(--ink);
+      text-align: left;
+      cursor: pointer;
+      transition: background .18s ease, padding .18s ease;
+    }
+    .catalog-item:hover { background: var(--surface); padding-left: 14px; padding-right: 14px; }
+    .catalog-item strong { display: block; font-size: 15px; }
+    .catalog-item small { display: block; color: var(--muted); margin-top: 3px; }
+    .catalog-item .arrow { color: var(--faint); }
+    .catalog-empty { grid-column: 1 / -1; display: none; padding: 70px 20px; text-align: center; color: var(--muted); }
+
+    .workbench-view { height: calc(100dvh - var(--header-h)); min-height: 700px; overflow: hidden; }
+    .workbench {
+      height: 100%;
+      display: grid;
+      grid-template-columns: 222px minmax(460px, 1fr) 294px;
+      background: var(--surface-2);
+    }
+    .work-tools, .inspector {
+      background: var(--surface);
+      overflow: auto;
+    }
+    .work-tools { border-right: 1px solid var(--line); padding: 16px 10px; }
+    .work-title { padding: 7px 10px 12px; }
+    .work-title strong { display: block; }
+    .work-title small { color: var(--muted); }
+    .work-section-label { padding: 15px 10px 7px; color: var(--faint); font-size: 11px; }
+    .work-tool {
+      width: 100%;
+      min-height: 48px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      display: grid;
+      grid-template-columns: 30px 1fr;
+      gap: 8px;
+      align-items: center;
+      text-align: left;
+      padding: 7px 9px;
+      cursor: pointer;
+      margin: 1px 0;
+    }
+    .work-tool:hover { background: var(--surface-2); color: var(--ink); }
+    .work-tool.active { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+    .work-tool .tool-symbol { width: 30px; height: 30px; border-radius: 7px; font-size: 9px; }
+    .work-file-note { margin: 24px 6px 8px; border: 1px solid var(--line); border-radius: 9px; padding: 12px; color: var(--muted); font-size: 11px; }
+
+    .workspace {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: 54px minmax(0, 1fr) 74px;
+      overflow: hidden;
+    }
+    .workspace-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 0 14px;
+    }
+    .workspace-file { min-width: 0; }
+    .workspace-file strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .workspace-file small { color: var(--muted); }
+    .workspace-actions { display: flex; gap: 7px; }
+
+    .canvas-shell {
+      min-height: 0;
+      position: relative;
+      padding: 20px;
+      overflow: auto;
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(45deg, color-mix(in srgb, var(--line) 45%, transparent) 25%, transparent 25%),
+        linear-gradient(-45deg, color-mix(in srgb, var(--line) 45%, transparent) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, color-mix(in srgb, var(--line) 45%, transparent) 75%),
+        linear-gradient(-45deg, transparent 75%, color-mix(in srgb, var(--line) 45%, transparent) 75%);
+      background-size: 22px 22px;
+      background-position: 0 0, 0 11px, 11px -11px, -11px 0;
+    }
+    .preview-frame {
+      position: relative;
+      width: min(920px, 100%);
+      aspect-ratio: 16 / 10;
+      background: #20262d;
+      border: 1px solid var(--line-strong);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      user-select: none;
+    }
+    .preview-frame img {
+      width: 100%; height: 100%; object-fit: cover;
+      object-position: top center;
+    }
+    .preview-before {
+      position: absolute;
+      inset: 0;
+      width: var(--compare);
+      overflow: hidden;
+      border-right: 2px solid #ffffff;
+      filter: saturate(.35) contrast(.9) brightness(.86);
+    }
+    .preview-before img {
+      width: calc(100vw - 516px);
+      max-width: 920px;
+      min-width: 460px;
+    }
+    .compare-handle {
+      position: absolute;
+      top: 50%; left: var(--compare);
+      transform: translate(-50%, -50%);
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      border: 2px solid #ffffff;
+      background: rgba(17, 26, 35, .82);
+      color: #ffffff;
+      display: grid; place-items: center;
+      pointer-events: none;
+      box-shadow: 0 7px 24px rgba(0,0,0,.26);
+      font-weight: 800;
+    }
+    .compare-input {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      opacity: 0;
+      cursor: ew-resize;
+    }
+    .preview-labels {
+      position: absolute;
+      inset: 12px 12px auto;
+      display: flex;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+    .preview-labels span {
+      color: #ffffff;
+      background: rgba(18, 26, 35, .78);
+      border-radius: 6px;
+      padding: 5px 8px;
+      font-size: 11px;
+    }
+    .scan-line {
+      position: absolute;
+      left: 0; right: 0; top: 8%;
+      height: 2px;
+      background: var(--accent);
+      box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 65%, transparent);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .canvas-tools {
+      position: absolute;
+      left: 50%; bottom: 34px;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 5px;
+      padding: 5px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: color-mix(in srgb, var(--surface) 92%, transparent);
+      box-shadow: var(--shadow-small);
+      backdrop-filter: blur(12px);
+    }
+    .canvas-tools button {
+      min-width: 34px; height: 32px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); cursor: pointer;
+    }
+    .canvas-tools button:hover, .canvas-tools button.active { background: var(--accent-soft); color: var(--accent); }
+
+    .workspace-status {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 18px;
+      padding: 0 16px;
+      border-top: 1px solid var(--line);
+      background: var(--surface);
+    }
+    .status-copy strong { display: block; font-size: 13px; }
+    .status-copy small { color: var(--muted); }
+    .progress-track {
+      height: 3px;
+      width: 100%;
+      margin-top: 8px;
+      background: var(--surface-3);
+      overflow: hidden;
+      border-radius: 2px;
+    }
+    .progress-fill { width: 0; height: 100%; background: var(--accent); transition: width .18s ease; }
+    .status-actions { display: flex; gap: 7px; }
+
+    .inspector { border-left: 1px solid var(--line); }
+    .inspector-tabs { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--line); }
+    .inspector-tab {
+      border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted); padding: 16px 6px 12px; cursor: pointer;
+    }
+    .inspector-tab.active { color: var(--accent); border-color: var(--accent); font-weight: 700; }
+    .inspector-panel { display: none; padding: 18px 16px 28px; }
+    .inspector-panel.active { display: block; }
+    .field { margin-bottom: 17px; }
+    .field label { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 7px; color: var(--muted); font-size: 12px; }
+    .field input[type="range"] { width: 100%; accent-color: var(--accent); }
+    .select, .text-input {
+      width: 100%;
+      height: 39px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface-2);
+      color: var(--ink);
+      padding: 0 10px;
+    }
+    .segmented { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; background: var(--surface-2); border-radius: 9px; }
+    .segmented button { min-height: 32px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); cursor: pointer; }
+    .segmented button.active { background: var(--surface); color: var(--ink); box-shadow: 0 1px 5px rgba(28,43,59,.09); }
+    .switch-row { min-height: 42px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); }
+    .switch {
+      width: 38px; height: 22px; border: 0; border-radius: 11px; background: var(--surface-3); padding: 2px; cursor: pointer;
+    }
+    .switch::after { content: ""; display: block; width: 18px; height: 18px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 4px rgba(0,0,0,.22); transition: transform .18s ease; }
+    .switch.on { background: var(--accent); }
+    .switch.on::after { transform: translateX(16px); }
+    .result-box { border: 1px solid var(--line); border-radius: 9px; padding: 12px; background: var(--surface-2); color: var(--muted); min-height: 92px; }
+    .history-row { display: grid; grid-template-columns: 42px 1fr; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+    .history-thumb { width: 42px; height: 34px; border-radius: 6px; object-fit: cover; border: 1px solid var(--line); }
+    .history-row strong { display: block; font-size: 12px; }
+    .history-row small { color: var(--muted); }
+
+    .reading-layout {
+      display: grid;
+      grid-template-columns: 270px minmax(0, 760px);
+      gap: 58px;
+      padding: 42px 0 90px;
+      align-items: start;
+    }
+    .reading-nav { position: sticky; top: calc(var(--header-h) + 24px); }
+    .reading-nav button {
+      width: 100%; border: 0; background: transparent; color: var(--muted); text-align: left; padding: 11px 10px; border-radius: 8px; cursor: pointer;
+    }
+    .reading-nav button:hover, .reading-nav button.active { background: var(--surface-2); color: var(--ink); }
+    .article { display: none; }
+    .article.active { display: block; }
+    .article h2 { margin: 0 0 18px; font-size: 32px; letter-spacing: -.03em; }
+    .article h3 { margin: 34px 0 10px; font-size: 19px; }
+    .article p { color: var(--muted); font-size: 15px; line-height: 1.85; }
+    .article-step { display: grid; grid-template-columns: 42px 1fr; gap: 16px; padding: 19px 0; border-bottom: 1px solid var(--line); }
+    .article-step b { width: 38px; height: 38px; border-radius: 9px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+    .article-step strong { display: block; }
+    .article-step span { color: var(--muted); }
+    .tip { margin-top: 24px; padding: 16px 18px; border-left: 3px solid var(--accent); background: var(--accent-soft); color: var(--muted); }
+
+    .download-layout {
+      padding: 64px 0 94px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(400px, .95fr);
+      gap: clamp(44px, 7vw, 100px);
+      align-items: center;
+    }
+    .download-copy h1 { margin: 0; max-width: 10em; font-size: clamp(42px, 5vw, 70px); line-height: 1.05; letter-spacing: -.05em; }
+    .download-copy > p { color: var(--muted); font-size: 16px; max-width: 40em; margin: 22px 0 0; }
+    .download-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; margin-top: 34px; border-top: 1px solid var(--line); }
+    .download-fact { padding: 16px 0; border-bottom: 1px solid var(--line); }
+    .download-fact span { display: block; color: var(--muted); font-size: 12px; }
+    .download-fact strong { display: block; margin-top: 3px; }
+    .package-panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .package-top { padding: 27px; border-bottom: 1px solid var(--line); }
+    .package-top img { width: 48px; height: 48px; margin-bottom: 22px; }
+    .package-top h2 { margin: 0; font-size: 23px; }
+    .package-top p { margin: 8px 0 0; color: var(--muted); }
+    .package-choice {
+      width: 100%; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--ink); text-align: left; display: grid; grid-template-columns: 1fr auto; gap: 18px; padding: 17px 27px; cursor: pointer;
+    }
+    .package-choice:hover { background: var(--surface-2); }
+    .package-choice strong { display: block; }
+    .package-choice small { color: var(--muted); }
+    .package-choice b { color: var(--accent); }
+    .package-foot { padding: 20px 27px; color: var(--muted); font-size: 12px; }
+
+    .release-list { padding: 34px 0 90px; max-width: 920px; }
+    .release {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 42px;
+      padding: 28px 0 34px;
+      border-bottom: 1px solid var(--line);
+    }
+    .release-meta strong { display: block; font-size: 20px; }
+    .release-meta span { color: var(--muted); font-size: 12px; }
+    .release-content h2 { margin: 0 0 14px; font-size: 20px; }
+    .change-section { margin-top: 18px; }
+    .change-section strong { display: block; color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+    .change-section p { margin: 5px 0; color: var(--ink); }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(13, 20, 29, .48);
+      backdrop-filter: blur(8px);
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      width: min(520px, 100%);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: 0 28px 90px rgba(0,0,0,.24);
+      overflow: hidden;
+    }
+    .modal-head { height: 54px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid var(--line); }
+    .modal-head button { border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: 18px; }
+    .modal-body { padding: 20px; }
+    .drop-zone {
+      min-height: 200px;
+      border: 1px dashed var(--line-strong);
+      border-radius: 10px;
+      background: var(--surface-2);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 30px;
+      cursor: pointer;
+    }
+    .drop-zone:hover { border-color: var(--accent); }
+    .drop-symbol { width: 52px; height: 52px; border-radius: 13px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); margin: 0 auto 14px; font-size: 22px; }
+    .drop-zone p { margin: 0; font-weight: 700; }
+    .drop-zone small { display: block; color: var(--muted); margin-top: 7px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+
+    .toast {
+      position: fixed;
+      z-index: 70;
+      right: 24px;
+      bottom: 24px;
+      max-width: min(360px, calc(100vw - 48px));
+      padding: 13px 15px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: var(--shadow-small);
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+    }
+
+    .mobile-menu-button { display: none; }
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      z-index: 40;
+      top: var(--header-h);
+      left: 0;
+      right: 0;
+      padding: 10px 18px 18px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+      box-shadow: var(--shadow-small);
+    }
+    .mobile-menu.open { display: grid; }
+    .mobile-menu .nav-button { text-align: left; }
+
+    @media (max-width: 1120px) {
+      .site-header { grid-template-columns: 1fr auto; }
+      .main-nav { display: none; }
+      .mobile-menu-button { display: inline-flex; }
+      .home-hero { grid-template-columns: 1fr; gap: 18px; padding-top: 58px; }
+      .hero-copy { max-width: 760px; }
+      .hero-product { min-height: auto; padding: 28px 20px 70px; }
+      .workbench { grid-template-columns: 178px minmax(420px, 1fr) 268px; }
+      .work-tools { padding-left: 7px; padding-right: 7px; }
+      .catalog { grid-template-columns: 190px 1fr; gap: 28px; }
+      .download-layout { grid-template-columns: 1fr 420px; gap: 48px; }
+    }
+    @media (max-width: 880px) {
+      .page-wrap { width: min(100% - 32px, 1320px); }
+      .trust-line { grid-template-columns: 1fr; gap: 9px; }
+      .workflow-strip { grid-template-columns: 1fr; gap: 26px; }
+      .workflow-line { height: 1px; }
+      .privacy-panel { grid-template-columns: 1fr; }
+      .privacy-map { min-height: 340px; }
+      .page-head { align-items: stretch; flex-direction: column; }
+      .page-head-side { min-width: 0; width: 100%; }
+      .catalog { grid-template-columns: 1fr; }
+      .catalog-nav { position: static; display: flex; overflow-x: auto; gap: 4px; padding-bottom: 6px; }
+      .catalog-nav p, .catalog-note { display: none; }
+      .filter-button { width: max-content; white-space: nowrap; }
+      .catalog-list { grid-template-columns: 1fr; }
+      .workbench-view { height: auto; min-height: calc(100dvh - var(--header-h)); overflow: visible; }
+      .workbench { grid-template-columns: 1fr; min-height: calc(100dvh - var(--header-h)); }
+      .work-tools { border-right: 0; border-bottom: 1px solid var(--line); display: flex; overflow-x: auto; padding: 9px; }
+      .work-title, .work-section-label, .work-file-note { display: none; }
+      .work-tool { width: max-content; min-width: max-content; grid-template-columns: 28px 1fr; padding-right: 12px; }
+      .workspace { min-height: 680px; }
+      .inspector { border-left: 0; border-top: 1px solid var(--line); max-height: none; }
+      .download-layout { grid-template-columns: 1fr; }
+      .reading-layout { grid-template-columns: 1fr; gap: 28px; }
+      .reading-nav { position: static; display: flex; overflow-x: auto; }
+      .reading-nav button { width: max-content; white-space: nowrap; }
+    }
+    @media (max-width: 620px) {
+      :root { --header-h: 60px; }
+      .site-header { padding: 0 14px; }
+      .brand small { display: none; }
+      .header-actions .desktop-cta { display: none; }
+      .hero-copy h1 { font-size: clamp(39px, 13vw, 58px); }
+      .home-hero { padding-top: 44px; }
+      .hero-product { padding-left: 0; padding-right: 0; }
+      .product-window { transform: none; }
+      .launcher { grid-template-columns: 1fr; }
+      .launcher-categories { display: none; }
+      .float-note { right: 6px; bottom: 4px; }
+      .home-section { padding: 70px 0; }
+      .privacy-copy { padding: 30px 24px; }
+      .catalog-item { grid-template-columns: 38px 1fr auto; }
+      .workspace { grid-template-rows: auto minmax(420px, 1fr) auto; }
+      .workspace-bar { align-items: flex-start; padding: 11px; flex-direction: column; }
+      .workspace-actions { width: 100%; }
+      .workspace-actions .button { flex: 1; }
+      .canvas-shell { padding: 10px; min-height: 430px; }
+      .preview-frame { min-width: 560px; }
+      .canvas-shell { place-items: center start; }
+      .workspace-status { grid-template-columns: 1fr; padding: 12px; }
+      .status-actions { width: 100%; }
+      .status-actions .button { flex: 1; }
+      .release { grid-template-columns: 1fr; gap: 15px; }
+      .download-facts { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body data-theme="light">
+  <div class="app">
+    <header class="site-header">
+      <button class="brand" data-route="home" aria-label="返回首页">
+        <img src="../../apps/web/public/icons/matrix-logo.svg" alt="万能格式转换器 LOGO" />
+        <span><strong>万能格式转换器</strong><small>在线版</small></span>
+      </button>
+      <nav class="main-nav" aria-label="主导航">
+        <button class="nav-button active" data-route="home">首页</button>
+        <button class="nav-button" data-route="tools">在线工具</button>
+        <button class="nav-button" data-route="guides">使用指南</button>
+        <button class="nav-button" data-route="download">离线版</button>
+        <button class="nav-button" data-route="changelog">更新记录</button>
+      </nav>
+      <div class="header-actions">
+        <button class="icon-button" id="themeToggle" aria-label="切换明暗主题" title="切换明暗主题">◐</button>
+        <button class="icon-button mobile-menu-button" id="mobileMenuButton" aria-label="打开导航">≡</button>
+        <button class="button primary desktop-cta" data-route="tools">开始处理</button>
+      </div>
+    </header>
+
+    <div class="mobile-menu" id="mobileMenu">
+      <button class="nav-button" data-route="home">首页</button>
+      <button class="nav-button" data-route="tools">在线工具</button>
+      <button class="nav-button" data-route="guides">使用指南</button>
+      <button class="nav-button" data-route="download">离线版</button>
+      <button class="nav-button" data-route="changelog">更新记录</button>
+    </div>
+
+    <main>
+      <section class="view active home-view" data-view="home">
+        <div class="page-wrap">
+          <div class="home-hero">
+            <div class="hero-copy">
+              <p class="eyebrow hero-animate">文件留在你的设备上</p>
+              <h1 class="hero-animate">打开文件，<span>完成转换。</span></h1>
+              <p class="hero-animate">图片、文档和音视频处理直接在浏览器本地完成。无需登录，不经过云端转换服务。</p>
+              <div class="hero-actions hero-animate">
+                <button class="button primary" data-route="tools">选择一个工具</button>
+                <button class="button quiet" data-route="download">获取离线专业版</button>
+              </div>
+              <div class="trust-line hero-animate">
+                <span><b class="trust-mark">✓</b>不上传用户文件</span>
+                <span><b class="trust-mark">✓</b>处理完成即可下载</span>
+                <span><b class="trust-mark">✓</b>无需注册账户</span>
+              </div>
+            </div>
+
+            <div class="hero-product hero-animate">
+              <div class="product-window">
+                <div class="window-bar">
+                  <span class="window-title"><img class="window-logo" src="../../apps/web/public/icons/matrix-logo.svg" alt="" />选择工具</span>
+                  <span class="window-tools"><span>−</span><span>□</span><span>×</span></span>
+                </div>
+                <div class="launcher">
+                  <aside class="launcher-categories">
+                    <strong>处理类型</strong>
+                    <button class="launch-category active">常用工具</button>
+                    <button class="launch-category">图片处理</button>
+                    <button class="launch-category">文档转换</button>
+                    <button class="launch-category">音视频</button>
+                    <button class="launch-category">截图与识别</button>
+                  </aside>
+                  <div class="launcher-main">
+                    <label class="launcher-search"><span>⌕</span><input id="heroToolSearch" placeholder="搜索处理工具" /></label>
+                    <div class="quick-tools" id="heroToolList">
+                      <button class="quick-tool" data-open-tool="图片压缩"><span class="tool-symbol">JPG</span><span><strong>图片压缩</strong><small>按质量或目标大小处理</small></span><b>打开</b></button>
+                      <button class="quick-tool" data-open-tool="PDF 转图片"><span class="tool-symbol">PDF</span><span><strong>PDF 转图片</strong><small>逐页导出或合成长图</small></span><b>打开</b></button>
+                      <button class="quick-tool" data-open-tool="视频格式转换"><span class="tool-symbol">MP4</span><span><strong>视频格式转换</strong><small>常用容器与清晰度</small></span><b>打开</b></button>
+                      <button class="quick-tool" data-open-tool="截图与标注"><span class="tool-symbol">CAP</span><span><strong>截图与标注</strong><small>箭头、文字和隐私模糊</small></span><b>打开</b></button>
+                      <button class="quick-tool" data-open-tool="OCR 文字识别"><span class="tool-symbol">OCR</span><span><strong>OCR 文字识别</strong><small>从图片提取中文和英文</small></span><b>打开</b></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="float-note">
+                <span class="safe-icon">✓</span>
+                <span><strong>浏览器本地处理</strong><small>当前页面不会上传文件</small></span>
+              </div>
+            </div>
+          </div>
+
+          <section class="home-section">
+            <div class="section-heading reveal">
+              <p class="eyebrow">简单而完整的处理流程</p>
+              <h2>从文件到结果，界面只保留当前需要的操作。</h2>
+              <p>在线版为单文件和少量文件任务设计。复杂批量任务会明确引导到离线专业版。</p>
+            </div>
+            <div class="workflow-strip reveal">
+              <article class="workflow-item"><b>打开</b><h3>选择本地文件</h3><p>系统先检查格式和大小，文件内容不会离开当前设备。</p></article>
+              <span class="workflow-line"></span>
+              <article class="workflow-item"><b>调整</b><h3>设置输出参数</h3><p>预览区与参数区保持同步，每次修改都能看到清晰反馈。</p></article>
+              <span class="workflow-line"></span>
+              <article class="workflow-item"><b>完成</b><h3>处理并下载</h3><p>结果生成后直接保存，页面关闭后不保留文件。</p></article>
+            </div>
+            <div class="privacy-panel reveal">
+              <div class="privacy-copy">
+                <p class="eyebrow">隐私边界</p>
+                <h3>转换能力在页面内运行，文件不经过中转服务器。</h3>
+                <p>用户文件、Canvas、Blob、ArrayBuffer 和转换结果都留在当前浏览器环境中。</p>
+                <div class="hero-actions"><button class="button" data-route="guides">查看处理说明</button></div>
+              </div>
+              <div class="privacy-map">
+                <div class="privacy-core"><span><img src="../../apps/web/public/icons/matrix-logo.svg" alt="" /><strong>本地处理核心</strong><small>输入、处理、输出均在设备内</small></span></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" data-view="tools">
+        <div class="page-wrap">
+          <header class="page-head">
+            <div><p class="eyebrow">在线工具</p><h1>你想处理什么？</h1><p>选择工具后进入专注工作区。在线版以单文件处理为主，不提供云端批量转换。</p></div>
+            <div class="page-head-side"><input class="search-field" id="catalogSearch" placeholder="搜索工具、格式或用途" /></div>
+          </header>
+          <div class="catalog">
+            <aside class="catalog-nav" id="catalogFilters">
+              <p>筛选类型</p>
+              <button class="filter-button active" data-filter="all"><span>全部工具</span><span>14</span></button>
+              <button class="filter-button" data-filter="image"><span>图片处理</span><span>5</span></button>
+              <button class="filter-button" data-filter="document"><span>文档转换</span><span>4</span></button>
+              <button class="filter-button" data-filter="media"><span>音视频</span><span>3</span></button>
+              <button class="filter-button" data-filter="capture"><span>截图与识别</span><span>2</span></button>
+              <div class="catalog-note">需要文件夹导入和批量输出时，请使用 Windows 离线专业版。</div>
+            </aside>
+            <div class="catalog-list" id="catalogList">
+              <div class="catalog-group" data-group="image">图片处理</div>
+              <button class="catalog-item" data-category="image" data-open-tool="图片裁切"><span class="tool-symbol">CUT</span><span><strong>图片裁切</strong><small>自由裁切、固定比例和头像尺寸</small></span><span class="arrow">→</span></button>
+              <button class="catalog-item" data-category="image" data-open-tool="尺寸调整"><span class="tool-symbol">SIZE</span><span><strong>尺寸调整</strong><small>按百分比或像素调整尺寸</small></span><span class="arrow">→</span></button>
+              <button class="catalog-item" data-category="image" data-open-tool="添加水印"><span class="tool-symbol">MARK</span><span><strong>添加水印</strong><small>文字和图片水印实时预览</small></span><span class="arrow">→</span></button>
+              <button class="catalog-item" data-category="image" data-open-tool="图片压缩"><span class="tool-symbol">JPG</span><span><strong>图片压缩</strong><small>质量优先或目标大小</small></span><span class="arrow">→</span></button>
+              <button class="catalog-item" data-category="image" data-open-tool="图片对比"><span class="tool-symbol">DIFF</span><span><strong>图片对比</strong><small>拖动查看处理前后差异</small></span><span class="arrow">→</span></button>
+              <div class="catalog-group" data-group="document">文档转换</div>
+              <button class="catalog-item" data-category="document" data-open-tool="PDF 转图片"><span class="tool-symbol">PDF</span><span><strong>PDF 转图片</strong><small>逐页导出或合成长图</small></span><span class="arrow">→</span></button>
+              <button class="catalog-item" data-category="document" data-open-tool="Word 转图片"><span class="tool-symbol">DOC</span><span><strong>Word 转图片</strong><small>保留页面布局并导出图片</small></span><span class="arrow">→</span></button>
+              <button class="catalog-item" data-category="document" data-open-tool="Excel 转图片"><span class="tool-symbol">XLS</span><span><strong>Excel 转图片</strong><small>工作表逐页导出或合并</small></span><span class="arrow">→</span></button>
+              <button class="catalog-item" data-category="document" data-open-tool="OCR 文字识别"><span class="tool-symbol">OCR</span><span><strong>OCR 文字识别</strong><small>从图片中提取中文和英文</small></span><span class="arrow">→</span></button>
+              <div class="catalog-group" data-group="media">音视频</div>
+              <button class="catalog-item" data-category="media" data-open-tool="视频格式转换"><span class="tool-symbol">MP4</span><span><strong>视频格式转换</strong><small>MP4、MOV、AVI、MKV 和 WebM</small></span><span class="arrow">→</span></button>
+              <button class="catalog-item" data-category="media" data-open-tool="音频格式转换"><span class="tool-symbol">MP3</span><span><strong>音频格式转换</strong><small>MP3、WAV、AAC、M4A 和 FLAC</small></span><span class="arrow">→</span></button>
+              <button class="catalog-item" data-category="media" data-open-tool="视频提取音频"><span class="tool-symbol">AUDIO</span><span><strong>视频提取音频</strong><small>保留独立音轨并导出</small></span><span class="arrow">→</span></button>
+              <div class="catalog-group" data-group="capture">截图与识别</div>
+              <button class="catalog-item" data-category="capture" data-open-tool="截图与标注"><span class="tool-symbol">CAP</span><span><strong>截图与标注</strong><small>共享屏幕、标注和隐私模糊</small></span><span class="arrow">→</span></button>
+              <button class="catalog-item" data-category="capture" data-open-tool="二维码识别"><span class="tool-symbol">QR</span><span><strong>二维码识别</strong><small>识别二维码和常见条形码</small></span><span class="arrow">→</span></button>
+              <div class="catalog-empty" id="catalogEmpty"><strong>没有找到对应工具</strong><p>请尝试输入格式名称，例如 PDF、JPG 或 MP4。</p></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view workbench-view" data-view="workbench">
+        <div class="workbench">
+          <aside class="work-tools">
+            <div class="work-title"><strong>在线工作区</strong><small>单文件本地处理</small></div>
+            <div class="work-section-label">图片</div>
+            <button class="work-tool active" data-work-tool="图片压缩"><span class="tool-symbol">JPG</span><span>图片压缩</span></button>
+            <button class="work-tool" data-work-tool="图片裁切"><span class="tool-symbol">CUT</span><span>图片裁切</span></button>
+            <button class="work-tool" data-work-tool="尺寸调整"><span class="tool-symbol">SIZE</span><span>尺寸调整</span></button>
+            <button class="work-tool" data-work-tool="添加水印"><span class="tool-symbol">MARK</span><span>添加水印</span></button>
+            <button class="work-tool" data-work-tool="图片对比"><span class="tool-symbol">DIFF</span><span>图片对比</span></button>
+            <div class="work-section-label">文档与识别</div>
+            <button class="work-tool" data-work-tool="PDF 转图片"><span class="tool-symbol">PDF</span><span>PDF 转图片</span></button>
+            <button class="work-tool" data-work-tool="Word 转图片"><span class="tool-symbol">DOC</span><span>Word 转图片</span></button>
+            <button class="work-tool" data-work-tool="Excel 转图片"><span class="tool-symbol">XLS</span><span>Excel 转图片</span></button>
+            <button class="work-tool" data-work-tool="OCR 文字识别"><span class="tool-symbol">OCR</span><span>OCR 文字识别</span></button>
+            <div class="work-section-label">音视频</div>
+            <button class="work-tool" data-work-tool="视频格式转换"><span class="tool-symbol">MP4</span><span>视频转换</span></button>
+            <button class="work-tool" data-work-tool="音频格式转换"><span class="tool-symbol">MP3</span><span>音频转换</span></button>
+            <button class="work-tool" data-work-tool="截图与标注"><span class="tool-symbol">CAP</span><span>截图与标注</span></button>
+            <div class="work-file-note">在线版不会读取文件夹。需要批量处理时可切换到离线专业版。</div>
+          </aside>
+
+          <section class="workspace">
+            <header class="workspace-bar">
+              <div class="workspace-file"><strong id="workspaceTitle">图片压缩</strong><small id="fileMeta">示例文件：在线工具台截图.png，1440 × 1100</small></div>
+              <div class="workspace-actions"><button class="button small" id="replaceFileButton">更换文件</button><button class="button small" id="resetButton">重置</button></div>
+            </header>
+            <div class="canvas-shell">
+              <div class="preview-frame" id="previewFrame">
+                <img src="../online-static-smoke-last-page.png" alt="在线版示例文件预览" />
+                <div class="preview-before"><img src="../online-static-smoke-last-page.png" alt="" /></div>
+                <div class="preview-labels"><span>处理前</span><span>处理后</span></div>
+                <div class="compare-handle">↔</div>
+                <input class="compare-input" id="compareRange" type="range" min="8" max="92" value="54" aria-label="拖动比较处理前后效果" />
+                <div class="scan-line" id="scanLine"></div>
+              </div>
+              <div class="canvas-tools" aria-label="预览工具">
+                <button class="active" data-canvas-tool="移动">移</button>
+                <button data-canvas-tool="选择">选</button>
+                <button data-canvas-tool="标注">标</button>
+                <button id="zoomOut">−</button>
+                <button id="zoomValue">86%</button>
+                <button id="zoomIn">＋</button>
+              </div>
+            </div>
+            <footer class="workspace-status">
+              <div class="status-copy">
+                <strong id="processState">准备处理</strong>
+                <small id="processDetail">调整右侧参数，然后运行当前工具。</small>
+                <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+              </div>
+              <div class="status-actions"><button class="button" id="copyResult">复制结果</button><button class="button primary" id="runTool">开始压缩</button></div>
+            </footer>
+          </section>
+
+          <aside class="inspector">
+            <div class="inspector-tabs">
+              <button class="inspector-tab active" data-inspector="settings">参数</button>
+              <button class="inspector-tab" data-inspector="result">结果</button>
+              <button class="inspector-tab" data-inspector="history">记录</button>
+            </div>
+            <div class="inspector-panel active" data-panel="settings">
+              <div class="field"><label><span>输出格式</span></label><select class="select"><option>JPG</option><option>PNG</option><option>WEBP</option></select></div>
+              <div class="field"><label><span>处理模式</span></label><div class="segmented"><button>轻度</button><button class="active">推荐</button><button>极限</button></div></div>
+              <div class="field"><label><span>质量</span><strong id="qualityValue">82</strong></label><input id="qualityRange" type="range" min="20" max="100" value="82" /></div>
+              <div class="field"><label><span>目标大小</span></label><select class="select"><option>不限制</option><option>500 KB</option><option>300 KB</option><option>100 KB</option></select></div>
+              <div class="switch-row"><span>移除元数据</span><button class="switch on" aria-label="移除元数据"></button></div>
+              <div class="switch-row"><span>处理后自动下载</span><button class="switch" aria-label="处理后自动下载"></button></div>
+              <div class="field" style="margin-top:18px"><label><span>文件名</span></label><input class="text-input" value="在线工具台截图_已压缩" /></div>
+            </div>
+            <div class="inspector-panel" data-panel="result">
+              <div class="result-box" id="resultBox">尚未生成结果。点击底部按钮运行当前工具。</div>
+              <button class="button block" style="margin-top:12px" id="downloadResult">下载结果</button>
+              <div class="switch-row" style="margin-top:14px"><span>保留处理设置</span><button class="switch on" aria-label="保留处理设置"></button></div>
+            </div>
+            <div class="inspector-panel" data-panel="history">
+              <div class="history-row"><img class="history-thumb" src="../online-static-smoke-last-page.png" alt="" /><span><strong>在线工具台截图.png</strong><small>当前示例，等待处理</small></span></div>
+              <div class="history-row"><img class="history-thumb" src="../ui-round-2-tools-mobile-375.png" alt="" /><span><strong>移动端工具页.png</strong><small>浏览器本地记录</small></span></div>
+              <p style="color:var(--muted);font-size:11px;margin-top:16px">关闭页面后，当前记录不会上传或同步。</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="view" data-view="guides">
+        <div class="page-wrap">
+          <header class="page-head"><div><p class="eyebrow">使用指南</p><h1>第一次使用也能顺利完成。</h1><p>从浏览器权限、文件选择到结果导出，所有说明都围绕实际操作。</p></div></header>
+          <div class="reading-layout">
+            <aside class="reading-nav">
+              <button class="active" data-article="start">快速开始</button>
+              <button data-article="privacy">本地处理与隐私</button>
+              <button data-article="screen">屏幕共享说明</button>
+              <button data-article="large">大文件处理建议</button>
+              <button data-article="offline">何时使用离线版</button>
+            </aside>
+            <div>
+              <article class="article active" data-article-panel="start">
+                <h2>快速开始</h2><p>在线版适合单文件或少量文件快速处理。选择工具、打开文件、调整参数，然后下载结果。</p>
+                <div class="article-step"><b>选择</b><span><strong>打开在线工具目录</strong>按文件类型或用途找到需要的处理工具。</span></div>
+                <div class="article-step"><b>打开</b><span><strong>选择当前设备上的文件</strong>页面会先检查格式，不会自动上传文件内容。</span></div>
+                <div class="article-step"><b>处理</b><span><strong>确认参数并运行</strong>处理状态、预览效果和结果会在同一工作区展示。</span></div>
+                <div class="article-step"><b>保存</b><span><strong>下载转换结果</strong>关闭页面前确认文件已经保存到需要的位置。</span></div>
+                <div class="tip">当前是界面审阅稿，文件按钮会载入内置示例，不会读取真实文件。</div>
+              </article>
+              <article class="article" data-article-panel="privacy"><h2>本地处理与隐私</h2><p>文件处理逻辑在浏览器环境中运行。在线站点不接收用户文件、Canvas、Blob、ArrayBuffer 或转换结果。</p><h3>页面关闭后的状态</h3><p>未下载的结果会随页面关闭而消失。浏览器不会把处理记录同步到账号，因为在线版不提供登录系统。</p><h3>广告边界</h3><p>广告容器与文件处理区域隔离，用户文件内容不会交给广告服务。</p></article>
+              <article class="article" data-article-panel="screen"><h2>屏幕共享说明</h2><p>截图功能只有在用户主动点击后才会请求浏览器权限。浏览器会展示可共享的标签页、窗口或屏幕。</p><h3>停止共享</h3><p>可以随时使用浏览器提供的停止共享按钮。停止后页面不会继续读取屏幕画面。</p></article>
+              <article class="article" data-article-panel="large"><h2>大文件处理建议</h2><p>浏览器内存有限。处理大体积视频、长文档或超高分辨率图片时，建议关闭无关标签页并保留足够磁盘空间。</p><h3>出现内存不足时</h3><p>降低输出尺寸或清晰度，也可以改用 Windows 离线专业版处理大文件和批量任务。</p></article>
+              <article class="article" data-article-panel="offline"><h2>何时使用离线版</h2><p>文件夹导入、多文件队列、断网处理、敏感文件和大文件都更适合离线专业版。</p><div class="hero-actions"><button class="button primary" data-route="download">查看离线版</button></div></article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" data-view="download">
+        <div class="page-wrap">
+          <div class="download-layout">
+            <div class="download-copy">
+              <p class="eyebrow">Windows 离线专业版</p>
+              <h1>把完整处理能力留在电脑里。</h1>
+              <p>适合断网环境、敏感文件、大文件和批量任务。安装后提供 3 天本地试用，无需登录。</p>
+              <div class="download-facts">
+                <div class="download-fact"><span>当前版本</span><strong>1.0.0</strong></div>
+                <div class="download-fact"><span>更新日期</span><strong>2026-06-17</strong></div>
+                <div class="download-fact"><span>支持系统</span><strong>Windows 10 / 11 x64</strong></div>
+                <div class="download-fact"><span>处理方式</span><strong>本机离线处理</strong></div>
+              </div>
+              <div class="hero-actions"><button class="button" data-route="guides">查看安装说明</button></div>
+            </div>
+            <div class="package-panel">
+              <div class="package-top"><img src="../../apps/web/public/icons/app-icon.png" alt="离线专业版图标" /><h2>选择安装方式</h2><p>普通用户推荐使用 EXE，集中部署可使用 MSI。</p></div>
+              <button class="package-choice" data-download="EXE 安装包"><span><strong>EXE 安装包</strong><small>约 245.42 MB，适合普通安装</small></span><b>下载</b></button>
+              <button class="package-choice" data-download="MSI 安装包"><span><strong>MSI 安装包</strong><small>约 255.93 MB，适合管理部署</small></span><b>下载</b></button>
+              <div class="package-foot">下载前请核对发布页提供的 SHA256。正式安装包与本审阅稿无关。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" data-view="changelog">
+        <div class="page-wrap">
+          <header class="page-head"><div><p class="eyebrow">更新记录</p><h1>只记录用户能感知的变化。</h1><p>正式更新时仅展示版本号、更新时间、原有功能和新增功能，不记录内部操作过程。</p></div></header>
+          <div class="release-list">
+            <article class="release">
+              <div class="release-meta"><strong>1.0.0</strong><span>2026-06-17</span></div>
+              <div class="release-content">
+                <h2>首次正式发布</h2>
+                <div class="change-section"><strong>原有功能</strong><p>图片裁切、尺寸调整、添加水印、图片压缩、PDF 转图片和音视频转换。</p></div>
+                <div class="change-section"><strong>新增功能</strong><p>Word 转图片、Excel 转图片、离线批量队列、独立结果文件夹和本地授权。</p></div>
+              </div>
+            </article>
+            <article class="release">
+              <div class="release-meta"><strong>后续版本</strong><span>正式发布时填写</span></div>
+              <div class="release-content"><h2>预留更新格式</h2><div class="change-section"><strong>原有功能</strong><p>沿用上一版本已经提供的用户功能。</p></div><div class="change-section"><strong>新增功能</strong><p>只填写本次发布真正新增或明显改变的功能。</p></div></div>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="fileModal" role="dialog" aria-modal="true" aria-labelledby="fileModalTitle">
+    <div class="modal">
+      <header class="modal-head"><strong id="fileModalTitle">选择本地文件</strong><button data-close-modal="fileModal" aria-label="关闭">×</button></header>
+      <div class="modal-body">
+        <button class="drop-zone" id="chooseSample"><span><span class="drop-symbol">＋</span><p>拖放文件到这里，或点击选择</p><small>审阅稿将载入内置示例文件，不会读取你的真实文件。</small></span></button>
+        <div class="modal-actions"><button class="button" data-close-modal="fileModal">取消</button><button class="button primary" id="loadSample">载入示例</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="../../apps/web/node_modules/gsap/dist/gsap.min.js"></script>
+  <script>
+    (() => {
+      const $ = (selector, root = document) => root.querySelector(selector);
+      const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+      const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const hasGsap = typeof window.gsap !== "undefined";
+      const toolActions = {
+        "图片压缩": "开始压缩",
+        "图片裁切": "应用裁切",
+        "尺寸调整": "调整尺寸",
+        "添加水印": "添加水印",
+        "图片对比": "生成对比",
+        "PDF 转图片": "导出页面",
+        "Word 转图片": "导出页面",
+        "Excel 转图片": "导出工作表",
+        "OCR 文字识别": "开始识别",
+        "视频格式转换": "开始转换",
+        "音频格式转换": "开始转换",
+        "视频提取音频": "提取音频",
+        "截图与标注": "开始截图",
+        "二维码识别": "开始识别"
+      };
+      let currentTool = "图片压缩";
+      let currentRoute = "home";
+      let zoom = 86;
+      let toastTimer;
+
+      function showToast(message) {
+        const toast = $("#toast");
+        toast.textContent = message;
+        clearTimeout(toastTimer);
+        if (hasGsap && !reduceMotion) {
+          gsap.killTweensOf(toast);
+          gsap.to(toast, { autoAlpha: 1, y: 0, duration: .28, ease: "power2.out" });
+          toastTimer = setTimeout(() => gsap.to(toast, { autoAlpha: 0, y: 12, duration: .25 }), 2200);
+        } else {
+          toast.style.opacity = "1";
+          toast.style.transform = "translateY(0)";
+          toastTimer = setTimeout(() => { toast.style.opacity = "0"; }, 2200);
+        }
+      }
+
+      function animateView(view) {
+        if (!hasGsap || reduceMotion) return;
+        const targets = view.matches(".workbench-view") ? [$(".workspace", view), $(".inspector", view)] : $$(":scope > .page-wrap > *", view);
+        gsap.fromTo(targets, { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: .44, stagger: .05, ease: "power3.out", clearProps: "all" });
+      }
+
+      function setRoute(route) {
+        const target = $(`.view[data-view="${route}"]`);
+        if (!target) return;
+        currentRoute = route;
+        $$(".view").forEach(view => view.classList.toggle("active", view === target));
+        $$("[data-route]").forEach(button => button.classList.toggle("active", button.dataset.route === route));
+        $("#mobileMenu").classList.remove("open");
+        window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+        animateView(target);
+      }
+
+      function setTool(name) {
+        currentTool = name;
+        $("#workspaceTitle").textContent = name;
+        $("#runTool").textContent = toolActions[name] || "开始处理";
+        $("#processState").textContent = "准备处理";
+        $("#processDetail").textContent = "调整右侧参数，然后运行当前工具。";
+        $("#progressFill").style.width = "0%";
+        $("#resultBox").textContent = "尚未生成结果。点击底部按钮运行当前工具。";
+        $$(".work-tool").forEach(button => button.classList.toggle("active", button.dataset.workTool === name));
+        setRoute("workbench");
+      }
+
+      $$("[data-route]").forEach(button => button.addEventListener("click", () => setRoute(button.dataset.route)));
+      $$("[data-open-tool]").forEach(button => button.addEventListener("click", () => setTool(button.dataset.openTool)));
+      $$("[data-work-tool]").forEach(button => button.addEventListener("click", () => setTool(button.dataset.workTool)));
+
+      $("#mobileMenuButton").addEventListener("click", () => $("#mobileMenu").classList.toggle("open"));
+      $("#themeToggle").addEventListener("click", () => {
+        document.body.dataset.theme = document.body.dataset.theme === "light" ? "dark" : "light";
+        showToast(document.body.dataset.theme === "dark" ? "已切换为深色界面" : "已切换为浅色界面");
+      });
+
+      $$(".launch-category").forEach(button => button.addEventListener("click", () => {
+        $$(".launch-category").forEach(item => item.classList.remove("active"));
+        button.classList.add("active");
+        showToast(`已切换到${button.textContent}`);
+      }));
+
+      $("#heroToolSearch").addEventListener("input", event => {
+        const value = event.target.value.trim().toLowerCase();
+        $$(".quick-tool", $("#heroToolList")).forEach(item => {
+          item.hidden = value && !item.textContent.toLowerCase().includes(value);
+        });
+      });
+
+      let activeFilter = "all";
+      function filterCatalog() {
+        const query = $("#catalogSearch").value.trim().toLowerCase();
+        let visible = 0;
+        $$(".catalog-item").forEach(item => {
+          const matchesFilter = activeFilter === "all" || item.dataset.category === activeFilter;
+          const matchesQuery = !query || item.textContent.toLowerCase().includes(query);
+          item.hidden = !(matchesFilter && matchesQuery);
+          if (!item.hidden) visible += 1;
+        });
+        $$(".catalog-group").forEach(group => {
+          const categoryItems = $$(`.catalog-item[data-category="${group.dataset.group}"]`);
+          group.hidden = !categoryItems.some(item => !item.hidden);
+        });
+        $("#catalogEmpty").style.display = visible ? "none" : "block";
+      }
+      $$(".filter-button").forEach(button => button.addEventListener("click", () => {
+        activeFilter = button.dataset.filter;
+        $$(".filter-button").forEach(item => item.classList.toggle("active", item === button));
+        filterCatalog();
+      }));
+      $("#catalogSearch").addEventListener("input", filterCatalog);
+
+      $("#compareRange").addEventListener("input", event => document.documentElement.style.setProperty("--compare", `${event.target.value}%`));
+      $("#qualityRange").addEventListener("input", event => $("#qualityValue").textContent = event.target.value);
+      $$(".segmented").forEach(group => $$("button", group).forEach(button => button.addEventListener("click", () => {
+        $$("button", group).forEach(item => item.classList.remove("active"));
+        button.classList.add("active");
+      })));
+      $$(".switch").forEach(button => button.addEventListener("click", () => button.classList.toggle("on")));
+      $$(".canvas-tools [data-canvas-tool]").forEach(button => button.addEventListener("click", () => {
+        $$(".canvas-tools [data-canvas-tool]").forEach(item => item.classList.remove("active"));
+        button.classList.add("active");
+        showToast(`当前预览工具：${button.dataset.canvasTool}`);
+      }));
+
+      function updateZoom() {
+        $("#zoomValue").textContent = `${zoom}%`;
+        $("#previewFrame").style.transform = `scale(${zoom / 86})`;
+      }
+      $("#zoomIn").addEventListener("click", () => { zoom = Math.min(120, zoom + 5); updateZoom(); });
+      $("#zoomOut").addEventListener("click", () => { zoom = Math.max(55, zoom - 5); updateZoom(); });
+      $("#zoomValue").addEventListener("click", () => { zoom = 86; updateZoom(); });
+
+      $$(".inspector-tab").forEach(button => button.addEventListener("click", () => {
+        $$(".inspector-tab").forEach(item => item.classList.toggle("active", item === button));
+        $$(".inspector-panel").forEach(panel => panel.classList.toggle("active", panel.dataset.panel === button.dataset.inspector));
+      }));
+
+      function openModal(id) {
+        const modal = $(`#${id}`);
+        modal.classList.add("open");
+        if (hasGsap && !reduceMotion) gsap.fromTo($(".modal", modal), { autoAlpha: 0, y: 18, scale: .98 }, { autoAlpha: 1, y: 0, scale: 1, duration: .3, ease: "power3.out" });
+      }
+      function closeModal(id) { $(`#${id}`).classList.remove("open"); }
+      $("#replaceFileButton").addEventListener("click", () => openModal("fileModal"));
+      $$("[data-close-modal]").forEach(button => button.addEventListener("click", () => closeModal(button.dataset.closeModal)));
+      $("#fileModal").addEventListener("click", event => { if (event.target === $("#fileModal")) closeModal("fileModal"); });
+      function loadSample() {
+        $("#fileMeta").textContent = "示例文件：在线工具台截图.png，1440 × 1100";
+        closeModal("fileModal");
+        showToast("示例文件已载入");
+      }
+      $("#loadSample").addEventListener("click", loadSample);
+      $("#chooseSample").addEventListener("click", loadSample);
+
+      $("#resetButton").addEventListener("click", () => {
+        $("#qualityRange").value = 82;
+        $("#qualityValue").textContent = "82";
+        $("#compareRange").value = 54;
+        document.documentElement.style.setProperty("--compare", "54%");
+        zoom = 86;
+        updateZoom();
+        showToast("参数已重置");
+      });
+
+      $("#runTool").addEventListener("click", () => {
+        const runButton = $("#runTool");
+        runButton.disabled = true;
+        $("#processState").textContent = "正在处理";
+        $("#processDetail").textContent = `${currentTool}正在浏览器本地运行。`;
+        $("#progressFill").style.width = "12%";
+        const line = $("#scanLine");
+        if (hasGsap && !reduceMotion) {
+          gsap.set(line, { autoAlpha: 1, top: "8%" });
+          gsap.to(line, { top: "91%", duration: 1.05, ease: "power1.inOut", onComplete: () => gsap.set(line, { autoAlpha: 0 }) });
+        }
+        let progress = 12;
+        const timer = setInterval(() => {
+          progress = Math.min(100, progress + 17);
+          $("#progressFill").style.width = `${progress}%`;
+          if (progress >= 100) {
+            clearInterval(timer);
+            runButton.disabled = false;
+            $("#processState").textContent = "处理完成";
+            $("#processDetail").textContent = "示例结果已经生成，可在右侧结果页签查看。";
+            $("#resultBox").textContent = `${currentTool}已完成。审阅稿展示的是交互反馈，不会生成真实文件。`;
+            $$(".inspector-tab").forEach(item => item.classList.toggle("active", item.dataset.inspector === "result"));
+            $$(".inspector-panel").forEach(panel => panel.classList.toggle("active", panel.dataset.panel === "result"));
+            showToast("处理完成");
+          }
+        }, 150);
+      });
+
+      $("#copyResult").addEventListener("click", () => showToast("示例结果已复制"));
+      $("#downloadResult").addEventListener("click", () => showToast("审阅稿不会下载真实文件"));
+      $$("[data-download]").forEach(button => button.addEventListener("click", () => showToast(`${button.dataset.download}下载入口已触发，审阅稿不会下载文件`)));
+
+      $$(".reading-nav button").forEach(button => button.addEventListener("click", () => {
+        $$(".reading-nav button").forEach(item => item.classList.toggle("active", item === button));
+        $$(".article").forEach(article => article.classList.toggle("active", article.dataset.articlePanel === button.dataset.article));
+        if (hasGsap && !reduceMotion) gsap.fromTo($(`.article[data-article-panel="${button.dataset.article}"]`), { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: .32 });
+      }));
+
+      if (hasGsap && !reduceMotion) {
+        gsap.timeline({ defaults: { duration: .62, ease: "power3.out" } })
+          .from(".site-header", { y: -20, autoAlpha: 0 })
+          .from(".hero-animate", { y: 24, autoAlpha: 0, stagger: .07 }, "-=.36")
+          .from(".product-window", { y: 28, rotation: 0, autoAlpha: 0 }, "-=.52")
+          .from(".float-note", { x: 18, autoAlpha: 0 }, "-=.3");
+        const observer = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            gsap.fromTo(entry.target, { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: .7, ease: "power3.out" });
+            observer.unobserve(entry.target);
+          });
+        }, { threshold: .16 });
+        $$(".reveal").forEach(item => observer.observe(item));
+      }
+    })();
+  </script>
+</body>
+</html>

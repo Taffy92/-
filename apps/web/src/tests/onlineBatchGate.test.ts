@@ -3,6 +3,8 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 
 const toolsClientSource = readFileSync(path.join(process.cwd(), "src/components/tools/ToolsClient.tsx"), "utf8");
+const toolCatalogSource = readFileSync(path.join(process.cwd(), "src/config/toolCatalog.ts"), "utf8");
+const headerSource = readFileSync(path.join(process.cwd(), "src/components/layout/Header.tsx"), "utf8");
 const mediaCoreSource = readFileSync(path.join(process.cwd(), "../../packages/media-core/src/index.ts"), "utf8");
 
 describe("online audio/video and batch professional gate", () => {
@@ -20,20 +22,19 @@ describe("online audio/video and batch professional gate", () => {
       toolsClientSource.indexOf("const webTabs"),
       toolsClientSource.indexOf("const desktopTabs")
     );
-    const onlineNavBlock = toolsClientSource.slice(
-      toolsClientSource.indexOf("const onlineNavSections"),
-      toolsClientSource.indexOf("const workbenchCapabilities")
-    );
-
     expect(webTabsBlock).not.toContain('id: "batch-gate"');
     expect(webTabsBlock).not.toContain('id: "download"');
-    expect(onlineNavBlock).not.toContain("离线与批量");
-    expect(onlineNavBlock).not.toContain("批量处理");
-    expect(onlineNavBlock).not.toContain("下载离线版");
     expect(toolsClientSource).not.toContain('data-testid="online-batch-gate"');
-    expect(toolsClientSource).toContain("使用教程");
-    expect(toolsClientSource).toContain("更新日志");
-    expect(toolsClientSource).toContain("下载专业版");
+    expect(toolCatalogSource).toContain("export const unifiedToolCategories");
+    expect(toolCatalogSource).toContain('id: "image"');
+    expect(toolCatalogSource).toContain('id: "pdf"');
+    expect(toolCatalogSource).toContain('id: "document"');
+    expect(toolCatalogSource).toContain('id: "media"');
+    expect(toolCatalogSource).toContain('id: "ocr"');
+    expect(headerSource).toContain("在线工具");
+    expect(headerSource).toContain("使用教程");
+    expect(headerSource).toContain("离线版");
+    expect(headerSource).not.toContain("增强工具");
     expect(toolsClientSource).toContain("文件本地处理，广告与转换数据隔离。");
   });
 

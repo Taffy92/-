@@ -70,7 +70,7 @@
         "icons/icon.png"
       ],
       "identifier": "com.mrxie.formatconverter",
-      "longDescription": "万能格式转换器离线专业版由 MR.谢 开发，支持图片格式与元数据处理、PDF 创建合并拆分与页面管理、Word 和 Excel 转图片、音视频格式转换与裁剪、视频截图与 GIF、音频增强，以及图片和 PDF 本地 OCR 等能力。所有用户文件仅在本机处理，不上传服务器，不调用云端转换 API。",
+      "longDescription": "万能格式转换器离线专业版由 MR.谢 开发，支持图片格式与元数据处理、PDF 创建合并拆分与页面管理、Word 和 Excel 转图片、音视频格式转换与裁剪、视频截图与 GIF、音频编辑，以及图片和 PDF 本地 OCR 等能力。所有用户文件仅在本机处理，不上传服务器，不调用云端转换 API。",
       "publisher": "MR.谢",
       "resources": [
         "resources/ffmpeg"

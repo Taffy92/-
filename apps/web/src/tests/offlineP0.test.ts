@@ -120,14 +120,22 @@ describe("offline P0 release checks", () => {
     const toolsClientPath = resolve(projectRoot, "apps", "web", "src", "components", "tools", "ToolsClient.tsx");
     const source = readFileSync(toolsClientPath, "utf8");
     const actionBarBlock = source.slice(
-      source.indexOf('className="desktop-compact-actions"'),
-      source.indexOf('<section className="desktop-file-workspace"')
+      source.indexOf('className="desktop-a-title-actions"'),
+      source.indexOf('<div className="desktop-a-output">')
+    );
+    const pickerBlock = source.slice(
+      source.indexOf('ref={inputRef}'),
+      source.indexOf('<header className="desktop-a-titlebar">')
     );
 
     expect(source).toContain("function clearAllLocalTasks");
-    expect(source).toContain("if (isDesktopSurface && tabId !== activeTab) clearAllLocalTasks");
-    expect(actionBarBlock).toContain("清空任务");
-    expect(actionBarBlock.indexOf("清空任务")).toBeLessThan(actionBarBlock.indexOf("输出目录"));
+    expect(actionBarBlock).toContain("添加文件");
+    expect(actionBarBlock).toContain("添加文件夹");
+    expect(actionBarBlock).toContain("清空");
+    expect(actionBarBlock.indexOf("添加文件")).toBeLessThan(actionBarBlock.indexOf("清空"));
+    expect(pickerBlock).toContain("multiple");
+    expect(pickerBlock).toContain("folderInputRef");
+    expect(pickerBlock).toContain("webkitdirectory");
   });
 
   it("keeps generated desktop media results previewable", () => {
@@ -165,12 +173,8 @@ describe("offline P0 release checks", () => {
     const source = readFileSync(toolsClientPath, "utf8");
     const globals = readFileSync(globalsPath, "utf8");
     const homeSource = readFileSync(homePagePath, "utf8");
-    const actionBarBlock = source.slice(
-      source.indexOf('className="desktop-compact-actions"'),
-      source.indexOf('<section className="desktop-file-workspace"')
-    );
-    const desktopBranchStart = source.indexOf('className="desktop-replica desktop-compact-frame"');
-    const desktopBranch = source.slice(desktopBranchStart, source.indexOf('className="office-workbench apple-workbench-page"', desktopBranchStart));
+    const desktopBranchStart = source.indexOf('className="desktop-a-shell"');
+    const desktopBranch = source.slice(desktopBranchStart, source.indexOf('className="a2-online-tools"', desktopBranchStart));
 
     expect(source).not.toContain("启动本地编译");
     expect(source).not.toContain("当前文件预览");
@@ -181,36 +185,37 @@ describe("offline P0 release checks", () => {
     expect(source).not.toContain("本地任务");
     expect(source).not.toContain("DesktopBatchTaskRow");
     expect(source).not.toContain("DesktopEmptyQueue");
-    expect(source).toContain("desktop-file-workspace");
-    expect(source).toContain("desktop-file-stage-preview");
+    expect(source).toContain("desktop-a-task-canvas");
+    expect(source).toContain("desktop-a-preview-area");
     expect(source).toContain("desktop-file-pick-cta");
     expect(source).toContain("desktop-preview-file-name");
     expect(source).toContain("DesktopTiledPreview");
     expect(source).toContain('aria-label="多文件缩略图预览"');
     expect(source).toContain("renderPdfPageToBlob(task.file, 1");
-    expect(actionBarBlock).not.toContain("inputRef.current?.click()");
-    expect(actionBarBlock).not.toContain("importFolder()");
-    expect(desktopBranch).not.toContain("folderInputRef");
-    expect(desktopBranch).not.toContain("webkitdirectory");
+    expect(desktopBranch).toContain("folderInputRef");
+    expect(desktopBranch).toContain("webkitdirectory");
+    expect(desktopBranch).toContain("importFolder()");
     expect(desktopBranch).not.toContain("onDragOver");
     expect(desktopBranch).not.toContain("onDrop");
     expect(desktopBranch).toMatch(/ref=\{inputRef\}[\s\S]*?multiple[\s\S]*?onChange/);
-    expect(globals).toContain("--desktop-bg: #f5f5f7");
+    expect(globals).toContain("--desktop-page: #f3f5f7");
     expect(globals).toContain("color-scheme: light");
     expect(globals).toContain(".desktop-tile-preview-grid");
     expect(globals).toContain(".desktop-file-pick-cta");
-    expect(globals).toContain("width: 300px");
-    expect(globals).toContain("height: 64px");
-    expect(globals).toContain("font-weight: 900");
+    expect(globals).toContain(".desktop-a-statusbar");
+    expect(globals).toContain("grid-template-columns: 184px minmax(0, 1fr) 286px");
     expect(globals).toContain(".desktop-preview-file-name");
     expect(globals).not.toContain(".desktop-compact-table-shell");
     expect(globals).not.toContain(".desktop-file-stage-header");
     const footerBlock = source.slice(
-      source.indexOf('<footer className="desktop-compact-footer">'),
-      source.indexOf("</footer>", source.indexOf('<footer className="desktop-compact-footer">'))
+      source.indexOf('<footer className="desktop-a-statusbar"'),
+      source.indexOf("</footer>", source.indexOf('<footer className="desktop-a-statusbar"'))
     );
-    expect(footerBlock).toContain("本地运行，保护隐私安全");
-    expect(footerBlock).toContain("开发者：MR.谢");
+    expect(footerBlock).toContain("总进度");
+    expect(footerBlock).toContain("成功");
+    expect(footerBlock).toContain("失败");
+    expect(footerBlock).toContain("等待");
+    expect(footerBlock).toContain("打开输出目录");
     expect(footerBlock).not.toContain("更新日志");
     expect(footerBlock).not.toContain("使用教程");
     expect(source).toContain("viewMode: 2");

@@ -12,16 +12,43 @@ type SupportDialogProps = {
 
 export function SupportDialog({ open, onClose, desktop = false }: SupportDialogProps) {
   const closeRef = useRef<HTMLButtonElement | null>(null);
+  const dialogRef = useRef<HTMLElement | null>(null);
   const [copied, setCopied] = useState<"wechat" | "email" | "">("");
 
   useEffect(() => {
     if (!open) return;
-    closeRef.current?.focus();
+    const previous = document.activeElement as HTMLElement | null;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = Array.from(
+        dialogRef.current?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        ) || []
+      );
+      if (!focusable.length) {
+        event.preventDefault();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
+    window.requestAnimationFrame(() => closeRef.current?.focus());
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      previous?.focus();
+    };
   }, [onClose, open]);
 
   if (!open) return null;
@@ -45,6 +72,7 @@ export function SupportDialog({ open, onClose, desktop = false }: SupportDialogP
       }}
     >
       <section
+        ref={dialogRef}
         className="support-dialog"
         role="dialog"
         aria-modal="true"

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
 import {
   Download,
   ChevronDown,
@@ -9,14 +9,14 @@ import {
   FileAudio,
   FileImage,
   FileText,
-  FolderOpen,
+  Grid2X2,
+  HardDrive,
   HeartHandshake,
   Loader2,
   Play,
   ShieldCheck,
   Square,
-  Trash2,
-  Video
+  Trash2
 } from "lucide-react";
 import {
   convertImage,
@@ -69,7 +69,12 @@ import {
 } from "@doctool/shared";
 import type { ExportImageFormat } from "@doctool/shared";
 import { isDesktopApp } from "@/config/appMode";
+import { currentReleaseVersion } from "@/config/version";
+import { MatrixLogo } from "@/components/layout/MatrixLogo";
 import { SupportDialog } from "@/components/support/SupportDialog";
+import { UnifiedCategoryRail, UnifiedDesktopSidebar, UnifiedToolDialog } from "@/components/tools/UnifiedToolCatalog";
+import { getUnifiedToolCategory } from "@/config/toolCatalog";
+import type { DesktopLicenseStatus } from "@/lib/desktopLicense";
 
 type LocalToolId =
   | "image-convert"
@@ -122,14 +127,27 @@ const tools: Array<{
   { id: "video-mute", group: "音视频工具", label: "视频静音", description: "移除全部音轨并保留视频画面" },
   { id: "video-frame", group: "音视频工具", label: "视频截图", description: "从指定时间点导出 JPG、PNG 或 WebP" },
   { id: "video-gif", group: "音视频工具", label: "视频转 GIF", description: "设置起止时间、宽度和帧率" },
-  { id: "audio-enhance", group: "音视频工具", label: "音频增强", description: "裁剪、顺序拼接、音量和淡入淡出" },
+  { id: "audio-enhance", group: "音视频工具", label: "音频编辑", description: "裁剪、顺序拼接、音量和淡入淡出" },
   { id: "ocr", group: "OCR 工具", label: "图片 / PDF 文字识别", description: "中文、英文、中英混合，导出 TXT 或 Word" }
 ];
 
-const groupedTools = Array.from(new Set(tools.map((tool) => tool.group))).map((group) => ({
-  group,
-  items: tools.filter((tool) => tool.group === group)
-}));
+type DesktopLicenseGateComponent = ComponentType<{
+  status: DesktopLicenseStatus;
+  onStatusChange: (status: DesktopLicenseStatus) => void;
+}>;
+
+const desktopBuildMode = process.env.NEXT_PUBLIC_APP_MODE === "desktop";
+
+async function loadDesktopLicenseApi() {
+  if (!desktopBuildMode) return null;
+  return import("@/lib/desktopLicense");
+}
+
+async function loadLicenseGateComponent(): Promise<DesktopLicenseGateComponent | null> {
+  if (!desktopBuildMode) return null;
+  const mod = await import("@/components/tools/LicenseGate");
+  return mod.LicenseGate;
+}
 
 export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { surface?: "desktop" | "web" }) {
   const desktop = surface === "desktop";
@@ -146,6 +164,10 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
   const [metadata, setMetadata] = useState<ImageMetadataSummary | null>(null);
   const [mediaDuration, setMediaDuration] = useState(0);
   const [supportOpen, setSupportOpen] = useState(false);
+  const [catalogOpen, setCatalogOpen] = useState(false);
+  const [desktopLicenseStatus, setDesktopLicenseStatus] = useState<DesktopLicenseStatus | null>(null);
+  const [desktopLicenseLoading, setDesktopLicenseLoading] = useState(false);
+  const [desktopLicenseGate, setDesktopLicenseGate] = useState<DesktopLicenseGateComponent | null>(null);
 
   const [imageFormat, setImageFormat] = useState<ExportImageFormat>("jpg");
   const [imageQuality, setImageQuality] = useState(90);
@@ -187,6 +209,51 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
   const [fadeOut, setFadeOut] = useState(0);
   const [ocrLanguage, setOcrLanguage] = useState<OcrLanguage>("chi_sim+eng");
   const [ocrExport, setOcrExport] = useState<"txt" | "editable-word" | "image-word">("txt");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const requestedTool = params.get("tool") as LocalToolId | null;
+    if (requestedTool && tools.some((item) => item.id === requestedTool)) setTool(requestedTool);
+    if (params.get("catalog") === "1") setCatalogOpen(true);
+  }, []);
+
+  useEffect(() => {
+    if (!desktop) {
+      setDesktopLicenseStatus(null);
+      setDesktopLicenseLoading(false);
+      setDesktopLicenseGate(null);
+      return;
+    }
+
+    let cancelled = false;
+    setDesktopLicenseLoading(true);
+    void (async () => {
+      try {
+        const api = await loadDesktopLicenseApi();
+        const Gate = await loadLicenseGateComponent();
+        if (cancelled) return;
+        if (!api || !Gate || !api.hasDesktopLicenseApi()) {
+          setDesktopLicenseStatus(null);
+          setDesktopLicenseGate(null);
+          return;
+        }
+        setDesktopLicenseGate(() => Gate);
+        const nextStatus = await api.getDesktopLicenseStatus();
+        if (!cancelled) setDesktopLicenseStatus(nextStatus);
+      } catch {
+        if (!cancelled) {
+          setDesktopLicenseStatus(null);
+          setDesktopLicenseGate(null);
+        }
+      } finally {
+        if (!cancelled) setDesktopLicenseLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [desktop]);
 
   const currentTool = useMemo(() => tools.find((item) => item.id === tool) || tools[0], [tool]);
   const multiple = supportsMultipleFiles(tool, desktop, audioMode);
@@ -272,6 +339,14 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
     setError("");
     setOutputs([]);
     try {
+      if (desktop) {
+        const api = await loadDesktopLicenseApi();
+        if (api?.hasDesktopLicenseApi()) {
+          const nextStatus = await api.getDesktopLicenseStatus();
+          setDesktopLicenseStatus(nextStatus);
+          if (!nextStatus.allowed) throw new Error(nextStatus.reason || "当前授权状态不可用。");
+        }
+      }
       const nextOutputs = await executeTool(controller.signal);
       const saved = desktop && nextOutputs.length
         ? await saveDesktopOutputs(nextOutputs, outputRoot)
@@ -539,209 +614,272 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
     setMessage("等待选择文件");
   }
 
+  const toolControls = (
+    <ToolControls
+      tool={tool}
+      imageFormat={imageFormat} setImageFormat={setImageFormat}
+      imageQuality={imageQuality} setImageQuality={setImageQuality}
+      rotation={rotation} setRotation={setRotation}
+      flipHorizontal={flipHorizontal} setFlipHorizontal={setFlipHorizontal}
+      flipVertical={flipVertical} setFlipVertical={setFlipVertical}
+      pdfPageMode={pdfPageMode} setPdfPageMode={setPdfPageMode}
+      pageSelection={pageSelection} setPageSelection={setPageSelection}
+      pdfSplitMode={pdfSplitMode} setPdfSplitMode={setPdfSplitMode}
+      pageOrder={pageOrder} setPageOrder={setPageOrder}
+      rotatePages={rotatePages} setRotatePages={setRotatePages}
+      pdfRotation={pdfRotation} setPdfRotation={setPdfRotation}
+      watermarkText={watermarkText} setWatermarkText={setWatermarkText}
+      watermarkKind={watermarkKind} setWatermarkKind={setWatermarkKind}
+      watermarkImage={watermarkImage} setWatermarkImage={setWatermarkImage}
+      watermarkPosition={watermarkPosition} setWatermarkPosition={setWatermarkPosition}
+      watermarkRotation={watermarkRotation} setWatermarkRotation={setWatermarkRotation}
+      watermarkScale={watermarkScale} setWatermarkScale={setWatermarkScale}
+      watermarkColor={watermarkColor} setWatermarkColor={setWatermarkColor}
+      watermarkOpacity={watermarkOpacity} setWatermarkOpacity={setWatermarkOpacity}
+      watermarkSize={watermarkSize} setWatermarkSize={setWatermarkSize}
+      pageNumberEnabled={pageNumberEnabled} setPageNumberEnabled={setPageNumberEnabled}
+      pageNumberPosition={pageNumberPosition} setPageNumberPosition={setPageNumberPosition}
+      headerText={headerText} setHeaderText={setHeaderText}
+      footerText={footerText} setFooterText={setFooterText}
+      startTime={startTime} setStartTime={setStartTime}
+      endTime={endTime} setEndTime={setEndTime}
+      mediaDuration={mediaDuration}
+      trimMode={trimMode} setTrimMode={setTrimMode}
+      videoFormat={videoFormat} setVideoFormat={setVideoFormat}
+      audioFormat={audioFormat} setAudioFormat={setAudioFormat}
+      frameFormat={frameFormat} setFrameFormat={setFrameFormat}
+      frameBatch={frameBatch} setFrameBatch={setFrameBatch}
+      frameInterval={frameInterval} setFrameInterval={setFrameInterval}
+      gifWidth={gifWidth} setGifWidth={setGifWidth}
+      gifFps={gifFps} setGifFps={setGifFps}
+      audioMode={audioMode} setAudioMode={setAudioMode}
+      volume={volume} setVolume={setVolume}
+      fadeIn={fadeIn} setFadeIn={setFadeIn}
+      fadeOut={fadeOut} setFadeOut={setFadeOut}
+      ocrLanguage={ocrLanguage} setOcrLanguage={setOcrLanguage}
+      ocrExport={ocrExport} setOcrExport={setOcrExport}
+      desktop={desktop}
+    />
+  );
+
+  if (desktop && desktopLicenseLoading) {
+    return (
+      <main className="desktop-a-license-loading">
+        <Loader2 className="animate-spin" aria-hidden="true" size={20} />
+        正在检查授权状态…
+      </main>
+    );
+  }
+
+  if (desktop && desktopLicenseStatus && !desktopLicenseStatus.allowed) {
+    if (!desktopLicenseGate) {
+      return (
+        <main className="desktop-a-license-loading">
+          <Loader2 className="animate-spin" aria-hidden="true" size={20} />
+          正在加载激活面板…
+        </main>
+      );
+    }
+    const LicenseGateComponent = desktopLicenseGate;
+    return <LicenseGateComponent status={desktopLicenseStatus} onStatusChange={setDesktopLicenseStatus} />;
+  }
+
+  if (desktop) {
+    return (
+      <>
+        <main className="desktop-a-shell desktop-a-local-tools">
+          <input
+            ref={inputRef}
+            className="hidden"
+            type="file"
+            accept={accept}
+            multiple={multiple}
+            onChange={(event) => {
+              void handleFiles(event.currentTarget.files);
+              event.currentTarget.value = "";
+            }}
+          />
+          <header className="desktop-a-titlebar">
+            <div className="desktop-a-brand">
+              <MatrixLogo />
+              <div>
+                <strong>万能格式转换器</strong>
+                <span>离线专业版 · v{currentReleaseVersion} · 本地处理</span>
+              </div>
+            </div>
+            <div className="desktop-a-title-actions">
+              <button className="primary" type="button" onClick={() => inputRef.current?.click()}>添加文件</button>
+              <button type="button" onClick={clear}>清空</button>
+              <button className="desktop-a-current-tool" type="button" onClick={() => setCatalogOpen(true)}>
+                {getUnifiedToolCategory(tool)?.label} / {currentTool.label}
+              </button>
+            </div>
+            <div className="desktop-a-output">
+              <span title={outputRoot || "尚未选择输出目录"}>输出到：{outputRoot || "请选择输出目录"}</span>
+              <button type="button" onClick={() => void selectOutputFolder()}>浏览</button>
+              <button className="primary" type="button" disabled={!files.length || status === "running"} onClick={() => void run()}>
+                {status === "running" ? <Loader2 className="animate-spin" aria-hidden="true" size={15} /> : <Play aria-hidden="true" size={15} />}
+                开始处理
+              </button>
+              <button className="danger" type="button" disabled={status !== "running"} onClick={cancel}>
+                <Square aria-hidden="true" size={14} />停止
+              </button>
+            </div>
+          </header>
+
+          <div className="desktop-a-body">
+            <UnifiedDesktopSidebar currentToolId={tool} onOpenCatalog={() => setCatalogOpen(true)} />
+            <section className="desktop-a-task-canvas">
+              <header>
+                <div>
+                  <h1>任务画布{files.length ? `（${files.length}）` : ""}</h1>
+                  <p>{currentTool.label} · {currentTool.description}</p>
+                </div>
+                <button type="button" onClick={() => inputRef.current?.click()}>添加文件</button>
+              </header>
+              <div className="desktop-a-local-canvas">
+                {files.length ? (
+                  <div className="local-toolkit-file-grid" aria-label="已选文件预览">
+                    {files.map((file) => (
+                      <LocalFilePreview file={file} key={`${file.name}-${file.size}-${file.lastModified}`} />
+                    ))}
+                  </div>
+                ) : (
+                  <button className="desktop-a-empty" type="button" onClick={() => inputRef.current?.click()}>
+                    <FileImage aria-hidden="true" size={26} />
+                    <strong>添加要处理的文件</strong>
+                    <span>{multiple ? "可以一次选择多个文件" : "当前工具每次处理一个文件"}</span>
+                  </button>
+                )}
+                {metadata ? <MetadataView metadata={metadata} /> : null}
+                <OutputList outputs={outputs} />
+              </div>
+            </section>
+            <aside className="desktop-a-inspector">
+              <header>
+                <p>当前工具</p>
+                <h2>{currentTool.label}</h2>
+                <span>{currentTool.description}</span>
+              </header>
+              <div className="desktop-a-control-panel">{toolControls}</div>
+              <div className="desktop-a-output-panel">
+                <label>输出目录</label>
+                <button type="button" title={outputRoot || "尚未选择输出目录"} onClick={() => void selectOutputFolder()}>
+                  <HardDrive aria-hidden="true" size={15} />
+                  <span>{outputRoot || "选择输出目录"}</span>
+                </button>
+              </div>
+              <button className="desktop-a-start" type="button" disabled={!files.length || status === "running"} onClick={() => void run()}>
+                {status === "running" ? <Loader2 className="animate-spin" aria-hidden="true" size={16} /> : <Play aria-hidden="true" size={16} />}
+                {tool === "ocr" ? "开始识别" : "开始处理"}{files.length ? `（${files.length}）` : ""}
+              </button>
+              <button className="desktop-a-support" type="button" onClick={() => setSupportOpen(true)}>
+                <HeartHandshake aria-hidden="true" size={15} />支持作者
+              </button>
+              {error ? <p className="desktop-a-error">处理失败：{error}</p> : null}
+            </aside>
+          </div>
+          <footer className="desktop-a-statusbar" aria-live="polite">
+            <div className="desktop-a-total-progress"><span style={{ width: `${Math.round(progress * 100)}%` }} /></div>
+            <span>总进度 {Math.round(progress * 100)}%</span>
+            <span>{message}</span>
+            <span>任务 {files.length}</span>
+            <span>结果 {outputs.length}</span>
+            <span>本地授权：{desktopLicenseStatus?.mode === "trial" ? "试用中" : "已授权"}</span>
+          </footer>
+        </main>
+        <SupportDialog open={supportOpen} onClose={() => setSupportOpen(false)} desktop />
+        <UnifiedToolDialog open={catalogOpen} currentToolId={tool} desktop onClose={() => setCatalogOpen(false)} />
+      </>
+    );
+  }
+
   return (
     <>
-    <main className={`local-toolkit-shell min-h-screen bg-[#07111d] text-slate-100 ${desktop ? "local-toolkit-desktop pt-0" : "local-toolkit-web"}`}>
-      <section className="local-toolkit-inner mx-auto max-w-[1500px] px-4 py-8 sm:px-6 lg:px-8">
-        <div className="local-toolkit-hero mb-6 flex flex-col gap-4 border border-cyan-300/15 bg-slate-950/75 p-5 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <div className="mb-2 inline-flex items-center gap-2 text-xs font-semibold tracking-[0.18em] text-cyan-300">
-              <ShieldCheck className="h-4 w-4" />
-              LOCAL TOOLKIT 2.0
-            </div>
-            <h1 className="text-2xl font-semibold">新增本地处理工具</h1>
-            <p className="mt-2 text-sm leading-6 text-slate-400">在线版与离线版复用同一套核心。文件、OCR 结果和转换结果不会上传服务器。</p>
-          </div>
-          <div className="local-toolkit-hero-actions">
-            <a className="btn-secondary inline-flex items-center justify-center" href="/tools">返回主工具台</a>
-            <button className="btn-secondary inline-flex items-center justify-center gap-2" type="button" onClick={() => setSupportOpen(true)}>
-              <HeartHandshake className="h-4 w-4" />支持作者
+      <main className="a2-online-tools a2-local-tools-page">
+        <UnifiedCategoryRail currentToolId={tool} />
+        <section className="a2-tool-shell">
+          <div className="a2-mobile-tool-bar">
+            <button type="button" onClick={() => setCatalogOpen(true)}>
+              <span><small>{getUnifiedToolCategory(tool)?.label}</small><strong>{currentTool.label}</strong></span>
+              <Grid2X2 aria-hidden="true" size={17} />
             </button>
           </div>
-        </div>
+          <header className="a2-tool-header">
+            <div>
+              <p>在线工具 / {getUnifiedToolCategory(tool)?.label} / {currentTool.label}</p>
+              <h1>{currentTool.label}</h1>
+              <span>{currentTool.description}。文件只在当前设备处理，不上传服务器。</span>
+            </div>
+            <div className="a2-tool-header-actions">
+              <span className="a2-local-status"><ShieldCheck aria-hidden="true" size={14} />在线 · 本地处理</span>
+              <button type="button" onClick={() => setCatalogOpen(true)}><Grid2X2 aria-hidden="true" size={15} />切换工具</button>
+            </div>
+          </header>
 
-        <div className="local-toolkit-layout grid gap-5 xl:grid-cols-[280px_minmax(0,1fr)_340px]">
-          <aside className="local-toolkit-nav border border-slate-800 bg-slate-950/70 p-3">
-            {groupedTools.map((group) => (
-              <section className="mb-4 last:mb-0" key={group.group}>
-                <p className="mb-2 px-2 text-xs font-semibold tracking-[0.16em] text-slate-500">{group.group}</p>
-                <div className="space-y-1">
-                  {group.items.map((item) => (
-                    <button
-                      key={item.id}
-                      className={`w-full border px-3 py-2.5 text-left transition ${
-                        tool === item.id
-                          ? "border-cyan-300/40 bg-cyan-400/10 text-cyan-50"
-                          : "border-transparent text-slate-300 hover:border-slate-700 hover:bg-slate-900"
-                      }`}
-                      type="button"
-                      onClick={() => setTool(item.id)}
-                    >
-                      <span className="block text-sm font-semibold">{item.label}</span>
-                      <span className="mt-1 block text-xs leading-5 text-slate-500">{item.description}</span>
-                    </button>
+          <div className="a2-workbench">
+            <section className="a2-main-column">
+              <div className="a2-step-heading"><span>1</span><strong>选择文件</strong></div>
+              <input
+                ref={inputRef}
+                className="hidden"
+                type="file"
+                accept={accept}
+                multiple={multiple}
+                onChange={(event) => {
+                  void handleFiles(event.currentTarget.files);
+                  event.currentTarget.value = "";
+                }}
+              />
+              <button className="a2-dropzone" type="button" onClick={() => inputRef.current?.click()}>
+                <FileImage aria-hidden="true" size={22} />
+                <span>
+                  <strong>选择{multiple ? "一个或多个" : "一个"}本地文件</strong>
+                  <small>支持格式：{accept.replaceAll(",", "、")}</small>
+                </span>
+              </button>
+              {files.length ? (
+                <div className="a2-local-file-list">
+                  {files.map((file) => (
+                    <div key={`${file.name}-${file.size}-${file.lastModified}`}>
+                      <span title={file.name}>{file.name}</span>
+                      <small>{formatBytes(file.size)}</small>
+                      {files.length > 1 ? (
+                        <span>
+                          <button type="button" aria-label={`上移 ${file.name}`} disabled={files[0] === file} onClick={() => moveFile(file, -1, files, setFiles)}><ChevronUp size={14} /></button>
+                          <button type="button" aria-label={`下移 ${file.name}`} disabled={files[files.length - 1] === file} onClick={() => moveFile(file, 1, files, setFiles)}><ChevronDown size={14} /></button>
+                        </span>
+                      ) : null}
+                    </div>
                   ))}
                 </div>
-              </section>
-            ))}
-          </aside>
-
-          <section className="local-toolkit-workspace min-w-0 border border-slate-800 bg-slate-950/55 p-5">
-            <div className="flex flex-col gap-3 border-b border-slate-800 pb-5 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <h2 className="text-xl font-semibold">{currentTool.label}</h2>
-                <p className="mt-1 text-sm leading-6 text-slate-400">{currentTool.description}</p>
-              </div>
-              <span className="inline-flex items-center gap-2 text-xs text-emerald-300">
-                <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                本地处理
-              </span>
-            </div>
-
-            <input
-              ref={inputRef}
-              className="hidden"
-              type="file"
-              accept={accept}
-              multiple={multiple}
-              onChange={(event) => {
-                void handleFiles(event.currentTarget.files);
-                event.currentTarget.value = "";
-              }}
-            />
-            <button
-              className="local-toolkit-dropzone mt-5 grid min-h-40 w-full place-items-center border border-dashed border-cyan-300/30 bg-cyan-400/[0.03] p-6 text-center transition hover:border-cyan-300/60 hover:bg-cyan-400/[0.06]"
-              type="button"
-              onClick={() => inputRef.current?.click()}
-            >
-              <span>
-                <FileImage className="mx-auto h-8 w-8 text-cyan-300" />
-                <strong className="mt-3 block">选择{multiple ? "一个或多个" : "一个"}本地文件</strong>
-                <small className="mt-2 block text-slate-500">支持格式：{accept.replaceAll(",", "、")}</small>
-              </span>
-            </button>
-
-            {desktop && files.length ? (
-              <div className="local-toolkit-file-grid" aria-label="已选文件预览">
-                {files.map((file) => (
-                  <LocalFilePreview file={file} key={`${file.name}-${file.size}-${file.lastModified}`} />
-                ))}
-              </div>
-            ) : null}
-
-            {files.length ? (
-              <div className="mt-4 max-h-52 overflow-auto border border-slate-800 bg-slate-950 p-3 text-sm">
-                {files.map((file) => (
-                  <div className="flex items-center justify-between gap-4 border-b border-slate-800/70 py-2 last:border-b-0" key={`${file.name}-${file.size}-${file.lastModified}`}>
-                    <span className="truncate">{file.name}</span>
-                    <span className="flex shrink-0 items-center gap-2">
-                      {files.length > 1 ? (
-                        <>
-                          <button className="border border-slate-700 p-1 text-slate-400 disabled:opacity-30" type="button" aria-label={`上移 ${file.name}`} disabled={files[0] === file} onClick={() => moveFile(file, -1, files, setFiles)}>
-                            <ChevronUp className="h-3.5 w-3.5" />
-                          </button>
-                          <button className="border border-slate-700 p-1 text-slate-400 disabled:opacity-30" type="button" aria-label={`下移 ${file.name}`} disabled={files[files.length - 1] === file} onClick={() => moveFile(file, 1, files, setFiles)}>
-                            <ChevronDown className="h-3.5 w-3.5" />
-                          </button>
-                        </>
-                      ) : null}
-                      <span className="text-xs text-slate-500">{formatBytes(file.size)}</span>
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-
-            {metadata ? <MetadataView metadata={metadata} /> : null}
-
-            <div className={`local-toolkit-status mt-5 border border-slate-800 bg-slate-950/70 p-4 is-${status}`}>
-              <div className="mb-2 flex items-center justify-between gap-3 text-sm">
-                <span>{message}</span>
-                <span>{Math.round(progress * 100)}%</span>
-              </div>
-              <div className="h-2 overflow-hidden bg-slate-800">
-                <div className="h-full bg-cyan-400 transition-[width]" style={{ width: `${Math.round(progress * 100)}%` }} />
-              </div>
-              {error ? <p className="mt-3 text-sm leading-6 text-rose-300">{error}</p> : null}
-            </div>
-
-            <div className="mt-5 flex flex-wrap gap-3">
-              <button className="btn-secondary inline-flex items-center gap-2" type="button" onClick={clear}>
-                <Trash2 className="h-4 w-4" />清空
-              </button>
-              {desktop ? (
-                <button className="btn-secondary inline-flex items-center gap-2" type="button" onClick={() => void selectOutputFolder()}>
-                  <FolderOpen className="h-4 w-4" />输出目录
-                </button>
               ) : null}
-              <button className="btn-secondary inline-flex items-center gap-2" type="button" disabled={status !== "running"} onClick={cancel}>
-                <Square className="h-4 w-4 fill-current" />停止
-              </button>
-              <button className="btn-primary inline-flex items-center gap-2" type="button" disabled={!files.length || status === "running"} onClick={() => void run()}>
-                {status === "running" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4 fill-current" />}
-                {tool === "image-metadata" ? "清除元数据" : tool === "ocr" ? "开始识别" : "开始处理"}
-              </button>
-            </div>
-
-            {outputRoot ? <p className="mt-3 truncate text-xs text-slate-500">离线输出目录：{outputRoot}</p> : null}
-            <OutputList outputs={outputs} />
-          </section>
-
-          <aside className="local-toolkit-inspector border border-slate-800 bg-slate-950/70 p-5">
-            <div className="mb-4 flex items-center gap-2 border-b border-slate-800 pb-4">
-              <FileText className="h-5 w-5 text-cyan-300" />
-              <h2 className="font-semibold">处理参数</h2>
-            </div>
-            <ToolControls
-              tool={tool}
-              imageFormat={imageFormat} setImageFormat={setImageFormat}
-              imageQuality={imageQuality} setImageQuality={setImageQuality}
-              rotation={rotation} setRotation={setRotation}
-              flipHorizontal={flipHorizontal} setFlipHorizontal={setFlipHorizontal}
-              flipVertical={flipVertical} setFlipVertical={setFlipVertical}
-              pdfPageMode={pdfPageMode} setPdfPageMode={setPdfPageMode}
-              pageSelection={pageSelection} setPageSelection={setPageSelection}
-              pdfSplitMode={pdfSplitMode} setPdfSplitMode={setPdfSplitMode}
-              pageOrder={pageOrder} setPageOrder={setPageOrder}
-              rotatePages={rotatePages} setRotatePages={setRotatePages}
-              pdfRotation={pdfRotation} setPdfRotation={setPdfRotation}
-              watermarkText={watermarkText} setWatermarkText={setWatermarkText}
-              watermarkKind={watermarkKind} setWatermarkKind={setWatermarkKind}
-              watermarkImage={watermarkImage} setWatermarkImage={setWatermarkImage}
-              watermarkPosition={watermarkPosition} setWatermarkPosition={setWatermarkPosition}
-              watermarkRotation={watermarkRotation} setWatermarkRotation={setWatermarkRotation}
-              watermarkScale={watermarkScale} setWatermarkScale={setWatermarkScale}
-              watermarkColor={watermarkColor} setWatermarkColor={setWatermarkColor}
-              watermarkOpacity={watermarkOpacity} setWatermarkOpacity={setWatermarkOpacity}
-              watermarkSize={watermarkSize} setWatermarkSize={setWatermarkSize}
-              pageNumberEnabled={pageNumberEnabled} setPageNumberEnabled={setPageNumberEnabled}
-              pageNumberPosition={pageNumberPosition} setPageNumberPosition={setPageNumberPosition}
-              headerText={headerText} setHeaderText={setHeaderText}
-              footerText={footerText} setFooterText={setFooterText}
-              startTime={startTime} setStartTime={setStartTime}
-              endTime={endTime} setEndTime={setEndTime}
-              mediaDuration={mediaDuration}
-              trimMode={trimMode} setTrimMode={setTrimMode}
-              videoFormat={videoFormat} setVideoFormat={setVideoFormat}
-              audioFormat={audioFormat} setAudioFormat={setAudioFormat}
-              frameFormat={frameFormat} setFrameFormat={setFrameFormat}
-              frameBatch={frameBatch} setFrameBatch={setFrameBatch}
-              frameInterval={frameInterval} setFrameInterval={setFrameInterval}
-              gifWidth={gifWidth} setGifWidth={setGifWidth}
-              gifFps={gifFps} setGifFps={setGifFps}
-              audioMode={audioMode} setAudioMode={setAudioMode}
-              volume={volume} setVolume={setVolume}
-              fadeIn={fadeIn} setFadeIn={setFadeIn}
-              fadeOut={fadeOut} setFadeOut={setFadeOut}
-              ocrLanguage={ocrLanguage} setOcrLanguage={setOcrLanguage}
-              ocrExport={ocrExport} setOcrExport={setOcrExport}
-              desktop={desktop}
-            />
-          </aside>
-        </div>
-      </section>
-    </main>
-    <SupportDialog open={supportOpen} onClose={() => setSupportOpen(false)} desktop={desktop} />
+              {metadata ? <MetadataView metadata={metadata} /> : null}
+              <div className="a2-step-heading a2-preview-heading"><span>2</span><strong>处理状态与结果</strong></div>
+              <div className={`a2-task-status is-${status}`} aria-live="polite">
+                <div className="a2-task-status-copy"><div><strong>{message}</strong><span>{error || currentTool.description}</span></div><span>{Math.round(progress * 100)}%</span></div>
+                <div className="a2-progress-track"><span style={{ width: `${Math.round(progress * 100)}%` }} /></div>
+                {error ? <p className="a2-status-error">处理失败：{error}</p> : null}
+                <div className="a2-task-actions">
+                  <button className="a2-button-secondary" type="button" onClick={clear}><Trash2 aria-hidden="true" size={15} />清空</button>
+                  <button className="a2-button-danger" type="button" disabled={status !== "running"} onClick={cancel}><Square aria-hidden="true" size={15} />停止</button>
+                  <button className="a2-button-primary" type="button" disabled={!files.length || status === "running"} onClick={() => void run()}>
+                    {status === "running" ? <Loader2 className="animate-spin" aria-hidden="true" size={16} /> : <Play aria-hidden="true" size={16} />}
+                    {tool === "image-metadata" ? "清除元数据" : tool === "ocr" ? "开始识别" : "开始处理"}
+                  </button>
+                </div>
+              </div>
+              <OutputList outputs={outputs} />
+            </section>
+            <aside className="a2-parameter-panel">
+              <header><p>处理参数</p><h2>{currentTool.label}</h2><span>{currentTool.description}</span></header>
+              <div className="a2-control-panel">{toolControls}</div>
+              <p className="a2-parameter-note"><ShieldCheck aria-hidden="true" size={14} />文件、OCR 内容和结果不会上传服务器。</p>
+            </aside>
+          </div>
+        </section>
+      </main>
+      <UnifiedToolDialog open={catalogOpen} currentToolId={tool} onClose={() => setCatalogOpen(false)} />
     </>
   );
 }

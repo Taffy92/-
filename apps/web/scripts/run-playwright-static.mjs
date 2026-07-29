@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 const appRoot = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const outToolsPage = join(appRoot, "out", "tools", "index.html");
 const host = "127.0.0.1";
-const port = "3010";
+const port = process.env.PLAYWRIGHT_PORT || "43871";
 const baseUrl = `http://${host}:${port}/tools/`;
 const playwrightBin = process.platform === "win32"
   ? join(appRoot, "node_modules", ".bin", "playwright.CMD")
@@ -46,7 +46,7 @@ function runPlaywright() {
   return new Promise((resolveRun) => {
     const child = spawn(playwrightCommand, playwrightArgs, {
       cwd: appRoot,
-      env: { ...process.env, PLAYWRIGHT_SKIP_WEBSERVER: "1" },
+      env: { ...process.env, PLAYWRIGHT_PORT: port, PLAYWRIGHT_SKIP_WEBSERVER: "1" },
       stdio: "inherit"
     });
     child.on("exit", (code) => resolveRun(code ?? 1));

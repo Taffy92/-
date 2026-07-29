@@ -498,7 +498,7 @@ export async function enhanceAudio(file: File, options: AudioEnhanceOptions): Pr
     {
       signal: options.signal,
       onProgress: options.onProgress,
-      loadingMessage: "正在加载本地音频增强核心",
+      loadingMessage: "正在加载本地音频处理核心",
       runningMessage: "正在调整音量和淡入淡出"
     }
   );

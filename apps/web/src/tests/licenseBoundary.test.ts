@@ -52,9 +52,10 @@ describe("offline license boundary", () => {
 
   it("keeps the license gate desktop-only and leaves online tabs unchanged", () => {
     const toolsSource = readProjectFile("apps", "web", "src", "components", "tools", "ToolsClient.tsx");
+    const localToolsSource = readProjectFile("apps", "web", "src", "components", "tools", "LocalToolsClient.tsx");
     const gateSource = readProjectFile("apps", "web", "src", "components", "tools", "LicenseGate.tsx");
 
-    const tabBlock = toolsSource.slice(toolsSource.indexOf("const webTabs"), toolsSource.indexOf("const aspectOptions"));
+    const tabBlock = toolsSource.slice(toolsSource.indexOf("const webTabs"), toolsSource.indexOf("const desktopTabs"));
     expect(tabBlock).toContain('id: "video-convert"');
     expect(tabBlock).toContain('id: "audio-convert"');
     expect(tabBlock).toContain('id: "video-audio"');
@@ -66,6 +67,12 @@ describe("offline license boundary", () => {
     expect(toolsSource).toContain('import("@/lib/desktopLicense")');
     expect(toolsSource).toContain("isDesktopSurface && desktopLicenseStatus && !desktopLicenseStatus.allowed");
     expect(toolsSource).toContain("await ensureDesktopLicenseAllowed()");
+    expect(localToolsSource).toContain('process.env.NEXT_PUBLIC_APP_MODE === "desktop"');
+    expect(localToolsSource).toContain('import("@/components/tools/LicenseGate")');
+    expect(localToolsSource).toContain('import("@/lib/desktopLicense")');
+    expect(localToolsSource).toContain("const nextStatus = await api.getDesktopLicenseStatus()");
+    expect(localToolsSource).toContain("if (!nextStatus.allowed) throw new Error");
+    expect(localToolsSource).toContain("desktop && desktopLicenseStatus && !desktopLicenseStatus.allowed");
     expect(gateSource).toContain("activation_request.mrx");
     expect(gateSource).toContain("license.mrx");
   });

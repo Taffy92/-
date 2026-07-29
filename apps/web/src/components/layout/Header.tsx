@@ -18,15 +18,13 @@ if (typeof window !== "undefined") {
 const webNavItems = [
   { href: siteConfig.links.home, label: "首页" },
   { href: siteConfig.links.tools, label: "在线工具" },
-  { href: siteConfig.links.localTools, label: "增强工具" },
   { href: siteConfig.links.tutorials, label: "使用教程" },
   { href: siteConfig.links.download, label: "离线版" },
   { href: siteConfig.links.about, label: "关于" }
 ] as const;
 
 const desktopNavItems = [
-  { href: siteConfig.links.tools, label: "专业工作台" },
-  { href: siteConfig.links.localTools, label: "增强工具" },
+  { href: siteConfig.links.tools, label: "离线工作台" },
   { href: siteConfig.links.tutorials, label: "使用教程" },
   { href: siteConfig.links.privacy, label: "隐私政策" },
   { href: siteConfig.links.licenses, label: "开源许可证" },
@@ -98,7 +96,6 @@ export function Header({ desktop = isDesktopApp }: { desktop?: boolean }) {
           <MatrixLogo />
           <span className="logo-text truncate">
             <span>{siteConfig.shortName}</span>
-            <span className="logo-tag">PRO</span>
           </span>
           {desktop ? <span className="apple-nav-badge">专业版</span> : null}
         </Link>
@@ -116,7 +113,7 @@ export function Header({ desktop = isDesktopApp }: { desktop?: boolean }) {
           {!desktop ? (
             <button className="nav-support-button" type="button" onClick={() => setSupportOpen(true)}>
               <HeartHandshake size={16} />
-              赞赏支持
+              支持作者
             </button>
           ) : null}
           <button
@@ -147,7 +144,7 @@ export function Header({ desktop = isDesktopApp }: { desktop?: boolean }) {
                   setOpen(false);
                   setSupportOpen(true);
                 }}>
-                  赞赏支持
+                  支持作者
                 </button>
               ) : null}
             </nav>

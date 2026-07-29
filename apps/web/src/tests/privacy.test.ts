@@ -15,7 +15,7 @@ const cloudFunctionSecuritySource = readFileSync(path.join(root, "../../cloudbas
 
 describe("privacy and product boundary checks", () => {
   it("exposes the approved tabs and removes deprecated modules", () => {
-    const tabBlock = toolsSource.slice(toolsSource.indexOf("const webTabs"), toolsSource.indexOf("const aspectOptions"));
+    const tabBlock = toolsSource.slice(toolsSource.indexOf("const webTabs"), toolsSource.indexOf("const cropAspectRatioMap"));
     expect(tabBlock).toContain('id: "video-convert"');
     expect(tabBlock).toContain('id: "audio-convert"');
     expect(tabBlock).toContain('id: "video-audio"');
@@ -66,7 +66,7 @@ describe("privacy and product boundary checks", () => {
 
   it("keeps the desktop titlebar version tied to release configuration", () => {
     expect(toolsSource).toContain('import { currentReleaseVersion } from "@/config/version"');
-    expect(toolsSource).toContain("离线专业版 v{currentReleaseVersion}");
+    expect(toolsSource).toContain("离线专业版 · v{currentReleaseVersion} · 本地处理");
     expect(toolsSource).not.toContain("离线专业版 v1.2.0");
   });
 

@@ -2,6 +2,7 @@ import { expect, type Page, test } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import ExcelJS from "exceljs";
 import JSZip from "jszip";
+import { getUnifiedToolHref, unifiedTools } from "../config/toolCatalog";
 
 test.beforeAll(() => {
   mkdirSync("../../verification", { recursive: true });
@@ -14,10 +15,10 @@ const labels = {
   imageCropLegacy: "\u56fe\u7247\u88c1\u526a",
   localPrivacyCurrent: "\u6587\u4ef6\u53ea\u5728\u5f53\u524d\u8bbe\u5907\u5904\u7406\uff0c\u4e0d\u4e0a\u4f20\u670d\u52a1\u5668\u3002",
   localPrivacyLegacy: "\u6587\u4ef6\u4ec5\u5728\u672c\u5730\u5904\u7406\uff0c\u4e0d\u4e0a\u4f20\u670d\u52a1\u5668",
-  dropzoneCurrent: "\u5c06\u76ee\u6807\u6587\u4ef6\u62d6\u62fd\u5230\u6b64\u533a\u57df\uff0c\u6216\u70b9\u51fb\u8f7d\u5165\u672c\u5730\u8d44\u6e90",
+  dropzoneCurrent: "\u62d6\u653e\u6587\u4ef6\u5230\u8fd9\u91cc\uff0c\u6216\u70b9\u51fb\u9009\u62e9\u6587\u4ef6",
   dropzoneLegacy: "\u5c06\u6587\u4ef6\u62d6\u62fd\u5230\u6b64\u5904\uff0c\u6216\u70b9\u51fb\u4e0a\u4f20",
-  start: "\u5f00\u59cb",
-  stop: "\u7ec8\u6b62|\u505c\u6b62",
+  start: "\u5f00\u59cb\u8f6c\u6362",
+  stop: "\u505c\u6b62",
   downloadHeading: "\u4e0b\u8f7d\u79bb\u7ebf\u5b89\u88c5\u7248",
   trialDownloadCopy: "\u79bb\u7ebf\u4e13\u4e1a\u7248\u73b0\u5728\u53ef\u4ee5\u76f4\u63a5\u4e0b\u8f7d\u8bd5\u7528",
   trialRunCopy: "\u8f6f\u4ef6\u9996\u6b21\u8fd0\u884c\u540e\u81ea\u52a8\u5f00\u542f\u672c\u673a 3 \u5929\u8bd5\u7528",
@@ -43,14 +44,11 @@ for (const viewport of viewports) {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.goto("/tools/", { waitUntil: "domcontentloaded" });
 
-    await expandSectionIfPresent(page, labels.imageTools);
     await expect(page.locator("h1").first()).toContainText(labels.imageCrop);
     await expect(page.locator("#lbl-panel-main-desc")).toContainText(
       new RegExp(`${labels.localPrivacyCurrent}|${labels.localPrivacyLegacy}`)
     );
-    await expect(page.locator('button[aria-pressed="true"]').first()).toContainText(
-      new RegExp(`${labels.imageCrop}|${labels.imageCropLegacy}`)
-    );
+    await expect(page.locator(".unified-category-rail a.active")).toContainText(labels.imageTools);
     await expect(page.getByText(new RegExp(`${labels.dropzoneCurrent}|${labels.dropzoneLegacy}`)).first()).toBeVisible();
     await expect(page.getByRole("button", { name: new RegExp(labels.start) }).first()).toBeVisible();
     await expect(page.getByRole("button", { name: new RegExp(labels.stop) }).first()).toBeVisible();
@@ -73,6 +71,80 @@ test("home page renders the homepage ad slot", async ({ page }) => {
   await expect(page.locator('script[src*="googlesyndication"], script[src*="doubleclick"]')).toHaveCount(0);
 });
 
+test("all 24 unified tools open their implemented workbench without browser errors", async ({ page }) => {
+  const browserErrors: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") browserErrors.push(message.text());
+  });
+  page.on("pageerror", (error) => browserErrors.push(error.message));
+
+  for (const tool of unifiedTools) {
+    await page.goto(getUnifiedToolHref(tool), { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { level: 1, name: tool.label })).toBeVisible();
+  }
+
+  expect(unifiedTools).toHaveLength(24);
+  expect(browserErrors).toEqual([]);
+});
+
+test("primary pages expose named controls and keyboard-contained dialogs", async ({ page }) => {
+  for (const path of ["/", "/tools/", "/local-tools/"]) {
+    await page.goto(path, { waitUntil: "domcontentloaded" });
+    const accessibilityProblems = await page.locator("body").evaluate(() => {
+      const visible = (element: Element) => {
+        const style = window.getComputedStyle(element);
+        const rect = element.getBoundingClientRect();
+        return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
+      };
+      const unnamedControls = Array.from(
+        document.querySelectorAll<HTMLElement>("button, a[href], input, select, textarea")
+      ).filter((element) => {
+        if (!visible(element)) return false;
+        if (element.getAttribute("aria-label") || element.getAttribute("aria-labelledby") || element.getAttribute("title")) return false;
+        if (element.textContent?.trim()) return false;
+        return !("labels" in element) || !(element as HTMLInputElement).labels?.length;
+      });
+      const imagesWithoutAlt = Array.from(document.querySelectorAll("img")).filter(
+        (image) => visible(image) && !image.hasAttribute("alt")
+      );
+      const ids = Array.from(document.querySelectorAll<HTMLElement>("[id]")).map((element) => element.id);
+      const duplicateIds = ids.filter((id, index) => ids.indexOf(id) !== index);
+      return {
+        duplicateIds,
+        imagesWithoutAlt: imagesWithoutAlt.map((image) => image.outerHTML),
+        unnamedControls: unnamedControls.map((element) => element.outerHTML)
+      };
+    });
+    expect(accessibilityProblems).toEqual({
+      duplicateIds: [],
+      imagesWithoutAlt: [],
+      unnamedControls: []
+    });
+  }
+
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const supportTrigger = page.getByRole("button", { name: "支持作者" });
+  await supportTrigger.click();
+  const supportDialog = page.getByRole("dialog", { name: "支持作者" });
+  await expect(page.getByRole("button", { name: "关闭支持作者弹窗" })).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  expect(await supportDialog.evaluate((dialog) => dialog.contains(document.activeElement))).toBe(true);
+  await page.keyboard.press("Escape");
+  await expect(supportDialog).toBeHidden();
+  await expect(supportTrigger).toBeFocused();
+
+  await page.goto("/tools/", { waitUntil: "domcontentloaded" });
+  const catalogTrigger = page.getByRole("button", { name: "切换工具" });
+  await catalogTrigger.click();
+  const catalogDialog = page.getByRole("dialog", { name: "按实际任务选择工具" });
+  await expect(page.getByRole("button", { name: "关闭工具目录" })).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  expect(await catalogDialog.evaluate((dialog) => dialog.contains(document.activeElement))).toBe(true);
+  await page.keyboard.press("Escape");
+  await expect(catalogDialog).toBeHidden();
+  await expect(catalogTrigger).toBeFocused();
+});
+
 for (const viewport of [
   { name: "mobile-375", width: 375, height: 812 },
   { name: "desktop-1440", width: 1440, height: 960 }
@@ -81,11 +153,11 @@ for (const viewport of [
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.goto("/", { waitUntil: "domcontentloaded" });
 
-    await expect(page.getByRole("heading", { name: /处理文件/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "文件转换，留在本机。" })).toBeVisible();
     if (viewport.width < 800) {
       await page.getByRole("button", { name: "打开导航菜单" }).click();
     }
-    await page.getByRole("button", { name: "赞赏支持" }).click();
+    await page.getByRole("button", { name: "支持作者" }).click();
     await expect(page.getByRole("dialog", { name: "支持作者" })).toBeVisible();
     await expect(page.getByText("___Skyblue", { exact: true })).toBeVisible();
     await expect(page.getByText("370298218@qq.com", { exact: true })).toBeVisible();
@@ -102,13 +174,14 @@ for (const viewport of [
   });
 }
 
-test("enhanced tools page keeps the three-part workbench usable", async ({ page }) => {
+test("local processing tools use the same unified workbench", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 960 });
   await page.goto("/local-tools/", { waitUntil: "domcontentloaded" });
 
-  await expect(page.getByRole("heading", { name: "新增本地处理工具" })).toBeVisible();
-  await expect(page.getByRole("button", { name: /选择一个本地文件/ })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "处理参数" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "图片格式转换" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /选择一个(?:或多个)?本地文件/ })).toBeVisible();
+  await expect(page.getByText("处理参数", { exact: true })).toBeVisible();
+  await expect(page.getByText("增强工具", { exact: true })).toHaveCount(0);
   await page.getByRole("button", { name: "支持作者" }).click();
   await expect(page.getByRole("dialog", { name: "支持作者" })).toBeVisible();
 
@@ -171,23 +244,13 @@ test("pdf word and excel uploads render a local document preview", async ({ page
   await expect(page.getByRole("img", { name: new RegExp(`Excel.*${labels.preview}`) })).toBeVisible();
 });
 
-async function expandSectionIfPresent(page: Page, label: string) {
-  const section = page.getByRole("button", { name: new RegExp(label) }).first();
-  try {
-    await section.waitFor({ state: "visible", timeout: 5_000 });
-  } catch {
-    return;
-  }
-  if ((await section.getAttribute("aria-expanded")) !== "true") {
-    await section.click();
-  }
-}
-
 async function openDocumentTool(page: Page, label: string) {
-  await expandSectionIfPresent(page, labels.documentTools);
-  const toolButton = page.getByRole("button", { name: new RegExp(label) }).first();
-  await expect(toolButton).toBeVisible();
-  await toolButton.click();
+  const toolIds: Record<string, string> = {
+    [labels.pdfToImage]: "pdf-images",
+    [labels.wordToImage]: "word-images",
+    [labels.excelToImage]: "excel-images"
+  };
+  await page.goto(`/tools/?tool=${toolIds[label]}`, { waitUntil: "domcontentloaded" });
   await expect(page.locator("h1").first()).toContainText(label);
 }
 

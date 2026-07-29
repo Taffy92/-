@@ -93,13 +93,15 @@ export default function InstallerDownloadButton({
       }
 
       let downloadedBytes = 0;
-      for (const [index, part] of packageInfo.parts.entries()) {
-        setMessage(`正在下载并校验第 ${index + 1}/${packageInfo.parts.length} 个分片…`);
+      for (const part of packageInfo.parts) {
+        setMessage(`正在下载并校验安装包，总进度 ${Math.round((downloadedBytes / packageInfo.size) * 100)}%…`);
         const bytes = await fetchVerifiedPart(part);
         if (writable) await writable.write(bytes);
         else bufferedParts.push(bytes);
         downloadedBytes += bytes.byteLength;
-        setProgress(Math.round((downloadedBytes / packageInfo.size) * 100));
+        const totalProgress = Math.round((downloadedBytes / packageInfo.size) * 100);
+        setProgress(totalProgress);
+        setMessage(`正在下载并校验安装包，总进度 ${totalProgress}%…`);
       }
 
       if (downloadedBytes !== packageInfo.size) {
@@ -198,28 +200,28 @@ function validatePackage(
     throw new Error("安装包信息与页面不一致。");
   }
   if (!Number.isSafeInteger(packageInfo.size) || packageInfo.size <= 0 || packageInfo.parts.length === 0) {
-    throw new Error("安装包大小或分片信息无效。");
+    throw new Error("安装包大小或下载信息无效。");
   }
   const totalPartSize = packageInfo.parts.reduce((total, part) => total + part.size, 0);
   if (totalPartSize !== packageInfo.size) {
-    throw new Error("安装包分片大小不完整。");
+    throw new Error("安装包数据大小不完整。");
   }
   const manifestPath = new URL(manifestUrl, window.location.origin).pathname;
   const expectedPartPrefix = `${manifestPath.replace(/manifest\.json$/, "")}${packageType}/`;
   for (const part of packageInfo.parts) {
     if (!part.url.startsWith(expectedPartPrefix) || !/^[A-F0-9]{64}$/.test(part.sha256)) {
-      throw new Error("安装包分片地址或校验值无效。");
+      throw new Error("安装包下载地址或校验值无效。");
     }
   }
 }
 
 async function fetchVerifiedPart(part: ManifestPart): Promise<ArrayBuffer> {
   const response = await fetch(part.url);
-  if (!response.ok) throw new Error(`分片请求失败（HTTP ${response.status}）。`);
+  if (!response.ok) throw new Error(`安装包下载请求失败（HTTP ${response.status}）。`);
   const bytes = await response.arrayBuffer();
-  if (bytes.byteLength !== part.size) throw new Error("分片大小校验失败。");
+  if (bytes.byteLength !== part.size) throw new Error("安装包数据大小校验失败。");
   const hash = await sha256(bytes);
-  if (hash !== part.sha256) throw new Error("分片完整性校验失败。");
+  if (hash !== part.sha256) throw new Error("安装包数据完整性校验失败。");
   return bytes;
 }
 

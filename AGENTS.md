@@ -40,3 +40,10 @@ npm run deploy:license-admin
 - 根目录只保留 README、许可证、项目规则等入口文件；阶段性报告放入 `docs/reports/archive/`。
 - EdgeOne 是公开网站、试用安装包和私有授权后台的正式渠道；CloudBase 仅保留历史授权实现、下载口令备用云函数和过渡托管能力。
 - CloudBase 环境 ID 如需替换，必须同步修改 `package.json` 与 `apps/web/cloudbaserc.json`。
+
+## UI Design and Visual QA
+
+- 修改 UI、前端组件、样式、布局、响应式、动效或交互前，必须先完整读取 `D:\CodexSkills\skills\media-converter-ui-director\SKILL.md`，并按任务读取其中指定的 references。
+- 先运行并截图核对真实功能，再建立可审阅的在线版/离线版视觉目标和设计系统；未确认视觉目标前，不进行大规模 UI 改造。
+- 在线版与离线版共享品牌但使用独立产品壳；不得仅靠深浅主题区分，不得把网页导航机械搬入 Windows 工作台。
+- 每阶段都要检查浏览器或桌面窗口截图、响应式/窗口尺寸、控制台错误、原有测试和受影响的核心转换流程；没有运行截图时不得声称视觉完成。
