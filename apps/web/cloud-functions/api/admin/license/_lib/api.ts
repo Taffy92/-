@@ -48,6 +48,18 @@ export function createLicenseAdminApi(
       return jsonResponse({ ok: true });
     },
 
+    sessionStatus(request: Request): Response {
+      try {
+        const config = dependencies.getConfig();
+        return jsonResponse({
+          ok: true,
+          authenticated: hasValidSession(request, config.sessionSecret, dependencies.now())
+        });
+      } catch (error) {
+        return toSafeErrorResponse(error);
+      }
+    },
+
     async createSession(request: Request): Promise<Response> {
       try {
         assertSameOrigin(request);

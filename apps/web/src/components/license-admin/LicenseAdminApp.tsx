@@ -5,6 +5,7 @@ import { Download, LogOut, ShieldCheck } from "lucide-react";
 import {
   LicenseAdminApiError,
   checkBackend,
+  checkSession,
   downloadEncryptedBackup,
   generateLicense,
   loadHistory,
@@ -71,7 +72,13 @@ export function LicenseAdminApp() {
 
   useEffect(() => {
     checkBackend().then(setBackendOnline);
-    refreshHistory();
+    checkSession().then((hasSession) => {
+      if (hasSession) {
+        refreshHistory();
+      } else {
+        setAuthenticated(false);
+      }
+    });
   }, [refreshHistory]);
 
   async function handleLogin(password: string) {

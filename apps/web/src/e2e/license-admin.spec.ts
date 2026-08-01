@@ -37,6 +37,10 @@ test("private license admin stays simple on desktop and mobile", async ({ page }
       await route.fulfill({ json: { ok: true } });
       return;
     }
+    if (url.pathname.endsWith("/session") && request.method() === "GET") {
+      await route.fulfill({ json: { ok: true, authenticated: loggedIn } });
+      return;
+    }
     if (!loggedIn) {
       await route.fulfill({ status: 401, json: { ok: false, error: "请重新登录。" } });
       return;

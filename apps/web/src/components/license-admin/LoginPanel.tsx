@@ -41,6 +41,17 @@ export function LoginPanel({
               : "后台暂不可用"}
         </div>
         <form onSubmit={submit} className={styles.loginForm}>
+          <label htmlFor="admin-username" className={styles.srOnly}>管理员账号</label>
+          <input
+            id="admin-username"
+            name="username"
+            type="text"
+            autoComplete="username"
+            value="admin"
+            readOnly
+            tabIndex={-1}
+            className={styles.srOnly}
+          />
           <label htmlFor="admin-password">管理员密码</label>
           <input
             id="admin-password"

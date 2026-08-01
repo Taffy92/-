@@ -43,6 +43,10 @@ describe("EdgeOne license admin API", () => {
 
   it("creates and clears an administrator session", async () => {
     const { api } = await createFixture();
+    const anonymousStatus = api.sessionStatus(request("/session"));
+    expect(anonymousStatus.status).toBe(200);
+    expect(await anonymousStatus.json()).toEqual({ ok: true, authenticated: false });
+
     const wrong = await api.createSession(request("/session", {
       method: "POST",
       body: JSON.stringify({ password: "000000" })
@@ -56,6 +60,10 @@ describe("EdgeOne license admin API", () => {
     }));
     expect(correct.status).toBe(200);
     expect(correct.headers.get("set-cookie")).toContain("license_admin_session=");
+
+    const cookie = (correct.headers.get("set-cookie") ?? "").split(";")[0];
+    const authenticatedStatus = api.sessionStatus(request("/session", { cookie }));
+    expect(await authenticatedStatus.json()).toEqual({ ok: true, authenticated: true });
 
     const logout = api.deleteSession(request("/session", { method: "DELETE" }));
     expect(logout.headers.get("set-cookie")).toContain("Max-Age=0");

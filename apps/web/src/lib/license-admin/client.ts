@@ -27,6 +27,20 @@ export async function checkBackend(): Promise<boolean> {
   }
 }
 
+export async function checkSession(): Promise<boolean> {
+  try {
+    const response = await fetch(`${API_ROOT}/session`, {
+      cache: "no-store",
+      credentials: "same-origin"
+    });
+    if (!response.ok) return false;
+    const payload = await response.json() as { authenticated?: unknown };
+    return payload.authenticated === true;
+  } catch {
+    return false;
+  }
+}
+
 export async function login(password: string): Promise<void> {
   await requestJson("/session", {
     method: "POST",
