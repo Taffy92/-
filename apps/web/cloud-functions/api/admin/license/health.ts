@@ -1,5 +1,5 @@
 import { licenseAdminApi } from "./_lib/api";
 
-export function onRequestGet(): Response {
-  return licenseAdminApi.health();
+export function onRequestGet(context: { request: Request }): Response {
+  return licenseAdminApi.health(context.request);
 }

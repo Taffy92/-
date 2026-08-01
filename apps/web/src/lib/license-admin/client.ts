@@ -15,29 +15,20 @@ export class LicenseAdminApiError extends Error {
   }
 }
 
-export async function checkBackend(): Promise<boolean> {
+export async function checkBackend(): Promise<{
+  online: boolean;
+  authenticated: boolean;
+}> {
   try {
     const response = await fetch(`${API_ROOT}/health`, {
       cache: "no-store",
       credentials: "same-origin"
     });
-    return response.ok;
-  } catch {
-    return false;
-  }
-}
-
-export async function checkSession(): Promise<boolean> {
-  try {
-    const response = await fetch(`${API_ROOT}/session`, {
-      cache: "no-store",
-      credentials: "same-origin"
-    });
-    if (!response.ok) return false;
+    if (!response.ok) return { online: false, authenticated: false };
     const payload = await response.json() as { authenticated?: unknown };
-    return payload.authenticated === true;
+    return { online: true, authenticated: payload.authenticated === true };
   } catch {
-    return false;
+    return { online: false, authenticated: false };
   }
 }
 

@@ -36,17 +36,13 @@ class MemoryBlobStore implements BlobStoreLike {
 describe("EdgeOne license admin API", () => {
   it("exposes a minimal public health response", async () => {
     const { api } = await createFixture();
-    const response = api.health();
+    const response = api.health(request("/health"));
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ ok: true });
+    expect(await response.json()).toEqual({ ok: true, authenticated: false });
   });
 
   it("creates and clears an administrator session", async () => {
     const { api } = await createFixture();
-    const anonymousStatus = api.sessionStatus(request("/session"));
-    expect(anonymousStatus.status).toBe(200);
-    expect(await anonymousStatus.json()).toEqual({ ok: true, authenticated: false });
-
     const wrong = await api.createSession(request("/session", {
       method: "POST",
       body: JSON.stringify({ password: "000000" })
@@ -62,7 +58,7 @@ describe("EdgeOne license admin API", () => {
     expect(correct.headers.get("set-cookie")).toContain("license_admin_session=");
 
     const cookie = (correct.headers.get("set-cookie") ?? "").split(";")[0];
-    const authenticatedStatus = api.sessionStatus(request("/session", { cookie }));
+    const authenticatedStatus = api.health(request("/health", { cookie }));
     expect(await authenticatedStatus.json()).toEqual({ ok: true, authenticated: true });
 
     const logout = api.deleteSession(request("/session", { method: "DELETE" }));

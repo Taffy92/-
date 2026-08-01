@@ -44,11 +44,7 @@ export function createLicenseAdminApi(
   dependencies: LicenseAdminApiDependencies = defaultDependencies
 ) {
   return {
-    health(): Response {
-      return jsonResponse({ ok: true });
-    },
-
-    sessionStatus(request: Request): Response {
+    health(request: Request): Response {
       try {
         const config = dependencies.getConfig();
         return jsonResponse({
