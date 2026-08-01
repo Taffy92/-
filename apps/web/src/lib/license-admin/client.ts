@@ -25,8 +25,8 @@ export async function checkBackend(): Promise<{
       credentials: "same-origin"
     });
     if (!response.ok) return { online: false, authenticated: false };
-    const payload = await response.json() as { authenticated?: unknown };
-    return { online: true, authenticated: payload.authenticated === true };
+    const payload = await response.json() as { hasSession?: unknown };
+    return { online: true, authenticated: payload.hasSession === true };
   } catch {
     return { online: false, authenticated: false };
   }

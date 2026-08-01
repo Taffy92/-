@@ -140,6 +140,10 @@ export function readSessionToken(request: Request): string {
   return "";
 }
 
+export function hasSessionCookie(request: Request): boolean {
+  return readSessionToken(request) !== "";
+}
+
 export function hasValidSession(
   request: Request,
   sessionSecret: string,
