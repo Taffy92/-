@@ -24,14 +24,14 @@ const installerPackages = [
     type: "exe",
     fileName: "万能格式转换器_2.0.0_x64-setup.exe",
     assetName: "format-converter_2.0.0_x64-setup.exe",
-    sha256: "774E1689AD352933B1F6BBA73DA41A9CE476EE7C590B8960EACD246DDD98D789",
+    sha256: "8BF3361BE8FED6C6123AD51B90D6298319AEFB9EE3C2A6143F4ABDD900886E3B",
     contentType: "application/vnd.microsoft.portable-executable"
   },
   {
     type: "msi",
     fileName: "万能格式转换器_2.0.0_x64_zh-CN.msi",
     assetName: "format-converter_2.0.0_x64_zh-CN.msi",
-    sha256: "896B0979634D39E267904D2EE69D82A8D99125ABBCF0BDF2617808CA0781F2E2",
+    sha256: "C992027904CAC48B77DD3FB79F11314D3D2689AC4E09161822BDA64B0D5DACFB",
     contentType: "application/x-msi"
   }
 ];

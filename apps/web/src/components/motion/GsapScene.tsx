@@ -40,30 +40,41 @@ export function GsapScene({ animateKey, children, variant }: GsapSceneProps) {
       const intro = q('[data-animate="home-intro"]');
       const trustItems = q('[data-animate="home-trust-item"]');
       const cards = q('[data-animate="home-card"]');
+      const homeTargets = [...shell, ...intro, ...trustItems, ...cards];
 
-      gsap.set([...shell, ...intro, ...trustItems, ...cards], { willChange: "transform, opacity" });
+      if (homeTargets.length) {
+        gsap.set(homeTargets, { willChange: "transform, opacity" });
+      }
 
-      gsap.timeline({ defaults: { duration: 0.55, ease: "power3.out" } })
-        .from(shell, { autoAlpha: 0, y: 22, duration: 0.5, clearProps: "transform,opacity,visibility,willChange" })
-        .from(intro, { autoAlpha: 0, y: 16, stagger: 0.07, clearProps: "transform,opacity,visibility,willChange" }, "-=0.22")
-        .from(trustItems, { autoAlpha: 0, x: 14, stagger: 0.06, clearProps: "transform,opacity,visibility,willChange" }, "-=0.2");
+      const timeline = gsap.timeline({ defaults: { duration: 0.55, ease: "power3.out" } });
+      if (shell.length) {
+        timeline.from(shell, { autoAlpha: 0, y: 22, duration: 0.5, clearProps: "transform,opacity,visibility,willChange" });
+      }
+      if (intro.length) {
+        timeline.from(intro, { autoAlpha: 0, y: 16, stagger: 0.07, clearProps: "transform,opacity,visibility,willChange" }, shell.length ? "-=0.22" : 0);
+      }
+      if (trustItems.length) {
+        timeline.from(trustItems, { autoAlpha: 0, x: 14, stagger: 0.06, clearProps: "transform,opacity,visibility,willChange" }, "-=0.2");
+      }
 
-      ScrollTrigger.batch(cards, {
-        interval: 0.08,
-        once: true,
-        start: "top 88%",
-        onEnter: (batch) => {
-          gsap.from(batch, {
-            autoAlpha: 0,
-            y: 22,
-            scale: 0.985,
-            duration: 0.52,
-            stagger: 0.06,
-            ease: "power2.out",
-            clearProps: "transform,opacity,visibility,willChange"
-          });
-        }
-      });
+      if (cards.length) {
+        ScrollTrigger.batch(cards, {
+          interval: 0.08,
+          once: true,
+          start: "top 88%",
+          onEnter: (batch) => {
+            gsap.from(batch, {
+              autoAlpha: 0,
+              y: 22,
+              scale: 0.985,
+              duration: 0.52,
+              stagger: 0.06,
+              ease: "power2.out",
+              clearProps: "transform,opacity,visibility,willChange"
+            });
+          }
+        });
+      }
     }
 
     if (variant === "tools") {
@@ -76,23 +87,34 @@ export function GsapScene({ animateKey, children, variant }: GsapSceneProps) {
       const actions = q('[data-animate="tools-actions"]');
       const preview = q('[data-animate="tools-preview"]');
       const ad = q('[data-animate="tools-ad"]');
+      const primaryTargets = [...nav, ...header, ...main, ...side];
+      const secondaryTargets = [...dropzone, ...actions, ...preview, ...ad];
+      const toolTargets = [...chrome, ...primaryTargets, ...secondaryTargets];
 
-      gsap.set([...chrome, ...nav, ...header, ...main, ...side, ...dropzone, ...actions, ...preview, ...ad], { willChange: "transform, opacity" });
+      if (toolTargets.length) {
+        gsap.set(toolTargets, { willChange: "transform, opacity" });
+      }
 
-      gsap.timeline({ defaults: { duration: 0.48, ease: "power3.out" } })
-        .from(chrome, { autoAlpha: 0, y: 18, clearProps: "transform,opacity,visibility,willChange" })
-        .from([nav, header, main, side], {
+      const timeline = gsap.timeline({ defaults: { duration: 0.48, ease: "power3.out" } });
+      if (chrome.length) {
+        timeline.from(chrome, { autoAlpha: 0, y: 18, clearProps: "transform,opacity,visibility,willChange" });
+      }
+      if (primaryTargets.length) {
+        timeline.from(primaryTargets, {
           autoAlpha: 0,
           y: 18,
           stagger: 0.07,
           clearProps: "transform,opacity,visibility,willChange"
-        }, "-=0.2")
-        .from([dropzone, actions, preview, ad], {
+        }, chrome.length ? "-=0.2" : 0);
+      }
+      if (secondaryTargets.length) {
+        timeline.from(secondaryTargets, {
           autoAlpha: 0,
           y: 14,
           stagger: 0.05,
           clearProps: "transform,opacity,visibility,willChange"
         }, "-=0.2");
+      }
     }
 
     window.setTimeout(() => ScrollTrigger.refresh(), 250);
