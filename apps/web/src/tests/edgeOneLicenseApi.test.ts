@@ -4,6 +4,7 @@ import {
   createLicenseAdminApi,
   type LicenseAdminApiDependencies
 } from "../../cloud-functions/api/admin/license/_lib/api";
+import { resolveHealthRequest } from "../../cloud-functions/api/admin/license/health";
 import { hashAdminPassword } from "../../cloud-functions/api/admin/license/_lib/auth";
 import {
   createRecordStore,
@@ -36,7 +37,10 @@ class MemoryBlobStore implements BlobStoreLike {
 describe("EdgeOne license admin API", () => {
   it("exposes a minimal public health response", async () => {
     const { api } = await createFixture();
-    const response = api.health(request("/health"));
+    const directRequest = request("/health");
+    expect(resolveHealthRequest(directRequest)).toBe(directRequest);
+    expect(resolveHealthRequest({ request: directRequest })).toBe(directRequest);
+    const response = api.health(directRequest);
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ ok: true, hasSession: false });
   });
