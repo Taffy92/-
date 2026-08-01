@@ -4,7 +4,6 @@ import {
   createLicenseAdminApi,
   type LicenseAdminApiDependencies
 } from "../../cloud-functions/api/admin/license/_lib/api";
-import { resolveHealthRequest } from "../../cloud-functions/api/admin/license/health";
 import { hashAdminPassword } from "../../cloud-functions/api/admin/license/_lib/auth";
 import {
   createRecordStore,
@@ -37,12 +36,9 @@ class MemoryBlobStore implements BlobStoreLike {
 describe("EdgeOne license admin API", () => {
   it("exposes a minimal public health response", async () => {
     const { api } = await createFixture();
-    const directRequest = request("/health");
-    expect(resolveHealthRequest(directRequest)).toBe(directRequest);
-    expect(resolveHealthRequest({ request: directRequest })).toBe(directRequest);
-    const response = api.health(directRequest);
+    const response = api.health();
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ ok: true, hasSession: false });
+    expect(await response.json()).toEqual({ ok: true });
   });
 
   it("creates and clears an administrator session", async () => {
@@ -60,10 +56,6 @@ describe("EdgeOne license admin API", () => {
     }));
     expect(correct.status).toBe(200);
     expect(correct.headers.get("set-cookie")).toContain("license_admin_session=");
-
-    const cookie = (correct.headers.get("set-cookie") ?? "").split(";")[0];
-    const authenticatedStatus = api.health(request("/health", { cookie }));
-    expect(await authenticatedStatus.json()).toEqual({ ok: true, hasSession: true });
 
     const logout = api.deleteSession(request("/session", { method: "DELETE" }));
     expect(logout.headers.get("set-cookie")).toContain("Max-Age=0");

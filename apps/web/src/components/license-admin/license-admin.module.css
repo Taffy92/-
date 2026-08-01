@@ -86,29 +86,6 @@
   line-height: 1.7;
 }
 
-.backendStatus {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 24px 0 18px;
-  color: #9ba3b1;
-  font-size: 13px;
-}
-
-.statusDot,
-.statusDotOnline {
-  width: 8px;
-  height: 8px;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  background: #6b7280;
-}
-
-.statusDotOnline {
-  background: #30d5c8;
-  box-shadow: 0 0 0 5px rgba(48, 213, 200, 0.09);
-}
-
 .loginForm,
 .issueForm {
   display: grid;

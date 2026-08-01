@@ -3,7 +3,6 @@ import {
   clearSessionCookie,
   createSessionCookie,
   createSessionToken,
-  hasSessionCookie,
   hasValidSession,
   verifyAdminPassword
 } from "./auth";
@@ -45,8 +44,8 @@ export function createLicenseAdminApi(
   dependencies: LicenseAdminApiDependencies = defaultDependencies
 ) {
   return {
-    health(request: Request): Response {
-      return jsonResponse({ ok: true, hasSession: hasSessionCookie(request) });
+    health(): Response {
+      return jsonResponse({ ok: true });
     },
 
     async createSession(request: Request): Promise<Response> {

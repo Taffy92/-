@@ -23,10 +23,6 @@ test("private license admin stays simple on desktop and mobile", async ({ page }
   await page.route("**/api/admin/license/**", async (route) => {
     const request = route.request();
     const url = new URL(request.url());
-    if (url.pathname.endsWith("/health")) {
-      await route.fulfill({ json: { ok: true, hasSession: loggedIn } });
-      return;
-    }
     if (url.pathname.endsWith("/session") && request.method() === "POST") {
       const body = request.postDataJSON() as { password?: string };
       if (body.password !== "123456") {

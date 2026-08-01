@@ -1,10 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { Download, LogOut, ShieldCheck } from "lucide-react";
 import {
   LicenseAdminApiError,
-  checkBackend,
   downloadEncryptedBackup,
   generateLicense,
   loadHistory,
@@ -40,8 +39,7 @@ const emptyHistory: LicenseHistoryPage = {
 };
 
 export function LicenseAdminApp() {
-  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
-  const [backendOnline, setBackendOnline] = useState<boolean | null>(null);
+  const [authenticated, setAuthenticated] = useState(false);
   const [loginBusy, setLoginBusy] = useState(false);
   const [loginError, setLoginError] = useState("");
   const [draft, setDraft] = useState(initialDraft);
@@ -68,17 +66,6 @@ export function LicenseAdminApp() {
       setHistoryLoading(false);
     }
   }, []);
-
-  useEffect(() => {
-    checkBackend().then(({ online, authenticated: hasSession }) => {
-      setBackendOnline(online);
-      if (hasSession) {
-        refreshHistory();
-      } else {
-        setAuthenticated(false);
-      }
-    });
-  }, [refreshHistory]);
 
   async function handleLogin(password: string) {
     setLoginBusy(true);
@@ -162,8 +149,7 @@ export function LicenseAdminApp() {
   if (authenticated !== true) {
     return (
       <LoginPanel
-        backendOnline={backendOnline}
-        busy={loginBusy || authenticated === null}
+        busy={loginBusy}
         error={loginError}
         onLogin={handleLogin}
       />
