@@ -6,26 +6,26 @@ export const downloadsConfig = {
   appName: "万能格式转换离线专业版",
   version: "2.0.0",
   fileName: exeFileName,
-  fileSize: "EXE 262.45 MB / MSI 272.81 MB",
+  fileSize: "EXE 262.46 MB / MSI 272.80 MB",
   releaseDate: "2026-08-02",
   sha256:
-    "EXE AF9EB0B6B2953421C917D91805D905055D68FF258BFFA4DFBAF866A132711F9F / MSI 9882F3EBDB02F72493D4236A1257422253C6ED5636FE4B0FEF1F88B504016AFF",
+    "EXE 04CB107A9B47CEC4FFD485E9E1450C1888C5283D31849050EAF7E308F9D1EB86 / MSI F69E2F9631E4401EDFE64CC0B5CDB20EBABB428CF795C4EC69BDD88F62B3F70B",
   manifestUrl: edgeOneManifestUrl,
   packages: [
     {
       type: "exe",
       label: "EXE 安装包",
       fileName: exeFileName,
-      fileSize: "262.45 MB",
-      sha256: "AF9EB0B6B2953421C917D91805D905055D68FF258BFFA4DFBAF866A132711F9F",
+      fileSize: "262.46 MB",
+      sha256: "04CB107A9B47CEC4FFD485E9E1450C1888C5283D31849050EAF7E308F9D1EB86",
       note: "推荐普通用户使用，安装后自动开启本机 3 天试用。"
     },
     {
       type: "msi",
       label: "MSI 安装包",
       fileName: msiFileName,
-      fileSize: "272.81 MB",
-      sha256: "9882F3EBDB02F72493D4236A1257422253C6ED5636FE4B0FEF1F88B504016AFF",
+      fileSize: "272.80 MB",
+      sha256: "F69E2F9631E4401EDFE64CC0B5CDB20EBABB428CF795C4EC69BDD88F62B3F70B",
       note: "适合企业、管理员或批量部署场景，同样内置 3 天试用。"
     }
   ],
