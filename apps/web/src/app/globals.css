@@ -4795,20 +4795,6 @@ textarea:focus-visible {
   opacity: 0.75;
 }
 
-.desktop-a-all-tools {
-  display: flex;
-  min-height: 36px;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  border: 0;
-  border-top: 1px solid var(--desktop-line);
-  background: #fff;
-  color: var(--desktop-blue);
-  font-size: 10px;
-  font-weight: 700;
-}
-
 .desktop-a-task-canvas {
   min-width: 0;
   min-height: 0;
@@ -8851,11 +8837,6 @@ body {
 
 .desktop-a-current-tools a small {
   font-size: 9px;
-}
-
-.desktop-a-all-tools {
-  min-height: 42px;
-  font-size: 12px;
 }
 
 .desktop-a-task-canvas {

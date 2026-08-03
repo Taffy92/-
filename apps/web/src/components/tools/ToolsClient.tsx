@@ -19,7 +19,8 @@ import { GsapScene } from "@/components/motion/GsapScene";
 import { MatrixLogo } from "@/components/layout/MatrixLogo";
 import { SupportDialog } from "@/components/support/SupportDialog";
 import { UnifiedDesktopSidebar, UnifiedToolDialog } from "@/components/tools/UnifiedToolCatalog";
-import { getUnifiedToolCategory } from "@/config/toolCatalog";
+import { getUnifiedToolCategory, getUnifiedToolHref } from "@/config/toolCatalog";
+import type { UnifiedToolItem } from "@/config/toolCatalog";
 import { batchModeLabel, batchTaskStatusLabel, createBatchTask, defaultOutputDirectory, getBatchCounts, getSupportedExtensions, isSupportedBatchName, sanitizeLocalPath } from "@/lib/batchQueue";
 import type { BatchMode, BatchOutputDirectory, BatchTask, BatchTaskStatus } from "@/lib/batchQueue";
 import type { DesktopLicenseStatus } from "@/lib/desktopLicense";
@@ -258,14 +259,19 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   }, [activeBatchMode, activeKind, activeTab, batchMode]);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const requestedTool = params.get("tool") as TabId | null;
-    if (requestedTool && tabs.some((tab) => tab.id === requestedTool)) {
-      setActiveTab(requestedTool);
-      const nextBatchMode = getBatchModeForTab(requestedTool);
-      if (nextBatchMode) setBatchMode(nextBatchMode);
-    }
-    if (params.get("catalog") === "1") setCatalogOpen(true);
+    const applyToolFromUrl = () => {
+      const params = new URLSearchParams(window.location.search);
+      const requestedTool = params.get("tool") as TabId | null;
+      if (requestedTool && tabs.some((tab) => tab.id === requestedTool)) {
+        setActiveTab(requestedTool);
+        const nextBatchMode = getBatchModeForTab(requestedTool);
+        if (nextBatchMode) setBatchMode(nextBatchMode);
+      }
+      if (params.get("catalog") === "1") setCatalogOpen(true);
+    };
+    applyToolFromUrl();
+    window.addEventListener("popstate", applyToolFromUrl);
+    return () => window.removeEventListener("popstate", applyToolFromUrl);
   }, [tabs]);
 
   useEffect(() => () => {
@@ -926,6 +932,20 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     setProgress(0);
     if (message) setProgressMessage(message);
   }
+
+  function selectDesktopTool(nextTool: UnifiedToolItem) {
+    if (!isDesktopSurface || nextTool.route !== "tools" || !desktopTabs.some((tab) => tab.id === nextTool.id)) return false;
+    const nextTab = nextTool.id as TabId;
+    setActiveTab(nextTab);
+    const nextBatchMode = getBatchModeForTab(nextTab);
+    if (nextBatchMode) setBatchMode(nextBatchMode);
+    window.history.pushState({}, "", getUnifiedToolHref(nextTool));
+    return true;
+  }
+
+  useEffect(() => {
+    if (isDesktopSurface) clearAllLocalTasks("等待选择文件");
+  }, [activeTab, isDesktopSurface]);
 
   function ensureFile(kind: "image" | "pdf" | "word" | "excel" | "video" | "audio") {
     if (!file) throw new Error("请先选择文件。");
@@ -1918,7 +1938,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
           </header>
 
           <div className="desktop-a-body">
-            <UnifiedDesktopSidebar currentToolId={activeTab} onOpenCatalog={() => setCatalogOpen(true)} />
+            <UnifiedDesktopSidebar currentToolId={activeTab} onSelectTool={selectDesktopTool} />
 
             <section className="desktop-a-task-canvas">
               <header>
@@ -2011,7 +2031,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
           </footer>
         </main>
         <SupportDialog open={supportOpen} onClose={() => setSupportOpen(false)} desktop />
-        <UnifiedToolDialog open={catalogOpen} currentToolId={activeTab} desktop onClose={() => setCatalogOpen(false)} />
+        <UnifiedToolDialog open={catalogOpen} currentToolId={activeTab} desktop onSelectTool={selectDesktopTool} onClose={() => setCatalogOpen(false)} />
       </>
     );
   }

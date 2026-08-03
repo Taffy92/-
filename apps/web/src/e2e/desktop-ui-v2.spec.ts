@@ -53,3 +53,19 @@ test("offline local tools remain simple and local", async ({ page }) => {
     fullPage: true
   });
 });
+
+test("offline tool switches stay responsive without reloading the workbench", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 820 });
+  await page.goto("/tools/?tool=video-convert", { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { level: 2, name: "视频格式转换" })).toBeVisible();
+  await expect(page.getByText("全部工具", { exact: true })).toHaveCount(0);
+  await page.evaluate(() => { document.body.dataset.offlineSwitchMarker = "keep"; });
+
+  await page.locator('.desktop-a-current-tools a[href*="audio-convert"]').click();
+  await expect(page.getByRole("heading", { level: 2, name: "音频格式转换" })).toBeVisible();
+  expect(await page.locator("body").getAttribute("data-offline-switch-marker")).toBe("keep");
+
+  await page.locator('.desktop-a-current-tools a[href*="video-audio"]').click();
+  await expect(page.getByRole("heading", { level: 2, name: "视频提取音频" })).toBeVisible();
+  expect(await page.locator("body").getAttribute("data-offline-switch-marker")).toBe("keep");
+});

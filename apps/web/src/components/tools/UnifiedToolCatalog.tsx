@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, FileSpreadsheet, FileText, Film, Grid2X2, Image as ImageIcon, ScanText, X } from "lucide-react";
+import { ChevronRight, FileSpreadsheet, FileText, Film, Image as ImageIcon, ScanText, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import {
@@ -9,6 +9,7 @@ import {
   getUnifiedToolHref,
   unifiedToolCategories
 } from "@/config/toolCatalog";
+import type { UnifiedToolItem } from "@/config/toolCatalog";
 
 const categoryIcons = {
   image: ImageIcon,
@@ -39,10 +40,10 @@ export function UnifiedCategoryRail({ currentToolId }: { currentToolId: string }
 
 export function UnifiedDesktopSidebar({
   currentToolId,
-  onOpenCatalog
+  onSelectTool
 }: {
   currentToolId: string;
-  onOpenCatalog: () => void;
+  onSelectTool?: (tool: UnifiedToolItem) => boolean;
 }) {
   const currentCategory = getUnifiedToolCategory(currentToolId) || unifiedToolCategories[0];
 
@@ -71,16 +72,15 @@ export function UnifiedDesktopSidebar({
             href={getUnifiedToolHref(tool)}
             key={tool.id}
             title={tool.description}
+            onClick={(event) => {
+              if (onSelectTool?.(tool)) event.preventDefault();
+            }}
           >
             <span>{tool.label}</span>
             {tool.offlineBatch ? <small>批量</small> : null}
           </Link>
         ))}
       </div>
-      <button className="desktop-a-all-tools" type="button" onClick={onOpenCatalog}>
-        <Grid2X2 aria-hidden="true" size={15} />
-        全部工具
-      </button>
     </aside>
   );
 }
@@ -89,11 +89,13 @@ export function UnifiedToolDialog({
   open,
   currentToolId,
   desktop = false,
+  onSelectTool,
   onClose
 }: {
   open: boolean;
   currentToolId: string;
   desktop?: boolean;
+  onSelectTool?: (tool: UnifiedToolItem) => boolean;
   onClose: () => void;
 }) {
   const closeRef = useRef<HTMLButtonElement | null>(null);
@@ -172,7 +174,10 @@ export function UnifiedToolDialog({
                     className={currentToolId === tool.id ? "active" : ""}
                     href={getUnifiedToolHref(tool)}
                     key={tool.id}
-                    onClick={onClose}
+                    onClick={(event) => {
+                      if (onSelectTool?.(tool)) event.preventDefault();
+                      onClose();
+                    }}
                   >
                     <span>
                       <strong>{tool.label}</strong>

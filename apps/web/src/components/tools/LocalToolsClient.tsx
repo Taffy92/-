@@ -75,7 +75,8 @@ import { currentReleaseVersion } from "@/config/version";
 import { MatrixLogo } from "@/components/layout/MatrixLogo";
 import { SupportDialog } from "@/components/support/SupportDialog";
 import { UnifiedDesktopSidebar, UnifiedToolDialog } from "@/components/tools/UnifiedToolCatalog";
-import { getUnifiedToolCategory } from "@/config/toolCatalog";
+import { getUnifiedToolCategory, getUnifiedToolHref } from "@/config/toolCatalog";
+import type { UnifiedToolItem } from "@/config/toolCatalog";
 import type { DesktopLicenseStatus } from "@/lib/desktopLicense";
 
 type LocalToolId =
@@ -212,10 +213,15 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
   const [ocrExport, setOcrExport] = useState<"txt" | "editable-word" | "image-word">("txt");
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const requestedTool = params.get("tool") as LocalToolId | null;
-    if (requestedTool && tools.some((item) => item.id === requestedTool)) setTool(requestedTool);
-    if (params.get("catalog") === "1") setCatalogOpen(true);
+    const applyToolFromUrl = () => {
+      const params = new URLSearchParams(window.location.search);
+      const requestedTool = params.get("tool") as LocalToolId | null;
+      if (requestedTool && tools.some((item) => item.id === requestedTool)) setTool(requestedTool);
+      if (params.get("catalog") === "1") setCatalogOpen(true);
+    };
+    applyToolFromUrl();
+    window.addEventListener("popstate", applyToolFromUrl);
+    return () => window.removeEventListener("popstate", applyToolFromUrl);
   }, []);
 
   useEffect(() => {
@@ -263,6 +269,8 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
   );
 
   useEffect(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
     setFiles([]);
     setOutputs([]);
     setMetadata(null);
@@ -272,6 +280,13 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
     setMessage("等待选择文件");
     setError("");
   }, [tool]);
+
+  function selectDesktopTool(nextTool: UnifiedToolItem) {
+    if (!desktop || nextTool.route !== "local-tools" || !tools.some((item) => item.id === nextTool.id)) return false;
+    setTool(nextTool.id as LocalToolId);
+    window.history.pushState({}, "", getUnifiedToolHref(nextTool));
+    return true;
+  }
 
   async function handleFiles(list: FileList | null) {
     const selected = list ? Array.from(list) : [];
@@ -720,7 +735,7 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
           </header>
 
           <div className="desktop-a-body">
-            <UnifiedDesktopSidebar currentToolId={tool} onOpenCatalog={() => setCatalogOpen(true)} />
+            <UnifiedDesktopSidebar currentToolId={tool} onSelectTool={selectDesktopTool} />
             <section className="desktop-a-task-canvas">
               <header>
                 <div>
@@ -775,7 +790,7 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
           </footer>
         </main>
         <SupportDialog open={supportOpen} onClose={() => setSupportOpen(false)} desktop />
-        <UnifiedToolDialog open={catalogOpen} currentToolId={tool} desktop onClose={() => setCatalogOpen(false)} />
+        <UnifiedToolDialog open={catalogOpen} currentToolId={tool} desktop onSelectTool={selectDesktopTool} onClose={() => setCatalogOpen(false)} />
       </>
     );
   }
