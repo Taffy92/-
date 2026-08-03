@@ -31,6 +31,7 @@ type WritableFile = {
 
 type SaveFileHandle = {
   createWritable(): Promise<WritableFile>;
+  getFile(): Promise<{ arrayBuffer(): Promise<ArrayBuffer> }>;
 };
 
 type SaveFilePicker = (options: {
@@ -40,6 +41,8 @@ type SaveFilePicker = (options: {
     accept: Record<string, string[]>;
   }>;
 }) => Promise<SaveFileHandle>;
+
+const DOWNLOAD_CONCURRENCY = 4;
 
 type Props = {
   packageType: PackageType;
@@ -69,6 +72,7 @@ export default function InstallerDownloadButton({
     setMessage("正在准备国内下载节点…");
 
     let writable: WritableFile | null = null;
+    let saveHandle: SaveFileHandle | null = null;
     try {
       const manifest = await loadManifest(manifestUrl);
       const packageInfo = manifest.packages[packageType];
@@ -89,32 +93,50 @@ export default function InstallerDownloadButton({
             }
           ]
         });
+        saveHandle = handle;
         writable = await handle.createWritable();
       }
 
       let downloadedBytes = 0;
-      for (const part of packageInfo.parts) {
-        setMessage(`正在下载并校验安装包，总进度 ${Math.round((downloadedBytes / packageInfo.size) * 100)}%…`);
-        const bytes = await fetchVerifiedPart(part);
-        if (writable) await writable.write(bytes);
-        else bufferedParts.push(bytes);
-        downloadedBytes += bytes.byteLength;
-        const totalProgress = Math.round((downloadedBytes / packageInfo.size) * 100);
-        setProgress(totalProgress);
-        setMessage(`正在下载并校验安装包，总进度 ${totalProgress}%…`);
+      for (let batchStart = 0; batchStart < packageInfo.parts.length; batchStart += DOWNLOAD_CONCURRENCY) {
+        const batch = packageInfo.parts.slice(batchStart, batchStart + DOWNLOAD_CONCURRENCY);
+        setMessage(
+          `正在并行下载并校验安装包，已处理 ${Math.round((downloadedBytes / packageInfo.size) * 100)}%…`
+        );
+        const bytesBatch = await Promise.all(batch.map((part) => fetchVerifiedPart(part)));
+
+        for (const bytes of bytesBatch) {
+          if (writable) await writable.write(bytes);
+          else bufferedParts.push(bytes);
+          downloadedBytes += bytes.byteLength;
+          const totalProgress = Math.min(99, Math.round((downloadedBytes / packageInfo.size) * 100));
+          setProgress(totalProgress);
+          setMessage(`正在并行下载并校验安装包，已处理 ${totalProgress}%…`);
+        }
       }
 
       if (downloadedBytes !== packageInfo.size) {
         throw new Error("下载后的文件大小与发布记录不一致。");
       }
 
+      let bufferedBlob: Blob | null = null;
       if (writable) {
         await writable.close();
         writable = null;
       } else {
-        saveBufferedFile(bufferedParts, packageInfo.contentType, fileName);
+        bufferedBlob = new Blob(bufferedParts, { type: packageInfo.contentType });
       }
 
+      setMessage("正在验证安装包完整性…");
+      const savedFile = saveHandle ? await saveHandle.getFile() : bufferedBlob;
+      if (!savedFile) throw new Error("安装包保存失败，请重试。");
+      const savedBytes = await savedFile.arrayBuffer();
+      const savedHash = await sha256(savedBytes);
+      if (savedBytes.byteLength !== packageInfo.size || savedHash !== packageInfo.sha256) {
+        throw new Error("下载后的安装包完整性校验失败，请删除当前文件后重新下载。");
+      }
+
+      if (bufferedBlob) saveBufferedFile(bufferedParts, packageInfo.contentType, fileName);
       setProgress(100);
       setMessage(`下载完成；文件 SHA256 应为 ${packageInfo.sha256}`);
     } catch (error) {
