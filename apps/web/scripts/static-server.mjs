@@ -43,14 +43,15 @@ function resolveFile(urlPath) {
 }
 
 const server = createServer((request, response) => {
-  const filePath = resolveFile(request.url || "/");
+  const requestedFile = resolveFile(request.url || "/");
+  const filePath = requestedFile || resolveFile("/404.html");
   if (!filePath) {
     response.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
     response.end("Not found");
     return;
   }
 
-  response.writeHead(200, {
+  response.writeHead(requestedFile ? 200 : 404, {
     "cache-control": "no-store",
     "content-type": mimeTypes.get(extname(filePath)) || "application/octet-stream",
     ...Object.fromEntries(securityHeaders.map(({ key, value }) => [key, value]))

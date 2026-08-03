@@ -44,15 +44,14 @@ for (const viewport of viewports) {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.goto("/tools/", { waitUntil: "domcontentloaded" });
 
-    await expect(page.locator("h1").first()).toContainText(labels.imageCrop);
-    await expect(page.locator("#lbl-panel-main-desc")).toContainText(
-      new RegExp(`${labels.localPrivacyCurrent}|${labels.localPrivacyLegacy}`)
-    );
-    await expect(page.locator(".unified-category-rail a.active")).toContainText(labels.imageTools);
-    await expect(page.getByText(new RegExp(`${labels.dropzoneCurrent}|${labels.dropzoneLegacy}`)).first()).toBeVisible();
-    await expect(page.getByRole("button", { name: new RegExp(labels.start) }).first()).toBeVisible();
-    await expect(page.getByRole("button", { name: new RegExp(labels.stop) }).first()).toBeVisible();
-    await expect(page.locator("#ad-container")).toHaveCount(0);
+    await expect(page.getByRole("heading", { level: 1, name: "所有转换任务，一页找到。" })).toBeVisible();
+    await expect(page.getByRole("searchbox", { name: "搜索工具或格式" })).toBeVisible();
+    await expect(page.locator(".online-tool-directory-grid > a")).toHaveCount(24);
+    await expect(page.locator("#baidu-tool-directory-ad-container")).toHaveAttribute("data-ad-provider", "baidu");
+
+    await page.getByRole("button", { name: "图片", exact: true }).click();
+    await expect(page.locator(".online-tool-directory-grid > a")).toHaveCount(7);
+    await expect(page.getByRole("link", { name: /图片格式转换/ })).toHaveAttribute("href", /\/local-tools\/?\?tool=image-convert/);
 
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
     expect(overflow).toBe(false);
@@ -134,15 +133,14 @@ test("primary pages expose named controls and keyboard-contained dialogs", async
   await expect(supportTrigger).toBeFocused();
 
   await page.goto("/tools/", { waitUntil: "domcontentloaded" });
-  const catalogTrigger = page.getByRole("button", { name: "切换工具" });
-  await catalogTrigger.click();
-  const catalogDialog = page.getByRole("dialog", { name: "按实际任务选择工具" });
-  await expect(page.getByRole("button", { name: "关闭工具目录" })).toBeFocused();
-  await page.keyboard.press("Shift+Tab");
-  expect(await catalogDialog.evaluate((dialog) => dialog.contains(document.activeElement))).toBe(true);
-  await page.keyboard.press("Escape");
-  await expect(catalogDialog).toBeHidden();
-  await expect(catalogTrigger).toBeFocused();
+  const search = page.getByRole("searchbox", { name: "搜索工具或格式" });
+  await search.fill("PDF");
+  await expect(page.locator(".online-tool-directory-grid > a")).toHaveCount(7);
+  await search.fill("");
+  await page.getByRole("button", { name: "OCR", exact: true }).click();
+  await expect(page.locator(".online-tool-directory-grid > a")).toHaveCount(1);
+  await page.getByRole("link", { name: /图片 \/ PDF 文字识别/ }).focus();
+  await expect(page.getByRole("link", { name: /图片 \/ PDF 文字识别/ })).toBeFocused();
 });
 
 for (const viewport of [
@@ -153,7 +151,7 @@ for (const viewport of [
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.goto("/", { waitUntil: "domcontentloaded" });
 
-    await expect(page.getByRole("heading", { name: "文件转换，留在本机。" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /文件转换.*浏览器本地完成/ })).toBeVisible();
     if (viewport.width < 800) {
       await page.getByRole("button", { name: "打开导航菜单" }).click();
     }

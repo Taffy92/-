@@ -3,8 +3,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ComponentType, RefObject } from "react";
 import Cropper from "cropperjs";
-import { CheckCircle2, Crop, Download, FileImage, FileText, Grid2X2, HardDrive, HeartHandshake, Image, Loader2, Maximize2, Music, Play, Scissors, ShieldCheck, Square, Table2, Type, Video } from "lucide-react";
+import { CheckCircle2, ChevronRight, Crop, Download, FileImage, FilePlus2, FileText, FolderPlus, HardDrive, HeartHandshake, Image, Loader2, Maximize2, Music, Play, Scissors, ShieldCheck, Square, Table2, Trash2, Type, Video } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import Link from "next/link";
 import { addImageWatermark, addTextWatermark, canvasToBlob, compressImage, loadImageElement, resizeImage } from "@doctool/image-core";
 import { combineImagePages, renderDocxToImagePages, renderExcelToImagePages } from "@doctool/export-core";
 import { getPdfPageCount, parsePageSelection, renderPdfPageToBlob, renderPdfPages } from "@doctool/pdf-core";
@@ -17,9 +18,9 @@ import { currentReleaseVersion } from "@/config/version";
 import { GsapScene } from "@/components/motion/GsapScene";
 import { MatrixLogo } from "@/components/layout/MatrixLogo";
 import { SupportDialog } from "@/components/support/SupportDialog";
-import { UnifiedCategoryRail, UnifiedDesktopSidebar, UnifiedToolDialog } from "@/components/tools/UnifiedToolCatalog";
+import { UnifiedDesktopSidebar, UnifiedToolDialog } from "@/components/tools/UnifiedToolCatalog";
 import { getUnifiedToolCategory } from "@/config/toolCatalog";
-import { batchModeLabel, createBatchTask, defaultOutputDirectory, getBatchCounts, getSupportedExtensions, isSupportedBatchName, sanitizeLocalPath } from "@/lib/batchQueue";
+import { batchModeLabel, batchTaskStatusLabel, createBatchTask, defaultOutputDirectory, getBatchCounts, getSupportedExtensions, isSupportedBatchName, sanitizeLocalPath } from "@/lib/batchQueue";
 import type { BatchMode, BatchOutputDirectory, BatchTask, BatchTaskStatus } from "@/lib/batchQueue";
 import type { DesktopLicenseStatus } from "@/lib/desktopLicense";
 import { getSidecarExperimentMode, isSidecarReady, shouldUseSidecarExperiment, sidecarExperimentStorageKey, sidecarStatusText, sidecarUnsupportedReason } from "@/lib/sidecarFfmpeg";
@@ -108,6 +109,10 @@ type DesktopTilePreview = {
   kind: "image" | "video" | "audio" | "file";
   url: string;
   note: string;
+  fileType: string;
+  fileSize: number;
+  status: BatchTaskStatus;
+  progress: number;
 };
 
 type ResultPreviewState = {
@@ -230,7 +235,6 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   const [sidecarExperimentEnabled, setSidecarExperimentEnabled] = useState(false);
   const [sidecarStatus, setSidecarStatus] = useState<SidecarCheckResult | null>(null);
   const [desktopLicenseStatus, setDesktopLicenseStatus] = useState<DesktopLicenseStatus | null>(null);
-  const [desktopLicenseLoading, setDesktopLicenseLoading] = useState(false);
   const [desktopLicenseGate, setDesktopLicenseGate] = useState<DesktopLicenseGateComponent | null>(null);
 
   const activeKind = tabs.find((tab) => tab.id === activeTab)?.kind;
@@ -283,13 +287,11 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   useEffect(() => {
     if (!isDesktopSurface) {
       setDesktopLicenseStatus(null);
-      setDesktopLicenseLoading(false);
       setDesktopLicenseGate(null);
       return;
     }
 
     let cancelled = false;
-    setDesktopLicenseLoading(true);
 
     async function loadLicenseStatus() {
       try {
@@ -309,8 +311,6 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
           setDesktopLicenseStatus(null);
           setDesktopLicenseGate(null);
         }
-      } finally {
-        if (!cancelled) setDesktopLicenseLoading(false);
       }
     }
 
@@ -724,7 +724,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     if (!isDesktopSurface) return;
     const api = await loadDesktopLicenseApi();
     if (!api || !api.hasDesktopLicenseApi()) return;
-    const nextStatus = await api.getDesktopLicenseStatus();
+    const nextStatus = await api.getDesktopLicenseStatus({ force: true });
     setDesktopLicenseStatus(nextStatus);
     if (!nextStatus.allowed) {
       throw new Error(nextStatus.reason || "当前授权状态不可用。");
@@ -1685,13 +1685,25 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
 
     let cancelled = false;
     const objectUrls: string[] = [];
-    const tasks = visibleBatchTasks.map((task) => ({ id: task.id, file: task.file, name: task.fileName }));
+    const tasks = visibleBatchTasks.map((task) => ({
+      id: task.id,
+      file: task.file,
+      name: task.fileName,
+      fileType: task.fileType,
+      fileSize: task.fileSize,
+      status: task.status,
+      progress: task.progress
+    }));
     setDesktopTilePreviews(tasks.map((task) => ({
       taskId: task.id,
       name: task.name,
       kind: isVideoFile(task.file) ? "video" : isAudioFile(task.file) ? "audio" : "file",
       url: "",
-      note: ""
+      note: "",
+      fileType: task.fileType,
+      fileSize: task.fileSize,
+      status: task.status,
+      progress: task.progress
     })));
 
     void (async () => {
@@ -1707,10 +1719,14 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
               name: task.name,
               kind: isVideoFile(task.file) ? "video" : "image",
               url,
-              note: ""
+              note: "",
+              fileType: task.fileType,
+              fileSize: task.fileSize,
+              status: task.status,
+              progress: task.progress
             };
           } else if (isAudioFile(task.file)) {
-            preview = { taskId: task.id, name: task.name, kind: "audio", url: "", note: "" };
+            preview = { taskId: task.id, name: task.name, kind: "audio", url: "", note: "", fileType: task.fileType, fileSize: task.fileSize, status: task.status, progress: task.progress };
           } else {
             let blob: Blob;
             if (isPdfFile(task.file)) {
@@ -1728,10 +1744,10 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
             }
             const url = URL.createObjectURL(blob);
             objectUrls.push(url);
-            preview = { taskId: task.id, name: task.name, kind: "image", url, note: "" };
+            preview = { taskId: task.id, name: task.name, kind: "image", url, note: "", fileType: task.fileType, fileSize: task.fileSize, status: task.status, progress: task.progress };
           }
         } catch {
-          preview = { taskId: task.id, name: task.name, kind: "file", url: "", note: "" };
+          preview = { taskId: task.id, name: task.name, kind: "file", url: "", note: "", fileType: task.fileType, fileSize: task.fileSize, status: task.status, progress: task.progress };
         }
         if (cancelled) break;
         setDesktopTilePreviews((current) => current.map((item) => item.taskId === task.id ? preview : item));
@@ -1744,16 +1760,15 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     };
   }, [desktopTilePreviewSignature, isDesktopSurface]);
 
-  if (isDesktopSurface && desktopLicenseLoading) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-[#0F1418] px-6 text-[#EDF3F7]">
-        <div className="flex items-center gap-3 border border-[#50646F] bg-[#182229] px-5 py-4 text-sm">
-          <Loader2 className="h-5 w-5 animate-spin" />
-          正在检查授权状态...
-        </div>
-      </main>
-    );
-  }
+  useEffect(() => {
+    if (!isDesktopSurface) return;
+    const currentTasks = activeBatchMode ? batchTasks.filter((task) => task.mode === activeBatchMode) : batchTasks;
+    const tasksById = new Map(currentTasks.map((task) => [task.id, task]));
+    setDesktopTilePreviews((current) => current.map((preview) => {
+      const task = tasksById.get(preview.taskId);
+      return task ? { ...preview, status: task.status, progress: task.progress } : preview;
+    }));
+  }, [activeBatchMode, batchTasks, isDesktopSurface]);
 
   if (isDesktopSurface && desktopLicenseStatus && !desktopLicenseStatus.allowed) {
     if (!desktopLicenseGate) {
@@ -1875,12 +1890,15 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
               </div>
             </div>
             <div className="desktop-a-title-actions">
-              <button className="primary" type="button" onClick={() => inputRef.current?.click()}>
+              <button type="button" onClick={() => inputRef.current?.click()}>
+                <FilePlus2 aria-hidden="true" size={15} />
                 添加文件
               </button>
-              <button type="button" onClick={() => void importFolder()}>添加文件夹</button>
+              <button type="button" onClick={() => void importFolder()}>
+                <FolderPlus aria-hidden="true" size={15} />添加文件夹
+              </button>
               <button type="button" disabled={status === "running" && taskCount > 0} onClick={() => clearAllLocalTasks()}>
-                清空
+                <Trash2 aria-hidden="true" size={14} />清空
               </button>
               <button className="desktop-a-current-tool" type="button" onClick={() => setCatalogOpen(true)}>
                 {getUnifiedToolCategory(activeTab)?.label || "转换工具"} / {currentTab.label}
@@ -1909,7 +1927,6 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
                   <p>{currentTab.label} · 文件仅在本机处理</p>
                 </div>
                 <div>
-                  <button type="button" onClick={() => inputRef.current?.click()}>添加文件</button>
                   <button type="button" disabled={!resultBlob && !resultFolderPath} onClick={handleDownload}>保存结果</button>
                 </div>
               </header>
@@ -1943,7 +1960,6 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
               <header>
                 <p>当前工具</p>
                 <h2>{currentTab.label}</h2>
-                <span>{currentTab.description}</span>
               </header>
               <div className="desktop-a-control-panel">{controlPanel}</div>
               <div className="desktop-a-output-panel">
@@ -1971,10 +1987,6 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
                 </label>
                 <button type="button" onClick={() => void refreshSidecarStatus()}>重新检测</button>
               </details>
-              <button className="desktop-a-start" type="button" disabled={!canStartTask} onClick={() => void runCurrentTask()}>
-                {status === "running" ? <Loader2 className="animate-spin" aria-hidden="true" size={16} /> : <Play aria-hidden="true" size={16} />}
-                开始转换{taskCount ? `（${taskCount}）` : ""}
-              </button>
               <button className="desktop-a-support" type="button" onClick={() => setSupportOpen(true)}>
                 <HeartHandshake aria-hidden="true" size={15} />支持作者
               </button>
@@ -2008,29 +2020,19 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     <>
       <main className="a2-online-tools">
         <GsapScene variant="tools" animateKey={activeTab}>
-          <UnifiedCategoryRail currentToolId={activeTab} />
           <section className="a2-tool-shell" id="tool-picker">
-            <div className="a2-mobile-tool-bar">
-              <button type="button" onClick={() => setCatalogOpen(true)}>
-                <span>
-                  <small>{getUnifiedToolCategory(activeTab)?.label}</small>
-                  <strong>{currentTab.label}</strong>
-                </span>
-                <Grid2X2 aria-hidden="true" size={17} />
-              </button>
-            </div>
-
             <header className="a2-tool-header" data-animate="tools-header">
               <div>
-                <p>在线工具 / {getUnifiedToolCategory(activeTab)?.label} / {currentTab.label}</p>
+                <nav className="a2-tool-breadcrumb" aria-label="面包屑">
+                  <Link href="/tools">在线工具</Link><ChevronRight aria-hidden="true" size={12} />
+                  <span>{getUnifiedToolCategory(activeTab)?.label}</span><ChevronRight aria-hidden="true" size={12} />
+                  <span>{currentTab.label}</span>
+                </nav>
                 <h1 id="lbl-panel-main-title">{currentTab.label}</h1>
                 <span id="lbl-panel-main-desc">{currentTab.description}。文件只在当前设备处理，不上传服务器。</span>
               </div>
               <div className="a2-tool-header-actions">
                 <span className="a2-local-status"><ShieldCheck aria-hidden="true" size={14} />在线 · 本地处理</span>
-                <button type="button" onClick={() => setCatalogOpen(true)}>
-                  <Grid2X2 aria-hidden="true" size={15} />切换工具
-                </button>
               </div>
             </header>
 
@@ -2080,14 +2082,12 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
                     onImageLoad={() => setCropPreviewKey((value) => value + 1)}
                   />
                 </div>
-                {onlineTaskActionBar}
               </section>
 
               <aside className="a2-parameter-panel" data-animate="tools-side" data-animate-dynamic="true">
                 <header>
-                  <p>输出设置</p>
-                  <h2 id="lbl-inspector-title">{currentTab.label}</h2>
-                  <span>{currentTab.description}</span>
+                  <p>{currentTab.label}</p>
+                  <h2 id="lbl-inspector-title">输出设置</h2>
                 </header>
                 <div className="a2-control-panel">{controlPanel}</div>
                 <p className="a2-parameter-note">
@@ -2095,6 +2095,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
                   参数和文件仅在当前页面内存中使用。文件本地处理，广告与转换数据隔离。
                 </p>
               </aside>
+              <div className="a2-workbench-actions">{onlineTaskActionBar}</div>
             </div>
           </section>
         </GsapScene>
@@ -2263,7 +2264,17 @@ function DesktopTiledPreview({
               <FileText className="h-8 w-8" />
             )}
           </span>
-          <strong title={preview.name}>{preview.name}</strong>
+          <span className="desktop-preview-tile-copy">
+            <strong title={preview.name}>{preview.name}</strong>
+            <small>{preview.fileType || "文件"} · {formatBytes(preview.fileSize)}</small>
+          </span>
+          <span className={`desktop-preview-tile-status is-${preview.status}`}>
+            <span>{batchTaskStatusLabel(preview.status)}</span>
+            <span>{Math.round(preview.progress * 100)}%</span>
+          </span>
+          <span className="desktop-preview-tile-progress" aria-hidden="true">
+            <span style={{ width: `${Math.round(preview.progress * 100)}%` }} />
+          </span>
           {preview.note ? <small>{preview.note}</small> : null}
         </button>
       ))}
@@ -2392,7 +2403,7 @@ function ControlPanel(props: ControlPanelProps) {
 }
 
 function Panel({ title, note, children }: { title: string; note: string; children: React.ReactNode }) {
-  return <div className="space-y-4"><div><h2 className="text-xl font-semibold text-slate-50">{title}</h2><p className="control-panel-note mt-1 text-sm leading-6 text-slate-400">{note}</p></div>{children}</div>;
+  return <section className="space-y-4" aria-label={`${title}参数`}><p className="control-panel-note text-sm leading-6 text-slate-400">{note}</p>{children}</section>;
 }
 function Field({ label, children }: { label: string; children: React.ReactNode }) { return <label className="block text-sm font-medium text-slate-300"><span className="mb-1 block">{label}</span>{children}</label>; }
 type SelectOption = string | { value: string; label: string };

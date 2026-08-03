@@ -166,6 +166,20 @@ describe("offline P0 release checks", () => {
     expect(desktopPreviewBlock).toContain("src={resultPreview.url}");
   });
 
+  it("keeps every imported desktop file in one scrollable preview grid", () => {
+    const toolsClient = readFileSync(resolve(projectRoot, "apps", "web", "src", "components", "tools", "ToolsClient.tsx"), "utf8");
+    const globals = readFileSync(resolve(projectRoot, "apps", "web", "src", "app", "globals.css"), "utf8");
+    const tiledPreview = toolsClient.slice(
+      toolsClient.indexOf("function DesktopTiledPreview"),
+      toolsClient.indexOf("function DesktopPreviewPanel")
+    );
+
+    expect(tiledPreview).toContain("previews.map");
+    expect(tiledPreview).not.toContain(".slice(");
+    expect(globals).toContain("grid-template-columns: repeat(3, minmax(0, 1fr)) !important");
+    expect(globals).toMatch(/\.desktop-tile-preview-grid[\s\S]*?overflow:\s*auto/);
+  });
+
   it("keeps the reviewed desktop UI copy and crop preview constraints", () => {
     const toolsClientPath = resolve(projectRoot, "apps", "web", "src", "components", "tools", "ToolsClient.tsx");
     const globalsPath = resolve(projectRoot, "apps", "web", "src", "app", "globals.css");

@@ -87,6 +87,23 @@ describe("offline license boundary", () => {
     expect(downloadBlock).toContain("结果已保存");
   });
 
+  it("keeps background authorization checks from replacing the workbench during tool switches", () => {
+    const toolsSource = readProjectFile("apps", "web", "src", "components", "tools", "ToolsClient.tsx");
+    const localToolsSource = readProjectFile("apps", "web", "src", "components", "tools", "LocalToolsClient.tsx");
+    const catalogSource = readProjectFile("apps", "web", "src", "components", "tools", "UnifiedToolCatalog.tsx");
+    const licenseSource = readProjectFile("apps", "web", "src", "lib", "desktopLicense.ts");
+
+    expect(toolsSource).not.toContain("desktopLicenseLoading");
+    expect(localToolsSource).not.toContain("desktopLicenseLoading");
+    expect(toolsSource).not.toContain("正在检查授权状态");
+    expect(localToolsSource).not.toContain("正在检查授权状态");
+    expect(catalogSource).toContain('import Link from "next/link"');
+    expect(licenseSource).toContain("cachedLicenseStatus");
+    expect(licenseSource).toContain("licenseStatusRequest");
+    expect(toolsSource).toContain("getDesktopLicenseStatus({ force: true })");
+    expect(localToolsSource).toContain("getDesktopLicenseStatus({ force: true })");
+  });
+
   it("documents the complete offline activation flow in the install guide", () => {
     const installGuide = readProjectFile(
       "apps",

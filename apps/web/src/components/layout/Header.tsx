@@ -41,9 +41,16 @@ export function Header({ desktop = isDesktopApp }: { desktop?: boolean }) {
 
   const headerClass = desktop ? "apple-global-nav apple-global-nav-desktop" : "apple-global-nav";
   const menuButtonClass = "apple-mobile-menu-button";
-  const isActive = (href: string) => href === siteConfig.links.home
-    ? pathname === href
-    : pathname === href || pathname.startsWith(`${href}/`);
+  const isActive = (href: string) => {
+    if (href === siteConfig.links.home) return pathname === href;
+    if (!desktop && href === siteConfig.links.tools) {
+      return pathname === siteConfig.links.tools
+        || pathname.startsWith(`${siteConfig.links.tools}/`)
+        || pathname === siteConfig.links.localTools
+        || pathname.startsWith(`${siteConfig.links.localTools}/`);
+    }
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
 
   useGSAP(() => {
     const brand = brandRef.current;

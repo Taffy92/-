@@ -1,6 +1,7 @@
 "use client";
 
-import { ChevronRight, Grid2X2, X } from "lucide-react";
+import { ChevronRight, FileSpreadsheet, FileText, Film, Grid2X2, Image as ImageIcon, ScanText, X } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useRef } from "react";
 import {
   getCategoryHref,
@@ -9,20 +10,28 @@ import {
   unifiedToolCategories
 } from "@/config/toolCatalog";
 
+const categoryIcons = {
+  image: ImageIcon,
+  pdf: FileText,
+  document: FileSpreadsheet,
+  media: Film,
+  ocr: ScanText
+};
+
 export function UnifiedCategoryRail({ currentToolId }: { currentToolId: string }) {
   const currentCategory = getUnifiedToolCategory(currentToolId);
 
   return (
     <nav className="unified-category-rail" aria-label="工具分类">
       {unifiedToolCategories.map((category) => (
-        <a
+        <Link
           className={currentCategory?.id === category.id ? "active" : ""}
           href={getCategoryHref(category)}
           key={category.id}
         >
           <strong>{category.label}</strong>
           <span>{category.summary}</span>
-        </a>
+        </Link>
       ))}
     </nav>
   );
@@ -40,21 +49,24 @@ export function UnifiedDesktopSidebar({
   return (
     <aside className="desktop-a-sidebar" aria-label="离线工具分类">
       <div className="desktop-a-category-list">
-        {unifiedToolCategories.map((category) => (
-          <a
-            className={currentCategory.id === category.id ? "active" : ""}
-            href={getCategoryHref(category)}
-            key={category.id}
-          >
-            <span>{category.label}</span>
-            <small>{category.tools.length}</small>
-          </a>
-        ))}
+        {unifiedToolCategories.map((category) => {
+          const CategoryIcon = categoryIcons[category.id];
+          return (
+            <Link
+              className={currentCategory.id === category.id ? "active" : ""}
+              href={getCategoryHref(category)}
+              key={category.id}
+            >
+              <span className="desktop-a-category-name"><CategoryIcon aria-hidden="true" size={15} />{category.label}</span>
+              <small>{category.tools.length}</small>
+            </Link>
+          );
+        })}
       </div>
       <div className="desktop-a-current-tools">
         <p>{currentCategory.label}</p>
         {currentCategory.tools.map((tool) => (
-          <a
+          <Link
             className={currentToolId === tool.id ? "active" : ""}
             href={getUnifiedToolHref(tool)}
             key={tool.id}
@@ -62,7 +74,7 @@ export function UnifiedDesktopSidebar({
           >
             <span>{tool.label}</span>
             {tool.offlineBatch ? <small>批量</small> : null}
-          </a>
+          </Link>
         ))}
       </div>
       <button className="desktop-a-all-tools" type="button" onClick={onOpenCatalog}>
@@ -143,8 +155,8 @@ export function UnifiedToolDialog({
         <header>
           <div>
             <p>{desktop ? "离线任务类型" : "在线工具目录"}</p>
-            <h2 id="unified-tool-dialog-title">按实际任务选择工具</h2>
-            <span>五个分类、24 个真实功能，在线版与离线版使用相同名称。</span>
+            <h2 id="unified-tool-dialog-title">选择工具</h2>
+            <span>按文件类型和处理目的查找。在线版一次处理一个文件，批量任务请使用 Windows 离线版。</span>
           </div>
           <button ref={closeRef} type="button" onClick={onClose} aria-label="关闭工具目录">
             <X aria-hidden="true" size={18} />
@@ -156,7 +168,7 @@ export function UnifiedToolDialog({
               <h3>{category.label}</h3>
               <div>
                 {category.tools.map((tool) => (
-                  <a
+                  <Link
                     className={currentToolId === tool.id ? "active" : ""}
                     href={getUnifiedToolHref(tool)}
                     key={tool.id}
@@ -170,7 +182,7 @@ export function UnifiedToolDialog({
                       {tool.offlineBatch ? <small>离线批量</small> : null}
                       <ChevronRight aria-hidden="true" size={14} />
                     </span>
-                  </a>
+                  </Link>
                 ))}
               </div>
             </section>

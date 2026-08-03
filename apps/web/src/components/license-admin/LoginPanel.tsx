@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { KeyRound } from "lucide-react";
 import styles from "./license-admin.module.css";
 
@@ -14,11 +14,17 @@ export function LoginPanel({
   onLogin: (password: string) => Promise<void>;
 }) {
   const [password, setPassword] = useState("");
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    setReady(true);
+  }, []);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    await onLogin(password);
+    const submittedPassword = password;
     setPassword("");
+    await onLogin(submittedPassword);
   }
 
   return (
@@ -50,11 +56,11 @@ export function LoginPanel({
             autoComplete="current-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            disabled={busy}
+            disabled={busy || !ready}
             autoFocus
           />
           {error ? <p className={styles.errorText} role="alert">{error}</p> : null}
-          <button type="submit" className={styles.primaryButton} disabled={busy || !password}>
+          <button type="submit" className={styles.primaryButton} disabled={!ready || busy || !password}>
             {busy ? "正在进入…" : "进入后台"}
           </button>
         </form>

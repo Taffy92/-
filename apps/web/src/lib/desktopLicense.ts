@@ -42,6 +42,9 @@ type TauriGlobal = {
   invoke?: <T>(command: string, args?: Record<string, unknown>) => Promise<T>;
 };
 
+let cachedLicenseStatus: DesktopLicenseStatus | null = null;
+let licenseStatusRequest: Promise<DesktopLicenseStatus> | null = null;
+
 function getTauriApi(): TauriGlobal | undefined {
   if (typeof window === "undefined") return undefined;
   return (window as unknown as { __TAURI__?: TauriGlobal }).__TAURI__;
@@ -61,16 +64,31 @@ async function invokeLicense<T>(command: string, args?: Record<string, unknown>)
   return invoke<T>(command, args);
 }
 
-export function getDesktopLicenseStatus() {
-  return invokeLicense<DesktopLicenseStatus>("get_license_status");
+export function getDesktopLicenseStatus(options: { force?: boolean } = {}) {
+  if (licenseStatusRequest) return licenseStatusRequest;
+  if (!options.force && cachedLicenseStatus) return Promise.resolve(cachedLicenseStatus);
+
+  licenseStatusRequest = invokeLicense<DesktopLicenseStatus>("get_license_status")
+    .then((status) => {
+      cachedLicenseStatus = status;
+      return status;
+    })
+    .finally(() => {
+      licenseStatusRequest = null;
+    });
+  return licenseStatusRequest;
 }
 
-export function activateLicenseCode(code: string) {
-  return invokeLicense<DesktopLicenseStatus>("activate_license_code", { code });
+export async function activateLicenseCode(code: string) {
+  const status = await invokeLicense<DesktopLicenseStatus>("activate_license_code", { code });
+  cachedLicenseStatus = status;
+  return status;
 }
 
-export function activateLicenseFileContent(content: string) {
-  return invokeLicense<DesktopLicenseStatus>("activate_license_file_content", { content });
+export async function activateLicenseFileContent(content: string) {
+  const status = await invokeLicense<DesktopLicenseStatus>("activate_license_file_content", { content });
+  cachedLicenseStatus = status;
+  return status;
 }
 
 export function createActivationRequest() {

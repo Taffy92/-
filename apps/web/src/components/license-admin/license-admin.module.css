@@ -529,6 +529,12 @@
   border: 0;
 }
 
+.loginForm input.srOnly {
+  width: 1px;
+  min-height: 0;
+  padding: 0;
+}
+
 @media (min-width: 600px) {
   .adminPage {
     padding: 42px 24px 80px;

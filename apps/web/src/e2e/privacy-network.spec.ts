@@ -23,7 +23,8 @@ test("local processing page does not upload user files while ads and download au
   });
 
   await page.goto("/tools/", { waitUntil: "domcontentloaded" });
-  await expect(page.locator("#lbl-panel-main-desc")).toContainText(localPrivacyText);
+  await page.locator(".online-tool-directory-grid > a").first().click();
+  await expect(page.getByText(localPrivacyText, { exact: false })).toBeVisible();
 
   await page.waitForTimeout(500);
   expect(fileUploadRequests).toEqual([]);

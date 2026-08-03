@@ -3,10 +3,9 @@
 import { ReactNode, useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 if (typeof window !== "undefined") {
-  gsap.registerPlugin(useGSAP, ScrollTrigger);
+  gsap.registerPlugin(useGSAP);
 }
 
 type GsapSceneProps = {
@@ -38,43 +37,30 @@ export function GsapScene({ animateKey, children, variant }: GsapSceneProps) {
     if (variant === "home") {
       const shell = q('[data-animate="home-shell"]');
       const intro = q('[data-animate="home-intro"]');
-      const trustItems = q('[data-animate="home-trust-item"]');
-      const cards = q('[data-animate="home-card"]');
-      const homeTargets = [...shell, ...intro, ...trustItems, ...cards];
+      const homeTargets = [...shell, ...intro];
 
       if (homeTargets.length) {
         gsap.set(homeTargets, { willChange: "transform, opacity" });
       }
 
-      const timeline = gsap.timeline({ defaults: { duration: 0.55, ease: "power3.out" } });
-      if (shell.length) {
-        timeline.from(shell, { autoAlpha: 0, y: 22, duration: 0.5, clearProps: "transform,opacity,visibility,willChange" });
-      }
+      const timeline = gsap.timeline({ defaults: { duration: 0.46, ease: "power2.out" } });
       if (intro.length) {
-        timeline.from(intro, { autoAlpha: 0, y: 16, stagger: 0.07, clearProps: "transform,opacity,visibility,willChange" }, shell.length ? "-=0.22" : 0);
-      }
-      if (trustItems.length) {
-        timeline.from(trustItems, { autoAlpha: 0, x: 14, stagger: 0.06, clearProps: "transform,opacity,visibility,willChange" }, "-=0.2");
-      }
-
-      if (cards.length) {
-        ScrollTrigger.batch(cards, {
-          interval: 0.08,
-          once: true,
-          start: "top 88%",
-          onEnter: (batch) => {
-            gsap.from(batch, {
-              autoAlpha: 0,
-              y: 22,
-              scale: 0.985,
-              duration: 0.52,
-              stagger: 0.06,
-              ease: "power2.out",
-              clearProps: "transform,opacity,visibility,willChange"
-            });
-          }
+        timeline.from(intro, {
+          autoAlpha: 0,
+          y: 12,
+          stagger: 0.04,
+          clearProps: "transform,opacity,visibility,willChange"
         });
       }
+      if (shell.length) {
+        timeline.from(shell, {
+          autoAlpha: 0,
+          y: 16,
+          duration: 0.56,
+          clearProps: "transform,opacity,visibility,willChange"
+        }, "-=0.28");
+      }
+
     }
 
     if (variant === "tools") {
@@ -117,7 +103,6 @@ export function GsapScene({ animateKey, children, variant }: GsapSceneProps) {
       }
     }
 
-    window.setTimeout(() => ScrollTrigger.refresh(), 250);
   }, { scope: scopeRef });
 
   useGSAP(() => {

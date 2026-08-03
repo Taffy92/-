@@ -5,11 +5,12 @@ import type { ComponentType, ReactNode } from "react";
 import {
   Download,
   ChevronDown,
+  ChevronRight,
   ChevronUp,
   FileAudio,
   FileImage,
+  FilePlus2,
   FileText,
-  Grid2X2,
   HardDrive,
   HeartHandshake,
   Loader2,
@@ -18,6 +19,7 @@ import {
   Square,
   Trash2
 } from "lucide-react";
+import Link from "next/link";
 import {
   convertImage,
   readImageMetadata,
@@ -72,7 +74,7 @@ import { isDesktopApp } from "@/config/appMode";
 import { currentReleaseVersion } from "@/config/version";
 import { MatrixLogo } from "@/components/layout/MatrixLogo";
 import { SupportDialog } from "@/components/support/SupportDialog";
-import { UnifiedCategoryRail, UnifiedDesktopSidebar, UnifiedToolDialog } from "@/components/tools/UnifiedToolCatalog";
+import { UnifiedDesktopSidebar, UnifiedToolDialog } from "@/components/tools/UnifiedToolCatalog";
 import { getUnifiedToolCategory } from "@/config/toolCatalog";
 import type { DesktopLicenseStatus } from "@/lib/desktopLicense";
 
@@ -166,7 +168,6 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
   const [supportOpen, setSupportOpen] = useState(false);
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [desktopLicenseStatus, setDesktopLicenseStatus] = useState<DesktopLicenseStatus | null>(null);
-  const [desktopLicenseLoading, setDesktopLicenseLoading] = useState(false);
   const [desktopLicenseGate, setDesktopLicenseGate] = useState<DesktopLicenseGateComponent | null>(null);
 
   const [imageFormat, setImageFormat] = useState<ExportImageFormat>("jpg");
@@ -220,13 +221,11 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
   useEffect(() => {
     if (!desktop) {
       setDesktopLicenseStatus(null);
-      setDesktopLicenseLoading(false);
       setDesktopLicenseGate(null);
       return;
     }
 
     let cancelled = false;
-    setDesktopLicenseLoading(true);
     void (async () => {
       try {
         const api = await loadDesktopLicenseApi();
@@ -245,8 +244,6 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
           setDesktopLicenseStatus(null);
           setDesktopLicenseGate(null);
         }
-      } finally {
-        if (!cancelled) setDesktopLicenseLoading(false);
       }
     })();
 
@@ -342,7 +339,7 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
       if (desktop) {
         const api = await loadDesktopLicenseApi();
         if (api?.hasDesktopLicenseApi()) {
-          const nextStatus = await api.getDesktopLicenseStatus();
+          const nextStatus = await api.getDesktopLicenseStatus({ force: true });
           setDesktopLicenseStatus(nextStatus);
           if (!nextStatus.allowed) throw new Error(nextStatus.reason || "当前授权状态不可用。");
         }
@@ -662,15 +659,6 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
     />
   );
 
-  if (desktop && desktopLicenseLoading) {
-    return (
-      <main className="desktop-a-license-loading">
-        <Loader2 className="animate-spin" aria-hidden="true" size={20} />
-        正在检查授权状态…
-      </main>
-    );
-  }
-
   if (desktop && desktopLicenseStatus && !desktopLicenseStatus.allowed) {
     if (!desktopLicenseGate) {
       return (
@@ -708,8 +696,12 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
               </div>
             </div>
             <div className="desktop-a-title-actions">
-              <button className="primary" type="button" onClick={() => inputRef.current?.click()}>添加文件</button>
-              <button type="button" onClick={clear}>清空</button>
+              <button type="button" onClick={() => inputRef.current?.click()}>
+                <FilePlus2 aria-hidden="true" size={15} />添加文件
+              </button>
+              <button type="button" onClick={clear}>
+                <Trash2 aria-hidden="true" size={14} />清空
+              </button>
               <button className="desktop-a-current-tool" type="button" onClick={() => setCatalogOpen(true)}>
                 {getUnifiedToolCategory(tool)?.label} / {currentTool.label}
               </button>
@@ -735,7 +727,6 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
                   <h1>任务画布{files.length ? `（${files.length}）` : ""}</h1>
                   <p>{currentTool.label} · {currentTool.description}</p>
                 </div>
-                <button type="button" onClick={() => inputRef.current?.click()}>添加文件</button>
               </header>
               <div className="desktop-a-local-canvas">
                 {files.length ? (
@@ -759,7 +750,6 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
               <header>
                 <p>当前工具</p>
                 <h2>{currentTool.label}</h2>
-                <span>{currentTool.description}</span>
               </header>
               <div className="desktop-a-control-panel">{toolControls}</div>
               <div className="desktop-a-output-panel">
@@ -769,10 +759,6 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
                   <span>{outputRoot || "选择输出目录"}</span>
                 </button>
               </div>
-              <button className="desktop-a-start" type="button" disabled={!files.length || status === "running"} onClick={() => void run()}>
-                {status === "running" ? <Loader2 className="animate-spin" aria-hidden="true" size={16} /> : <Play aria-hidden="true" size={16} />}
-                {tool === "ocr" ? "开始识别" : "开始处理"}{files.length ? `（${files.length}）` : ""}
-              </button>
               <button className="desktop-a-support" type="button" onClick={() => setSupportOpen(true)}>
                 <HeartHandshake aria-hidden="true" size={15} />支持作者
               </button>
@@ -797,23 +783,19 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
   return (
     <>
       <main className="a2-online-tools a2-local-tools-page">
-        <UnifiedCategoryRail currentToolId={tool} />
         <section className="a2-tool-shell">
-          <div className="a2-mobile-tool-bar">
-            <button type="button" onClick={() => setCatalogOpen(true)}>
-              <span><small>{getUnifiedToolCategory(tool)?.label}</small><strong>{currentTool.label}</strong></span>
-              <Grid2X2 aria-hidden="true" size={17} />
-            </button>
-          </div>
           <header className="a2-tool-header">
             <div>
-              <p>在线工具 / {getUnifiedToolCategory(tool)?.label} / {currentTool.label}</p>
+              <nav className="a2-tool-breadcrumb" aria-label="面包屑">
+                <Link href="/tools">在线工具</Link><ChevronRight aria-hidden="true" size={12} />
+                <span>{getUnifiedToolCategory(tool)?.label}</span><ChevronRight aria-hidden="true" size={12} />
+                <span>{currentTool.label}</span>
+              </nav>
               <h1>{currentTool.label}</h1>
               <span>{currentTool.description}。文件只在当前设备处理，不上传服务器。</span>
             </div>
             <div className="a2-tool-header-actions">
               <span className="a2-local-status"><ShieldCheck aria-hidden="true" size={14} />在线 · 本地处理</span>
-              <button type="button" onClick={() => setCatalogOpen(true)}><Grid2X2 aria-hidden="true" size={15} />切换工具</button>
             </div>
           </header>
 
@@ -910,7 +892,8 @@ function LocalFilePreview({ file }: { file: File }) {
       </div>
       <div>
         <strong title={file.name}>{file.name}</strong>
-        <span>{formatBytes(file.size)}</span>
+        <span>{file.name.split(".").pop()?.toUpperCase() || "文件"} · {formatBytes(file.size)}</span>
+        <small>已加入任务</small>
       </div>
     </article>
   );
