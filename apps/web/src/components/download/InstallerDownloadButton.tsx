@@ -42,7 +42,7 @@ type SaveFilePicker = (options: {
   }>;
 }) => Promise<SaveFileHandle>;
 
-const DOWNLOAD_CONCURRENCY = 4;
+const DOWNLOAD_CONCURRENCY = 6;
 
 type Props = {
   packageType: PackageType;

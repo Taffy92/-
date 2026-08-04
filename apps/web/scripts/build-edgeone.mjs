@@ -10,7 +10,7 @@ const outDir = path.join(appRoot, "out");
 const nextBin = path.join(appRoot, "node_modules", "next", "dist", "bin", "next");
 const maxEdgeOneFileSize = 25 * 1024 * 1024;
 const wasmPartSize = 16 * 1024 * 1024;
-const installerPartSize = 16 * 1024 * 1024;
+const installerPartSize = 24 * 1024 * 1024;
 const releaseVersion = "2.0.0";
 const releaseInstallerDir = path.resolve(appRoot, "..", "..", "release", `v${releaseVersion}`, "installers");
 const edgeOneReleaseDir = path.join(outDir, "release", `v${releaseVersion}`, "edgeone");
@@ -208,7 +208,8 @@ async function reusePublishedInstallerParts(installer, publishedManifest) {
     publishedPackage.fileName !== installer.fileName ||
     publishedPackage.sha256 !== installer.sha256 ||
     !Array.isArray(publishedPackage.parts) ||
-    publishedPackage.parts.length === 0
+    publishedPackage.parts.length === 0 ||
+    !usesCurrentInstallerPartLayout(publishedPackage)
   ) {
     throw new Error(`Published ${installer.type} installer manifest does not match this release.`);
   }
@@ -270,6 +271,17 @@ async function reusePublishedInstallerParts(installer, publishedManifest) {
     contentType: installer.contentType,
     parts
   };
+}
+
+function usesCurrentInstallerPartLayout(packageInfo) {
+  if (!Number.isSafeInteger(packageInfo?.size) || !Array.isArray(packageInfo.parts) || packageInfo.parts.length === 0) {
+    return false;
+  }
+  if (packageInfo.parts.length !== Math.ceil(packageInfo.size / installerPartSize)) return false;
+  return packageInfo.parts.every((part, index, parts) => {
+    if (!Number.isSafeInteger(part?.size) || part.size <= 0 || part.size > installerPartSize) return false;
+    return index === parts.length - 1 || part.size === installerPartSize;
+  });
 }
 
 async function assertNoPrivateLicenseMaterial() {

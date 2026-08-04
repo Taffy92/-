@@ -115,7 +115,7 @@ npm run build:edgeone
 npm run deploy:edgeone
 ```
 
-EdgeOne 项目名为 `format-converter-web`。正式构建会从被 Git 忽略的 `release/v2.0.0/installers/` 读取 EXE/MSI，先核对整包 SHA256，再生成不超过 16 MiB 的同源分片。浏览器逐片校验并在本地拼装，避免国内用户被跳转到 GitHub。
+EdgeOne 项目名为 `format-converter-web`。正式构建会从被 Git 忽略的 `release/v2.0.0/installers/` 读取 EXE/MSI，先核对整包 SHA256，再生成不超过 24 MiB 的同源分片。浏览器逐片校验并在本地拼装，避免国内用户被跳转到 GitHub。GitHub 关联构建无法读取本地安装包时，会拒绝复用旧分片布局并重新拉取已校验的发布资产，确保分片提速配置真正生效。
 
 正式构建还会纳入 EdgeOne 授权函数，并检查私钥、客户记录和 `.mrx` 没有进入发布产物。具体检查地址与故障处理见 `docs/operator-runbook.md`。
 
