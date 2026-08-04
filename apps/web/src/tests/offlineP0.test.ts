@@ -73,8 +73,10 @@ describe("offline P0 release checks", () => {
     expect(downloadButtonSource).toContain("showSaveFilePicker");
     expect(downloadButtonSource).toContain("getFile()");
     expect(downloadButtonSource).toContain("fetchVerifiedPart");
+    expect(downloadButtonSource).toContain("当前浏览器不支持安全保存安装包");
+    expect(downloadButtonSource).toContain("downloadPartsInOrder");
+    expect(downloadButtonSource).not.toContain("saveBufferedFile");
     expect(downloadButtonSource).toContain("DOWNLOAD_CONCURRENCY = 6");
-    expect(downloadButtonSource).toContain("Promise.all(batch.map");
     expect(downloadButtonSource).toContain("下载后的安装包完整性校验失败");
     expect(downloadButtonSource).toContain('crypto.subtle.digest("SHA-256"');
     expect(edgeOneBuildSource).toContain("installerPartSize");

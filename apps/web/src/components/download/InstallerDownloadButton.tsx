@@ -79,64 +79,41 @@ export default function InstallerDownloadButton({
       validatePackage(packageInfo, fileName, manifestUrl, packageType);
 
       const picker = (window as typeof window & { showSaveFilePicker?: SaveFilePicker }).showSaveFilePicker;
-      const bufferedParts: ArrayBuffer[] = [];
+      if (!picker) {
+        throw new Error("当前浏览器不支持安全保存安装包，请使用新版 Edge 或 Chrome。");
+      }
 
-      if (picker) {
-        const handle = await picker({
-          suggestedName: fileName,
-          types: [
-            {
-              description: packageType === "exe" ? "Windows EXE 安装包" : "Windows MSI 安装包",
-              accept: {
-                [packageInfo.contentType]: [`.${packageType}`]
-              }
+      const handle = await picker({
+        suggestedName: fileName,
+        types: [
+          {
+            description: packageType === "exe" ? "Windows EXE 安装包" : "Windows MSI 安装包",
+            accept: {
+              [packageInfo.contentType]: [`.${packageType}`]
             }
-          ]
-        });
-        saveHandle = handle;
-        writable = await handle.createWritable();
-      }
+          }
+        ]
+      });
+      saveHandle = handle;
+      writable = await handle.createWritable();
 
-      let downloadedBytes = 0;
-      for (let batchStart = 0; batchStart < packageInfo.parts.length; batchStart += DOWNLOAD_CONCURRENCY) {
-        const batch = packageInfo.parts.slice(batchStart, batchStart + DOWNLOAD_CONCURRENCY);
-        setMessage(
-          `正在并行下载并校验安装包，已处理 ${Math.round((downloadedBytes / packageInfo.size) * 100)}%…`
-        );
-        const bytesBatch = await Promise.all(batch.map((part) => fetchVerifiedPart(part)));
+      await downloadPartsInOrder(packageInfo.parts, writable, packageInfo.size, (downloadedBytes) => {
+        const totalProgress = Math.min(99, Math.round((downloadedBytes / packageInfo.size) * 100));
+        setProgress(totalProgress);
+        setMessage(`正在并行下载并校验安装包，已处理 ${totalProgress}%…`);
+      });
 
-        for (const bytes of bytesBatch) {
-          if (writable) await writable.write(bytes);
-          else bufferedParts.push(bytes);
-          downloadedBytes += bytes.byteLength;
-          const totalProgress = Math.min(99, Math.round((downloadedBytes / packageInfo.size) * 100));
-          setProgress(totalProgress);
-          setMessage(`正在并行下载并校验安装包，已处理 ${totalProgress}%…`);
-        }
-      }
-
-      if (downloadedBytes !== packageInfo.size) {
-        throw new Error("下载后的文件大小与发布记录不一致。");
-      }
-
-      let bufferedBlob: Blob | null = null;
-      if (writable) {
-        await writable.close();
-        writable = null;
-      } else {
-        bufferedBlob = new Blob(bufferedParts, { type: packageInfo.contentType });
-      }
+      await writable.close();
+      writable = null;
 
       setMessage("正在验证安装包完整性…");
-      const savedFile = saveHandle ? await saveHandle.getFile() : bufferedBlob;
-      if (!savedFile) throw new Error("安装包保存失败，请重试。");
+      const savedFile = await saveHandle.getFile();
       const savedBytes = await savedFile.arrayBuffer();
       const savedHash = await sha256(savedBytes);
       if (savedBytes.byteLength !== packageInfo.size || savedHash !== packageInfo.sha256) {
         throw new Error("下载后的安装包完整性校验失败，请删除当前文件后重新下载。");
       }
 
-      if (bufferedBlob) saveBufferedFile(bufferedParts, packageInfo.contentType, fileName);
       setProgress(100);
       setMessage(`下载完成；文件 SHA256 应为 ${packageInfo.sha256}`);
     } catch (error) {
@@ -247,20 +224,67 @@ async function fetchVerifiedPart(part: ManifestPart): Promise<ArrayBuffer> {
   return bytes;
 }
 
+async function downloadPartsInOrder(
+  parts: ManifestPart[],
+  writable: WritableFile,
+  totalSize: number,
+  onPartDownloaded: (downloadedBytes: number) => void
+) {
+  let nextPartIndex = 0;
+  let downloadedBytes = 0;
+  let workerError: unknown = null;
+  let wakeWriter: (() => void) | null = null;
+  const completedParts = new Map<number, ArrayBuffer>();
+
+  async function worker() {
+    while (!workerError) {
+      const partIndex = nextPartIndex++;
+      if (partIndex >= parts.length) return;
+
+      try {
+        const bytes = await fetchVerifiedPart(parts[partIndex]);
+        completedParts.set(partIndex, bytes);
+        downloadedBytes += bytes.byteLength;
+        onPartDownloaded(downloadedBytes);
+        wakeWriter?.();
+        wakeWriter = null;
+      } catch (error) {
+        workerError = error;
+        wakeWriter?.();
+        wakeWriter = null;
+        return;
+      }
+    }
+  }
+
+  const workers = Array.from(
+    { length: Math.min(DOWNLOAD_CONCURRENCY, parts.length) },
+    () => worker()
+  );
+
+  for (let partIndex = 0; partIndex < parts.length; partIndex += 1) {
+    while (!completedParts.has(partIndex) && !workerError) {
+      await new Promise<void>((resolve) => {
+        wakeWriter = resolve;
+      });
+    }
+    if (workerError) throw workerError;
+
+    const bytes = completedParts.get(partIndex);
+    if (!bytes) throw new Error("安装包分片下载结果不完整。");
+    completedParts.delete(partIndex);
+    await writable.write(bytes);
+  }
+
+  await Promise.all(workers);
+  if (downloadedBytes !== totalSize) {
+    throw new Error("下载后的文件大小与发布记录不一致。");
+  }
+}
+
 async function sha256(bytes: ArrayBuffer) {
   const digest = await crypto.subtle.digest("SHA-256", bytes);
   return Array.from(new Uint8Array(digest), (value) => value.toString(16).padStart(2, "0"))
     .join("")
     .toUpperCase();
-}
-
-function saveBufferedFile(parts: ArrayBuffer[], contentType: string, fileName: string) {
-  const url = URL.createObjectURL(new Blob(parts, { type: contentType }));
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = fileName;
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
