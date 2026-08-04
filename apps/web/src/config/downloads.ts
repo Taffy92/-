@@ -1,6 +1,6 @@
 const exeFileName = "万能格式转换器_2.0.0_x64-setup.exe";
 const msiFileName = "万能格式转换器_2.0.0_x64_zh-CN.msi";
-const edgeOneManifestUrl = "/release/v2.0.0/edgeone/manifest.json";
+const edgeOneManifestUrl = "/release/v2.0.0/edgeone-v24/manifest.json";
 
 export const downloadsConfig = {
   appName: "万能格式转换离线专业版",

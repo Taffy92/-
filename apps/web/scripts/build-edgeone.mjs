@@ -13,7 +13,8 @@ const wasmPartSize = 16 * 1024 * 1024;
 const installerPartSize = 24 * 1024 * 1024;
 const releaseVersion = "2.0.0";
 const releaseInstallerDir = path.resolve(appRoot, "..", "..", "release", `v${releaseVersion}`, "installers");
-const edgeOneReleaseDir = path.join(outDir, "release", `v${releaseVersion}`, "edgeone");
+const edgeOneInstallerDirectory = "edgeone-v24";
+const edgeOneReleaseDir = path.join(outDir, "release", `v${releaseVersion}`, edgeOneInstallerDirectory);
 const publishedReleaseBaseUrl =
   process.env.EDGEONE_RELEASE_SOURCE_URL || "https://gszhmrx.cn";
 const installerAssetBaseUrl =
@@ -138,7 +139,7 @@ async function writeInstallerParts() {
       const partBytes = sourceBytes.subarray(offset, offset + installerPartSize);
       await writeFile(path.join(packageDir, partName), partBytes);
       parts.push({
-        url: `/release/v${releaseVersion}/edgeone/${installer.type}/${partName}`,
+        url: `/release/v${releaseVersion}/${edgeOneInstallerDirectory}/${installer.type}/${partName}`,
         size: partBytes.length,
         sha256: sha256(partBytes)
       });
@@ -161,7 +162,7 @@ async function writeInstallerParts() {
 
 async function fetchPublishedInstallerManifest() {
   const manifestUrl = new URL(
-    `/release/v${releaseVersion}/edgeone/manifest.json`,
+    `/release/v${releaseVersion}/${edgeOneInstallerDirectory}/manifest.json`,
     publishedReleaseBaseUrl
   );
   console.log(`Local installers are unavailable; reusing verified parts from ${manifestUrl.origin}.`);
@@ -215,7 +216,7 @@ async function reusePublishedInstallerParts(installer, publishedManifest) {
   }
 
   const packageDir = path.join(edgeOneReleaseDir, installer.type);
-  const expectedPrefix = `/release/v${releaseVersion}/edgeone/${installer.type}/`;
+  const expectedPrefix = `/release/v${releaseVersion}/${edgeOneInstallerDirectory}/${installer.type}/`;
   const publishedBase = new URL(publishedReleaseBaseUrl);
   const combinedHash = createHash("sha256");
   const parts = [];

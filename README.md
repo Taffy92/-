@@ -94,7 +94,7 @@ NEXT_PUBLIC_SITE_URL=https://gszhmrx.cn
 
 当前正式域名为 `https://gszhmrx.cn`，`https://www.gszhmrx.cn` 绑定到同一 EdgeOne Pages 项目。所有 canonical、sitemap、Open Graph URL 都从 `apps/web/src/config/site.ts` 的 `siteConfig.url` 读取，构建前确认 `NEXT_PUBLIC_SITE_URL=https://gszhmrx.cn`。
 
-离线安装包按 3 天试用模式直接下载。下载页固定读取 EdgeOne 同源清单 `/release/v2.0.0/edgeone/manifest.json`，不再依赖可变的外部安装包 URL 环境变量。
+离线安装包按 3 天试用模式直接下载。下载页固定读取 EdgeOne 同源清单 `/release/v2.0.0/edgeone-v24/manifest.json`，不再依赖可变的外部安装包 URL 环境变量。
 
 授权后台四项秘密值只配置在 EdgeOne 服务端环境变量中，不写入 `.env`、在线前端或 Git。使用 `tools/admin-license-generator/setup-edgeone-admin.ps1` 在本地安全生成。
 
@@ -115,7 +115,7 @@ npm run build:edgeone
 npm run deploy:edgeone
 ```
 
-EdgeOne 项目名为 `format-converter-web`。正式构建会从被 Git 忽略的 `release/v2.0.0/installers/` 读取 EXE/MSI，先核对整包 SHA256，再生成不超过 24 MiB 的同源分片。浏览器逐片校验并在本地拼装，避免国内用户被跳转到 GitHub。GitHub 关联构建无法读取本地安装包时，会拒绝复用旧分片布局并重新拉取已校验的发布资产，确保分片提速配置真正生效。
+EdgeOne 项目名为 `format-converter-web`。正式构建会从被 Git 忽略的 `release/v2.0.0/installers/` 读取 EXE/MSI，先核对整包 SHA256，再生成不超过 24 MiB 的同源分片。浏览器逐片校验并在本地拼装，避免国内用户被跳转到 GitHub。GitHub 关联构建无法读取本地安装包时，会拒绝复用旧分片布局并重新拉取已校验的发布资产，确保分片提速配置真正生效；分片目录使用 `edgeone-v24`，避免长期缓存命中旧分片。
 
 正式构建还会纳入 EdgeOne 授权函数，并检查私钥、客户记录和 `.mrx` 没有进入发布产物。具体检查地址与故障处理见 `docs/operator-runbook.md`。
 

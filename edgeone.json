@@ -88,7 +88,7 @@
       ]
     },
     {
-      "source": "/release/v2.0.0/edgeone/*",
+      "source": "/release/v2.0.0/edgeone-v24/*",
       "headers": [
         {
           "key": "Cache-Control",

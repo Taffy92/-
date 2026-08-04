@@ -39,7 +39,7 @@ describe("adsConfig", () => {
       expect(source).not.toMatch(/googlesyndication|doubleclick|pagead2\.google/i);
     }
 
-    expect(deploymentConfigSources[0]).toContain("/release/v2.0.0/edgeone/*");
+    expect(deploymentConfigSources[0]).toContain("/release/v2.0.0/edgeone-v24/*");
     expect(deploymentConfigSources[0]).not.toContain("/release/v1.0.0/edgeone/*");
   });
 });

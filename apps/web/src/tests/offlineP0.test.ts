@@ -65,7 +65,7 @@ describe("offline P0 release checks", () => {
     const outInstallerDir = resolve(projectRoot, "apps", "web", "out", "release", "v2.0.0", "installers");
     const releaseSumsPath = resolve(projectRoot, "release", "v2.0.0", "installers", "SHA256SUMS.txt");
 
-    expect(downloadsConfigSource).toContain("/release/v2.0.0/edgeone/manifest.json");
+    expect(downloadsConfigSource).toContain("/release/v2.0.0/edgeone-v24/manifest.json");
     expect(downloadsConfigSource).not.toContain("github.com");
     expect(downloadsConfigSource).not.toContain('"/release/v2.0.0/installers"');
     expect(downloadPageSource).toContain("InstallerDownloadButton");
