@@ -67,12 +67,13 @@ describe("offline P0 release checks", () => {
     expect(readFileSync(workerAssetPath, "utf8")).toContain("browser-image-compression");
   });
 
-  it("keeps release downloads on same-origin EdgeOne ZIP chunks without raw installers", () => {
+  it("keeps release downloads on the two official EdgeOne hosts without raw installers", () => {
     const downloadsConfigPath = resolve(projectRoot, "apps", "web", "src", "config", "downloads.ts");
     const downloadsConfigSource = readFileSync(downloadsConfigPath, "utf8");
     const downloadPageSource = readFileSync(resolve(projectRoot, "apps", "web", "src", "app", "download", "page.tsx"), "utf8");
     const downloadButtonSource = readFileSync(resolve(projectRoot, "apps", "web", "src", "components", "download", "InstallerDownloadButton.tsx"), "utf8");
     const edgeOneBuildSource = readFileSync(resolve(projectRoot, "apps", "web", "scripts", "build-edgeone.mjs"), "utf8");
+    const edgeOneConfigSource = readFileSync(resolve(projectRoot, "edgeone.json"), "utf8");
     const versionSource = readFileSync(resolve(projectRoot, "apps", "web", "src", "config", "version.ts"), "utf8");
     const publicInstallerDir = resolve(projectRoot, "apps", "web", "public", "release", "v2.0.0", "installers");
     const outInstallerDir = resolve(projectRoot, "apps", "web", "out", "release", "v2.0.0", "installers");
@@ -92,7 +93,10 @@ describe("offline P0 release checks", () => {
     expect(downloadButtonSource).toContain("当前浏览器不支持安全保存安装包");
     expect(downloadButtonSource).toContain("downloadPartsInOrder");
     expect(downloadButtonSource).not.toContain("saveBufferedFile");
-    expect(downloadButtonSource).toContain("DOWNLOAD_CONCURRENCY = 6");
+    expect(downloadButtonSource).toContain("DOWNLOAD_CONCURRENCY = 12");
+    expect(downloadButtonSource).toContain("DOWNLOAD_MIRROR_HOSTS");
+    expect(downloadButtonSource).toContain("response.body.getReader()");
+    expect(edgeOneConfigSource).toContain('"key": "Access-Control-Allow-Origin"');
     expect(downloadButtonSource).not.toContain("EXE");
     expect(downloadButtonSource).toContain("下载后的安装包完整性校验失败");
     expect(downloadButtonSource).toContain('crypto.subtle.digest("SHA-256"');

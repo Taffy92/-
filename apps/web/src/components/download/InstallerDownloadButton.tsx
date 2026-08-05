@@ -42,7 +42,9 @@ type SaveFilePicker = (options: {
   }>;
 }) => Promise<SaveFileHandle>;
 
-const DOWNLOAD_CONCURRENCY = 6;
+const DOWNLOAD_CONCURRENCY = 12;
+const DOWNLOAD_MIRROR_HOSTS = ["gszhmrx.cn", "www.gszhmrx.cn"] as const;
+const PROGRESS_UPDATE_BYTES = 1024 * 1024;
 
 type Props = {
   packageType: PackageType;
@@ -214,14 +216,60 @@ function validatePackage(
   }
 }
 
-async function fetchVerifiedPart(part: ManifestPart): Promise<ArrayBuffer> {
-  const response = await fetch(part.url);
+async function fetchVerifiedPart(
+  part: ManifestPart,
+  partIndex: number,
+  onBytesReceived: (byteCount: number) => void
+): Promise<ArrayBuffer> {
+  const response = await fetch(resolvePartUrl(part.url, partIndex));
   if (!response.ok) throw new Error(`安装包下载请求失败（HTTP ${response.status}）。`);
-  const bytes = await response.arrayBuffer();
-  if (bytes.byteLength !== part.size) throw new Error("安装包数据大小校验失败。");
+  const bytes = await readResponseBytes(response, part.size, onBytesReceived);
   const hash = await sha256(bytes);
   if (hash !== part.sha256) throw new Error("安装包数据完整性校验失败。");
   return bytes;
+}
+
+function resolvePartUrl(partUrl: string, partIndex: number) {
+  const currentHostIndex = DOWNLOAD_MIRROR_HOSTS.indexOf(
+    window.location.hostname.toLowerCase() as typeof DOWNLOAD_MIRROR_HOSTS[number]
+  );
+  if (currentHostIndex === -1) return partUrl;
+
+  const targetHost = DOWNLOAD_MIRROR_HOSTS[(currentHostIndex + partIndex) % DOWNLOAD_MIRROR_HOSTS.length];
+  return new URL(partUrl, `https://${targetHost}`).toString();
+}
+
+async function readResponseBytes(
+  response: Response,
+  expectedSize: number,
+  onBytesReceived: (byteCount: number) => void
+) {
+  if (!response.body) {
+    const bytes = await response.arrayBuffer();
+    if (bytes.byteLength !== expectedSize) throw new Error("安装包数据大小校验失败。");
+    onBytesReceived(bytes.byteLength);
+    return bytes;
+  }
+
+  const buffer = new ArrayBuffer(expectedSize);
+  const bytes = new Uint8Array(buffer);
+  const reader = response.body.getReader();
+  let offset = 0;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (offset + value.byteLength > expectedSize) {
+      await reader.cancel();
+      throw new Error("安装包数据大小校验失败。");
+    }
+    bytes.set(value, offset);
+    offset += value.byteLength;
+    onBytesReceived(value.byteLength);
+  }
+
+  if (offset !== expectedSize) throw new Error("安装包数据大小校验失败。");
+  return buffer;
 }
 
 async function downloadPartsInOrder(
@@ -231,7 +279,8 @@ async function downloadPartsInOrder(
   onPartDownloaded: (downloadedBytes: number) => void
 ) {
   let nextPartIndex = 0;
-  let downloadedBytes = 0;
+  let receivedBytes = 0;
+  let lastReportedBytes = 0;
   let workerError: unknown = null;
   let wakeWriter: (() => void) | null = null;
   const completedParts = new Map<number, ArrayBuffer>();
@@ -242,10 +291,14 @@ async function downloadPartsInOrder(
       if (partIndex >= parts.length) return;
 
       try {
-        const bytes = await fetchVerifiedPart(parts[partIndex]);
+        const bytes = await fetchVerifiedPart(parts[partIndex], partIndex, (byteCount) => {
+          receivedBytes += byteCount;
+          if (receivedBytes - lastReportedBytes >= PROGRESS_UPDATE_BYTES || receivedBytes === totalSize) {
+            lastReportedBytes = receivedBytes;
+            onPartDownloaded(receivedBytes);
+          }
+        });
         completedParts.set(partIndex, bytes);
-        downloadedBytes += bytes.byteLength;
-        onPartDownloaded(downloadedBytes);
         wakeWriter?.();
         wakeWriter = null;
       } catch (error) {
@@ -277,7 +330,7 @@ async function downloadPartsInOrder(
   }
 
   await Promise.all(workers);
-  if (downloadedBytes !== totalSize) {
+  if (receivedBytes !== totalSize) {
     throw new Error("下载后的文件大小与发布记录不一致。");
   }
 }
