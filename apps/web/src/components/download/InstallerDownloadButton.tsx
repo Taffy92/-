@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-type PackageType = "exe" | "msi";
+type PackageType = "zip";
 
 type ManifestPart = {
   url: string;
@@ -87,9 +87,9 @@ export default function InstallerDownloadButton({
         suggestedName: fileName,
         types: [
           {
-            description: packageType === "exe" ? "Windows EXE 安装包" : "Windows MSI 安装包",
+            description: "Windows ZIP 安装包",
             accept: {
-              [packageInfo.contentType]: [`.${packageType}`]
+              [packageInfo.contentType]: [".zip"]
             }
           }
         ]
@@ -183,7 +183,7 @@ async function loadManifest(url: string): Promise<DownloadManifest> {
   const response = await fetch(url, { cache: "no-store" });
   if (!response.ok) throw new Error(`下载清单不可用（HTTP ${response.status}）。`);
   const manifest = await response.json() as DownloadManifest;
-  if (manifest.version !== 1 || !manifest.packages?.exe || !manifest.packages?.msi) {
+  if (manifest.version !== 1 || !manifest.packages?.zip || Object.keys(manifest.packages).some((key) => key !== "zip")) {
     throw new Error("下载清单格式无效。");
   }
   return manifest;

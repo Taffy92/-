@@ -11,7 +11,7 @@ function loadCloudFunction(allowedOrigin = "https://example.test") {
   return require(helperPath) as {
     normalizeOrigin: (origin: string) => string;
     parseAllowedOrigins: (origin: string) => string[];
-    normalizePackageType: (value: string) => "exe" | "msi" | null;
+    normalizePackageType: (value: string) => "zip" | null;
     passwordMatches: (input: string, expected: string) => boolean;
     isOriginAllowed: (origin: string, allowed?: string[]) => boolean;
     buildCorsHeaders: (req: { headers: Record<string, string> }, allowed: string[]) => Record<string, string>;
@@ -19,11 +19,11 @@ function loadCloudFunction(allowedOrigin = "https://example.test") {
 }
 
 describe("CloudBase download authorization hardening", () => {
-  it("only accepts exe or msi package types", () => {
+  it("only accepts the ZIP package type", () => {
     const cloudFunction = loadCloudFunction();
-    expect(cloudFunction.normalizePackageType("exe")).toBe("exe");
-    expect(cloudFunction.normalizePackageType("MSI")).toBe("msi");
-    expect(cloudFunction.normalizePackageType("zip")).toBeNull();
+    expect(cloudFunction.normalizePackageType("zip")).toBe("zip");
+    expect(cloudFunction.normalizePackageType("MSI")).toBeNull();
+    expect(cloudFunction.normalizePackageType("exe")).toBeNull();
     expect(cloudFunction.normalizePackageType("../setup.exe")).toBeNull();
   });
 

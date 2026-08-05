@@ -77,7 +77,6 @@
       ],
       "shortDescription": "本地处理的图片、文档和音视频格式转换工具",
       "targets": [
-        "nsis",
         "msi"
       ],
         "windows": {
@@ -87,13 +86,6 @@
                 "type": "offlineInstaller",
                 "silent": true
             },
-            "nsis": {
-                "displayLanguageSelector": true,
-                "installMode": "perMachine",
-                "languages": [
-            "SimpChinese"
-          ]
-        },
         "wix": {
           "language": "zh-CN"
         },

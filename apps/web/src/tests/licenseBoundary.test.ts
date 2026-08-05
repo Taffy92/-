@@ -108,9 +108,10 @@ describe("offline license boundary", () => {
     const installGuide = readProjectFile(
       "apps",
       "web",
-      "public",
+      "..",
+      "..",
       "release",
-      "v1.0.0",
+      "v2.0.0",
       "docs",
       "INSTALL_GUIDE.md"
     );

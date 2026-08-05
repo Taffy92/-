@@ -218,8 +218,7 @@ async function collectBundledArtifacts() {
   await addDirArtifact(artifacts, "Next.js 静态网站产物", "apps/web/out", "在线版和离线版共用的静态页面、JS、CSS 和静态资源。");
   await addDirArtifact(artifacts, "PDF.js 静态资源", "apps/web/out/pdfjs", "来自 pdfjs-dist 的主模块、worker、CMaps 和字体资源。");
   await addDirArtifact(artifacts, "FFmpeg WASM 静态资源", "apps/web/out/ffmpeg", "来自 @ffmpeg/core 的 ffmpeg-core.js 和 ffmpeg-core.wasm。");
-  await addBundleFiles(artifacts, "release/v2.0.0/installers", /\.exe$/i, "Windows NSIS 安装包", "离线版 Windows x64 EXE 安装包。");
-  await addBundleFiles(artifacts, "release/v2.0.0/installers", /\.msi$/i, "Windows MSI 安装包", "离线版 Windows x64 MSI 安装包。");
+  await addBundleFiles(artifacts, "release/v2.0.0/installers", /\.zip$/i, "Windows ZIP 安装包", "离线版 Windows x64 ZIP 安装包，内含 MSI。");
   return artifacts;
 }
 

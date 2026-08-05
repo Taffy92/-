@@ -6,7 +6,7 @@ Windows 安装包出现“Windows 已保护你的电脑”通常是因为安装�
 
 - 购买 OV 或 EV 代码签名证书，EV 更适合商业软件首次发布。
 - 在 Windows 打包机导入证书，配置 `apps/desktop/src-tauri/tauri.conf.json` 的 `certificateThumbprint` 和 `timestampUrl`。
-- 对 EXE/MSI 使用同一个发行主体持续签名发布，积累 SmartScreen 信誉。
+- 对 MSI 使用同一个发行主体持续签名发布，积累 Windows 安装信任。
 - 发布页保留 SHA256、版本号、公司/开发者信息、隐私说明和许可证说明，降低用户疑虑。
 
 当前项目里 `certificateThumbprint` 仍为 `null`，所以本地打包出的安装包会继续有 SmartScreen 风险。没有真实证书前，不应填假的 thumbprint；否则会导致打包或签名失败。

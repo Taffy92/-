@@ -43,8 +43,9 @@ describe("EdgeOne private license admin build", () => {
     expect(buildSource).toContain("fetchVerifiedInstallerAsset");
     expect(buildSource).toContain("EDGEONE_INSTALLER_SOURCE_URL");
     expect(buildSource).toContain("releases/download/v${releaseVersion}/");
-    expect(buildSource).toContain('assetName: "format-converter_2.0.0_x64-setup.exe"');
-    expect(buildSource).toContain('assetName: "format-converter_2.0.0_x64_zh-CN.msi"');
+    expect(buildSource).toContain('assetName: "format-converter_2.0.0_x64_zh-CN.zip"');
+    expect(buildSource).toContain("assertMsiOnlyZip");
+    expect(buildSource).not.toContain("setup.exe");
     expect(buildSource).toContain("failed size or SHA256 verification");
     expect(buildSource).toContain("failed complete SHA256 verification");
     expect(buildSource).toContain("Downloaded ${installer.type} installer failed complete SHA256 verification");

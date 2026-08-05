@@ -19,22 +19,13 @@ const DOWNLOAD_PASSWORD = process.env.DOWNLOAD_PASSWORD || "";
 const ALLOWED_ORIGINS = parseAllowedOrigins(process.env.ALLOWED_ORIGIN || process.env.ALLOWED_ORIGINS || "");
 const DEFAULT_MAX_AGE = Number(process.env.DOWNLOAD_URL_MAX_AGE || 600);
 const MAX_REQUEST_BODY_BYTES = Number(process.env.DOWNLOAD_REQUEST_MAX_BYTES || 2048);
-const DEFAULT_FILE_ID = process.env.INSTALLER_FILE_ID || "";
 const DEFAULT_FILE_NAME =
-  process.env.INSTALLER_FILE_NAME ||
-  "\u4e07\u80fd\u683c\u5f0f\u8f6c\u6362\u79bb\u7ebf\u4e13\u4e1a\u7248_1.0.0_x64-setup.exe";
+  process.env.INSTALLER_ZIP_FILE_NAME ||
+  "\u4e07\u80fd\u683c\u5f0f\u8f6c\u6362\u5668_2.0.0_x64_zh-CN.zip";
 const INSTALLER_FILES = {
-  exe: {
-    fileID: process.env.INSTALLER_EXE_FILE_ID || DEFAULT_FILE_ID,
-    fileName:
-      process.env.INSTALLER_EXE_FILE_NAME ||
-      DEFAULT_FILE_NAME
-  },
-  msi: {
-    fileID: process.env.INSTALLER_MSI_FILE_ID || "",
-    fileName:
-      process.env.INSTALLER_MSI_FILE_NAME ||
-      "\u4e07\u80fd\u683c\u5f0f\u8f6c\u6362\u79bb\u7ebf\u4e13\u4e1a\u7248_1.0.0_x64_zh-CN.msi"
+  zip: {
+    fileID: process.env.INSTALLER_ZIP_FILE_ID || "",
+    fileName: DEFAULT_FILE_NAME
   }
 };
 
@@ -56,7 +47,7 @@ const server = http.createServer(async (req, res) => {
       ok: true,
       service: "createDownloadUrl",
       mode: "shared_password",
-      configured: Boolean(DOWNLOAD_PASSWORD && INSTALLER_FILES.exe.fileID)
+      configured: Boolean(DOWNLOAD_PASSWORD && INSTALLER_FILES.zip.fileID)
     });
     return;
   }
@@ -121,11 +112,11 @@ const server = http.createServer(async (req, res) => {
     }
 
     const password = String(body.password || body.code || "").trim();
-    const packageType = normalizePackageType(body.packageType || body.type || "exe");
+    const packageType = normalizePackageType(body.packageType || body.type || "zip");
     if (!packageType) {
       await writeLog({ allowed: false, reason: "invalid_package_type", req });
       sendJson(res, 400, {
-        error: "\u5b89\u88c5\u5305\u7c7b\u578b\u4e0d\u6b63\u786e\uff0c\u8bf7\u9009\u62e9 EXE \u6216 MSI\u3002"
+        error: "\u5b89\u88c5\u5305\u7c7b\u578b\u4e0d\u6b63\u786e\uff0c\u8bf7\u9009\u62e9 ZIP\u3002"
       }, buildCorsHeaders(req));
       return;
     }

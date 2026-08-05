@@ -41,8 +41,8 @@ function buildCorsHeaders(req, allowedOrigins) {
 }
 
 function normalizePackageType(value) {
-  const normalized = String(value || "exe").trim().toLowerCase();
-  if (normalized === "exe" || normalized === "msi") return normalized;
+  const normalized = String(value || "zip").trim().toLowerCase();
+  if (normalized === "zip") return normalized;
   return null;
 }
 

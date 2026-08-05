@@ -112,8 +112,7 @@ export default function DownloadPage() {
       <section className="mt-8 rounded-sm tech-panel p-6 sm:p-8">
         <h2 className="text-xl font-bold text-slate-50">发布说明与合规入口</h2>
         <p className="mt-2 text-sm leading-7 text-slate-300">
-          下载前建议先查看安装说明、隐私说明和开源许可证。安装包未做代码签名时，Windows Defender 或 SmartScreen
-          可能出现提示，请核对 SHA256 后再安装。
+          下载前建议先查看安装说明、隐私说明和开源许可证。请先核对 ZIP 的 SHA256，再解压 ZIP 内的 MSI 安装包。
         </p>
         <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <DocLink href="/release/v2.0.0/docs/release-notes" label="发布说明" />
@@ -128,9 +127,9 @@ export default function DownloadPage() {
       <section id="install-tips" className="mt-8 rounded-sm tech-panel p-6 sm:p-8">
         <h2 className="text-xl font-bold text-slate-50">安装和校验提示</h2>
         <ol className="mt-4 space-y-3 text-sm leading-7 text-slate-300">
-          <li>1. 下载 EXE 或 MSI 后，先核对页面展示的 SHA256 与本地文件是否一致。</li>
+          <li>1. 下载 ZIP 后，先核对页面展示的 SHA256 与本地文件是否一致。</li>
           <li>2. Windows 10 / 11 均可安装；离线专业版安装包内置 WebView2 离线安装支持。</li>
-          <li>3. 如果 SmartScreen 提示未知发布者，请确认文件来源和 SHA256，再根据自己的风险判断继续安装。</li>
+          <li>3. 解压 ZIP 后运行其中的 MSI 安装包，按向导完成离线专业版安装。</li>
           <li>4. 离线专业版支持断网使用；授权只控制桌面端继续使用，不接触用户处理文件。</li>
           <li>5. 在线版适合单文件或少量文件快速处理，批量处理请使用 Windows 离线专业版。</li>
         </ol>

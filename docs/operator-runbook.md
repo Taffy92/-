@@ -10,7 +10,7 @@
 - 静态与函数产物：`apps/web/out`
 - 原始安装包：`release/v2.0.0/installers/`，仅保存在本地并被 Git 忽略
 - 下载清单：`/release/v2.0.0/edgeone-v24/manifest.json`
-- 安装包分片：`/release/v2.0.0/edgeone-v24/{exe|msi}/part-*.bin`
+- 安装包分片：`/release/v2.0.0/edgeone-v24/zip/part-*.bin`
 
 浏览器从同源地址逐片下载并校验 SHA256。用户处理文件始终留在本机，不会进入 EdgeOne 函数或 Blob。
 
@@ -30,7 +30,7 @@ npm run deploy:edgeone
 
 1. 构建在线静态站；
 2. 拆分 FFmpeg WASM；
-3. 核对本地正式 EXE/MSI 的 SHA256；
+3. 核对本地正式 ZIP 的 SHA256，并检查 ZIP 内只有 MSI；
 4. 生成不超过 24 MiB 的同源安装包分片和清单；GitHub 关联构建无法读取本地安装包时，不复用旧分片布局，改为重新拉取已校验的发布资产；
 5. 把 `cloud-functions` 与最小运行依赖纳入产物；
 6. 拒绝大于 25 MiB 的文件，以及私钥、客户记录或 `.mrx`。
@@ -59,7 +59,7 @@ https://gszhmrx.cn/download/
 https://gszhmrx.cn/admin/license/
 https://gszhmrx.cn/api/admin/license/health
 https://gszhmrx.cn/release/v2.0.0/edgeone-v24/manifest.json
-https://gszhmrx.cn/release/v2.0.0/edgeone-v24/exe/part-001.bin
+https://gszhmrx.cn/release/v2.0.0/edgeone-v24/zip/part-001.bin
 https://www.gszhmrx.cn/
 ```
 
@@ -67,7 +67,7 @@ https://www.gszhmrx.cn/
 - 错误密码不登录，正确密码可进入且不会触发应用层锁定；
 - 可生成测试授权、复制激活码、展示二维码、下载 `.mrx`；
 - 历史记录可搜索、续期和重新下载，备份下载为加密内容；
-- 清单同时包含 EXE、MSI，首尾分片可下载；
+- 清单只包含 ZIP，首尾分片可下载；
 - 完整下载后的文件大小和 SHA256 与发布记录一致；
 - 页面不跳转 GitHub、CloudBase 对象存储或其他境外下载地址。
 

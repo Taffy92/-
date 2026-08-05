@@ -115,7 +115,7 @@ npm run build:edgeone
 npm run deploy:edgeone
 ```
 
-EdgeOne 项目名为 `format-converter-web`。正式构建会从被 Git 忽略的 `release/v2.0.0/installers/` 读取 EXE/MSI，先核对整包 SHA256，再生成不超过 24 MiB 的同源分片。浏览器逐片校验并在本地拼装，避免国内用户被跳转到 GitHub。GitHub 关联构建无法读取本地安装包时，会拒绝复用旧分片布局并重新拉取已校验的发布资产，确保分片提速配置真正生效；分片目录使用 `edgeone-v24`，避免长期缓存命中旧分片。
+EdgeOne 项目名为 `format-converter-web`。正式构建会从被 Git 忽略的 `release/v2.0.0/installers/` 读取 ZIP，先核对 ZIP 整包 SHA256 和内部 MSI，再生成不超过 24 MiB 的同源分片。浏览器逐片校验并在本地拼装，避免国内用户被跳转到 GitHub；ZIP 内只保留 MSI 安装包。分片目录使用 `edgeone-v24`，避免长期缓存命中旧分片。
 
 正式构建还会纳入 EdgeOne 授权函数，并检查私钥、客户记录和 `.mrx` 没有进入发布产物。具体检查地址与故障处理见 `docs/operator-runbook.md`。
 
@@ -133,7 +133,7 @@ EdgeOne 构建、函数地域和响应头配置位于根目录 `edgeone.json`。
 
 离线专业版采用“直接下载 3 天试用，试用结束后激活”的模式。下载入口不再要求统一下载口令，授权控制发生在桌面端启动和试用到期之后。
 
-当前 EXE/MSI 由 EdgeOne 同源分片分发。原始安装包只保存在本地发布归档，构建产物和安装包都不会提交到 Git。旧的 `cloudbase/functions/createDownloadUrl` 口令云函数作为备用内部分发方案保留，但不是公开下载页主流程。
+当前 ZIP 由 EdgeOne 同源分片分发。原始安装包只保存在本地发布归档，构建产物和安装包都不会提交到 Git。旧的 `cloudbase/functions/createDownloadUrl` 口令云函数作为备用内部分发方案保留，但不是公开下载页主流程。
 
 ## 私有授权后台
 
@@ -177,7 +177,7 @@ apps/desktop/src-tauri/target/release/bundle/
 
 离线专业版包含本地 3 天试用和机器码绑定授权。试用结束后继续使用需要管理员签发的激活码或 `license.mrx`，授权细节见 `docs/offline-license.md`。该机制不引入登录、会员或云端转换，也不上传用户文件。
 
-离线安装包在构建阶段可能需要联网下载或缓存 WebView2 离线安装器；正式发布给用户的 EXE/MSI 应包含该离线安装器。发布前建议在一台断网 Windows 10/11 x64 电脑或虚拟机中做安装和核心功能回归测试。
+离线安装包在构建阶段可能需要联网下载或缓存 WebView2 离线安装器；正式发布给用户的 ZIP 内 MSI 应包含该离线安装器。发布前建议在一台断网 Windows 10/11 x64 电脑或虚拟机中做安装和核心功能回归测试。
 
 ## 修改站点信息
 
@@ -218,7 +218,7 @@ Excel 转图片：支持 `.xlsx`、`.csv`。旧版 `.xls` 请先用 Excel/WPS �
 5. 运行 `npm run build:web`。
 6. 商业发布前确认离线授权生产公钥已替换，管理员私钥和授权记录没有进入客户包。
 7. 运行 `npm run package:desktop`。
-8. 将新 EXE/MSI 同步到 `release/<version>/installers/`，更新 SHA256，并同步下载配置和 EdgeOne 构建脚本中的版本、文件名与校验值。
+8. 生成只含 MSI 的新 ZIP，同步到 `release/<version>/installers/`，更新 ZIP SHA256，并同步下载配置和 EdgeOne 构建脚本中的版本、文件名与校验值。
 9. 运行本地秘密配置工具，确认 EdgeOne 后台私钥对应桌面端 `PUBLIC_KEY_RAW_B64`，并安全备份记录加密密钥。
 10. 运行 `npm run build:edgeone` 和 `npm run deploy:edgeone`，完成国内站点、同源下载与私有授权后台验证。
 

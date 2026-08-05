@@ -5,16 +5,29 @@ import { resolve } from "node:path";
 const projectRoot = resolve(process.cwd(), "..", "..");
 
 describe("offline P0 release checks", () => {
-  it("keeps the default desktop package path on NSIS and leaves MSI explicit", () => {
+  it("keeps the desktop package path on MSI only", () => {
     const rootPackage = JSON.parse(readFileSync(resolve(projectRoot, "package.json"), "utf8"));
     const desktopPackage = JSON.parse(readFileSync(resolve(projectRoot, "apps", "desktop", "package.json"), "utf8"));
 
-    expect(desktopPackage.scripts.build).toBe("tauri build --bundles nsis");
-    expect(desktopPackage.scripts["build:all"]).toBe("tauri build");
+    expect(desktopPackage.scripts.build).toBe("tauri build --bundles msi");
+    expect(desktopPackage.scripts["build:all"]).toBe("tauri build --bundles msi");
     expect(desktopPackage.scripts["package:msi"]).toBe("tauri build --bundles msi");
+    const tauriConfig = JSON.parse(readFileSync(resolve(projectRoot, "apps", "desktop", "src-tauri", "tauri.conf.json"), "utf8"));
+    expect(tauriConfig.tauri.bundle.targets).toEqual(["msi"]);
+    expect(tauriConfig.tauri.bundle.nsis).toBeUndefined();
     expect(rootPackage.scripts["package:desktop"]).toContain("--filter desktop package");
     expect(rootPackage.scripts["package:desktop:msi"]).toContain("--filter desktop package:msi");
     expect(rootPackage.scripts["package:desktop:all"]).toContain("--filter desktop build:all");
+  });
+
+  it("keeps the release installer directory free of EXE artifacts", () => {
+    const installerDir = resolve(projectRoot, "release", "v2.0.0", "installers");
+    const installerFiles = readdirSync(installerDir);
+
+    expect(installerFiles.filter((fileName) => /\.exe$/i.test(fileName))).toEqual([]);
+    expect(installerFiles.filter((fileName) => /\.zip$/i.test(fileName))).toEqual([
+      "万能格式转换器_2.0.0_x64_zh-CN.zip",
+    ]);
   });
 
   it("keeps Tauri Chinese metadata valid UTF-8", () => {
@@ -54,7 +67,7 @@ describe("offline P0 release checks", () => {
     expect(readFileSync(workerAssetPath, "utf8")).toContain("browser-image-compression");
   });
 
-  it("keeps release downloads on same-origin EdgeOne chunks without raw installers", () => {
+  it("keeps release downloads on same-origin EdgeOne ZIP chunks without raw installers", () => {
     const downloadsConfigPath = resolve(projectRoot, "apps", "web", "src", "config", "downloads.ts");
     const downloadsConfigSource = readFileSync(downloadsConfigPath, "utf8");
     const downloadPageSource = readFileSync(resolve(projectRoot, "apps", "web", "src", "app", "download", "page.tsx"), "utf8");
@@ -66,10 +79,13 @@ describe("offline P0 release checks", () => {
     const releaseSumsPath = resolve(projectRoot, "release", "v2.0.0", "installers", "SHA256SUMS.txt");
 
     expect(downloadsConfigSource).toContain("/release/v2.0.0/edgeone-v24/manifest.json");
+    expect(downloadsConfigSource).toContain('type: "zip"');
+    expect(downloadsConfigSource).not.toContain("EXE");
     expect(downloadsConfigSource).not.toContain("github.com");
     expect(downloadsConfigSource).not.toContain('"/release/v2.0.0/installers"');
     expect(downloadPageSource).toContain("InstallerDownloadButton");
     expect(downloadPageSource).not.toContain("item.downloadUrl");
+    expect(downloadPageSource).not.toContain("下载 EXE");
     expect(downloadButtonSource).toContain("showSaveFilePicker");
     expect(downloadButtonSource).toContain("getFile()");
     expect(downloadButtonSource).toContain("fetchVerifiedPart");
@@ -77,6 +93,7 @@ describe("offline P0 release checks", () => {
     expect(downloadButtonSource).toContain("downloadPartsInOrder");
     expect(downloadButtonSource).not.toContain("saveBufferedFile");
     expect(downloadButtonSource).toContain("DOWNLOAD_CONCURRENCY = 6");
+    expect(downloadButtonSource).not.toContain("EXE");
     expect(downloadButtonSource).toContain("下载后的安装包完整性校验失败");
     expect(downloadButtonSource).toContain('crypto.subtle.digest("SHA-256"');
     expect(edgeOneBuildSource).toContain("installerPartSize");
@@ -87,7 +104,7 @@ describe("offline P0 release checks", () => {
     expect(versionSource).toContain('currentReleaseVersion = "2.0.0"');
     const releaseSums = readFileSync(releaseSumsPath, "utf8");
     const releaseHashes = releaseSums.match(/\b[A-F0-9]{64}\b/g) || [];
-    expect(releaseHashes).toHaveLength(2);
+    expect(releaseHashes).toHaveLength(1);
     for (const hash of releaseHashes) {
       expect(downloadsConfigSource).toContain(hash);
     }
@@ -194,7 +211,7 @@ describe("offline P0 release checks", () => {
     const source = readFileSync(toolsClientPath, "utf8");
     const globals = readFileSync(globalsPath, "utf8");
     const homeSource = readFileSync(homePagePath, "utf8");
-    const desktopBranchStart = source.indexOf('className="desktop-a-shell"');
+    const desktopBranchStart = source.indexOf('className={`desktop-a-shell');
     const desktopBranch = source.slice(desktopBranchStart, source.indexOf('className="a2-online-tools"', desktopBranchStart));
 
     expect(source).not.toContain("启动本地编译");

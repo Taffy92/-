@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import type { ComponentType, ReactNode } from "react";
 import {
   Download,
@@ -170,6 +170,7 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [desktopLicenseStatus, setDesktopLicenseStatus] = useState<DesktopLicenseStatus | null>(null);
   const [desktopLicenseGate, setDesktopLicenseGate] = useState<DesktopLicenseGateComponent | null>(null);
+  const [isToolSwitching, startToolTransition] = useTransition();
 
   const [imageFormat, setImageFormat] = useState<ExportImageFormat>("jpg");
   const [imageQuality, setImageQuality] = useState(90);
@@ -216,7 +217,10 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
     const applyToolFromUrl = () => {
       const params = new URLSearchParams(window.location.search);
       const requestedTool = params.get("tool") as LocalToolId | null;
-      if (requestedTool && tools.some((item) => item.id === requestedTool)) setTool(requestedTool);
+      if (requestedTool && tools.some((item) => item.id === requestedTool)) {
+        resetToolState();
+        setTool(requestedTool);
+      }
       if (params.get("catalog") === "1") setCatalogOpen(true);
     };
     applyToolFromUrl();
@@ -268,7 +272,7 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
     || (tool === "video-frame" && frameBatch)
   );
 
-  useEffect(() => {
+  function resetToolState() {
     abortRef.current?.abort();
     abortRef.current = null;
     setFiles([]);
@@ -279,11 +283,14 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
     setProgress(0);
     setMessage("等待选择文件");
     setError("");
-  }, [tool]);
+  }
 
   function selectDesktopTool(nextTool: UnifiedToolItem) {
     if (!desktop || nextTool.route !== "local-tools" || !tools.some((item) => item.id === nextTool.id)) return false;
-    setTool(nextTool.id as LocalToolId);
+    startToolTransition(() => {
+      resetToolState();
+      setTool(nextTool.id as LocalToolId);
+    });
     window.history.pushState({}, "", getUnifiedToolHref(nextTool));
     return true;
   }
@@ -690,7 +697,7 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
   if (desktop) {
     return (
       <>
-        <main className="desktop-a-shell desktop-a-local-tools">
+        <main className={`desktop-a-shell desktop-a-local-tools${isToolSwitching ? " is-tool-switching" : ""}`} aria-busy={isToolSwitching}>
           <input
             ref={inputRef}
             className="hidden"

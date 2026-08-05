@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import type { ComponentType, RefObject } from "react";
 import Cropper from "cropperjs";
 import { CheckCircle2, ChevronRight, Crop, Download, FileImage, FilePlus2, FileText, FolderPlus, HardDrive, HeartHandshake, Image, Loader2, Maximize2, Music, Play, Scissors, ShieldCheck, Square, Table2, Trash2, Type, Video } from "lucide-react";
@@ -237,6 +237,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   const [sidecarStatus, setSidecarStatus] = useState<SidecarCheckResult | null>(null);
   const [desktopLicenseStatus, setDesktopLicenseStatus] = useState<DesktopLicenseStatus | null>(null);
   const [desktopLicenseGate, setDesktopLicenseGate] = useState<DesktopLicenseGateComponent | null>(null);
+  const [isToolSwitching, startToolTransition] = useTransition();
 
   const activeKind = tabs.find((tab) => tab.id === activeTab)?.kind;
   const activeBatchMode = isDesktopSurface ? getBatchModeForTab(activeTab) : activeTab === "batch" ? batchMode : undefined;
@@ -936,16 +937,15 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   function selectDesktopTool(nextTool: UnifiedToolItem) {
     if (!isDesktopSurface || nextTool.route !== "tools" || !desktopTabs.some((tab) => tab.id === nextTool.id)) return false;
     const nextTab = nextTool.id as TabId;
-    setActiveTab(nextTab);
-    const nextBatchMode = getBatchModeForTab(nextTab);
-    if (nextBatchMode) setBatchMode(nextBatchMode);
+    startToolTransition(() => {
+      clearAllLocalTasks("等待选择文件");
+      setActiveTab(nextTab);
+      const nextBatchMode = getBatchModeForTab(nextTab);
+      if (nextBatchMode) setBatchMode(nextBatchMode);
+    });
     window.history.pushState({}, "", getUnifiedToolHref(nextTool));
     return true;
   }
-
-  useEffect(() => {
-    if (isDesktopSurface) clearAllLocalTasks("等待选择文件");
-  }, [activeTab, isDesktopSurface]);
 
   function ensureFile(kind: "image" | "pdf" | "word" | "excel" | "video" | "audio") {
     if (!file) throw new Error("请先选择文件。");
@@ -1874,7 +1874,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   if (isDesktopSurface) {
     return (
       <>
-        <main className="desktop-a-shell">
+        <main className={`desktop-a-shell${isToolSwitching ? " is-tool-switching" : ""}`} aria-busy={isToolSwitching}>
           <input
             ref={inputRef}
             className="hidden"

@@ -22,7 +22,7 @@ const labels = {
   downloadHeading: "\u4e0b\u8f7d\u79bb\u7ebf\u5b89\u88c5\u7248",
   trialDownloadCopy: "\u79bb\u7ebf\u4e13\u4e1a\u7248\u73b0\u5728\u53ef\u4ee5\u76f4\u63a5\u4e0b\u8f7d\u8bd5\u7528",
   trialRunCopy: "\u8f6f\u4ef6\u9996\u6b21\u8fd0\u884c\u540e\u81ea\u52a8\u5f00\u542f\u672c\u673a 3 \u5929\u8bd5\u7528",
-  exeTrialDownload: "\u4e0b\u8f7d EXE 3 \u5929\u8bd5\u7528\u7248",
+  zipTrialDownload: "\u4e0b\u8f7d ZIP 3 \u5929\u8bd5\u7528\u7248",
   releaseNotes: "\u53d1\u5e03\u8bf4\u660e",
   installGuide: "\u5b89\u88c5\u6307\u5357",
   siteReading: "\u7ad9\u5185\u9605\u8bfb\u7248",
@@ -198,7 +198,7 @@ test("download page keeps trial download copy clear and local-processing promise
   await expect(page.locator("h1").first()).toContainText(labels.downloadHeading);
   await expect(page.getByText(labels.trialDownloadCopy).first()).toBeVisible();
   await expect(page.getByText(labels.trialRunCopy).first()).toBeVisible();
-  await expect(page.getByRole("button", { name: labels.exeTrialDownload, exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: labels.zipTrialDownload, exact: true })).toBeVisible();
   await expect(page.locator('a[href*="github.com"]')).toHaveCount(0);
   await expect(page.getByRole("link", { name: labels.releaseNotes })).toHaveAttribute("href", "/release/v2.0.0/docs/release-notes/");
   await expect(page.getByRole("link", { name: labels.installGuide })).toHaveAttribute("href", "/release/v2.0.0/docs/install-guide/");

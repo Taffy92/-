@@ -36,10 +36,8 @@ Module._load = function patchedLoad(request, parent, isMain) {
 
 process.env.DOWNLOAD_PASSWORD = "MRX-DOWNLOAD-2026";
 process.env.ALLOWED_ORIGIN = "https://site.example.test";
-process.env.INSTALLER_EXE_FILE_ID = "cloud://bucket/installers/v1.0.0/setup.exe";
-process.env.INSTALLER_MSI_FILE_ID = "cloud://bucket/installers/v1.0.0/setup.msi";
-process.env.INSTALLER_EXE_FILE_NAME = "万能格式转换器_1.0.0_x64-setup.exe";
-process.env.INSTALLER_MSI_FILE_NAME = "万能格式转换器_1.0.0_x64_zh-CN.msi";
+process.env.INSTALLER_ZIP_FILE_ID = "cloud://bucket/installers/v2.0.0/installer.zip";
+process.env.INSTALLER_ZIP_FILE_NAME = "万能格式转换器_2.0.0_x64_zh-CN.zip";
 
 const { server } = require("../cloudbase/functions/createDownloadUrl/index.js");
 
@@ -76,29 +74,24 @@ async function request(baseUrl, body, origin = "https://site.example.test", meth
     assert.equal(options.status, 204);
     assert.equal(options.headers.get("access-control-allow-origin"), "https://site.example.test");
 
-    const exe = await request(baseUrl, { password: "MRX-DOWNLOAD-2026", packageType: "exe" });
-    assert.equal(exe.status, 200);
-    assert.equal(exe.body.packageType, "exe");
-    assert.equal(exe.body.fileName, "万能格式转换器_1.0.0_x64-setup.exe");
+    const zip = await request(baseUrl, { password: "MRX-DOWNLOAD-2026", packageType: "zip" });
+    assert.equal(zip.status, 200);
+    assert.equal(zip.body.packageType, "zip");
+    assert.equal(zip.body.fileName, "万能格式转换器_2.0.0_x64_zh-CN.zip");
 
-    const msi = await request(baseUrl, { password: "MRX-DOWNLOAD-2026", packageType: "msi" });
-    assert.equal(msi.status, 200);
-    assert.equal(msi.body.packageType, "msi");
-    assert.equal(msi.body.fileName, "万能格式转换器_1.0.0_x64_zh-CN.msi");
-
-    const wrongPassword = await request(baseUrl, { password: "wrong", packageType: "exe" });
+    const wrongPassword = await request(baseUrl, { password: "wrong", packageType: "zip" });
     assert.equal(wrongPassword.status, 403);
 
-    const invalidPackage = await request(baseUrl, { password: "MRX-DOWNLOAD-2026", packageType: "zip" });
+    const invalidPackage = await request(baseUrl, { password: "MRX-DOWNLOAD-2026", packageType: "msi" });
     assert.equal(invalidPackage.status, 400);
 
-    const invalidOrigin = await request(baseUrl, { password: "MRX-DOWNLOAD-2026", packageType: "exe" }, "https://evil.example.test");
+    const invalidOrigin = await request(baseUrl, { password: "MRX-DOWNLOAD-2026", packageType: "zip" }, "https://evil.example.test");
     assert.equal(invalidOrigin.status, 403);
     assert.equal(invalidOrigin.headers.get("access-control-allow-origin"), null);
 
     const invalidContentType = await request(
       baseUrl,
-      { password: "MRX-DOWNLOAD-2026", packageType: "exe" },
+      { password: "MRX-DOWNLOAD-2026", packageType: "zip" },
       "https://site.example.test",
       "POST",
       { "Content-Type": "text/plain" }
@@ -109,7 +102,7 @@ async function request(baseUrl, body, origin = "https://site.example.test", meth
       baseUrl,
       JSON.stringify({
         password: "MRX-DOWNLOAD-2026",
-        packageType: "exe",
+        packageType: "zip",
         padding: "x".repeat(4096)
       }),
       "https://site.example.test",

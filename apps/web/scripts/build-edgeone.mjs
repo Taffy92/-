@@ -3,6 +3,7 @@ import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import JSZip from "jszip";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const appRoot = path.resolve(__dirname, "..");
@@ -13,6 +14,8 @@ const wasmPartSize = 16 * 1024 * 1024;
 const installerPartSize = 24 * 1024 * 1024;
 const publishedPartDownloadConcurrency = 6;
 const releaseVersion = "2.0.0";
+const msiFileName = "万能格式转换器_2.0.0_x64_zh-CN.msi";
+const msiSha256 = "F69E2F9631E4401EDFE64CC0B5CDB20EBABB428CF795C4EC69BDD88F62B3F70B";
 const releaseInstallerDir = path.resolve(appRoot, "..", "..", "release", `v${releaseVersion}`, "installers");
 const edgeOneInstallerDirectory = "edgeone-v24";
 const edgeOneReleaseDir = path.join(outDir, "release", `v${releaseVersion}`, edgeOneInstallerDirectory);
@@ -23,18 +26,11 @@ const installerAssetBaseUrl =
   `https://github.com/Taffy92/-/releases/download/v${releaseVersion}/`;
 const installerPackages = [
   {
-    type: "exe",
-    fileName: "万能格式转换器_2.0.0_x64-setup.exe",
-    assetName: "format-converter_2.0.0_x64-setup.exe",
-    sha256: "04CB107A9B47CEC4FFD485E9E1450C1888C5283D31849050EAF7E308F9D1EB86",
-    contentType: "application/vnd.microsoft.portable-executable"
-  },
-  {
-    type: "msi",
-    fileName: "万能格式转换器_2.0.0_x64_zh-CN.msi",
-    assetName: "format-converter_2.0.0_x64_zh-CN.msi",
-    sha256: "F69E2F9631E4401EDFE64CC0B5CDB20EBABB428CF795C4EC69BDD88F62B3F70B",
-    contentType: "application/x-msi"
+    type: "zip",
+    fileName: "万能格式转换器_2.0.0_x64_zh-CN.zip",
+    assetName: "format-converter_2.0.0_x64_zh-CN.zip",
+    sha256: "5E4CA7F1592E228D9AAD7F303521FC9B20C172123A771271D3CC8BC962770B5A",
+    contentType: "application/zip"
   }
 ];
 const wasmPartUrls = [
@@ -108,6 +104,7 @@ async function writeInstallerParts() {
       sourceBytes = await readFile(sourcePath);
     } catch (error) {
       if (error?.code !== "ENOENT") throw error;
+      if (installer.type === "zip") sourceBytes = await createMsiOnlyZip();
     }
 
     if (!sourceBytes) {
@@ -130,6 +127,7 @@ async function writeInstallerParts() {
     if (sourceHash !== installer.sha256) {
       throw new Error(`${installer.fileName} SHA256 mismatch: ${sourceHash}`);
     }
+    await assertMsiOnlyZip(sourceBytes);
 
     const packageDir = path.join(edgeOneReleaseDir, installer.type);
     await mkdir(packageDir, { recursive: true });
@@ -174,6 +172,36 @@ async function fetchPublishedInstallerManifest() {
     throw new Error(`Unable to fetch published installer manifest: HTTP ${response.status}`);
   }
   return response.json();
+}
+
+async function createMsiOnlyZip() {
+  let msiBytes;
+  try {
+    msiBytes = await readFile(path.join(releaseInstallerDir, msiFileName));
+  } catch (error) {
+    if (error?.code === "ENOENT") return null;
+    throw error;
+  }
+  if (sha256(msiBytes) !== msiSha256) {
+    throw new Error(`${msiFileName} SHA256 mismatch while creating the ZIP.`);
+  }
+  const zip = new JSZip();
+  zip.file(msiFileName, msiBytes, { date: new Date(0), compression: "STORE" });
+  const zipBytes = await zip.generateAsync({ type: "nodebuffer", compression: "STORE", platform: "DOS" });
+  await writeFile(path.join(releaseInstallerDir, "万能格式转换器_2.0.0_x64_zh-CN.zip"), zipBytes);
+  return zipBytes;
+}
+
+async function assertMsiOnlyZip(zipBytes) {
+  const zip = await JSZip.loadAsync(zipBytes);
+  const files = Object.entries(zip.files).filter(([, entry]) => !entry.dir);
+  if (files.length !== 1 || files[0][0] !== msiFileName) {
+    throw new Error("The release ZIP must contain exactly one MSI installer.");
+  }
+  const innerMsi = await files[0][1].async("nodebuffer");
+  if (sha256(innerMsi) !== msiSha256) {
+    throw new Error("The MSI inside the release ZIP failed SHA256 verification.");
+  }
 }
 
 async function fetchVerifiedInstallerAsset(installer, publishedPartsError) {

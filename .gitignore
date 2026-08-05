@@ -107,8 +107,10 @@ verification/**/msi-admin-extract/
 # same-origin chunks under the ignored apps/web/out directory.
 release/*/installers/*.exe
 release/*/installers/*.msi
+release/*/installers/*.zip
 apps/web/public/release/*/installers/*.exe
 apps/web/public/release/*/installers/*.msi
+apps/web/public/release/*/installers/*.zip
 !release/*/installers/SHA256SUMS.txt
 !apps/web/public/release/*/installers/SHA256SUMS.txt
 
@@ -138,7 +140,7 @@ skills-lock.json
 !.vscode/settings.json
 
 # Keep release documentation and SHA256SUMS tracked by policy.
-# EXE/MSI release artifacts are distributed outside ordinary Git.
+# Installer artifacts are distributed outside ordinary Git.
 
 # Tencent Cloud EdgeOne
 .edgeone/*

@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "tauri dev",
-    "build": "tauri build --bundles nsis",
-    "build:all": "tauri build",
+    "build": "tauri build --bundles msi",
+    "build:all": "tauri build --bundles msi",
     "package": "pnpm build",
     "package:msi": "tauri build --bundles msi"
   },

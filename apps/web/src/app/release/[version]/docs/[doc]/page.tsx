@@ -28,7 +28,7 @@ const releaseDocs = {
 } as const;
 
 type ReleaseDocSlug = keyof typeof releaseDocs;
-type ReleaseVersion = "v1.0.0" | "v2.0.0";
+type ReleaseVersion = "v2.0.0";
 
 type PageProps = {
   params: Promise<{
@@ -40,7 +40,7 @@ type PageProps = {
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return (["v1.0.0", "v2.0.0"] as const).flatMap((version) =>
+  return (["v2.0.0"] as const).flatMap((version) =>
     Object.keys(releaseDocs).map((doc) => ({ version, doc }))
   );
 }
@@ -90,19 +90,16 @@ function getReleaseDoc(doc: string) {
 }
 
 function isReleaseVersion(version: string): version is ReleaseVersion {
-  return version === "v1.0.0" || version === "v2.0.0";
+  return version === "v2.0.0";
 }
 
 function getReleaseDocPath(version: ReleaseVersion, doc: ReleaseDocSlug) {
   const entry = releaseDocs[doc];
-  if (version === "v1.0.0") {
-    return join(process.cwd(), "public", "release", version, "docs", entry.fileName);
-  }
   if (doc === "third-party-notices") {
     return join(process.cwd(), "..", "..", "docs", "third-party-notices.md");
   }
   if (doc === "ffmpeg-license") {
-    return join(process.cwd(), "..", "..", "release", "v1.0.0", "docs", "FFMPEG_LICENSE_NOTICE.md");
+    return join(process.cwd(), "..", "..", "FFMPEG_LICENSE_NOTICE.md");
   }
   return join(process.cwd(), "..", "..", "release", version, "docs", entry.fileName);
 }

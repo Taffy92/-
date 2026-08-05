@@ -35,8 +35,7 @@
 | Next.js 静态网站产物 | `apps/web/out` | 目录 | 362 | 596.05 MB | - | 在线版和离线版共用的静态页面、JS、CSS 和静态资源。 |
 | PDF.js 静态资源 | `apps/web/out/pdfjs` | 目录 | 189 | 3.80 MB | - | 来自 pdfjs-dist 的主模块、worker、CMaps 和字体资源。 |
 | FFmpeg WASM 静态资源 | `apps/web/out/ffmpeg` | 目录 | 3 | 30.85 MB | - | 来自 @ffmpeg/core 的 ffmpeg-core.js 和 ffmpeg-core.wasm。 |
-| Windows NSIS 安装包 | `release/v2.0.0/installers/万能格式转换器_2.0.0_x64-setup.exe` | 文件 | 1 | 262.46 MB | 04CB107A9B47CEC4FFD485E9E1450C1888C5283D31849050EAF7E308F9D1EB86 | 离线版 Windows x64 EXE 安装包。 |
-| Windows MSI 安装包 | `release/v2.0.0/installers/万能格式转换器_2.0.0_x64_zh-CN.msi` | 文件 | 1 | 272.80 MB | F69E2F9631E4401EDFE64CC0B5CDB20EBABB428CF795C4EC69BDD88F62B3F70B | 离线版 Windows x64 MSI 安装包。 |
+| Windows ZIP 安装包 | `release/v2.0.0/installers/万能格式转换器_2.0.0_x64_zh-CN.zip` | 文件 | 1 | 272.80 MB | 5E4CA7F1592E228D9AAD7F303521FC9B20C172123A771271D3CC8BC962770B5A | 离线版 Windows x64 ZIP 安装包，内含 MSI。 |
 
 ## 直接 npm 依赖
 
