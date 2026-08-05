@@ -11,6 +11,7 @@ const nextBin = path.join(appRoot, "node_modules", "next", "dist", "bin", "next"
 const maxEdgeOneFileSize = 25 * 1024 * 1024;
 const wasmPartSize = 16 * 1024 * 1024;
 const installerPartSize = 24 * 1024 * 1024;
+const publishedPartDownloadConcurrency = 6;
 const releaseVersion = "2.0.0";
 const releaseInstallerDir = path.resolve(appRoot, "..", "..", "release", `v${releaseVersion}`, "installers");
 const edgeOneInstallerDirectory = "edgeone-v24";
@@ -223,7 +224,7 @@ async function reusePublishedInstallerParts(installer, publishedManifest) {
   let totalSize = 0;
   await mkdir(packageDir, { recursive: true });
 
-  for (const publishedPart of publishedPackage.parts) {
+  const publishedPartDownloads = publishedPackage.parts.map((publishedPart, index) => {
     if (
       typeof publishedPart?.url !== "string" ||
       !publishedPart.url.startsWith(expectedPrefix)
@@ -236,27 +237,51 @@ async function reusePublishedInstallerParts(installer, publishedManifest) {
       throw new Error(`Published ${installer.type} installer part uses an unexpected origin.`);
     }
 
-    const response = await fetch(partUrl, {
-      signal: AbortSignal.timeout(120_000)
-    });
-    if (!response.ok) {
-      throw new Error(`Unable to fetch ${partUrl.pathname}: HTTP ${response.status}`);
-    }
+    return { index, partUrl, publishedPart };
+  });
 
-    const partBytes = Buffer.from(await response.arrayBuffer());
-    const partHash = sha256(partBytes);
-    if (partBytes.length !== publishedPart.size || partHash !== publishedPart.sha256) {
-      throw new Error(`${partUrl.pathname} failed size or SHA256 verification.`);
-    }
+  console.log(
+    `Reusing ${publishedPartDownloads.length} verified ${installer.type} parts with ` +
+    `${Math.min(publishedPartDownloadConcurrency, publishedPartDownloads.length)} parallel downloads.`
+  );
+  const downloadedParts = await mapWithConcurrency(
+    publishedPartDownloads,
+    publishedPartDownloadConcurrency,
+    async ({ index, partUrl, publishedPart }) => {
+      const response = await fetch(partUrl, {
+        signal: AbortSignal.timeout(120_000)
+      });
+      if (!response.ok) {
+        throw new Error(`Unable to fetch ${partUrl.pathname}: HTTP ${response.status}`);
+      }
 
-    const partName = path.basename(partUrl.pathname);
-    await writeFile(path.join(packageDir, partName), partBytes);
+      const partBytes = Buffer.from(await response.arrayBuffer());
+      const partHash = sha256(partBytes);
+      if (partBytes.length !== publishedPart.size || partHash !== publishedPart.sha256) {
+        throw new Error(`${partUrl.pathname} failed size or SHA256 verification.`);
+      }
+
+      const partName = path.basename(partUrl.pathname);
+      const partPath = path.join(packageDir, partName);
+      await writeFile(partPath, partBytes);
+      console.log(`Reused ${installer.type} part ${index + 1}/${publishedPartDownloads.length}.`);
+      return {
+        partPath,
+        url: `${expectedPrefix}${partName}`,
+        size: partBytes.length,
+        sha256: partHash
+      };
+    }
+  );
+
+  for (const downloadedPart of downloadedParts) {
+    const partBytes = await readFile(downloadedPart.partPath);
     combinedHash.update(partBytes);
-    totalSize += partBytes.length;
+    totalSize += downloadedPart.size;
     parts.push({
-      url: `${expectedPrefix}${partName}`,
-      size: partBytes.length,
-      sha256: partHash
+      url: downloadedPart.url,
+      size: downloadedPart.size,
+      sha256: downloadedPart.sha256
     });
   }
 
@@ -272,6 +297,22 @@ async function reusePublishedInstallerParts(installer, publishedManifest) {
     contentType: installer.contentType,
     parts
   };
+}
+
+async function mapWithConcurrency(items, concurrency, worker) {
+  const results = new Array(items.length);
+  let nextIndex = 0;
+  const workerCount = Math.min(concurrency, items.length);
+
+  await Promise.all(Array.from({ length: workerCount }, async () => {
+    while (nextIndex < items.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      results[index] = await worker(items[index]);
+    }
+  }));
+
+  return results;
 }
 
 function usesCurrentInstallerPartLayout(packageInfo) {

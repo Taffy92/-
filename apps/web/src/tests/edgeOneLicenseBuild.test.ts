@@ -38,6 +38,8 @@ describe("EdgeOne private license admin build", () => {
 
     expect(buildSource).toContain("fetchPublishedInstallerManifest");
     expect(buildSource).toContain("reusePublishedInstallerParts");
+    expect(buildSource).toContain("publishedPartDownloadConcurrency = 6");
+    expect(buildSource).toContain("mapWithConcurrency");
     expect(buildSource).toContain("fetchVerifiedInstallerAsset");
     expect(buildSource).toContain("EDGEONE_INSTALLER_SOURCE_URL");
     expect(buildSource).toContain("releases/download/v${releaseVersion}/");
