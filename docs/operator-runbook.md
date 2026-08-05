@@ -5,14 +5,14 @@
 ## 生产结构
 
 - 正式域名：`https://gszhmrx.cn`、`https://www.gszhmrx.cn`
-- EdgeOne 项目：`format-converter-web`
+- EdgeOne 项目：`format-converter-web-upload`（唯一正式项目，直接上传）
 - 授权后台：`https://gszhmrx.cn/admin/license/`
 - 静态与函数产物：`apps/web/out`
 - 原始安装包：`release/v2.0.0/installers/`，仅保存在本地并被 Git 忽略
 - 下载清单：`/release/v2.0.0/edgeone-v24/manifest.json`
 - 安装包分片：`/release/v2.0.0/edgeone-v24/zip/part-*.bin`
 
-浏览器从同源地址逐片下载并校验 SHA256。用户处理文件始终留在本机，不会进入 EdgeOne 函数或 Blob。
+浏览器从 `gszhmrx.cn` 与 `www.gszhmrx.cn` 两个自有 EdgeOne 域名并行下载分片并校验 SHA256。用户处理文件始终留在本机，不会进入 EdgeOne 函数或 Blob。
 
 ## 构建与部署
 
@@ -31,9 +31,10 @@ npm run deploy:edgeone
 1. 构建在线静态站；
 2. 拆分 FFmpeg WASM；
 3. 核对本地正式 ZIP 的 SHA256，并检查 ZIP 内只有 MSI；
-4. 生成不超过 24 MiB 的同源安装包分片和清单；GitHub 关联构建无法读取本地安装包时，不复用旧分片布局，改为重新拉取已校验的发布资产；
+4. 从本地正式安装包生成不超过 24 MiB 的同源分片和清单；
 5. 把 `cloud-functions` 与最小运行依赖纳入产物；
-6. 拒绝大于 25 MiB 的文件，以及私钥、客户记录或 `.mrx`。
+6. 从根目录 `edgeone.json` 生成不含构建命令和输出目录的直传配置到 `apps/web/out`，供直接上传部署读取响应头和函数配置；
+7. 拒绝大于 25 MiB 的文件，以及私钥、客户记录或 `.mrx`。
 
 不要用 `build:web` 的产物覆盖正式 EdgeOne 站点，因为普通构建不包含安装包分片和生产函数部署内容。
 
@@ -45,7 +46,7 @@ npm run deploy:edgeone
 powershell -ExecutionPolicy Bypass -File tools\admin-license-generator\setup-edgeone-admin.ps1
 ```
 
-把生成文件中的四项值逐项设置到 EdgeOne 项目 `format-converter-web` 的生产环境变量，设置完立即关闭文件，不在日志或聊天中粘贴。记录加密密钥必须安全离线备份；丢失后历史授权记录无法解密。
+把生成文件中的四项值逐项设置到 EdgeOne 项目 `format-converter-web-upload` 的生产环境变量，设置完立即关闭文件，不在日志或聊天中粘贴。记录加密密钥必须安全离线备份；丢失后历史授权记录无法解密。
 
 后台密码允许 6 位纯数字，程序不做复杂度限制，也不因连续错误锁定。此选择适合单管理员使用，但必须避免把地址和密码告知他人。
 

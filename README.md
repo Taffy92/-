@@ -115,7 +115,7 @@ npm run build:edgeone
 npm run deploy:edgeone
 ```
 
-EdgeOne 项目名为 `format-converter-web`。正式构建会从被 Git 忽略的 `release/v2.0.0/installers/` 读取 ZIP，先核对 ZIP 整包 SHA256 和内部 MSI，再生成不超过 24 MiB 的同源分片。浏览器逐片校验并在本地拼装，避免国内用户被跳转到 GitHub；ZIP 内只保留 MSI 安装包。分片目录使用 `edgeone-v24`，避免长期缓存命中旧分片。
+EdgeOne 唯一正式项目名为 `format-converter-web-upload`，通过本地构建产物直接上传，不使用 GitHub Provider。正式构建会从被 Git 忽略的 `release/v2.0.0/installers/` 读取 ZIP，先核对 ZIP 整包 SHA256 和内部 MSI，再生成不超过 24 MiB 的分片。浏览器从两个自有域名并行下载、逐片校验并在本地拼装，避免国内用户被跳转到 GitHub；ZIP 内只保留 MSI 安装包。分片目录使用 `edgeone-v24`，避免长期缓存命中旧分片。
 
 正式构建还会纳入 EdgeOne 授权函数，并检查私钥、客户记录和 `.mrx` 没有进入发布产物。具体检查地址与故障处理见 `docs/operator-runbook.md`。
 

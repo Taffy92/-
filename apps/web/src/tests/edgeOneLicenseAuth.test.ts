@@ -66,7 +66,7 @@ describe("EdgeOne license admin authentication", () => {
     const presetDomain = new Request("http://internal-function/session", {
       method: "POST",
       headers: {
-        Origin: "https://format-converter-web-s1e4ymen.edgeone.cool"
+        Origin: "https://format-converter-web-upload-bnsgopdb.edgeone.cool"
       }
     });
     expect(() => assertSameOrigin(presetDomain)).not.toThrow();

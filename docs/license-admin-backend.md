@@ -40,7 +40,7 @@ LICENSE_SESSION_SECRET_B64
 LICENSE_RECORD_ENCRYPTION_KEY_B64
 ```
 
-在 EdgeOne Pages 项目 `format-converter-web` 的生产环境变量中逐项添加，然后部署完整站点：
+在唯一的 EdgeOne Pages 项目 `format-converter-web-upload` 的生产环境变量中逐项添加，然后从本地构建产物直接部署完整站点：
 
 ```powershell
 npm run deploy:license-admin

@@ -734,7 +734,7 @@ Get-ChildItem apps\web\out -Recurse -File -Include *.mrx,license_records.json
 ### Step 5：部署预览环境
 
 ```powershell
-edgeone makers deploy apps/web/out -n format-converter-web -e preview
+edgeone makers deploy apps/web/out -n format-converter-web-upload -e preview
 ```
 
 预期：部署成功并返回预览地址。
@@ -760,7 +760,7 @@ edgeone makers deploy apps/web/out -n format-converter-web -e preview
 3. 部署生产环境：
 
 ```powershell
-edgeone makers deploy apps/web/out -n format-converter-web -e production
+edgeone makers deploy apps/web/out -n format-converter-web-upload -e production
 ```
 
 预期：生产部署成功。确认生产后台正常后，删除本地 `.tmp/edgeone-admin-secrets.env`，保留记录加密密钥的独立离线备份。

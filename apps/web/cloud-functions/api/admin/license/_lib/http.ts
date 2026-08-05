@@ -2,7 +2,7 @@ const MAX_BODY_BYTES = 64 * 1024;
 const ADMIN_ORIGIN_HOSTS = new Set([
   "gszhmrx.cn",
   "www.gszhmrx.cn",
-  "format-converter-web-s1e4ymen.edgeone.cool"
+  "format-converter-web-upload-bnsgopdb.edgeone.cool"
 ]);
 
 export class HttpError extends Error {

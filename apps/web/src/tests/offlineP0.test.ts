@@ -18,6 +18,7 @@ describe("offline P0 release checks", () => {
     expect(rootPackage.scripts["package:desktop"]).toContain("--filter desktop package");
     expect(rootPackage.scripts["package:desktop:msi"]).toContain("--filter desktop package:msi");
     expect(rootPackage.scripts["package:desktop:all"]).toContain("--filter desktop build:all");
+    expect(rootPackage.scripts["deploy:edgeone"]).toContain("-n format-converter-web-upload");
   });
 
   it("keeps the release installer directory free of EXE artifacts", () => {
@@ -103,6 +104,8 @@ describe("offline P0 release checks", () => {
     expect(edgeOneBuildSource).toContain("installerPartSize");
     expect(edgeOneBuildSource).toContain("usesCurrentInstallerPartLayout");
     expect(edgeOneBuildSource).toContain("writeInstallerParts");
+    expect(edgeOneBuildSource).toContain("writeDirectUploadConfig");
+    expect(edgeOneBuildSource).toContain("delete config.outputDirectory");
     expect(edgeOneBuildSource).toContain("part-");
     expect(downloadsConfigSource).toContain('version: "2.0.0"');
     expect(versionSource).toContain('currentReleaseVersion = "2.0.0"');

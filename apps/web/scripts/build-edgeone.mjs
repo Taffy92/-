@@ -74,6 +74,7 @@ if (wasmParts.length !== wasmPartUrls.length) {
 }
 await rm(wasmPath);
 await writeInstallerParts();
+await writeDirectUploadConfig();
 await assertNoPrivateLicenseMaterial();
 
 const oversizedFiles = [];
@@ -157,6 +158,15 @@ async function writeInstallerParts() {
     path.join(edgeOneReleaseDir, "manifest.json"),
     `${JSON.stringify(manifest, null, 2)}\n`
   );
+}
+
+async function writeDirectUploadConfig() {
+  const sourcePath = path.resolve(appRoot, "..", "..", "edgeone.json");
+  const config = JSON.parse(await readFile(sourcePath, "utf8"));
+  delete config.buildCommand;
+  delete config.installCommand;
+  delete config.outputDirectory;
+  await writeFile(path.join(outDir, "edgeone.json"), `${JSON.stringify(config, null, 2)}\n`);
 }
 
 async function fetchPublishedInstallerManifest() {
