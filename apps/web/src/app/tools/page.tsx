@@ -14,7 +14,13 @@ export const metadata: Metadata = createPageMetadata({
 });
 
 export default function ToolsPage() {
-  if (isDesktopApp) return <ToolsClient surface="desktop" />;
+  if (isDesktopApp) {
+    return (
+      <Suspense fallback={<main className="online-tool-directory-loading" aria-busy="true">正在加载工具...</main>}>
+        <ToolsClient surface="desktop" />
+      </Suspense>
+    );
+  }
   return (
     <Suspense fallback={<main className="online-tool-directory-loading" aria-busy="true">正在载入工具目录...</main>}>
       <OnlineToolsEntry />

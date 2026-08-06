@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { AdSlot } from "@doctool/ui";
 import {
   ArrowRight,
@@ -70,7 +71,11 @@ const localSteps = [
 
 export default function HomePage() {
   if (isDesktopApp) {
-    return <ToolsClient surface="desktop" />;
+    return (
+      <Suspense fallback={<main className="online-tool-directory-loading" aria-busy="true">正在加载工具...</main>}>
+        <ToolsClient surface="desktop" />
+      </Suspense>
+    );
   }
 
   return (

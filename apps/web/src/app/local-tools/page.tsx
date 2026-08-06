@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { isDesktopApp } from "@/config/appMode";
 import { LocalToolsClient } from "@/components/tools/LocalToolsClient";
 import { createPageMetadata } from "@/lib/seo";
@@ -10,5 +11,9 @@ export const metadata: Metadata = createPageMetadata({
 });
 
 export default function LocalToolsPage() {
-  return <LocalToolsClient surface={isDesktopApp ? "desktop" : "web"} />;
+  return (
+    <Suspense fallback={<main className="online-tool-directory-loading" aria-busy="true">正在加载工具...</main>}>
+      <LocalToolsClient surface={isDesktopApp ? "desktop" : "web"} />
+    </Suspense>
+  );
 }

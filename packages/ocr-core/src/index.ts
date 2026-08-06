@@ -4,8 +4,10 @@ import {
   ImageRun,
   Packer,
   Paragraph,
-  TextRun
+  TextRun,
+  Textbox
 } from "docx";
+import type { UniversalMeasure } from "docx";
 import { createWorker, OEM } from "tesseract.js";
 import {
   extractPdfTextPages,
@@ -23,6 +25,19 @@ export interface OcrPageResult {
   confidence: number;
   source: OcrPageSource;
   image?: Blob;
+  width?: number;
+  height?: number;
+  layout?: OcrTextBox[];
+}
+
+export interface OcrTextBox {
+  text: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  confidence?: number;
+  fontFamily?: string;
 }
 
 export interface OcrDocumentResult {
@@ -81,6 +96,7 @@ export function createOcrTextBlob(pages: OcrPageResult[]) {
 }
 
 export async function exportEditableOcrWord(pages: OcrPageResult[]) {
+  return exportEditableOcrWordWithLayout(pages);
   if (!pages.length) throw new Error("没有可导出的 OCR 页面。");
   const document = new Document({
     creator: "万能格式转换器",
@@ -97,6 +113,75 @@ export async function exportEditableOcrWord(pages: OcrPageResult[]) {
     }))
   });
   return Packer.toBlob(document);
+}
+
+async function exportEditableOcrWordWithLayout(pages: OcrPageResult[]) {
+  if (!pages.length) throw new Error("No OCR pages to export.");
+  const document = new Document({
+    creator: "Universal Format Converter",
+    description: "Editable local OCR export",
+    sections: pages.map((page) => createEditableOcrSection(page))
+  });
+  return Packer.toBlob(document);
+}
+
+function createEditableOcrSection(page: OcrPageResult) {
+  const layout = normalizeOcrLayout(page);
+  if (!layout.length) {
+    return { properties: {}, children: paragraphsFromText(page.text) };
+  }
+
+  const sourceWidth = Math.max(1, page.width || Math.max(...layout.map((box) => box.x + box.width)));
+  const sourceHeight = Math.max(1, page.height || Math.max(...layout.map((box) => box.y + box.height)));
+  const scale = Math.min(1, 794 / sourceWidth, 1123 / sourceHeight);
+  const pageWidth = Math.max(1, Math.round(sourceWidth * scale));
+  const pageHeight = Math.max(1, Math.round(sourceHeight * scale));
+
+  return {
+    properties: {
+      page: {
+        size: { width: pageWidth * 15, height: pageHeight * 15 },
+        margin: { top: 0, right: 0, bottom: 0, left: 0 }
+      }
+    },
+    children: layout.map((box) => new Textbox({
+      children: [new TextRun({
+        text: box.text,
+        font: box.fontFamily || "Microsoft YaHei",
+        size: Math.max(12, Math.round(Math.min(24, box.height * scale) * 1.5))
+      })],
+      style: {
+        width: pixelsToInches(box.width * scale),
+        height: pixelsToInches(box.height * scale),
+        left: pixelsToInches(box.x * scale),
+        top: pixelsToInches(box.y * scale),
+        position: "absolute",
+        positionHorizontal: "absolute",
+        positionHorizontalRelative: "page",
+        positionVertical: "absolute",
+        positionVerticalRelative: "page",
+        wrapStyle: "none",
+        zIndex: 1
+      }
+    }))
+  };
+}
+
+function pixelsToInches(pixels: number): UniversalMeasure {
+  return `${Math.max(0, pixels / 96).toFixed(3)}in` as UniversalMeasure;
+}
+
+function normalizeOcrLayout(page: OcrPageResult): OcrTextBox[] {
+  return (page.layout || [])
+    .map((box) => ({
+      ...box,
+      text: box.text.trim(),
+      x: Math.max(0, box.x),
+      y: Math.max(0, box.y),
+      width: Math.max(1, box.width),
+      height: Math.max(1, box.height)
+    }))
+    .filter((box) => box.text.length > 0);
 }
 
 export async function exportImageOcrWord(pages: OcrPageResult[]) {
@@ -179,19 +264,26 @@ async function recognizePdf(file: File, options: RecognizeDocumentOptions) {
           text: textPage.text,
           confidence: 100,
           source: "text",
-          image: options.includePageImages ? pageImage : undefined
+          image: options.includePageImages ? pageImage : undefined,
+          width: textPage.width,
+          height: textPage.height,
+          layout: textPage.layout
         });
         options.onProgress?.(pageNumber / pageCount, `已直接提取第 ${pageNumber}/${pageCount} 页文字`);
         continue;
       }
       const activeWorker = await ensureWorker();
       const result = await recognizeWithCancellation(activeWorker, pageImage as Blob, options.signal);
+      const dimensions = await readImageDimensions(pageImage as Blob);
       results.push({
         pageNumber,
-        text: result.data.text.trim(),
+        text: normalizeRecognizedText(result.data.text),
         confidence: normalizeConfidence(result.data.confidence),
         source: "ocr",
-        image: options.includePageImages ? pageImage : undefined
+        image: options.includePageImages ? pageImage : undefined,
+        width: dimensions.width,
+        height: dimensions.height,
+        layout: layoutFromTesseractData(result.data)
       });
     }
   } finally {
@@ -221,12 +313,16 @@ async function recognizeImagePage(
   });
   try {
     const result = await recognizeWithCancellation(worker, file, options.signal);
+    const dimensions = await readImageDimensions(file);
     return {
       pageNumber,
-      text: result.data.text.trim(),
+      text: normalizeRecognizedText(result.data.text),
       confidence: normalizeConfidence(result.data.confidence),
       source: "ocr",
-      image: options.includePageImages ? file : undefined
+      image: options.includePageImages ? file : undefined,
+      width: dimensions.width,
+      height: dimensions.height,
+      layout: layoutFromTesseractData(result.data)
     };
   } finally {
     await worker.terminate().catch(() => undefined);
@@ -244,7 +340,7 @@ async function recognizeWithCancellation(
   };
   signal?.addEventListener("abort", onAbort, { once: true });
   try {
-    const result = await worker.recognize(image);
+    const result = await worker.recognize(image, {}, { text: true, blocks: true });
     ensureNotAborted(signal);
     return result;
   } catch (error) {
@@ -261,6 +357,70 @@ function paragraphsFromText(text: string) {
     spacing: { after: 120, line: 360 },
     children: [new TextRun({ text: line || " ", font: "Microsoft YaHei" })]
   }));
+}
+
+function normalizeRecognizedText(text: string) {
+  let normalized = text
+    .replace(/\r\n?/g, "\n")
+    .replace(/[ \t]+/g, " ")
+    .trim();
+  let previous = "";
+  while (normalized !== previous) {
+    previous = normalized;
+    normalized = normalized
+      .replace(/([\u3400-\u9fff])\s+([\u3400-\u9fffA-Za-z0-9])/g, "$1$2")
+      .replace(/([A-Za-z0-9])\s+([\u3400-\u9fff])/g, "$1$2")
+      .replace(/([\u3400-\u9fff])\s+([，。！？；：、）》】”’…,.!?;:)\]}])/g, "$1$2")
+      .replace(/([（《【“‘(\[{])\s+/g, "$1");
+  }
+  return normalized;
+}
+
+function layoutFromTesseractData(data: {
+  blocks?: Array<{
+    paragraphs: Array<{
+      lines: Array<{
+        text: string;
+        confidence: number;
+        bbox: { x0: number; y0: number; x1: number; y1: number };
+        words: Array<{
+          text: string;
+          confidence: number;
+          font_name: string;
+          bbox: { x0: number; y0: number; x1: number; y1: number };
+        }>;
+      }>;
+    }>;
+  }> | null;
+}): OcrTextBox[] {
+  const layout: OcrTextBox[] = [];
+  for (const block of data.blocks || []) {
+    for (const paragraph of block.paragraphs || []) {
+      for (const line of paragraph.lines || []) {
+        const words = (line.words || []).filter((word) => word.text.trim());
+        const text = normalizeRecognizedText(line.text || words.map((word) => word.text).join(" "));
+        if (!text) continue;
+        layout.push({
+          text,
+          x: line.bbox.x0,
+          y: line.bbox.y0,
+          width: Math.max(1, line.bbox.x1 - line.bbox.x0),
+          height: Math.max(1, line.bbox.y1 - line.bbox.y0),
+          confidence: normalizeConfidence(line.confidence),
+          fontFamily: resolveOcrFont(words[0]?.font_name)
+        });
+      }
+    }
+  }
+  return layout;
+}
+
+function resolveOcrFont(fontName?: string) {
+  const normalized = fontName?.trim();
+  if (!normalized || /^(arial|sans[- ]?serif|serif|unknown|font)$/i.test(normalized)) {
+    return "Microsoft YaHei";
+  }
+  return normalized;
 }
 
 async function normalizeDocxImage(blob: Blob): Promise<{ blob: Blob; type: "jpg" | "png" | "gif" | "bmp" }> {

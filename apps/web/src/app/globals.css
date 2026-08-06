@@ -5881,6 +5881,132 @@ textarea:focus-visible {
   }
 }
 
+/* Keep the local online workbench on the approved light A2 surface. */
+.a2-local-tools-page {
+  background: var(--a2-page) !important;
+  color: var(--a2-text) !important;
+}
+
+.a2-local-tools-page .a2-workbench,
+.a2-local-tools-page .a2-task-status,
+.a2-local-tools-page .a2-local-file-list > div,
+.a2-local-tools-page .a2-output-item {
+  background: #fff !important;
+  color: var(--a2-text) !important;
+}
+
+.a2-local-tools-page .a2-output-list {
+  border-color: var(--a2-line) !important;
+  background: var(--a2-green-soft) !important;
+  color: var(--a2-text) !important;
+}
+
+.a2-local-tools-page .a2-output-list h3 {
+  color: var(--a2-green) !important;
+}
+
+.a2-local-tools-page .a2-output-item {
+  border-color: var(--a2-line) !important;
+}
+
+.a2-local-tools-page .text-slate-50,
+.a2-local-tools-page .text-slate-100,
+.a2-local-tools-page .text-slate-200,
+.a2-local-tools-page .text-slate-300 {
+  color: var(--a2-text) !important;
+}
+
+.a2-local-tools-page .text-slate-400,
+.a2-local-tools-page .text-slate-500 {
+  color: var(--a2-muted) !important;
+}
+
+.a2-local-tools-page [class*="bg-slate-950"],
+.a2-local-tools-page [class*="bg-slate-900"] {
+  background-color: #fff !important;
+}
+
+.a2-local-tools-page [class*="border-slate-"] {
+  border-color: var(--a2-line) !important;
+}
+
+.support-dialog-layer:not(.support-dialog-layer-desktop) {
+  background: rgba(23, 32, 51, 0.3);
+}
+
+.support-dialog-layer:not(.support-dialog-layer-desktop) .support-dialog {
+  border-color: var(--a2-line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--a2-text);
+  box-shadow: 0 24px 70px rgba(23, 32, 51, 0.2);
+}
+
+.support-dialog-layer:not(.support-dialog-layer-desktop) .support-dialog-head,
+.support-dialog-layer:not(.support-dialog-layer-desktop) .support-contact-panel,
+.support-dialog-layer:not(.support-dialog-layer-desktop) .support-contact-row {
+  border-color: var(--a2-line);
+  background: #fff;
+}
+
+.support-dialog-layer:not(.support-dialog-layer-desktop) .support-dialog-head h2,
+.support-dialog-layer:not(.support-dialog-layer-desktop) .support-contact-panel h3,
+.support-dialog-layer:not(.support-dialog-layer-desktop) .support-contact-row strong,
+.support-dialog-layer:not(.support-dialog-layer-desktop) .support-qr-grid figcaption {
+  color: var(--a2-text);
+}
+
+.support-dialog-layer:not(.support-dialog-layer-desktop) .support-dialog-intro,
+.support-dialog-layer:not(.support-dialog-layer-desktop) .support-contact-panel > p,
+.support-dialog-layer:not(.support-dialog-layer-desktop) .support-contact-row small,
+.support-dialog-layer:not(.support-dialog-layer-desktop) .support-dialog-note {
+  color: var(--a2-muted);
+}
+
+.support-dialog-layer:not(.support-dialog-layer-desktop) .support-qr-grid figure {
+  border-color: var(--a2-line);
+  background: #f8fafc;
+}
+
+.support-dialog-layer:not(.support-dialog-layer-desktop) .support-contact-row a,
+.support-dialog-layer:not(.support-dialog-layer-desktop) .support-contact-row button {
+  border-color: var(--a2-line);
+  background: #fff;
+  color: var(--a2-blue);
+}
+
+.a2-page-download-list {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.a2-page-download-list button {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--a2-line);
+  border-radius: 5px;
+  background: #f8fafc;
+  color: var(--a2-blue);
+  padding: 7px 9px;
+  text-align: left;
+  font-size: 11px;
+}
+
+.a2-page-download-list button:hover {
+  border-color: var(--a2-blue);
+  background: var(--a2-blue-soft);
+}
+
+.a2-page-download-list button span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Site-level 404 keeps the same restrained product shell and carries no ad slot. */
 .not-found-page {
   display: grid;

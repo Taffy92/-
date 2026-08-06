@@ -22,7 +22,7 @@ const modes = [
     id: "ocr",
     label: "OCR 识别",
     title: "本地模型读取文字",
-    detail: "图片和 PDF 内容在当前设备识别，可导出 TXT 或 Word。",
+    detail: "图片和 PDF 内容在当前设备识别，可导出可编辑 Word。",
     icon: ScanText
   },
   {

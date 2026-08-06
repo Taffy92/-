@@ -30,6 +30,9 @@ describe("privacy and product boundary checks", () => {
     expect(tabBlock).not.toContain('id: "pdf-excel"');
     expect(tabBlock).not.toContain('id: "image-word"');
     expect(tabBlock).not.toContain('id: "image-excel"');
+    expect(localToolsSource).toContain("exportEditableOcrWord(document.pages)");
+    expect(localToolsSource).not.toContain("createOcrTextBlob");
+    expect(localToolsSource).not.toContain("exportImageOcrWord");
     expect(tabBlock).not.toContain("PDF 编辑");
     expect(tabBlock).not.toContain("PDF 精准编辑");
     expect(tabBlock).not.toContain("PDF 局部修改");
@@ -141,7 +144,8 @@ describe("privacy and product boundary checks", () => {
     expect(batchBlock).not.toContain(".zip");
     expect(toolsSource).toContain("renderDocxToImagePages");
     expect(toolsSource).toContain("renderExcelToImagePages");
-    expect(exportCoreSource).toContain("JSZip.loadAsync");
+    expect(exportCoreSource).toContain("renderAsync");
+    expect(exportCoreSource).toContain("html2canvas");
     expect(exportCoreSource).toContain("ExcelJS.Workbook");
     expect(exportCoreSource).toContain("combineImagePages");
   });

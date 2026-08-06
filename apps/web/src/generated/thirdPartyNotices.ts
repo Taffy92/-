@@ -2,9 +2,9 @@
 // Do not edit it by hand.
 
 export const thirdPartyNoticeMeta = {
-  "generatedAt": "2026-08-02T10:06:21.069Z",
-  "npmPackageCount": 774,
-  "directNpmPackageCount": 45,
+  "generatedAt": "2026-08-06T12:35:58.724Z",
+  "npmPackageCount": 765,
+  "directNpmPackageCount": 47,
   "rustCrateCount": 429,
   "bundledArtifactCount": 3,
   "sources": [
@@ -21,8 +21,8 @@ export const bundledArtifacts = [
     "label": "Next.js 静态网站产物",
     "path": "apps/web/out",
     "kind": "目录",
-    "files": 362,
-    "sizeBytes": 625004941,
+    "files": 296,
+    "sizeBytes": 62236812,
     "sha256": "",
     "note": "在线版和离线版共用的静态页面、JS、CSS 和静态资源。"
   },
@@ -39,7 +39,7 @@ export const bundledArtifacts = [
     "label": "FFmpeg WASM 静态资源",
     "path": "apps/web/out/ffmpeg",
     "kind": "目录",
-    "files": 3,
+    "files": 2,
     "sizeBytes": 32344478,
     "sha256": "",
     "note": "来自 @ffmpeg/core 的 ffmpeg-core.js 和 ffmpeg-core.wasm。"
@@ -352,6 +352,20 @@ export const directNpmPackages = [
     "inLockfile": true
   },
   {
+    "name": "docx-preview",
+    "version": "0.3.6",
+    "license": "Apache-2.0",
+    "repository": "git+https://github.com/zVolodymyr/docxjs.git",
+    "homepage": "",
+    "author": "Volodymyr Baydalka",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": true,
+    "inLockfile": true
+  },
+  {
     "name": "eslint",
     "version": "8.57.1",
     "license": "MIT",
@@ -367,7 +381,7 @@ export const directNpmPackages = [
   },
   {
     "name": "eslint-config-next",
-    "version": "15.5.18",
+    "version": "15.5.22",
     "license": "MIT",
     "repository": "vercel/next.js",
     "homepage": "https://nextjs.org/docs/app/api-reference/config/eslint",
@@ -432,6 +446,20 @@ export const directNpmPackages = [
     "inLockfile": true
   },
   {
+    "name": "html2canvas",
+    "version": "1.4.1",
+    "license": "MIT",
+    "repository": "git@github.com:niklasvh/html2canvas.git",
+    "homepage": "https://html2canvas.hertzen.com",
+    "author": "Niklas von Hertzen niklasvh@gmail.com",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": true,
+    "inLockfile": true
+  },
+  {
     "name": "jsdom",
     "version": "24.1.3",
     "license": "MIT",
@@ -475,7 +503,7 @@ export const directNpmPackages = [
   },
   {
     "name": "next",
-    "version": "15.5.18",
+    "version": "15.5.22",
     "license": "MIT",
     "repository": "vercel/next.js",
     "homepage": "https://nextjs.org",
@@ -517,7 +545,7 @@ export const directNpmPackages = [
   },
   {
     "name": "postcss",
-    "version": "8.5.10",
+    "version": "8.5.26",
     "license": "MIT",
     "repository": "postcss/postcss",
     "homepage": "https://postcss.org/",
@@ -643,7 +671,7 @@ export const directNpmPackages = [
   },
   {
     "name": "vitest",
-    "version": "1.6.1",
+    "version": "3.2.7",
     "license": "MIT",
     "repository": "git+https://github.com/vitest-dev/vitest.git",
     "homepage": "https://github.com/vitest-dev/vitest#readme",
@@ -877,6 +905,18 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "@esbuild/win32-x64",
+    "version": "0.27.0",
+    "license": "MIT",
+    "repository": "git+https://github.com/evanw/esbuild.git",
+    "homepage": "",
+    "author": "",
+    "licenseFiles": [],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
     "name": "@eslint-community/eslint-utils",
     "version": "4.9.1",
     "license": "MIT",
@@ -1092,25 +1132,11 @@ export const npmPackages = [
   },
   {
     "name": "@img/sharp-win32-x64",
-    "version": "0.34.5",
+    "version": "0.35.3",
     "license": "Apache-2.0 AND LGPL-3.0-or-later",
     "repository": "git+https://github.com/lovell/sharp.git",
     "homepage": "https://sharp.pixelplumbing.com",
     "author": "Lovell Fuller <npm@lovell.info>",
-    "licenseFiles": [
-      "LICENSE"
-    ],
-    "noticeFiles": [],
-    "direct": false,
-    "inLockfile": true
-  },
-  {
-    "name": "@jest/schemas",
-    "version": "29.6.3",
-    "license": "MIT",
-    "repository": "https://github.com/jestjs/jest.git",
-    "homepage": "",
-    "author": "",
     "licenseFiles": [
       "LICENSE"
     ],
@@ -1230,7 +1256,7 @@ export const npmPackages = [
   },
   {
     "name": "@next/env",
-    "version": "15.5.18",
+    "version": "15.5.22",
     "license": "MIT",
     "repository": "https://github.com/vercel/next.js",
     "homepage": "",
@@ -1242,7 +1268,7 @@ export const npmPackages = [
   },
   {
     "name": "@next/eslint-plugin-next",
-    "version": "15.5.18",
+    "version": "15.5.22",
     "license": "MIT",
     "repository": "vercel/next.js",
     "homepage": "",
@@ -1254,7 +1280,7 @@ export const npmPackages = [
   },
   {
     "name": "@next/swc-win32-x64-msvc",
-    "version": "15.5.18",
+    "version": "15.5.22",
     "license": "MIT",
     "repository": "https://github.com/vercel/next.js",
     "homepage": "",
@@ -1443,20 +1469,6 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
-    "name": "@sinclair/typebox",
-    "version": "0.27.10",
-    "license": "MIT",
-    "repository": "https://github.com/sinclairzx81/typebox-legacy",
-    "homepage": "",
-    "author": "sinclairzx81",
-    "licenseFiles": [
-      "license"
-    ],
-    "noticeFiles": [],
-    "direct": false,
-    "inLockfile": true
-  },
-  {
     "name": "@swc/helpers",
     "version": "0.5.15",
     "license": "Apache-2.0",
@@ -1606,6 +1618,34 @@ export const npmPackages = [
     "license": "MIT",
     "repository": "https://github.com/tsconfig/bases.git",
     "homepage": "",
+    "author": "",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "@types/chai",
+    "version": "5.2.3",
+    "license": "MIT",
+    "repository": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/chai",
+    "author": "",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "@types/deep-eql",
+    "version": "4.0.2",
+    "license": "MIT",
+    "repository": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/deep-eql",
     "author": "",
     "licenseFiles": [
       "LICENSE"
@@ -2200,7 +2240,7 @@ export const npmPackages = [
   },
   {
     "name": "@vitest/expect",
-    "version": "1.6.1",
+    "version": "3.2.7",
     "license": "MIT",
     "repository": "git+https://github.com/vitest-dev/vitest.git",
     "homepage": "https://github.com/vitest-dev/vitest/tree/main/packages/expect#readme",
@@ -2213,8 +2253,36 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "@vitest/mocker",
+    "version": "3.2.7",
+    "license": "MIT",
+    "repository": "git+https://github.com/vitest-dev/vitest.git",
+    "homepage": "https://github.com/vitest-dev/vitest/tree/main/packages/mocker#readme",
+    "author": "",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "@vitest/pretty-format",
+    "version": "3.2.7",
+    "license": "MIT",
+    "repository": "git+https://github.com/vitest-dev/vitest.git",
+    "homepage": "https://github.com/vitest-dev/vitest/tree/main/packages/utils#readme",
+    "author": "",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
     "name": "@vitest/runner",
-    "version": "1.6.1",
+    "version": "3.2.7",
     "license": "MIT",
     "repository": "git+https://github.com/vitest-dev/vitest.git",
     "homepage": "https://github.com/vitest-dev/vitest/tree/main/packages/runner#readme",
@@ -2228,7 +2296,7 @@ export const npmPackages = [
   },
   {
     "name": "@vitest/snapshot",
-    "version": "1.6.1",
+    "version": "3.2.7",
     "license": "MIT",
     "repository": "git+https://github.com/vitest-dev/vitest.git",
     "homepage": "https://github.com/vitest-dev/vitest/tree/main/packages/snapshot#readme",
@@ -2242,7 +2310,7 @@ export const npmPackages = [
   },
   {
     "name": "@vitest/spy",
-    "version": "1.6.1",
+    "version": "3.2.7",
     "license": "MIT",
     "repository": "git+https://github.com/vitest-dev/vitest.git",
     "homepage": "https://github.com/vitest-dev/vitest/tree/main/packages/spy#readme",
@@ -2256,7 +2324,7 @@ export const npmPackages = [
   },
   {
     "name": "@vitest/utils",
-    "version": "1.6.1",
+    "version": "3.2.7",
     "license": "MIT",
     "repository": "git+https://github.com/vitest-dev/vitest.git",
     "homepage": "https://github.com/vitest-dev/vitest/tree/main/packages/utils#readme",
@@ -2421,20 +2489,6 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
-    "name": "ansi-styles",
-    "version": "5.2.0",
-    "license": "MIT",
-    "repository": "chalk/ansi-styles",
-    "homepage": "",
-    "author": "Sindre Sorhus sindresorhus@gmail.com",
-    "licenseFiles": [
-      "license"
-    ],
-    "noticeFiles": [],
-    "direct": false,
-    "inLockfile": true
-  },
-  {
     "name": "any-promise",
     "version": "1.3.0",
     "license": "MIT",
@@ -2535,20 +2589,6 @@ export const npmPackages = [
   {
     "name": "arg",
     "version": "4.1.0",
-    "license": "MIT",
-    "repository": "zeit/arg",
-    "homepage": "",
-    "author": "Josh Junon <junon@zeit.co>",
-    "licenseFiles": [
-      "LICENSE.md"
-    ],
-    "noticeFiles": [],
-    "direct": false,
-    "inLockfile": true
-  },
-  {
-    "name": "arg",
-    "version": "4.1.3",
     "license": "MIT",
     "repository": "zeit/arg",
     "homepage": "",
@@ -2716,12 +2756,14 @@ export const npmPackages = [
   },
   {
     "name": "assertion-error",
-    "version": "1.1.0",
+    "version": "2.0.1",
     "license": "MIT",
     "repository": "git@github.com:chaijs/assertion-error.git",
     "homepage": "",
     "author": "Jake Luer <jake@qualiancy.com> (http://qualiancy.com)",
-    "licenseFiles": [],
+    "licenseFiles": [
+      "LICENSE"
+    ],
     "noticeFiles": [],
     "direct": false,
     "inLockfile": true
@@ -2917,6 +2959,20 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "base64-arraybuffer",
+    "version": "1.0.2",
+    "license": "MIT",
+    "repository": "https://github.com/niklasvh/base64-arraybuffer",
+    "homepage": "https://github.com/niklasvh/base64-arraybuffer",
+    "author": "Niklas von Hertzen niklasvh@gmail.com",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
     "name": "base64-js",
     "version": "1.5.1",
     "license": "MIT",
@@ -3042,7 +3098,7 @@ export const npmPackages = [
   },
   {
     "name": "brace-expansion",
-    "version": "1.1.14",
+    "version": "1.1.18",
     "license": "MIT",
     "repository": "git://github.com/juliangruber/brace-expansion.git",
     "homepage": "https://github.com/juliangruber/brace-expansion",
@@ -3056,7 +3112,7 @@ export const npmPackages = [
   },
   {
     "name": "brace-expansion",
-    "version": "2.1.0",
+    "version": "2.1.4",
     "license": "MIT",
     "repository": "git://github.com/juliangruber/brace-expansion.git",
     "homepage": "https://github.com/juliangruber/brace-expansion",
@@ -3306,7 +3362,7 @@ export const npmPackages = [
   },
   {
     "name": "chai",
-    "version": "4.5.0",
+    "version": "5.3.3",
     "license": "MIT",
     "repository": "https://github.com/chaijs/chai",
     "homepage": "http://chaijs.com",
@@ -3346,7 +3402,7 @@ export const npmPackages = [
   },
   {
     "name": "check-error",
-    "version": "1.0.3",
+    "version": "2.1.3",
     "license": "MIT",
     "repository": "git+ssh://git@github.com/chaijs/check-error.git",
     "homepage": "",
@@ -3567,20 +3623,6 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
-    "name": "confbox",
-    "version": "0.1.8",
-    "license": "MIT",
-    "repository": "unjs/confbox",
-    "homepage": "",
-    "author": "",
-    "licenseFiles": [
-      "LICENSE"
-    ],
-    "noticeFiles": [],
-    "direct": false,
-    "inLockfile": true
-  },
-  {
     "name": "console-control-strings",
     "version": "1.1.0",
     "license": "ISC",
@@ -3699,6 +3741,20 @@ export const npmPackages = [
     "repository": "git@github.com:moxystudio/node-cross-spawn.git",
     "homepage": "https://github.com/moxystudio/node-cross-spawn",
     "author": "André Cruz <andre@moxy.studio>",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
+    "name": "css-line-break",
+    "version": "2.1.0",
+    "license": "MIT",
+    "repository": "git+ssh://git@github.com/niklasvh/css-line-break.git",
+    "homepage": "https://github.com/niklasvh/css-line-break#readme",
+    "author": "Niklas von Hertzen niklasvh@gmail.com",
     "licenseFiles": [
       "LICENSE"
     ],
@@ -3902,7 +3958,7 @@ export const npmPackages = [
   },
   {
     "name": "deep-eql",
-    "version": "4.1.4",
+    "version": "5.0.2",
     "license": "MIT",
     "repository": "git@github.com:chaijs/deep-eql.git",
     "homepage": "",
@@ -4041,20 +4097,6 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
-    "name": "diff-sequences",
-    "version": "29.6.3",
-    "license": "MIT",
-    "repository": "https://github.com/jestjs/jest.git",
-    "homepage": "",
-    "author": "",
-    "licenseFiles": [
-      "LICENSE"
-    ],
-    "noticeFiles": [],
-    "direct": false,
-    "inLockfile": true
-  },
-  {
     "name": "dijkstrajs",
     "version": "1.0.3",
     "license": "MIT",
@@ -4119,6 +4161,20 @@ export const npmPackages = [
     "repository": "git+https://github.com/dolanmiu/docx.git",
     "homepage": "https://docx.js.org",
     "author": "Dolan Miu",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": true,
+    "inLockfile": true
+  },
+  {
+    "name": "docx-preview",
+    "version": "0.3.6",
+    "license": "Apache-2.0",
+    "repository": "git+https://github.com/zVolodymyr/docxjs.git",
+    "homepage": "",
+    "author": "Volodymyr Baydalka",
     "licenseFiles": [
       "LICENSE"
     ],
@@ -4319,6 +4375,20 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "es-module-lexer",
+    "version": "1.7.0",
+    "license": "MIT",
+    "repository": "git+https://github.com/guybedford/es-module-lexer.git",
+    "homepage": "https://github.com/guybedford/es-module-lexer#readme",
+    "author": "Guy Bedford",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
     "name": "es-object-atoms",
     "version": "1.1.1",
     "license": "MIT",
@@ -4403,6 +4473,20 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "esbuild",
+    "version": "0.27.0",
+    "license": "MIT",
+    "repository": "git+https://github.com/evanw/esbuild.git",
+    "homepage": "",
+    "author": "",
+    "licenseFiles": [
+      "LICENSE.md"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
     "name": "esbuild-windows-64",
     "version": "0.14.47",
     "license": "MIT",
@@ -4458,7 +4542,7 @@ export const npmPackages = [
   },
   {
     "name": "eslint-config-next",
-    "version": "15.5.18",
+    "version": "15.5.22",
     "license": "MIT",
     "repository": "vercel/next.js",
     "homepage": "https://nextjs.org/docs/app/api-reference/config/eslint",
@@ -4761,20 +4845,6 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
-    "name": "execa",
-    "version": "8.0.1",
-    "license": "MIT",
-    "repository": "sindresorhus/execa",
-    "homepage": "",
-    "author": "Sindre Sorhus sindresorhus@gmail.com",
-    "licenseFiles": [
-      "license"
-    ],
-    "noticeFiles": [],
-    "direct": false,
-    "inLockfile": true
-  },
-  {
     "name": "exifr",
     "version": "7.1.3",
     "license": "MIT",
@@ -4786,6 +4856,20 @@ export const npmPackages = [
     ],
     "noticeFiles": [],
     "direct": true,
+    "inLockfile": true
+  },
+  {
+    "name": "expect-type",
+    "version": "1.4.0",
+    "license": "Apache-2.0",
+    "repository": "https://github.com/mmkal/expect-type.git",
+    "homepage": "https://github.com/mmkal/expect-type#readme",
+    "author": "",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
     "inLockfile": true
   },
   {
@@ -5263,20 +5347,6 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
-    "name": "get-func-name",
-    "version": "2.0.2",
-    "license": "MIT",
-    "repository": "git+ssh://git@github.com/chaijs/get-func-name.git",
-    "homepage": "",
-    "author": "Jake Luer <jake@alogicalparadox.com> (http://alogicalparadox.com)",
-    "licenseFiles": [
-      "LICENSE"
-    ],
-    "noticeFiles": [],
-    "direct": false,
-    "inLockfile": true
-  },
-  {
     "name": "get-intrinsic",
     "version": "1.3.0",
     "license": "MIT",
@@ -5307,20 +5377,6 @@ export const npmPackages = [
   {
     "name": "get-stream",
     "version": "5.2.0",
-    "license": "MIT",
-    "repository": "sindresorhus/get-stream",
-    "homepage": "",
-    "author": "Sindre Sorhus sindresorhus@gmail.com",
-    "licenseFiles": [
-      "license"
-    ],
-    "noticeFiles": [],
-    "direct": false,
-    "inLockfile": true
-  },
-  {
-    "name": "get-stream",
-    "version": "8.0.1",
     "license": "MIT",
     "repository": "sindresorhus/get-stream",
     "homepage": "",
@@ -5623,6 +5679,20 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "html2canvas",
+    "version": "1.4.1",
+    "license": "MIT",
+    "repository": "git@github.com:niklasvh/html2canvas.git",
+    "homepage": "https://html2canvas.hertzen.com",
+    "author": "Niklas von Hertzen niklasvh@gmail.com",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": true,
+    "inLockfile": true
+  },
+  {
     "name": "http-errors",
     "version": "1.4.0",
     "license": "MIT",
@@ -5696,20 +5766,6 @@ export const npmPackages = [
     "license": "Apache-2.0",
     "repository": "ehmicky/human-signals",
     "homepage": "https://git.io/JeluP",
-    "author": "ehmicky <ehmicky@gmail.com> (https://github.com/ehmicky)",
-    "licenseFiles": [
-      "LICENSE"
-    ],
-    "noticeFiles": [],
-    "direct": false,
-    "inLockfile": true
-  },
-  {
-    "name": "human-signals",
-    "version": "5.0.0",
-    "license": "Apache-2.0",
-    "repository": "ehmicky/human-signals",
-    "homepage": "https://www.github.com/ehmicky/human-signals",
     "author": "ehmicky <ehmicky@gmail.com> (https://github.com/ehmicky)",
     "licenseFiles": [
       "LICENSE"
@@ -6243,20 +6299,6 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
-    "name": "is-stream",
-    "version": "3.0.0",
-    "license": "MIT",
-    "repository": "sindresorhus/is-stream",
-    "homepage": "",
-    "author": "Sindre Sorhus sindresorhus@gmail.com",
-    "licenseFiles": [
-      "license"
-    ],
-    "noticeFiles": [],
-    "direct": false,
-    "inLockfile": true
-  },
-  {
     "name": "is-string",
     "version": "1.1.1",
     "license": "MIT",
@@ -6749,20 +6791,6 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
-    "name": "local-pkg",
-    "version": "0.5.1",
-    "license": "MIT",
-    "repository": "git+https://github.com/antfu/local-pkg.git",
-    "homepage": "https://github.com/antfu/local-pkg#readme",
-    "author": "Anthony Fu <anthonyfu117@hotmail.com>",
-    "licenseFiles": [
-      "LICENSE"
-    ],
-    "noticeFiles": [],
-    "direct": false,
-    "inLockfile": true
-  },
-  {
     "name": "locate-path",
     "version": "5.0.0",
     "license": "MIT",
@@ -7002,7 +7030,7 @@ export const npmPackages = [
   },
   {
     "name": "loupe",
-    "version": "2.3.7",
+    "version": "3.2.1",
     "license": "MIT",
     "repository": "https://github.com/chaijs/loupe",
     "homepage": "https://github.com/chaijs/loupe",
@@ -7211,20 +7239,6 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
-    "name": "mimic-fn",
-    "version": "4.0.0",
-    "license": "MIT",
-    "repository": "sindresorhus/mimic-fn",
-    "homepage": "",
-    "author": "Sindre Sorhus sindresorhus@gmail.com",
-    "licenseFiles": [
-      "license"
-    ],
-    "noticeFiles": [],
-    "direct": false,
-    "inLockfile": true
-  },
-  {
     "name": "minimalistic-assert",
     "version": "1.0.1",
     "license": "ISC",
@@ -7393,20 +7407,6 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
-    "name": "mlly",
-    "version": "1.8.2",
-    "license": "MIT",
-    "repository": "unjs/mlly",
-    "homepage": "",
-    "author": "",
-    "licenseFiles": [
-      "LICENSE"
-    ],
-    "noticeFiles": [],
-    "direct": false,
-    "inLockfile": true
-  },
-  {
     "name": "mri",
     "version": "1.2.0",
     "license": "MIT",
@@ -7464,7 +7464,7 @@ export const npmPackages = [
   },
   {
     "name": "nanoid",
-    "version": "3.3.12",
+    "version": "3.3.17",
     "license": "MIT",
     "repository": "ai/nanoid",
     "homepage": "",
@@ -7518,7 +7518,7 @@ export const npmPackages = [
   },
   {
     "name": "next",
-    "version": "15.5.18",
+    "version": "15.5.22",
     "license": "MIT",
     "repository": "vercel/next.js",
     "homepage": "https://nextjs.org",
@@ -7631,20 +7631,6 @@ export const npmPackages = [
   {
     "name": "npm-run-path",
     "version": "4.0.1",
-    "license": "MIT",
-    "repository": "sindresorhus/npm-run-path",
-    "homepage": "",
-    "author": "Sindre Sorhus sindresorhus@gmail.com",
-    "licenseFiles": [
-      "license"
-    ],
-    "noticeFiles": [],
-    "direct": false,
-    "inLockfile": true
-  },
-  {
-    "name": "npm-run-path",
-    "version": "5.3.0",
     "license": "MIT",
     "repository": "sindresorhus/npm-run-path",
     "homepage": "",
@@ -7853,20 +7839,6 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
-    "name": "onetime",
-    "version": "6.0.0",
-    "license": "MIT",
-    "repository": "sindresorhus/onetime",
-    "homepage": "",
-    "author": "Sindre Sorhus sindresorhus@gmail.com",
-    "licenseFiles": [
-      "license"
-    ],
-    "noticeFiles": [],
-    "direct": false,
-    "inLockfile": true
-  },
-  {
     "name": "opencollective-postinstall",
     "version": "2.0.3",
     "license": "MIT",
@@ -7953,20 +7925,6 @@ export const npmPackages = [
   {
     "name": "p-limit",
     "version": "3.1.0",
-    "license": "MIT",
-    "repository": "sindresorhus/p-limit",
-    "homepage": "",
-    "author": "Sindre Sorhus sindresorhus@gmail.com",
-    "licenseFiles": [
-      "license"
-    ],
-    "noticeFiles": [],
-    "direct": false,
-    "inLockfile": true
-  },
-  {
-    "name": "p-limit",
-    "version": "5.0.0",
     "license": "MIT",
     "repository": "sindresorhus/p-limit",
     "homepage": "",
@@ -8133,20 +8091,6 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
-    "name": "path-key",
-    "version": "4.0.0",
-    "license": "MIT",
-    "repository": "sindresorhus/path-key",
-    "homepage": "",
-    "author": "Sindre Sorhus sindresorhus@gmail.com",
-    "licenseFiles": [
-      "license"
-    ],
-    "noticeFiles": [],
-    "direct": false,
-    "inLockfile": true
-  },
-  {
     "name": "path-match",
     "version": "1.2.4",
     "license": "MIT",
@@ -8218,20 +8162,6 @@ export const npmPackages = [
   },
   {
     "name": "pathe",
-    "version": "1.1.2",
-    "license": "MIT",
-    "repository": "unjs/pathe",
-    "homepage": "",
-    "author": "",
-    "licenseFiles": [
-      "LICENSE"
-    ],
-    "noticeFiles": [],
-    "direct": false,
-    "inLockfile": true
-  },
-  {
-    "name": "pathe",
     "version": "2.0.3",
     "license": "MIT",
     "repository": "unjs/pathe",
@@ -8246,7 +8176,7 @@ export const npmPackages = [
   },
   {
     "name": "pathval",
-    "version": "1.1.1",
+    "version": "2.0.1",
     "license": "MIT",
     "repository": "git+ssh://git@github.com/chaijs/pathval.git",
     "homepage": "https://github.com/chaijs/pathval",
@@ -8385,20 +8315,6 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
-    "name": "pkg-types",
-    "version": "1.3.1",
-    "license": "MIT",
-    "repository": "unjs/pkg-types",
-    "homepage": "",
-    "author": "",
-    "licenseFiles": [
-      "LICENSE"
-    ],
-    "noticeFiles": [],
-    "direct": false,
-    "inLockfile": true
-  },
-  {
     "name": "playwright",
     "version": "1.60.0",
     "license": "Apache-2.0",
@@ -8460,7 +8376,7 @@ export const npmPackages = [
   },
   {
     "name": "postcss",
-    "version": "8.5.10",
+    "version": "8.5.26",
     "license": "MIT",
     "repository": "postcss/postcss",
     "homepage": "https://postcss.org/",
@@ -8561,20 +8477,6 @@ export const npmPackages = [
     "repository": "git://github.com/gkz/prelude-ls.git",
     "homepage": "http://preludels.com",
     "author": "George Zahariev <z@georgezahariev.com>",
-    "licenseFiles": [
-      "LICENSE"
-    ],
-    "noticeFiles": [],
-    "direct": false,
-    "inLockfile": true
-  },
-  {
-    "name": "pretty-format",
-    "version": "29.7.0",
-    "license": "MIT",
-    "repository": "https://github.com/jestjs/jest.git",
-    "homepage": "",
-    "author": "James Kyle <me@thejameskyle.com>",
     "licenseFiles": [
       "LICENSE"
     ],
@@ -8765,20 +8667,6 @@ export const npmPackages = [
   {
     "name": "react-is",
     "version": "16.13.1",
-    "license": "MIT",
-    "repository": "https://github.com/facebook/react.git",
-    "homepage": "https://reactjs.org/",
-    "author": "",
-    "licenseFiles": [
-      "LICENSE"
-    ],
-    "noticeFiles": [],
-    "direct": false,
-    "inLockfile": true
-  },
-  {
-    "name": "react-is",
-    "version": "18.3.1",
     "license": "MIT",
     "repository": "https://github.com/facebook/react.git",
     "homepage": "https://reactjs.org/",
@@ -9319,6 +9207,20 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "semver",
+    "version": "7.8.5",
+    "license": "ISC",
+    "repository": "git+https://github.com/npm/node-semver.git",
+    "homepage": "",
+    "author": "GitHub Inc.",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
     "name": "set-blocking",
     "version": "2.0.0",
     "license": "ISC",
@@ -9404,9 +9306,9 @@ export const npmPackages = [
   },
   {
     "name": "sharp",
-    "version": "0.34.5",
+    "version": "0.35.3",
     "license": "Apache-2.0",
-    "repository": "git://github.com/lovell/sharp.git",
+    "repository": "git+https://github.com/lovell/sharp.git",
     "homepage": "https://sharp.pixelplumbing.com",
     "author": "Lovell Fuller <npm@lovell.info>",
     "licenseFiles": [
@@ -9531,20 +9433,6 @@ export const npmPackages = [
   {
     "name": "signal-exit",
     "version": "4.0.2",
-    "license": "ISC",
-    "repository": "https://github.com/tapjs/signal-exit.git",
-    "homepage": "",
-    "author": "Ben Coe <ben@npmjs.com>",
-    "licenseFiles": [
-      "LICENSE.txt"
-    ],
-    "noticeFiles": [],
-    "direct": false,
-    "inLockfile": true
-  },
-  {
-    "name": "signal-exit",
-    "version": "4.1.0",
     "license": "ISC",
     "repository": "https://github.com/tapjs/signal-exit.git",
     "homepage": "",
@@ -9845,20 +9733,6 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
-    "name": "strip-final-newline",
-    "version": "3.0.0",
-    "license": "MIT",
-    "repository": "sindresorhus/strip-final-newline",
-    "homepage": "",
-    "author": "Sindre Sorhus sindresorhus@gmail.com",
-    "licenseFiles": [
-      "license"
-    ],
-    "noticeFiles": [],
-    "direct": false,
-    "inLockfile": true
-  },
-  {
     "name": "strip-json-comments",
     "version": "3.1.1",
     "license": "MIT",
@@ -9874,7 +9748,7 @@ export const npmPackages = [
   },
   {
     "name": "strip-literal",
-    "version": "2.1.1",
+    "version": "3.1.0",
     "license": "MIT",
     "repository": "git+https://github.com/antfu/strip-literal.git",
     "homepage": "https://github.com/antfu/strip-literal#readme",
@@ -10041,6 +9915,20 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "text-segmentation",
+    "version": "1.0.3",
+    "license": "MIT",
+    "repository": "git+ssh://git@github.com/niklasvh/text-segmentation.git",
+    "homepage": "https://github.com/niklasvh/text-segmentation",
+    "author": "Niklas von Hertzen niklasvh@gmail.com",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
     "name": "text-table",
     "version": "0.2.0",
     "license": "MIT",
@@ -10111,6 +9999,20 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "tinyexec",
+    "version": "0.3.2",
+    "license": "MIT",
+    "repository": "git+https://github.com/tinylibs/tinyexec.git",
+    "homepage": "https://github.com/tinylibs/tinyexec#readme",
+    "author": "James Garbutt (https://github.com/43081j)",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
     "name": "tinyglobby",
     "version": "0.2.16",
     "license": "MIT",
@@ -10126,9 +10028,9 @@ export const npmPackages = [
   },
   {
     "name": "tinypool",
-    "version": "0.8.4",
+    "version": "1.1.1",
     "license": "MIT",
-    "repository": "git+https://github.com/tinylibs/tinypool.git",
+    "repository": "https://github.com/tinylibs/tinypool.git",
     "homepage": "https://github.com/tinylibs/tinypool#readme",
     "author": "",
     "licenseFiles": [
@@ -10139,8 +10041,22 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "tinyrainbow",
+    "version": "2.0.0",
+    "license": "MIT",
+    "repository": "git+https://github.com/tinylibs/tinyrainbow.git",
+    "homepage": "https://github.com/tinylibs/tinyrainbow#readme",
+    "author": "",
+    "licenseFiles": [
+      "LICENCE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
     "name": "tinyspy",
-    "version": "2.2.1",
+    "version": "4.0.4",
     "license": "MIT",
     "repository": "git+https://github.com/tinylibs/tinyspy.git",
     "homepage": "https://github.com/tinylibs/tinyspy#readme",
@@ -10154,7 +10070,7 @@ export const npmPackages = [
   },
   {
     "name": "tmp",
-    "version": "0.2.5",
+    "version": "0.2.7",
     "license": "MIT",
     "repository": "https://github.com/raszi/node-tmp.git",
     "homepage": "http://github.com/raszi/node-tmp",
@@ -10375,12 +10291,12 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
-    "name": "type-check",
-    "version": "0.4.0",
+    "name": "tsx",
+    "version": "4.21.0",
     "license": "MIT",
-    "repository": "git://github.com/gkz/type-check.git",
-    "homepage": "https://github.com/gkz/type-check",
-    "author": "George Zahariev <z@georgezahariev.com>",
+    "repository": "privatenumber/tsx",
+    "homepage": "https://tsx.is",
+    "author": "Hiroki Osame hiroki.osame@gmail.com",
     "licenseFiles": [
       "LICENSE"
     ],
@@ -10389,12 +10305,12 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
-    "name": "type-detect",
-    "version": "4.1.0",
+    "name": "type-check",
+    "version": "0.4.0",
     "license": "MIT",
-    "repository": "git+ssh://git@github.com/chaijs/type-detect.git",
-    "homepage": "",
-    "author": "Jake Luer <jake@alogicalparadox.com> (http://alogicalparadox.com)",
+    "repository": "git://github.com/gkz/type-check.git",
+    "homepage": "https://github.com/gkz/type-check",
+    "author": "George Zahariev <z@georgezahariev.com>",
     "licenseFiles": [
       "LICENSE"
     ],
@@ -10498,20 +10414,6 @@ export const npmPackages = [
     ],
     "noticeFiles": [],
     "direct": true,
-    "inLockfile": true
-  },
-  {
-    "name": "ufo",
-    "version": "1.6.4",
-    "license": "MIT",
-    "repository": "unjs/ufo",
-    "homepage": "",
-    "author": "",
-    "licenseFiles": [
-      "LICENSE"
-    ],
-    "noticeFiles": [],
-    "direct": false,
     "inLockfile": true
   },
   {
@@ -10723,6 +10625,20 @@ export const npmPackages = [
     "inLockfile": true
   },
   {
+    "name": "utrie",
+    "version": "1.0.2",
+    "license": "MIT",
+    "repository": "git+ssh://git@github.com/niklasvh/utrie.git",
+    "homepage": "https://github.com/niklasvh/utrie",
+    "author": "Niklas von Hertzen niklasvh@gmail.com",
+    "licenseFiles": [
+      "LICENSE"
+    ],
+    "noticeFiles": [],
+    "direct": false,
+    "inLockfile": true
+  },
+  {
     "name": "uuid",
     "version": "11.1.1",
     "license": "MIT",
@@ -10794,7 +10710,7 @@ export const npmPackages = [
   },
   {
     "name": "vite-node",
-    "version": "1.6.1",
+    "version": "3.2.4",
     "license": "MIT",
     "repository": "git+https://github.com/vitest-dev/vitest.git",
     "homepage": "https://github.com/vitest-dev/vitest/blob/main/packages/vite-node#readme",
@@ -10808,7 +10724,7 @@ export const npmPackages = [
   },
   {
     "name": "vitest",
-    "version": "1.6.1",
+    "version": "3.2.7",
     "license": "MIT",
     "repository": "git+https://github.com/vitest-dev/vitest.git",
     "homepage": "https://github.com/vitest-dev/vitest#readme",
@@ -11327,20 +11243,6 @@ export const npmPackages = [
   {
     "name": "yocto-queue",
     "version": "0.1.0",
-    "license": "MIT",
-    "repository": "sindresorhus/yocto-queue",
-    "homepage": "",
-    "author": "Sindre Sorhus sindresorhus@gmail.com",
-    "licenseFiles": [
-      "license"
-    ],
-    "noticeFiles": [],
-    "direct": false,
-    "inLockfile": true
-  },
-  {
-    "name": "yocto-queue",
-    "version": "1.2.2",
     "license": "MIT",
     "repository": "sindresorhus/yocto-queue",
     "homepage": "",

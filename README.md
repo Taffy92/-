@@ -224,6 +224,6 @@ Excel 转图片：支持 `.xlsx`、`.csv`。旧版 `.xls` 请先用 Excel/WPS �
 
 ## 第三方依赖许可证
 
-第三方依赖包括 Next.js、React、TypeScript、Tailwind CSS、PDF.js、ExcelJS、browser-image-compression、Cropper.js、JSZip、@ffmpeg/ffmpeg、@ffmpeg/core、@ffmpeg/util、Tauri、lucide-react 等。上线前请根据锁文件复核许可证清单，页面 `/licenses` 已提供基础说明。
+第三方依赖包括 Next.js、React、TypeScript、Tailwind CSS、PDF.js、docx-preview、html2canvas、ExcelJS、browser-image-compression、Cropper.js、JSZip、@ffmpeg/ffmpeg、@ffmpeg/core、@ffmpeg/util、Tauri、lucide-react 等。上线前请根据锁文件复核许可证清单，页面 `/licenses` 已提供基础说明。
 
 正式发布时，网站和离线软件内都必须保留“开源许可证”页面。大多数依赖允许商业使用，但需要保留各自的版权声明、许可证文本和必要的 NOTICE 信息。`@ffmpeg/core` 当前许可证为 `GPL-2.0-or-later`，商业分发时必须额外遵守 GPL 对源代码、许可证和版权声明的要求。当前离线版使用 Tauri，未引入 Electron；如以后切换到 Electron，也需要补充 Electron 及其依赖的许可证说明。

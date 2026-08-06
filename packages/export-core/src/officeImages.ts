@@ -1,5 +1,6 @@
-﻿import JSZip from "jszip";
 import ExcelJS from "exceljs";
+import { renderAsync } from "docx-preview";
+import html2canvas from "html2canvas";
 import type { ExportImageFormat, ProgressReporter } from "@doctool/shared";
 
 export interface ImagePage {
@@ -13,70 +14,97 @@ export interface OfficeImageOptions {
   onProgress?: ProgressReporter;
 }
 
-type WordBlock =
-  | { type: "paragraph"; text: string }
-  | { type: "table"; rows: string[][] };
-
-const pageWidth = 1240;
-const pageHeight = 1754;
-const pageMargin = 86;
-const bodyFont = "26px Microsoft YaHei, PingFang SC, Arial, sans-serif";
-const titleFont = "700 32px Microsoft YaHei, PingFang SC, Arial, sans-serif";
 const maxExcelFileBytes = 30 * 1024 * 1024;
 const maxExcelSheets = 30;
 const maxExcelRowsPerSheet = 5000;
 const maxExcelCellsPerSheet = 50000;
+const maxRenderedPageHeight = 12000;
 
 export async function renderDocxToImagePages(file: File, options: OfficeImageOptions): Promise<ImagePage[]> {
-  const blocks = await readDocxBlocks(file);
-  if (!blocks.length) throw new Error("Word 文档没有读取到可转换内容，请确认文件为 .docx 格式。");
-  const pages = renderWordBlocksToPages(blocks, options.format);
-  options.onProgress?.(1, `已生成 ${pages.length} 张 Word 图片`);
-  return pages;
+  if (typeof document === "undefined") throw new Error("Word renderer requires a browser document.");
+  const host = document.createElement("div");
+  host.style.position = "fixed";
+  host.style.left = "0";
+  host.style.top = "0";
+  host.style.zIndex = "-1";
+  host.style.background = "#ffffff";
+  host.style.visibility = "visible";
+  host.style.pointerEvents = "none";
+  document.body.appendChild(host);
+
+  try {
+    await renderAsync(await file.arrayBuffer(), host, undefined, {
+      breakPages: true,
+      ignoreLastRenderedPageBreak: false,
+      experimental: true,
+      useBase64URL: true
+    });
+    if (document.fonts?.ready) await document.fonts.ready;
+    await nextFrame();
+    const pages = Array.from(host.querySelectorAll<HTMLElement>("section.docx"));
+    const targets = pages.length ? pages : [host.querySelector<HTMLElement>(".docx") || host];
+    const result: ImagePage[] = [];
+    for (const [index, target] of targets.entries()) {
+      const canvas = await html2canvas(target, {
+        backgroundColor: "#ffffff",
+        scale: renderScale(target.scrollWidth || host.scrollWidth),
+        useCORS: false,
+        logging: false,
+        width: target.scrollWidth || undefined,
+        height: target.scrollHeight || undefined,
+        windowWidth: Math.max(window.innerWidth, target.scrollWidth || 0),
+        windowHeight: Math.max(window.innerHeight, target.scrollHeight || 0)
+      });
+      result.push({
+        pageNumber: index + 1,
+        label: `第 ${index + 1} 页`,
+        blob: await canvasToBlob(canvas, options.format)
+      });
+      options.onProgress?.((index + 1) / Math.max(1, targets.length), `已生成 ${index + 1}/${targets.length} 张 Word 图片`);
+    }
+    if (!result.length) throw new Error("Word document has no renderable pages.");
+    return result;
+  } finally {
+    host.remove();
+  }
 }
 
 export async function renderExcelToImagePages(file: File, options: OfficeImageOptions): Promise<ImagePage[]> {
-  const pages: ImagePage[] = [];
-
+  if (typeof document === "undefined") throw new Error("Excel renderer requires a browser document.");
   if (file.size > maxExcelFileBytes) {
-    throw new Error("Excel 文件超过 30MB。为避免浏览器内存不足，请拆分文件后再转换，或使用离线专业版处理。");
+    throw new Error("Excel file exceeds 30MB. Split it before converting or use the offline edition.");
   }
 
+  const pages: ImagePage[] = [];
   const lowerName = file.name.toLowerCase();
+  if (lowerName.endsWith(".xls")) {
+    throw new Error("Legacy .xls files are not supported. Save the file as .xlsx first.");
+  }
+
+  const workbook = new ExcelJS.Workbook();
   if (lowerName.endsWith(".csv") || /csv/i.test(file.type)) {
     const rows = normalizeRows(parseCsv(await file.text()));
-    if (rows.length > maxExcelRowsPerSheet) {
-      throw new Error(`CSV 行数超过 ${maxExcelRowsPerSheet} 行，请拆分后再转换。`);
-    }
-    ensureCellLimit(rows);
-    if (rows.length) pages.push(...renderSheetRowsToPages("CSV 数据", rows, options.format, 1));
-    options.onProgress?.(1, "正在渲染 CSV 数据");
+    validateSheetLimits("CSV 数据", rows);
+    pages.push(...await renderWorksheetPages(createCsvWorksheet(rows), "CSV 数据", html2canvas, options));
   } else {
-    if (lowerName.endsWith(".xls")) {
-      throw new Error("为避免旧版 .xls 解析风险，请先用 Excel/WPS 将文件另存为 .xlsx 后再转换。");
-    }
-
-    const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(new Uint8Array(await file.arrayBuffer()) as any);
     if (workbook.worksheets.length > maxExcelSheets) {
       throw new Error(`工作表数量超过 ${maxExcelSheets} 个，请拆分文件后再转换。`);
     }
-
-    workbook.worksheets.forEach((sheet, sheetIndex) => {
-      const rows = normalizeRows(worksheetToRows(sheet));
-      if (!rows.length) return;
-      ensureCellLimit(rows);
-      pages.push(...renderSheetRowsToPages(sheet.name || `工作表 ${sheetIndex + 1}`, rows, options.format, pages.length + 1));
-      options.onProgress?.((sheetIndex + 1) / Math.max(1, workbook.worksheets.length), `正在渲染工作表：${sheet.name}`);
-    });
+    for (const [sheetIndex, sheet] of workbook.worksheets.entries()) {
+      const rows = worksheetToRows(sheet);
+      if (!rows.length) continue;
+      validateSheetLimits(sheet.name, rows);
+      pages.push(...await renderWorksheetPages(sheet, sheet.name || `工作表 ${sheetIndex + 1}`, html2canvas, options));
+    }
   }
 
-  if (!pages.length) throw new Error("Excel 文件没有读取到可转换的工作表内容。");
+  if (!pages.length) throw new Error("Excel workbook has no renderable worksheet content.");
   return pages;
 }
 
 export async function combineImagePages(pages: ImagePage[], format: ExportImageFormat, onProgress?: ProgressReporter): Promise<Blob> {
-  if (!pages.length) throw new Error("没有可合成的图片页面。");
+  if (!pages.length) throw new Error("No image pages to combine.");
   const bitmaps = [];
   for (const [index, page] of pages.entries()) {
     bitmaps.push(await blobToBitmap(page.blob));
@@ -91,7 +119,7 @@ export async function combineImagePages(pages: ImagePage[], format: ExportImageF
   canvas.width = Math.max(1, Math.round(maxWidth * scale));
   canvas.height = Math.max(1, Math.round(totalHeight * scale));
   const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("当前浏览器不支持 Canvas，无法合成图片。");
+  if (!ctx) throw new Error("Canvas is not supported by this browser.");
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   let y = 0;
@@ -106,153 +134,232 @@ export async function combineImagePages(pages: ImagePage[], format: ExportImageF
   return canvasToBlob(canvas, format);
 }
 
-async function readDocxBlocks(file: File): Promise<WordBlock[]> {
-  const zip = await JSZip.loadAsync(await file.arrayBuffer());
-  const documentXml = await zip.file("word/document.xml")?.async("text");
-  if (!documentXml) throw new Error("只支持标准 .docx 文档，暂不支持旧版 .doc 文件。");
-  const xml = new DOMParser().parseFromString(documentXml, "application/xml");
-  const body = firstByLocalName(xml, "body");
-  if (!body) return [];
-  const blocks: WordBlock[] = [];
-  Array.from(body.children).forEach((child) => {
-    if (child.localName === "p") {
-      const text = textFromNode(child);
-      blocks.push({ type: "paragraph", text });
-      return;
-    }
-    if (child.localName === "tbl") {
-      const rows = Array.from(child.getElementsByTagNameNS("*", "tr")).map((row) =>
-        Array.from(row.getElementsByTagNameNS("*", "tc")).map((cell) => textFromNode(cell))
-      );
-      if (rows.length) blocks.push({ type: "table", rows });
-    }
-  });
-  return blocks.filter((block) => block.type === "table" || block.text.trim());
-}
-
-function renderWordBlocksToPages(blocks: WordBlock[], format: ExportImageFormat): ImagePage[] {
+async function renderWorksheetPages(
+  sheet: ExcelJS.Worksheet,
+  sheetName: string,
+  html2canvas: typeof import("html2canvas").default,
+  options: OfficeImageOptions
+): Promise<ImagePage[]> {
+  const maxRow = Math.max(sheet.rowCount, 1);
+  const maxColumn = Math.max(sheet.columnCount, 1);
   const pages: ImagePage[] = [];
-  let canvas = createPageCanvas();
-  let ctx = canvas.getContext("2d")!;
-  let y = pageMargin;
-  drawPageTitle(ctx, "Word 转图片", y);
-  y += 58;
-
-  const commitPage = () => {
-    pages.push({ pageNumber: pages.length + 1, label: `第 ${pages.length + 1} 页`, blob: canvasToBlobSync(canvas, format) });
-    canvas = createPageCanvas();
-    ctx = canvas.getContext("2d")!;
-    y = pageMargin;
-  };
-
-  const ensureSpace = (height: number) => {
-    if (y + height <= pageHeight - pageMargin) return;
-    commitPage();
-  };
-
-  blocks.forEach((block) => {
-    if (block.type === "paragraph") {
-      ctx.font = bodyFont;
-      ctx.fillStyle = "#111827";
-      const lines = wrapText(ctx, block.text || " ", pageWidth - pageMargin * 2);
-      ensureSpace(lines.length * 38 + 18);
-      lines.forEach((line) => {
-        ctx.fillText(line, pageMargin, y);
-        y += 38;
+  let startRow = 1;
+  while (startRow <= maxRow) {
+    const host = createSheetHost(sheet, sheetName, startRow, maxRow, maxColumn);
+    document.body.appendChild(host);
+    try {
+      await nextFrame();
+      const canvas = await html2canvas(host, {
+        backgroundColor: "#ffffff",
+        scale: renderScale(host.scrollWidth),
+        useCORS: false,
+        logging: false,
+        width: host.scrollWidth,
+        height: Math.min(host.scrollHeight, maxRenderedPageHeight),
+        windowWidth: Math.max(window.innerWidth, host.scrollWidth),
+        windowHeight: Math.max(window.innerHeight, host.scrollHeight)
       });
-      y += 18;
-      return;
+      pages.push({
+        pageNumber: optionsPageNumber(pages),
+        label: `${sheetName} ${pages.length + 1}`,
+        blob: await canvasToBlob(canvas, options.format)
+      });
+      const renderedRows = countRenderedRows(host);
+      startRow += Math.max(1, renderedRows);
+      options.onProgress?.(Math.min(1, startRow / (maxRow + 1)), `正在渲染工作表：${sheetName}`);
+    } finally {
+      host.remove();
     }
-    const columns = Math.max(...block.rows.map((row) => row.length), 1);
-    const cellWidth = (pageWidth - pageMargin * 2) / columns;
-    block.rows.forEach((row) => {
-      ctx.font = "23px Microsoft YaHei, PingFang SC, Arial, sans-serif";
-      const wrappedCells = Array.from({ length: columns }, (_, index) => wrapText(ctx, row[index] || "", cellWidth - 18));
-      const rowHeight = Math.max(50, Math.max(...wrappedCells.map((lines) => lines.length)) * 30 + 18);
-      ensureSpace(rowHeight + 8);
-      Array.from({ length: columns }).forEach((_, index) => {
-        const x = pageMargin + index * cellWidth;
-        ctx.strokeStyle = "#cbd5e1";
-        ctx.strokeRect(x, y, cellWidth, rowHeight);
-        ctx.fillStyle = "#111827";
-        wrappedCells[index].forEach((line, lineIndex) => ctx.fillText(line, x + 9, y + 32 + lineIndex * 30));
-      });
-      y += rowHeight;
-    });
-    y += 18;
-  });
-
-  if (pages.length === 0 || y > pageMargin) commitPage();
-  return pages;
-}
-
-function renderSheetRowsToPages(sheetName: string, rows: string[][], format: ExportImageFormat, firstPageNumber: number): ImagePage[] {
-  const maxColumns = Math.max(...rows.map((row) => row.length), 1);
-  const widths = Array.from({ length: maxColumns }, (_, column) => {
-    const longest = Math.max(...rows.map((row) => String(row[column] || "").length), sheetName.length / maxColumns);
-    return clamp(longest * 13 + 42, 96, 260);
-  });
-  const contentWidth = widths.reduce((sum, width) => sum + width, 0);
-  const canvasWidth = Math.max(1200, Math.min(2400, contentWidth + 120));
-  const rowHeight = 46;
-  const rowsPerPage = 24;
-  const pages: ImagePage[] = [];
-  for (let start = 0; start < rows.length; start += rowsPerPage) {
-    const pageRows = rows.slice(start, start + rowsPerPage);
-    const canvas = document.createElement("canvas");
-    canvas.width = canvasWidth;
-    canvas.height = 150 + pageRows.length * rowHeight;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("当前浏览器不支持 Canvas，无法渲染 Excel。");
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.font = titleFont;
-    ctx.fillStyle = "#111827";
-    ctx.fillText(sheetName, 60, 58);
-    ctx.font = "22px Microsoft YaHei, PingFang SC, Arial, sans-serif";
-    let y = 104;
-    pageRows.forEach((row, rowIndex) => {
-      let x = 60;
-      const isHeader = start === 0 && rowIndex === 0;
-      widths.forEach((width, columnIndex) => {
-        ctx.fillStyle = isHeader ? "#eff6ff" : "#ffffff";
-        ctx.fillRect(x, y, width, rowHeight);
-        ctx.strokeStyle = "#cbd5e1";
-        ctx.strokeRect(x, y, width, rowHeight);
-        ctx.fillStyle = "#111827";
-        const text = String(row[columnIndex] || "");
-        ctx.fillText(truncateToWidth(ctx, text, width - 18), x + 9, y + 30);
-        x += width;
-      });
-      y += rowHeight;
-    });
-    pages.push({
-      pageNumber: firstPageNumber + pages.length,
-      label: `${sheetName} ${Math.floor(start / rowsPerPage) + 1}`,
-      blob: canvasToBlobSync(canvas, format)
-    });
   }
   return pages;
 }
 
+function createSheetHost(sheet: ExcelJS.Worksheet, sheetName: string, startRow: number, maxRow: number, maxColumn: number) {
+  const host = document.createElement("div");
+  host.style.position = "fixed";
+  host.style.left = "0";
+  host.style.top = "0";
+  host.style.zIndex = "-1";
+  host.style.visibility = "visible";
+  host.style.pointerEvents = "none";
+  host.style.background = "#ffffff";
+  host.style.display = "inline-block";
+  host.style.width = `${sheetWidth(sheet, maxColumn)}px`;
+
+  const table = document.createElement("table");
+  table.style.borderCollapse = "collapse";
+  table.style.tableLayout = "fixed";
+  table.style.fontFamily = "Calibri, Microsoft YaHei, Arial, sans-serif";
+  table.style.fontSize = "14px";
+  table.style.color = "#000000";
+  table.style.background = "#ffffff";
+  table.appendChild(createColumnGroup(sheet, maxColumn));
+
+  const title = document.createElement("caption");
+  title.textContent = sheetName;
+  title.style.captionSide = "top";
+  title.style.textAlign = "left";
+  title.style.fontSize = "18px";
+  title.style.fontWeight = "700";
+  title.style.padding = "10px 0";
+  table.appendChild(title);
+
+  const body = document.createElement("tbody");
+  const merges = mergeMap(sheet);
+  let renderedHeight = 0;
+  for (let rowNumber = startRow; rowNumber <= maxRow; rowNumber += 1) {
+    const row = sheet.getRow(rowNumber);
+    const tr = document.createElement("tr");
+    tr.style.height = `${rowHeight(row)}px`;
+    for (let columnNumber = 1; columnNumber <= maxColumn; columnNumber += 1) {
+      const merge = merges.get(`${rowNumber}:${columnNumber}`);
+      if (merge && (merge.startRow !== rowNumber || merge.startColumn !== columnNumber)) continue;
+      const cell = row.getCell(columnNumber);
+      const td = document.createElement("td");
+      const columnWidth = columnPixelWidth(sheet.getColumn(columnNumber));
+      td.style.width = `${columnWidth}px`;
+      td.style.height = `${rowHeight(row)}px`;
+      td.style.padding = "3px 6px";
+      td.style.boxSizing = "border-box";
+      td.style.whiteSpace = cell.alignment?.wrapText ? "pre-wrap" : "pre";
+      td.style.overflow = "hidden";
+      applyCellStyle(td, cell);
+      td.textContent = cell.text || formatExcelCellValue(cell.value);
+      if (merge) {
+        td.colSpan = merge.endColumn - merge.startColumn + 1;
+        td.rowSpan = merge.endRow - merge.startRow + 1;
+      }
+      tr.appendChild(td);
+    }
+    body.appendChild(tr);
+    renderedHeight += rowHeight(row);
+    if (renderedHeight >= maxRenderedPageHeight) break;
+  }
+  table.appendChild(body);
+  host.appendChild(table);
+  return host;
+}
+
+function createCsvWorksheet(rows: string[][]) {
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet("CSV 数据");
+  rows.forEach((row) => sheet.addRow(row));
+  return sheet;
+}
+
+function createColumnGroup(sheet: ExcelJS.Worksheet, maxColumn: number) {
+  const colgroup = document.createElement("colgroup");
+  for (let columnNumber = 1; columnNumber <= maxColumn; columnNumber += 1) {
+    const col = document.createElement("col");
+    col.style.width = `${columnPixelWidth(sheet.getColumn(columnNumber))}px`;
+    colgroup.appendChild(col);
+  }
+  return colgroup;
+}
+
+function applyCellStyle(element: HTMLTableCellElement, cell: ExcelJS.Cell) {
+  const font = cell.font;
+  if (font) {
+    element.style.fontFamily = font.name || "Calibri";
+    element.style.fontSize = `${font.size || 11}pt`;
+    element.style.fontWeight = font.bold ? "700" : "400";
+    element.style.fontStyle = font.italic ? "italic" : "normal";
+    if (font.color?.argb) element.style.color = argbToCss(font.color.argb);
+  }
+  if (cell.fill?.type === "pattern" && cell.fill.pattern === "solid" && cell.fill.fgColor?.argb) {
+    element.style.backgroundColor = argbToCss(cell.fill.fgColor.argb);
+  }
+  const alignment = cell.alignment;
+  if (alignment?.horizontal) element.style.textAlign = alignment.horizontal;
+  if (alignment?.vertical) element.style.verticalAlign = alignment.vertical;
+  if (alignment?.wrapText) element.style.whiteSpace = "pre-wrap";
+  const border = cell.border;
+  if (border) {
+    element.style.borderTop = borderStyle(border.top);
+    element.style.borderRight = borderStyle(border.right);
+    element.style.borderBottom = borderStyle(border.bottom);
+    element.style.borderLeft = borderStyle(border.left);
+  } else {
+    element.style.border = "1px solid #d9d9d9";
+  }
+}
+
+function borderStyle(border: Partial<ExcelJS.Border> | undefined) {
+  if (!border?.style) return "1px solid #d9d9d9";
+  const color = border.color?.argb ? argbToCss(border.color.argb) : "#808080";
+  const width = border.style === "thick" ? 2 : border.style === "medium" ? 1.5 : 1;
+  return `${width}px solid ${color}`;
+}
+
+function mergeMap(sheet: ExcelJS.Worksheet) {
+  const map = new Map<string, { startRow: number; startColumn: number; endRow: number; endColumn: number }>();
+  for (const range of sheet.model.merges || []) {
+    const match = range.match(/^(\$?[A-Z]+\$?\d+):(\$?[A-Z]+\$?\d+)$/i);
+    if (!match) continue;
+    const start = cellAddress(match[1]);
+    const end = cellAddress(match[2]);
+    const value = { startRow: start.row, startColumn: start.column, endRow: end.row, endColumn: end.column };
+    for (let row = start.row; row <= end.row; row += 1) {
+      for (let column = start.column; column <= end.column; column += 1) map.set(`${row}:${column}`, value);
+    }
+  }
+  return map;
+}
+
+function cellAddress(value: string) {
+  const normalized = value.replace(/\$/g, "").toUpperCase();
+  const match = normalized.match(/^([A-Z]+)(\d+)$/);
+  if (!match) return { row: 1, column: 1 };
+  let column = 0;
+  for (const char of match[1]) column = column * 26 + char.charCodeAt(0) - 64;
+  return { row: Number(match[2]), column };
+}
+
+function sheetWidth(sheet: ExcelJS.Worksheet, maxColumn: number) {
+  return Array.from({ length: maxColumn }, (_, index) => columnPixelWidth(sheet.getColumn(index + 1)))
+    .reduce((sum, width) => sum + width, 0);
+}
+
+function columnPixelWidth(column: ExcelJS.Column) {
+  return Math.max(28, Math.round(((column.width || 8.43) * 7) + 5));
+}
+
+function rowHeight(row: ExcelJS.Row) {
+  return Math.max(20, Math.round(((row.height || 15) * 96) / 72));
+}
+
+function countRenderedRows(host: HTMLElement) {
+  return Math.max(1, host.querySelectorAll("tbody tr").length);
+}
+
+function renderScale(width: number) {
+  return Math.min(3, Math.max(2, 2400 / Math.max(1, width)));
+}
+
+function optionsPageNumber(pages: ImagePage[]) {
+  return pages.length + 1;
+}
+
+function validateSheetLimits(sheetName: string, rows: string[][]) {
+  if (rows.length > maxExcelRowsPerSheet) {
+    throw new Error(`工作表 ${sheetName} 超过 ${maxExcelRowsPerSheet} 行，请拆分后再转换。`);
+  }
+  const cells = rows.reduce((total, row) => total + row.length, 0);
+  if (cells > maxExcelCellsPerSheet) {
+    throw new Error(`工作表 ${sheetName} 单元格数量超过 ${maxExcelCellsPerSheet} 个，请拆分后再转换。`);
+  }
+}
+
 function worksheetToRows(sheet: ExcelJS.Worksheet): string[][] {
   const rows: string[][] = [];
-  let cells = 0;
   sheet.eachRow({ includeEmpty: false }, (row) => {
-    if (rows.length >= maxExcelRowsPerSheet) {
-      throw new Error(`工作表 ${sheet.name} 超过 ${maxExcelRowsPerSheet} 行，请拆分后再转换。`);
-    }
     const values: string[] = [];
     row.eachCell({ includeEmpty: true }, (cell, columnIndex) => {
       values[columnIndex - 1] = formatExcelCellValue(cell.value);
-      cells += 1;
-      if (cells > maxExcelCellsPerSheet) {
-        throw new Error(`工作表 ${sheet.name} 单元格数量超过 ${maxExcelCellsPerSheet} 个，请拆分后再转换。`);
-      }
     });
     rows.push(values);
   });
-  return rows;
+  return normalizeRows(rows);
 }
 
 function formatExcelCellValue(value: ExcelJS.CellValue | undefined): string {
@@ -260,20 +367,17 @@ function formatExcelCellValue(value: ExcelJS.CellValue | undefined): string {
   if (value instanceof Date) return value.toLocaleDateString("zh-CN");
   if (typeof value !== "object") return String(value);
   if ("text" in value && typeof value.text === "string") return value.text;
-  if ("richText" in value && Array.isArray(value.richText)) {
-    return value.richText.map((item) => item.text || "").join("");
-  }
+  if ("richText" in value && Array.isArray(value.richText)) return value.richText.map((item) => item.text || "").join("");
   if ("result" in value) return formatExcelCellValue(value.result as ExcelJS.CellValue);
   if ("formula" in value) return String(value.formula || "");
   if ("hyperlink" in value) return String(value.hyperlink || "");
   return String(value);
 }
 
-function ensureCellLimit(rows: string[][]) {
-  const cells = rows.reduce((total, row) => total + row.length, 0);
-  if (cells > maxExcelCellsPerSheet) {
-    throw new Error(`表格单元格数量超过 ${maxExcelCellsPerSheet} 个，请拆分文件后再转换。`);
-  }
+function normalizeRows(rows: string[][]): string[][] {
+  return rows
+    .map((row) => row.map((cell) => String(cell ?? "").trim()))
+    .filter((row) => row.some(Boolean));
 }
 
 function parseCsv(text: string): string[][] {
@@ -281,7 +385,6 @@ function parseCsv(text: string): string[][] {
   let row: string[] = [];
   let cell = "";
   let quoted = false;
-
   for (let index = 0; index < text.length; index += 1) {
     const char = text[index];
     const next = text[index + 1];
@@ -309,86 +412,19 @@ function parseCsv(text: string): string[][] {
     }
     cell += char;
   }
-
   row.push(cell);
   rows.push(row);
   return rows;
 }
 
-function normalizeRows(rows: string[][]): string[][] {
-  return rows
-    .map((row) => row.map((cell) => String(cell ?? "").trim()))
-    .filter((row) => row.some(Boolean));
+function argbToCss(value: string) {
+  const normalized = value.length === 8 ? value.slice(2) : value;
+  return `#${normalized}`;
 }
 
-function createPageCanvas() {
-  const canvas = document.createElement("canvas");
-  canvas.width = pageWidth;
-  canvas.height = pageHeight;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("当前浏览器不支持 Canvas，无法渲染 Word。");
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  return canvas;
-}
-
-function drawPageTitle(ctx: CanvasRenderingContext2D, title: string, y: number) {
-  ctx.font = titleFont;
-  ctx.fillStyle = "#0f172a";
-  ctx.fillText(title, pageMargin, y);
-}
-
-function textFromNode(node: Element) {
-  return Array.from(node.getElementsByTagNameNS("*", "t"))
-    .map((item) => item.textContent || "")
-    .join("")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function firstByLocalName(document: XMLDocument, localName: string) {
-  return Array.from(document.getElementsByTagName("*")).find((node) => node.localName === localName);
-}
-
-function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number) {
-  const lines: string[] = [];
-  let current = "";
-  for (const char of text) {
-    const next = current + char;
-    if (ctx.measureText(next).width > maxWidth && current) {
-      lines.push(current);
-      current = char;
-    } else {
-      current = next;
-    }
-  }
-  if (current) lines.push(current);
-  return lines.length ? lines : [""];
-}
-
-function truncateToWidth(ctx: CanvasRenderingContext2D, text: string, maxWidth: number) {
-  if (ctx.measureText(text).width <= maxWidth) return text;
-  let output = text;
-  while (output.length > 1 && ctx.measureText(`${output}...`).width > maxWidth) {
-    output = output.slice(0, -1);
-  }
-  return `${output}...`;
-}
-
-function canvasToBlobSync(canvas: HTMLCanvasElement, format: ExportImageFormat) {
-  const dataUrl = canvas.toDataURL(mimeForFormat(format), format === "png" ? undefined : 0.92);
-  const binary = atob(dataUrl.split(",")[1] || "");
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
-  return new Blob([bytes], { type: mimeForFormat(format) });
-}
-
-function canvasToBlob(canvas: HTMLCanvasElement, format: ExportImageFormat) {
-  return new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (blob) resolve(blob);
-      else reject(new Error("图片生成失败，请降低清晰度后重试。"));
-    }, mimeForFormat(format), format === "png" ? undefined : 0.92);
+function canvasToBlob(canvas: HTMLCanvasElement, format: ExportImageFormat): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("图片生成失败，请降低清晰度后重试。")), mimeForFormat(format), format === "png" ? undefined : 0.92);
   });
 }
 
@@ -414,6 +450,6 @@ function mimeForFormat(format: ExportImageFormat) {
   return "image/jpeg";
 }
 
-function clamp(value: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, value));
+function nextFrame() {
+  return new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 }

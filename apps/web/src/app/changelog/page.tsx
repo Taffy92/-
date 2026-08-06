@@ -14,7 +14,7 @@ const releases = [
     previousFeatures: [
       "图片、PDF、办公文档和音视频本地转换",
       "离线批量队列、独立文件夹输出和本地授权",
-      "图片与 PDF 本地 OCR，支持 TXT 和 Word 导出",
+      "图片与 PDF 本地 OCR，支持可编辑 Word 导出",
       "图片、PDF、文档、音视频与 OCR 工具"
     ],
     newFeatures: [
@@ -40,7 +40,7 @@ const releases = [
       "PDF 文字或图片水印、页码、页眉和页脚",
       "音视频裁剪、视频静音、视频截图、视频转 GIF",
       "音频拼接、音量调整、淡入和淡出",
-      "图片与 PDF 本地 OCR，支持导出 TXT、可编辑 Word 和原样 Word"
+      "图片与 PDF 本地 OCR，支持导出可编辑 Word"
     ]
   },
   {

@@ -6,6 +6,7 @@ import Cropper from "cropperjs";
 import { CheckCircle2, ChevronRight, Crop, Download, FileImage, FilePlus2, FileText, FolderPlus, HardDrive, HeartHandshake, Image, Loader2, Maximize2, Music, Play, Scissors, ShieldCheck, Square, Table2, Trash2, Type, Video } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { addImageWatermark, addTextWatermark, canvasToBlob, compressImage, loadImageElement, resizeImage } from "@doctool/image-core";
 import { combineImagePages, renderDocxToImagePages, renderExcelToImagePages } from "@doctool/export-core";
 import { getPdfPageCount, parsePageSelection, renderPdfPageToBlob, renderPdfPages } from "@doctool/pdf-core";
@@ -160,6 +161,11 @@ function getOnlineFileSizeLimitMessage(file: File) {
 export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { surface?: "web" | "desktop" }) {
   const isDesktopSurface = surface === "desktop";
   const tabs = isDesktopSurface ? desktopTabs : webTabs;
+  const searchParams = useSearchParams();
+  const requestedTab = searchParams.get("tool");
+  const initialTab = tabs.some((tab) => tab.id === requestedTab)
+    ? requestedTab as TabId
+    : isDesktopSurface ? "video-convert" : "crop";
   const inputRef = useRef<HTMLInputElement | null>(null);
   const folderInputRef = useRef<HTMLInputElement | null>(null);
   const cropImageRef = useRef<HTMLImageElement | null>(null);
@@ -167,7 +173,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   const cancelRef = useRef(false);
   const mediaAbortRef = useRef<AbortController | null>(null);
 
-  const [activeTab, setActiveTab] = useState<TabId>(isDesktopSurface ? "video-convert" : "crop");
+  const [activeTab, setActiveTab] = useState<TabId>(initialTab);
   const [file, setFile] = useState<File | null>(null);
   const [fileUrl, setFileUrl] = useState("");
   const [summary, setSummary] = useState<FileSummary | null>(null);
@@ -177,6 +183,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   const [error, setError] = useState("");
   const [resultBlob, setResultBlob] = useState<Blob | null>(null);
   const [resultName, setResultName] = useState("");
+  const [resultFiles, setResultFiles] = useState<Array<{ blob: Blob; name: string }>>([]);
   const [resultFolderPath, setResultFolderPath] = useState("");
   const [resultPreview, setResultPreview] = useState<ResultPreviewState | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
@@ -227,6 +234,10 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   const [audioBitrate, setAudioBitrate] = useState<AudioBitrateOption>("128k");
   const [stripMetadata, setStripMetadata] = useState(true);
   const [batchMode, setBatchMode] = useState<BatchMode>(isDesktopSurface ? "video-convert" : "compress");
+
+  useEffect(() => {
+    if (tabs.some((tab) => tab.id === requestedTab)) setActiveTab(requestedTab as TabId);
+  }, [requestedTab, tabs]);
   const [batchFiles, setBatchFiles] = useState<File[]>([]);
   const [batchTasks, setBatchTasks] = useState<BatchTask[]>([]);
   const [activeTaskId, setActiveTaskId] = useState("");
@@ -582,6 +593,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     setError("");
     setResultBlob(null);
     setResultName("");
+    setResultFiles([]);
     setResultFolderPath("");
     setResultPreview(null);
     setPreviewUrl((current) => {
@@ -961,6 +973,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   function finishTask(blob: Blob, name: string, message = "处理完成，可以下载结果。") {
     setResultBlob(blob);
     setResultName(name);
+    setResultFiles([{ blob, name }]);
     setResultFolderPath("");
     setResultPreviewFromBlob(blob, name);
     setProgressMessage(message);
@@ -969,7 +982,18 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   function finishFolderTask(folderPath: string, name: string, message: string) {
     setResultBlob(null);
     setResultName(name);
+    setResultFiles([]);
     setResultFolderPath(folderPath);
+    setResultPreview(null);
+    setProgressMessage(message);
+  }
+
+  function finishFilesTask(files: Array<{ blob: Blob; name: string }>, message: string) {
+    if (!files.length) throw new Error("没有可下载的页面结果。");
+    setResultBlob(null);
+    setResultName(`${files[0].name.replace(/_page_\d+\.[^.]+$/i, "")}（${files.length}页）`);
+    setResultFiles(files);
+    setResultFolderPath("");
     setResultPreview(null);
     setProgressMessage(message);
   }
@@ -1116,7 +1140,9 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
 
   async function runPdfImages() {
     const source = ensureFile("pdf");
-    const destination = pdfImageMode === "pages" ? await ensureFolderOutputDirectory() : outputDirectory;
+    const destination = pdfImageMode === "pages" && isDesktopSurface
+      ? await ensureFolderOutputDirectory()
+      : null;
     const pages = await selectedPdfPages(source);
     const scale = pdfScale === "ultra" ? 3 : pdfScale === "high" ? 2 : 1.2;
     if (pdfImageMode === "combined") {
@@ -1144,6 +1170,15 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
         setProgressMessage(message || "正在逐页导出 PDF");
       }
     });
+    if (!isDesktopSurface) {
+      finishFilesTask(rendered.map((page) => ({
+        blob: page.blob,
+        name: rendered.length === 1
+          ? pdfSingleImageName(source.name, pdfImageFormat)
+          : pdfPageImageName(source.name, page.pageNumber, pdfImageFormat)
+      })), "PDF 已按页面生成图片，请在下方分别下载。");
+      return;
+    }
     const folderPath = await saveFilesToOutputFolder(
       pdfOutputFolderName(source.name),
       rendered.map((page) => ({
@@ -1152,7 +1187,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
           ? pdfSingleImageName(source.name, pdfImageFormat)
           : pdfPageImageName(source.name, page.pageNumber, pdfImageFormat)
       })),
-      destination
+      destination as BatchOutputDirectory
     );
     if (!folderPath) throw new Error("无法创建 PDF 输出文件夹，请重新选择输出目录后再试。");
     setProgress(1);
@@ -1161,17 +1196,25 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
 
   async function runWordImages() {
     const source = ensureFile("word");
-    const destination = officeImageMode === "pages" ? await ensureFolderOutputDirectory() : outputDirectory;
+    const shouldCombine = officeImageMode === "combined";
+    const destination = !shouldCombine && isDesktopSurface ? await ensureFolderOutputDirectory() : null;
     const pages = await renderDocxToImagePages(source, { format: officeImageFormat, onProgress: (value, message) => {
       setProgress(value * 0.7);
       setProgressMessage(message || "正在渲染 Word 文档");
     } });
-    if (officeImageMode === "combined") {
+    if (shouldCombine) {
       const blob = await combineImagePages(pages, officeImageFormat, (value, message) => {
         setProgress(0.7 + value * 0.3);
         setProgressMessage(message || "正在合成一页图片");
       });
       finishTask(blob, fileNameWithSuffix(source.name, "combined", officeImageFormat), "Word 已合成为一张长图，可以下载。");
+      return;
+    }
+    if (!isDesktopSurface) {
+      finishFilesTask(pages.map((page) => ({
+        blob: page.blob,
+        name: officePageImageName(source.name, page.pageNumber, officeImageFormat)
+      })), "Word 已按页面生成图片，请在下方分别下载。");
       return;
     }
     const folderPath = await saveFilesToOutputFolder(
@@ -1182,7 +1225,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
           ? officeSingleImageName(source.name, officeImageFormat)
           : officePageImageName(source.name, page.pageNumber, officeImageFormat)
       })),
-      destination
+      destination as BatchOutputDirectory
     );
     if (!folderPath) throw new Error("无法创建 Word 输出文件夹，请重新选择输出目录后再试。");
     setProgress(1);
@@ -1191,17 +1234,25 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
 
   async function runExcelImages() {
     const source = ensureFile("excel");
-    const destination = officeImageMode === "pages" ? await ensureFolderOutputDirectory() : outputDirectory;
+    const shouldCombine = officeImageMode === "combined";
+    const destination = !shouldCombine && isDesktopSurface ? await ensureFolderOutputDirectory() : null;
     const pages = await renderExcelToImagePages(source, { format: officeImageFormat, onProgress: (value, message) => {
       setProgress(value * 0.7);
       setProgressMessage(message || "正在渲染 Excel 工作表");
     } });
-    if (officeImageMode === "combined") {
+    if (shouldCombine) {
       const blob = await combineImagePages(pages, officeImageFormat, (value, message) => {
         setProgress(0.7 + value * 0.3);
         setProgressMessage(message || "正在合成一页图片");
       });
       finishTask(blob, fileNameWithSuffix(source.name, "combined", officeImageFormat), "Excel 已合成为一张长图，可以下载。");
+      return;
+    }
+    if (!isDesktopSurface) {
+      finishFilesTask(pages.map((page) => ({
+        blob: page.blob,
+        name: officePageImageName(source.name, page.pageNumber, officeImageFormat)
+      })), "Excel 已按工作表/页面生成图片，请在下方分别下载。");
       return;
     }
     const folderPath = await saveFilesToOutputFolder(
@@ -1212,7 +1263,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
           ? officeSingleImageName(source.name, officeImageFormat)
           : officePageImageName(source.name, page.pageNumber, officeImageFormat)
       })),
-      destination
+      destination as BatchOutputDirectory
     );
     if (!folderPath) throw new Error("无法创建 Excel 输出文件夹，请重新选择输出目录后再试。");
     setProgress(1);
@@ -1622,7 +1673,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   }
 
   async function handleDownload() {
-    if ((!resultBlob || !resultName) && !resultFolderPath) return;
+    if ((!resultBlob || !resultName) && !resultFiles.length && !resultFolderPath) return;
     setError("");
     try {
       if (resultFolderPath) {
@@ -1635,6 +1686,10 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
       const message = friendlyError(error);
       setError(resultFolderPath ? `${message}。结果已保存：${sanitizeLocalPath(resultFolderPath)}` : message);
     }
+  }
+
+  function downloadResultFile(item: { blob: Blob; name: string }) {
+    downloadBlob(item.blob, item.name);
   }
 
   async function openLocalPath(pathValue: string, label = "结果文件夹") {
@@ -1836,6 +1891,16 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
           <CheckCircle2 aria-hidden="true" size={17} />
           <span title={resultName}>已生成：{resultName}</span>
         </p>
+      ) : null}
+      {resultFiles.length > 1 ? (
+        <div className="a2-page-download-list" aria-label="逐页下载结果">
+          {resultFiles.map((item) => (
+            <button type="button" key={item.name} onClick={() => downloadResultFile(item)}>
+              <Download aria-hidden="true" size={14} />
+              <span title={item.name}>{item.name}</span>
+            </button>
+          ))}
+        </div>
       ) : null}
       <div className="a2-task-actions">
         <button
@@ -2412,8 +2477,8 @@ function ControlPanel(props: ControlPanelProps) {
   if (props.activeTab === "watermark") return <Panel title="添加水印" note="文字或图片水印均在本地合成，不上传图片。文字水印支持字号、颜色和透明度预览。"><Select label="水印类型" value={props.watermarkMode} onChange={props.setWatermarkMode} options={["text", "image"]} />{props.watermarkMode === "image" ? <Field label="水印图片"><input type="file" accept={imageAccept} onChange={(event) => props.setWatermarkImage(event.target.files?.[0] || null)} /></Field> : <><Field label="水印文字"><input className="form-input" value={props.watermarkText} onChange={(event) => props.setWatermarkText(event.target.value)} /></Field><Range label="文字大小" value={props.watermarkFontSize} min={12} max={160} onChange={props.setWatermarkFontSize} /><Field label="文字颜色"><div className="flex gap-2"><input className="h-11 w-14 rounded-sm border border-cyan-300/20 bg-slate-950 p-1" type="color" value={props.watermarkColor} onChange={(event) => props.setWatermarkColor(event.target.value)} /><input className="form-input" value={props.watermarkColor} onChange={(event) => props.setWatermarkColor(event.target.value)} /></div></Field></>}<Select label="位置" value={props.watermarkPosition} onChange={props.setWatermarkPosition} options={["top-left", "top-right", "bottom-left", "bottom-right", "center", "tile"]} /><Range label="透明度" value={props.watermarkOpacity} min={5} max={100} onChange={props.setWatermarkOpacity} /><ImageFormat value={props.watermarkFormat} onChange={props.setWatermarkFormat} /></Panel>;
   if (props.activeTab === "compress") return <Panel title="图片压缩" note="固定导出 JPG，目标大小为 500KB、200KB、100KB、50KB、25KB。"><Select label="压缩强度" value={props.compressStrength} onChange={props.setCompressStrength} options={["light", "recommended", "extreme"]} /><Field label="目标大小"><select className="form-input" value={props.targetSize} onChange={(event) => props.setTargetSize(event.target.value)}><option value="500KB">500KB</option><option value="200KB">200KB</option><option value="100KB">100KB</option><option value="50KB">50KB</option><option value="25KB">25KB</option></select></Field><Range label="质量" value={props.compressQuality} min={10} max={100} onChange={props.setCompressQuality} /><NumberField label="最大宽高" value={props.maxSize} onChange={props.setMaxSize} /><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={props.keepOriginalSize} onChange={(event) => props.setKeepOriginalSize(event.target.checked)} />保留原尺寸</label></Panel>;
   if (props.activeTab === "pdf-images") return <Panel title="PDF 转图片" note="PDF.js 本地渲染。离线版逐页导出会保存到同名文件夹；在线版无法直接创建文件夹时才打包 ZIP。"><PdfPageField value={props.pdfPages} onChange={props.setPdfPages} /><Select label="导出方式" value={props.pdfImageMode} onChange={props.setPdfImageMode} options={[{ value: "pages", label: "逐页导出" }, { value: "combined", label: "合成一页导出" }]} /><Select label="图片格式" value={props.pdfImageFormat} onChange={props.setPdfImageFormat} options={["png", "jpg", "webp"]} /><Select label="清晰度" value={props.pdfScale} onChange={props.setPdfScale} options={["normal", "high", "ultra"]} /></Panel>;
-  if (props.activeTab === "word-images") return <Panel title="Word 转图片" note="支持标准 .docx 文档，按页面导出图片或合成为一张长图，所有解析和渲染都在本地完成。"><Select label="导出方式" value={props.officeImageMode} onChange={props.setOfficeImageMode} options={[{ value: "pages", label: "逐页导出" }, { value: "combined", label: "合成一页导出" }]} /><ImageFormat value={props.officeImageFormat} onChange={props.setOfficeImageFormat} /></Panel>;
-  if (props.activeTab === "excel-images") return <Panel title="Excel 转图片" note="支持 xlsx、csv。旧版 xls 请先另存为 xlsx 后再转换，以降低浏览器解析风险。"><Select label="导出方式" value={props.officeImageMode} onChange={props.setOfficeImageMode} options={[{ value: "pages", label: "逐页导出" }, { value: "combined", label: "合成一页导出" }]} /><ImageFormat value={props.officeImageFormat} onChange={props.setOfficeImageFormat} /></Panel>;
+  if (props.activeTab === "word-images") return <Panel title="Word 转图片" note="支持 .docx 文档。在线版可逐页下载或合成为长图，离线版逐页结果保存到同名文件夹，解析和渲染均在本地完成。"><Select label="导出方式" value={props.officeImageMode} onChange={props.setOfficeImageMode} options={[{ value: "pages", label: "逐页下载" }, { value: "combined", label: "合成一页下载" }]} /><ImageFormat value={props.officeImageFormat} onChange={props.setOfficeImageFormat} /></Panel>;
+  if (props.activeTab === "excel-images") return <Panel title="Excel 转图片" note="支持 xlsx、csv。可按工作表/页面逐页下载，也可合成为长图；旧版 .xls 请先另存为 .xlsx。"><Select label="导出方式" value={props.officeImageMode} onChange={props.setOfficeImageMode} options={[{ value: "pages", label: "逐页下载" }, { value: "combined", label: "合成一页下载" }]} /><ImageFormat value={props.officeImageFormat} onChange={props.setOfficeImageFormat} /></Panel>;
   if (props.activeTab === "video-convert") return <Panel title="视频格式转换" note="使用本地 FFmpeg WASM，支持 MP4、MOV、AVI、MKV、WebM，并可选择分辨率、码率和是否清理元数据。">{props.desktopMode ? null : <MediaCapabilityBox report={props.mediaReport} />}<Select label="输出格式" value={props.videoFormat} onChange={props.setVideoFormat} options={[...videoOutputFormats]} /><Quality value={props.mediaQuality} onChange={props.setMediaQuality} /><Select label="视频尺寸" value={props.videoSize} onChange={props.setVideoSize} options={[...videoSizeOptions]} /><MediaAdvancedControls {...props} /></Panel>;
   if (props.activeTab === "audio-convert") return <Panel title="音频格式转换" note="使用本地 FFmpeg WASM，支持 MP3、WAV、AAC、M4A、FLAC，并可选择音频码率。">{props.desktopMode ? null : <MediaCapabilityBox report={props.mediaReport} />}<Select label="输出格式" value={props.audioFormat} onChange={props.setAudioFormat} options={[...audioOutputFormats]} /><Quality value={props.mediaQuality} onChange={props.setMediaQuality} /><MediaAdvancedControls {...props} /></Panel>;
   if (props.activeTab === "video-audio") return <Panel title="视频提取音频" note="只读取视频中的音频轨道，导出 MP3、WAV、M4A、AAC。">{props.desktopMode ? null : <MediaCapabilityBox report={props.mediaReport} />}<Select label="输出格式" value={props.extractedAudioFormat} onChange={props.setExtractedAudioFormat} options={[...extractedAudioOutputFormats]} /><Quality value={props.mediaQuality} onChange={props.setMediaQuality} /><MediaAdvancedControls {...props} /></Panel>;

@@ -11,6 +11,17 @@ export interface PdfTextPage {
   pageNumber: number;
   text: string;
   itemCount: number;
+  width: number;
+  height: number;
+  layout: PdfTextBox[];
+}
+
+export interface PdfTextBox {
+  text: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
 
 export async function getPdfPageCount(file: File): Promise<number> {
@@ -65,14 +76,26 @@ export async function extractPdfTextPages(file: File): Promise<PdfTextPage[]> {
   const results: PdfTextPage[] = [];
   for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
     const page = await pdf.getPage(pageNumber);
+    const viewport = page.getViewport({ scale: 1 });
     const content = await page.getTextContent();
     const items = Array.isArray(content?.items) ? content.items : [];
     const lines: string[] = [];
+    const layout: PdfTextBox[] = [];
     let currentLine = "";
     for (const item of items) {
       if (!isPdfTextItem(item)) continue;
       const value = item.str.trim();
       if (value) currentLine += `${currentLine ? " " : ""}${value}`;
+      if (value && Array.isArray(item.transform)) {
+        const height = Math.max(8, Math.hypot(item.transform[2] || 0, item.transform[3] || 0));
+        layout.push({
+          text: value,
+          x: Math.max(0, item.transform[4] || 0),
+          y: Math.max(0, viewport.height - (item.transform[5] || 0) - height),
+          width: Math.max(1, item.width || height),
+          height
+        });
+      }
       if (item.hasEOL && currentLine) {
         lines.push(currentLine);
         currentLine = "";
@@ -82,7 +105,10 @@ export async function extractPdfTextPages(file: File): Promise<PdfTextPage[]> {
     results.push({
       pageNumber,
       text: lines.join("\n").trim(),
-      itemCount: items.length
+      itemCount: items.length,
+      width: viewport.width,
+      height: viewport.height,
+      layout
     });
   }
   return results;
@@ -160,7 +186,12 @@ async function renderPage(page: any, format: PdfOutputFormat, scale: number): Pr
   });
 }
 
-function isPdfTextItem(value: unknown): value is { str: string; hasEOL?: boolean } {
+function isPdfTextItem(value: unknown): value is {
+  str: string;
+  hasEOL?: boolean;
+  transform?: number[];
+  width?: number;
+} {
   return typeof value === "object"
     && value !== null
     && "str" in value

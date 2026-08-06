@@ -20,6 +20,7 @@ import {
   Trash2
 } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   convertImage,
   readImageMetadata,
@@ -54,9 +55,7 @@ import type {
   VideoOutputFormat
 } from "@doctool/media-core";
 import {
-  createOcrTextBlob,
   exportEditableOcrWord,
-  exportImageOcrWord,
   recognizeLocalDocument
 } from "@doctool/ocr-core";
 import type { OcrLanguage } from "@doctool/ocr-core";
@@ -131,7 +130,7 @@ const tools: Array<{
   { id: "video-frame", group: "音视频工具", label: "视频截图", description: "从指定时间点导出 JPG、PNG 或 WebP" },
   { id: "video-gif", group: "音视频工具", label: "视频转 GIF", description: "设置起止时间、宽度和帧率" },
   { id: "audio-enhance", group: "音视频工具", label: "音频编辑", description: "裁剪、顺序拼接、音量和淡入淡出" },
-  { id: "ocr", group: "OCR 工具", label: "图片 / PDF 文字识别", description: "中文、英文、中英混合，导出 TXT 或 Word" }
+  { id: "ocr", group: "OCR 工具", label: "图片 / PDF 文字识别", description: "中文、英文、中英混合，导出可编辑 Word" }
 ];
 
 type DesktopLicenseGateComponent = ComponentType<{
@@ -154,9 +153,14 @@ async function loadLicenseGateComponent(): Promise<DesktopLicenseGateComponent |
 
 export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { surface?: "desktop" | "web" }) {
   const desktop = surface === "desktop";
+  const searchParams = useSearchParams();
+  const requestedTool = searchParams.get("tool");
+  const initialTool = tools.some((item) => item.id === requestedTool)
+    ? requestedTool as LocalToolId
+    : "image-convert";
   const inputRef = useRef<HTMLInputElement | null>(null);
   const abortRef = useRef<AbortController | null>(null);
-  const [tool, setTool] = useState<LocalToolId>("image-convert");
+  const [tool, setTool] = useState<LocalToolId>(initialTool);
   const [files, setFiles] = useState<File[]>([]);
   const [outputs, setOutputs] = useState<OutputItem[]>([]);
   const [status, setStatus] = useState<"idle" | "running" | "done" | "error" | "cancelled">("idle");
@@ -171,6 +175,10 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
   const [desktopLicenseStatus, setDesktopLicenseStatus] = useState<DesktopLicenseStatus | null>(null);
   const [desktopLicenseGate, setDesktopLicenseGate] = useState<DesktopLicenseGateComponent | null>(null);
   const [isToolSwitching, startToolTransition] = useTransition();
+
+  useEffect(() => {
+    if (tools.some((item) => item.id === requestedTool)) setTool(requestedTool as LocalToolId);
+  }, [requestedTool]);
 
   const [imageFormat, setImageFormat] = useState<ExportImageFormat>("jpg");
   const [imageQuality, setImageQuality] = useState(90);
@@ -211,7 +219,7 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
   const [fadeIn, setFadeIn] = useState(0);
   const [fadeOut, setFadeOut] = useState(0);
   const [ocrLanguage, setOcrLanguage] = useState<OcrLanguage>("chi_sim+eng");
-  const [ocrExport, setOcrExport] = useState<"txt" | "editable-word" | "image-word">("txt");
+  const [ocrExport, setOcrExport] = useState<"editable-word">("editable-word");
 
   useEffect(() => {
     const applyToolFromUrl = () => {
@@ -596,18 +604,16 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
           ensureActive(signal);
           const document = await recognizeLocalDocument(file, {
             language: ocrLanguage,
-            includePageImages: ocrExport === "image-word",
             signal,
             onProgress: (value, text) => report((index + value) / files.length, text)
           });
+          if (!document.pages.some((page) => page.text.trim() || page.layout?.some((box) => box.text.trim()))) {
+            throw new Error("未识别到可导出的文字，请检查图片清晰度、页面方向或识别语言后重试。");
+          }
           const base = safeBaseName(file.name);
-          const blob = ocrExport === "txt"
-            ? createOcrTextBlob(document.pages)
-            : ocrExport === "editable-word"
-              ? await exportEditableOcrWord(document.pages)
-              : await exportImageOcrWord(document.pages);
+          const blob = await exportEditableOcrWord(document.pages);
           results.push({
-            name: `${base}_ocr.${ocrExport === "txt" ? "txt" : "docx"}`,
+            name: `${base}_ocr.docx`,
             blob,
             folder: files.length > 1 || file.type === "application/pdf" ? base : undefined
           });
@@ -963,7 +969,7 @@ type ControlProps = {
   fadeIn: number; setFadeIn: (value: number) => void;
   fadeOut: number; setFadeOut: (value: number) => void;
   ocrLanguage: OcrLanguage; setOcrLanguage: (value: OcrLanguage) => void;
-  ocrExport: "txt" | "editable-word" | "image-word"; setOcrExport: (value: "txt" | "editable-word" | "image-word") => void;
+  ocrExport: "editable-word"; setOcrExport: (value: "editable-word") => void;
   desktop: boolean;
 };
 
@@ -1075,8 +1081,7 @@ function ToolControls(props: ControlProps) {
   if (props.tool === "ocr") return (
     <>
       <SelectField label="识别语言" value={props.ocrLanguage} onChange={(value) => props.setOcrLanguage(value as OcrLanguage)} options={[["chi_sim+eng", "中文 + 英文"], ["chi_sim", "简体中文"], ["eng", "英文"]]} />
-      <SelectField label="导出方式" value={props.ocrExport} onChange={(value) => props.setOcrExport(value as "txt" | "editable-word" | "image-word")} options={[["txt", "TXT 纯文本"], ["editable-word", "可编辑 Word"], ["image-word", "原样 Word（页面图像）"]]} />
-      <p className="text-xs leading-6 text-slate-500">可编辑 Word 会重建段落，复杂表格、公式和多栏可能与原稿不同；原样 Word 优先保持视觉版式，但正文主要以页面图像呈现。</p>
+      <p className="text-xs leading-6 text-slate-500">识别结果只导出为可编辑 Word，并按识别到的文字坐标生成文本框；复杂表格、公式和多栏仍可能需要微调。</p>
     </>
   );
   return <p className="text-sm leading-6 text-slate-500">该工具无需额外参数，结果按文件列表顺序生成。</p>;
@@ -1112,11 +1117,11 @@ function MetadataView({ metadata }: { metadata: ImageMetadataSummary }) {
 function OutputList({ outputs }: { outputs: OutputItem[] }) {
   if (!outputs.length) return null;
   return (
-    <div className="mt-5 border border-emerald-400/20 bg-emerald-400/[0.04] p-4">
+    <div className="a2-output-list mt-5 border border-emerald-400/20 bg-emerald-400/[0.04] p-4">
       <h3 className="font-semibold text-emerald-200">处理结果</h3>
       <div className="mt-3 space-y-2">
         {outputs.map((item, index) => (
-          <div className="flex items-center justify-between gap-3 border border-slate-800 bg-slate-950/70 px-3 py-2" key={`${item.name}-${index}`}>
+          <div className="a2-output-item flex items-center justify-between gap-3 border border-slate-800 bg-slate-950/70 px-3 py-2" key={`${item.name}-${index}`}>
             <div className="min-w-0">
               <p className="truncate text-sm">{item.name}</p>
               <p className="truncate text-xs text-slate-500">{item.savedPath || formatBytes(item.blob.size)}</p>
