@@ -7,7 +7,7 @@ export const downloadsConfig = {
   fileName: zipFileName,
   fileSize: "272.80 MB",
   releaseDate: "2026-08-05",
-  sha256: "5E4CA7F1592E228D9AAD7F303521FC9B20C172123A771271D3CC8BC962770B5A",
+  sha256: "191767A4402244E58EAE44DA4AFBC516EF7458C83B014C7EB7A21158C1CD87EC",
   manifestUrl: edgeOneManifestUrl,
   packages: [
     {
@@ -15,7 +15,7 @@ export const downloadsConfig = {
       label: "ZIP 安装包",
       fileName: zipFileName,
       fileSize: "272.80 MB",
-      sha256: "5E4CA7F1592E228D9AAD7F303521FC9B20C172123A771271D3CC8BC962770B5A",
+      sha256: "191767A4402244E58EAE44DA4AFBC516EF7458C83B014C7EB7A21158C1CD87EC",
       note: "ZIP 内仅包含 MSI 安装包，解压后运行 MSI 即可安装离线专业版。"
     }
   ],

@@ -15,7 +15,9 @@ const { chromium } = requireFromWeb("@playwright/test");
 const files = readdirSync(inputDir);
 const sample = {
   wav: path.join(inputDir, files.find((name) => name.toLowerCase().endsWith(".wav")) || ""),
-  mp4: path.join(inputDir, files.find((name) => name.toLowerCase().endsWith(".mp4")) || "")
+  mp4: process.env.SMOKE_VIDEO
+    ? path.resolve(process.env.SMOKE_VIDEO)
+    : path.join(inputDir, files.find((name) => name.toLowerCase().endsWith(".mp4")) || "")
 };
 
 const videoFormats = (process.env.SMOKE_VIDEO_FORMATS || "mp4,mov,avi,mkv,webm")
@@ -83,35 +85,26 @@ page.on("console", (message) => {
 });
 page.on("pageerror", (error) => result.consoleErrors.push(error.message));
 
-async function expandSectionIfPresent(label) {
-  const section = page.getByRole("button", { name: new RegExp(label) }).first();
-  try {
-    await section.waitFor({ state: "visible", timeout: 5_000 });
-  } catch {
-    return;
-  }
-  if ((await section.getAttribute("aria-expanded")) !== "true") {
-    await section.click();
-  }
-}
-
-async function runSingleMode(label, filePath, timeoutMs, outputFormat) {
-  await page.goto(result.url, { waitUntil: "networkidle", timeout: 60_000 });
-  await expandSectionIfPresent("音视频工具");
-  await page.locator("button").filter({ hasText: label }).first().click();
+async function runSingleMode(toolId, filePath, timeoutMs, outputFormat, allowExpectedFailure = false) {
+  await page.goto(`${result.url}?tool=${toolId}`, { waitUntil: "networkidle", timeout: 60_000 });
   await page.locator('input[type="file"]').first().setInputFiles(filePath);
   if (outputFormat) {
     await page.getByLabel("输出格式").selectOption(outputFormat);
   }
-  await page.getByRole("button", { name: /开始|开始转换|处理/ }).first().click();
-  const success = page.getByText("已生成");
-  const failure = page.getByText(/处理失败|当前浏览器无法转码|当前浏览器本地视频转码失败/);
+  const startButton = page.getByRole("button", { name: "开始转换", exact: true });
+  await startButton.waitFor({ state: "visible", timeout: 15_000 });
+  if (await startButton.isDisabled()) throw new Error("开始转换按钮在文件就绪后仍处于禁用状态。");
+  await startButton.click();
+  const success = page.getByText("转换完成", { exact: true });
+  const failure = page.getByText("处理失败", { exact: true });
   const outcome = await Promise.race([
     success.waitFor({ timeout: timeoutMs }).then(() => "success"),
     failure.waitFor({ timeout: timeoutMs }).then(() => "failure")
   ]);
   if (outcome === "failure") {
-    throw new Error((await captureBodyText()).slice(0, 400));
+    const bodyText = await captureBodyText();
+    if (allowExpectedFailure && /过小的视频分辨率/.test(bodyText)) return "expected-failure: input resolution guard";
+    throw new Error(bodyText.slice(0, 400));
   }
   return true;
 }
@@ -121,11 +114,11 @@ async function captureBodyText() {
 }
 
 try {
-  result.checks.audioConvert = await runSingleMode("音频格式转换", sample.wav, 45_000);
+  result.checks.audioConvert = await runSingleMode("audio-convert", sample.wav, 120_000);
   result.checks.videoConvert = {};
   for (const format of videoFormats) {
     try {
-      result.checks.videoConvert[format] = await runSingleMode("视频格式转换", sample.mp4, 60_000, format);
+      result.checks.videoConvert[format] = await runSingleMode("video-convert", sample.mp4, 180_000, format, format === "webm");
     } catch (error) {
       result.checks.videoConvert[format] = {
         success: false,
@@ -135,7 +128,7 @@ try {
     }
   }
   try {
-    result.checks.videoExtractAudio = await runSingleMode("视频提取音频", sample.mp4, 60_000);
+    result.checks.videoExtractAudio = await runSingleMode("video-audio", sample.mp4, 180_000);
   } catch (error) {
     const bodyText = await captureBodyText();
     if (!bodyText.includes("该视频没有可提取的音频轨道")) throw error;

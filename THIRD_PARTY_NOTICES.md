@@ -2,7 +2,7 @@
 
 本文件为“万能格式转换器”在线版和 Windows 离线安装版的第三方开源软件 Notices。内容根据锁文件、本地依赖元数据和最终构建产物生成，用于正式发布前的许可证归档和产品内展示。
 
-- 生成时间：2026-08-06T12:35:58.724Z
+- 生成时间：2026-08-06T15:56:39.161Z
 - npm 依赖数量：765
 - 直接 npm 依赖数量：47
 - Rust crate 数量：429
@@ -32,10 +32,10 @@
 
 | 名称 | 路径 | 类型 | 文件数 | 大小 | SHA256 | 说明 |
 | --- | --- | --- | --- | --- | --- | --- |
-| Next.js 静态网站产物 | `apps/web/out` | 目录 | 296 | 59.35 MB | - | 在线版和离线版共用的静态页面、JS、CSS 和静态资源。 |
+| LibreOffice offline conversion component | `apps/desktop/src-tauri/resources/libreoffice` | 目录 | 19528 | 1.47 GB | - | Bundled with the offline MSI for local Word/Excel to PDF conversion. See the component README for source and license details. |
+| Next.js 静态网站产物 | `apps/web/out` | 目录 | 296 | 59.32 MB | - | 在线版和离线版共用的静态页面、JS、CSS 和静态资源。 |
 | PDF.js 静态资源 | `apps/web/out/pdfjs` | 目录 | 189 | 3.80 MB | - | 来自 pdfjs-dist 的主模块、worker、CMaps 和字体资源。 |
 | FFmpeg WASM 静态资源 | `apps/web/out/ffmpeg` | 目录 | 2 | 30.85 MB | - | 来自 @ffmpeg/core 的 ffmpeg-core.js 和 ffmpeg-core.wasm。 |
-| Windows ZIP 安装包 | `release/v2.0.0/installers/万能格式转换器_2.0.0_x64_zh-CN.zip` | 文件 | 1 | 272.80 MB | 5E4CA7F1592E228D9AAD7F303521FC9B20C172123A771271D3CC8BC962770B5A | 离线版 Windows x64 ZIP 安装包，内含 MSI。 |
 
 ## 直接 npm 依赖
 

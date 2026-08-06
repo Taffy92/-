@@ -9,9 +9,9 @@ describe("offline P0 release checks", () => {
     const rootPackage = JSON.parse(readFileSync(resolve(projectRoot, "package.json"), "utf8"));
     const desktopPackage = JSON.parse(readFileSync(resolve(projectRoot, "apps", "desktop", "package.json"), "utf8"));
 
-    expect(desktopPackage.scripts.build).toBe("tauri build --bundles msi");
+    expect(desktopPackage.scripts.build).toBe("node ../../scripts/prepare-libreoffice.mjs && tauri build --bundles msi");
     expect(desktopPackage.scripts["build:all"]).toBe("tauri build --bundles msi");
-    expect(desktopPackage.scripts["package:msi"]).toBe("tauri build --bundles msi");
+    expect(desktopPackage.scripts["package:msi"]).toBe("node ../../scripts/prepare-libreoffice.mjs && tauri build --bundles msi");
     const tauriConfig = JSON.parse(readFileSync(resolve(projectRoot, "apps", "desktop", "src-tauri", "tauri.conf.json"), "utf8"));
     expect(tauriConfig.tauri.bundle.targets).toEqual(["msi"]);
     expect(tauriConfig.tauri.bundle.nsis).toBeUndefined();

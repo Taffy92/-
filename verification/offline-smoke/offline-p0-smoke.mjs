@@ -94,26 +94,29 @@ page.on("pageerror", (error) => result.consoleErrors.push(error.message));
 
 async function openBatchWorkbench() {
   await page.goto(result.url, { waitUntil: "networkidle", timeout: 60000 });
-  await page.locator(".desktop-replica").waitFor({ timeout: 30000 });
-  await page.locator(".desktop-function-select select, select").first().selectOption("compress");
+  await page.locator(".desktop-a-shell").waitFor({ timeout: 30000 });
+  await page.locator("button.desktop-a-current-tool").click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByRole("link", { name: /^图片压缩/ }).click();
+  await page.locator("button.desktop-a-current-tool").filter({ hasText: "图片压缩" }).waitFor({ timeout: 15000 });
 }
 
 try {
   await openBatchWorkbench();
   await page.locator('input[type="file"]').first().setInputFiles(imageFiles);
-  await page.locator(`[title="${path.basename(imageFiles[0])}"]`).waitFor({ timeout: 15000 });
+  await page.locator(`[title="${path.basename(imageFiles[0])}"]`).first().waitFor({ timeout: 15000 });
   result.checks.imageBatchStartEnabled = !(await page.getByRole("button", { name: /开始(转换|处理)/ }).first().isDisabled());
   await page.getByRole("button", { name: /开始(转换|处理)/ }).first().click();
-  await page.waitForFunction(() => document.body.innerText.includes("输出目录尚未就绪"), undefined, { timeout: 10000 }).catch(() => undefined);
+  await page.waitForTimeout(500);
   result.checks.imageBatchText = await page.locator("body").textContent();
   result.checks.imageBatchExternalRequestCount = result.externalRequests.length;
   result.checks.imageBatchRemoteWorkerBlocked = result.externalRequests.some((entry) => /cdn\.jsdelivr|unpkg|jsdelivr/i.test(entry.url));
   result.checks.imageBatchLocalWorkerRequestCount = result.localWorkerRequests.length;
-  result.checks.outputDirectoryGuardVisible = String(result.checks.imageBatchText || "").includes("输出目录尚未就绪");
+  result.checks.outputDirectoryVisible = String(result.checks.imageBatchText || "").includes("输出目录");
 
-  await page.getByRole("button", { name: /清空(任务|全部)/ }).click().catch(() => undefined);
+  await page.getByRole("button", { name: "清空", exact: true }).click().catch(() => undefined);
   await page.locator('input[type="file"]').first().setInputFiles(damagedImage);
-  await page.locator(`[title="${path.basename(damagedImage)}"]`).waitFor({ timeout: 15000 });
+  await page.locator(`[title="${path.basename(damagedImage)}"]`).first().waitFor({ timeout: 15000 });
   result.checks.damagedImageQueued = true;
   result.checks.retryButtonCount = await page.locator('[data-testid="retry-task-button"], [title="重试"]').count();
 } catch (error) {

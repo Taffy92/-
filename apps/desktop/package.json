@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "tauri dev",
-    "build": "tauri build --bundles msi",
+    "build": "node ../../scripts/prepare-libreoffice.mjs && tauri build --bundles msi",
     "build:all": "tauri build --bundles msi",
     "package": "pnpm build",
-    "package:msi": "tauri build --bundles msi"
+    "package:msi": "node ../../scripts/prepare-libreoffice.mjs && tauri build --bundles msi"
   },
   "dependencies": {
     "@tauri-apps/api": "^1.6.0"

@@ -707,7 +707,12 @@ function videoArgs(options: VideoConversionOptions) {
   const commonMap = ["-map", "0:v:0", "-map", "0:a?", ...scaleArgs(options.videoSize), "-shortest"];
 
   if (options.format === "webm") {
-    return [...commonMap, "-c:v", "libvpx-vp9", "-b:v", quality.videoBitrate, "-deadline", "realtime", "-cpu-used", "5", "-c:a", "libopus", "-b:a", audioBitrate];
+    return [
+      ...commonMap,
+      "-c:v", "libvpx", "-b:v", quality.videoBitrate,
+      "-deadline", "realtime", "-cpu-used", "5", "-threads", "1",
+      "-c:a", "libopus", "-b:a", audioBitrate
+    ];
   }
 
   if (options.format === "avi") {

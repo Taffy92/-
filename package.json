@@ -20,6 +20,7 @@
     "build:desktop": "node scripts/run-pnpm.cjs --filter desktop build",
     "package:desktop": "node scripts/run-pnpm.cjs --filter desktop package",
     "package:desktop:msi": "node scripts/run-pnpm.cjs --filter desktop package:msi",
+    "prepare:libreoffice": "node scripts/prepare-libreoffice.mjs",
     "package:desktop:all": "node scripts/run-pnpm.cjs --filter desktop build:all",
     "check:privacy": "node scripts/run-pnpm.cjs --filter web check:privacy",
     "check:network": "node scripts/run-pnpm.cjs --filter web check:network",

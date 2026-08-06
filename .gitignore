@@ -37,6 +37,14 @@ apps/desktop/src-tauri/resources/ffmpeg/bin/*.exe
 apps/desktop/src-tauri/resources/ffmpeg/bin/*.dll
 apps/desktop/src-tauri/*backup*.json
 
+# LibreOffice runtime is prepared from the official MSI during release builds.
+# Keep the source/runtime binaries out of the public repository while retaining
+# the checked-in component documentation and manifest.
+apps/desktop/src-tauri/resources/libreoffice/**
+!apps/desktop/src-tauri/resources/libreoffice/
+!apps/desktop/src-tauri/resources/libreoffice/README.md
+!apps/desktop/src-tauri/resources/libreoffice/manifest.json
+
 # Logs and temporary files
 *.log
 *.tmp

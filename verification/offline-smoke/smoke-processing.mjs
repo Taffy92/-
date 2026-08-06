@@ -94,11 +94,23 @@ page.on("console", (message) => {
 page.on("pageerror", (error) => result.consoleErrors.push(error.message));
 
 async function clearAll() {
-  await page.getByRole("button", { name: /清空(任务|全部)/ }).click().catch(() => undefined);
+  await page.getByRole("button", { name: "清空", exact: true }).click().catch(() => undefined);
 }
 
+const toolLabels = {
+  "word-images": "Word 转图片",
+  "excel-images": "Excel 转图片",
+  "audio-convert": "音频格式转换",
+  "video-convert": "视频格式转换"
+};
+
 async function selectMode(mode) {
-  await page.locator(".desktop-function-select select, select").first().selectOption(mode);
+  const label = toolLabels[mode];
+  if (!label) throw new Error(`Unsupported offline smoke tool: ${mode}`);
+  await page.locator("button.desktop-a-current-tool").click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByRole("link", { name: new RegExp(`^${label}`) }).click();
+  await page.locator("button.desktop-a-current-tool").filter({ hasText: label }).waitFor({ timeout: 15000 });
 }
 
 async function runMode(mode, filePath, timeoutMs) {
@@ -116,7 +128,7 @@ async function runMode(mode, filePath, timeoutMs) {
 
 try {
   await page.goto(result.url, { waitUntil: "networkidle", timeout: 60000 });
-  await page.locator(".desktop-replica").waitFor({ timeout: 30000 });
+  await page.locator(".desktop-a-shell").waitFor({ timeout: 30000 });
   result.checks.wordBatchRow = await runMode("word-images", sample.docx, 12000);
   result.checks.excelBatchRow = await runMode("excel-images", sample.xlsx, 12000);
   result.checks.audioBatchRow = await runMode("audio-convert", sample.wav, 35000);

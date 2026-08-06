@@ -13,7 +13,7 @@ export type BatchTask = {
   outputFormat: string;
   outputPath?: string;
   resultName?: string;
-  backend?: "wasm" | "sidecar";
+  backend?: "wasm" | "sidecar" | "libreoffice";
   progress: number;
   status: BatchTaskStatus;
   error?: string;
@@ -33,7 +33,7 @@ export type BatchHistoryEntry = {
   sanitizedSourcePath?: string;
   sanitizedOutputPath?: string;
   resultName?: string;
-  backend?: "wasm" | "sidecar";
+  backend?: "wasm" | "sidecar" | "libreoffice";
   status: BatchHistoryStatus;
   error?: string;
   createdAt: number;
@@ -159,7 +159,7 @@ export function buildBatchLog(tasks: BatchTask[]) {
   return tasks.map((task) => {
     const source = task.sourcePath ? sanitizeLocalPath(task.sourcePath) : task.fileName;
     const output = task.outputPath ? sanitizeLocalPath(task.outputPath) : task.resultName || "-";
-    const backend = task.backend ? ` | 后端：${task.backend === "sidecar" ? "sidecar" : "WASM"}` : "";
+    const backend = task.backend ? ` | 后端：${task.backend === "sidecar" ? "sidecar" : task.backend === "libreoffice" ? "LibreOffice" : "WASM"}` : "";
     const error = task.error ? ` | 失败原因：${task.error}` : "";
     return `[${new Date(task.completedAt || task.createdAt).toLocaleString()}] ${batchTaskStatusLabel(task.status)} | ${task.fileName} | 来源：${source} | 输出：${output}${backend}${error}`;
   }).join("\n");

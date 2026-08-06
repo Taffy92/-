@@ -531,27 +531,21 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
             title = file.name;
             message = "";
           } else if (previewMode === "word-images") {
-            const pages = await renderDocxToImagePages(file, {
-              format: "png",
-              onProgress: (_value, progressMessage) => {
-                if (!cancelled && progressMessage) {
-                  setDocumentPreview((current) => ({ ...current, message: progressMessage }));
-                }
+            const pages = await renderOfficePages(file, "word", "png", (_value, progressMessage) => {
+              if (!cancelled && progressMessage) {
+                setDocumentPreview((current) => ({ ...current, message: progressMessage }));
               }
-            });
+            }, isDesktopSurface);
             if (!pages[0]) throw new Error("Word 文档没有可预览页面。");
             blob = pages[0].blob;
             title = file.name;
             message = "";
           } else {
-            const pages = await renderExcelToImagePages(file, {
-              format: "png",
-              onProgress: (_value, progressMessage) => {
-                if (!cancelled && progressMessage) {
-                  setDocumentPreview((current) => ({ ...current, message: progressMessage }));
-                }
+            const pages = await renderOfficePages(file, "excel", "png", (_value, progressMessage) => {
+              if (!cancelled && progressMessage) {
+                setDocumentPreview((current) => ({ ...current, message: progressMessage }));
               }
-            });
+            }, isDesktopSurface);
             if (!pages[0]) throw new Error("Excel 文件没有可预览工作表。");
             blob = pages[0].blob;
             title = file.name;
@@ -1198,10 +1192,10 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     const source = ensureFile("word");
     const shouldCombine = officeImageMode === "combined";
     const destination = !shouldCombine && isDesktopSurface ? await ensureFolderOutputDirectory() : null;
-    const pages = await renderDocxToImagePages(source, { format: officeImageFormat, onProgress: (value, message) => {
+    const pages = await renderOfficePages(source, "word", officeImageFormat, (value, message) => {
       setProgress(value * 0.7);
       setProgressMessage(message || "正在渲染 Word 文档");
-    } });
+    }, isDesktopSurface);
     if (shouldCombine) {
       const blob = await combineImagePages(pages, officeImageFormat, (value, message) => {
         setProgress(0.7 + value * 0.3);
@@ -1236,10 +1230,10 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     const source = ensureFile("excel");
     const shouldCombine = officeImageMode === "combined";
     const destination = !shouldCombine && isDesktopSurface ? await ensureFolderOutputDirectory() : null;
-    const pages = await renderExcelToImagePages(source, { format: officeImageFormat, onProgress: (value, message) => {
+    const pages = await renderOfficePages(source, "excel", officeImageFormat, (value, message) => {
       setProgress(value * 0.7);
       setProgressMessage(message || "正在渲染 Excel 工作表");
-    } });
+    }, isDesktopSurface);
     if (shouldCombine) {
       const blob = await combineImagePages(pages, officeImageFormat, (value, message) => {
         setProgress(0.7 + value * 0.3);
@@ -1391,7 +1385,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     task: BatchTask,
     onProgress: (value: number, message?: string) => void,
     destination: BatchOutputDirectory = outputDirectory
-  ): Promise<{ blob?: Blob; name: string; outputPath?: string; backend: "wasm" | "sidecar" }> {
+  ): Promise<{ blob?: Blob; name: string; outputPath?: string; backend: "wasm" | "sidecar" | "libreoffice" }> {
     const item = task.file;
     const mode = task.mode;
     const sidecarResult = await maybeRunSidecarBatchTask(task, onProgress, destination);
@@ -1469,10 +1463,10 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     }
 
     if (mode === "word-images") {
-      const pages = await renderDocxToImagePages(item, { format: officeImageFormat, onProgress });
+      const pages = await renderOfficePages(item, "word", officeImageFormat, onProgress, isDesktopSurface, task.sourcePath);
       if (officeImageMode === "combined") {
         const blob = await combineImagePages(pages, officeImageFormat, onProgress);
-        return { blob, name: fileNameWithSuffix(item.name, "combined", officeImageFormat), backend: "wasm" };
+        return { blob, name: fileNameWithSuffix(item.name, "combined", officeImageFormat), backend: isDesktopSurface ? "libreoffice" : "wasm" };
       }
       const outputPath = await saveFilesToOutputFolder(
         officeOutputFolderName(item.name),
@@ -1486,14 +1480,14 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
       );
       if (!outputPath) throw new Error("无法创建 Word 输出文件夹，请重新选择输出目录后再试。");
       onProgress(1, `已保存 Word 文件夹：${sanitizeLocalPath(outputPath)}`);
-      return { name: officeOutputFolderName(item.name), outputPath, backend: "wasm" };
+      return { name: officeOutputFolderName(item.name), outputPath, backend: isDesktopSurface ? "libreoffice" : "wasm" };
     }
 
     if (mode === "excel-images") {
-      const pages = await renderExcelToImagePages(item, { format: officeImageFormat, onProgress });
+      const pages = await renderOfficePages(item, "excel", officeImageFormat, onProgress, isDesktopSurface, task.sourcePath);
       if (officeImageMode === "combined") {
         const blob = await combineImagePages(pages, officeImageFormat, onProgress);
-        return { blob, name: fileNameWithSuffix(item.name, "combined", officeImageFormat), backend: "wasm" };
+        return { blob, name: fileNameWithSuffix(item.name, "combined", officeImageFormat), backend: isDesktopSurface ? "libreoffice" : "wasm" };
       }
       const outputPath = await saveFilesToOutputFolder(
         officeOutputFolderName(item.name),
@@ -1507,7 +1501,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
       );
       if (!outputPath) throw new Error("无法创建 Excel 输出文件夹，请重新选择输出目录后再试。");
       onProgress(1, `已保存 Excel 文件夹：${sanitizeLocalPath(outputPath)}`);
-      return { name: officeOutputFolderName(item.name), outputPath, backend: "wasm" };
+      return { name: officeOutputFolderName(item.name), outputPath, backend: isDesktopSurface ? "libreoffice" : "wasm" };
     }
 
     if (mode === "video-convert") {
@@ -1764,6 +1758,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
       id: task.id,
       file: task.file,
       name: task.fileName,
+      sourcePath: task.sourcePath,
       fileType: task.fileType,
       fileSize: task.fileSize,
       status: task.status,
@@ -1807,11 +1802,11 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
             if (isPdfFile(task.file)) {
               blob = await renderPdfPageToBlob(task.file, 1, "png", 0.7);
             } else if (isWordFile(task.file)) {
-              const pages = await renderDocxToImagePages(task.file, { format: "png" });
+              const pages = await renderOfficePages(task.file, "word", "png", undefined, true, task.sourcePath);
               if (!pages[0]) throw new Error("Word 文档没有可预览页面。");
               blob = pages[0].blob;
             } else if (isExcelFile(task.file)) {
-              const pages = await renderExcelToImagePages(task.file, { format: "png" });
+              const pages = await renderOfficePages(task.file, "excel", "png", undefined, true, task.sourcePath);
               if (!pages[0]) throw new Error("Excel 文件没有可预览工作表。");
               blob = pages[0].blob;
             } else {
@@ -2477,8 +2472,8 @@ function ControlPanel(props: ControlPanelProps) {
   if (props.activeTab === "watermark") return <Panel title="添加水印" note="文字或图片水印均在本地合成，不上传图片。文字水印支持字号、颜色和透明度预览。"><Select label="水印类型" value={props.watermarkMode} onChange={props.setWatermarkMode} options={["text", "image"]} />{props.watermarkMode === "image" ? <Field label="水印图片"><input type="file" accept={imageAccept} onChange={(event) => props.setWatermarkImage(event.target.files?.[0] || null)} /></Field> : <><Field label="水印文字"><input className="form-input" value={props.watermarkText} onChange={(event) => props.setWatermarkText(event.target.value)} /></Field><Range label="文字大小" value={props.watermarkFontSize} min={12} max={160} onChange={props.setWatermarkFontSize} /><Field label="文字颜色"><div className="flex gap-2"><input className="h-11 w-14 rounded-sm border border-cyan-300/20 bg-slate-950 p-1" type="color" value={props.watermarkColor} onChange={(event) => props.setWatermarkColor(event.target.value)} /><input className="form-input" value={props.watermarkColor} onChange={(event) => props.setWatermarkColor(event.target.value)} /></div></Field></>}<Select label="位置" value={props.watermarkPosition} onChange={props.setWatermarkPosition} options={["top-left", "top-right", "bottom-left", "bottom-right", "center", "tile"]} /><Range label="透明度" value={props.watermarkOpacity} min={5} max={100} onChange={props.setWatermarkOpacity} /><ImageFormat value={props.watermarkFormat} onChange={props.setWatermarkFormat} /></Panel>;
   if (props.activeTab === "compress") return <Panel title="图片压缩" note="固定导出 JPG，目标大小为 500KB、200KB、100KB、50KB、25KB。"><Select label="压缩强度" value={props.compressStrength} onChange={props.setCompressStrength} options={["light", "recommended", "extreme"]} /><Field label="目标大小"><select className="form-input" value={props.targetSize} onChange={(event) => props.setTargetSize(event.target.value)}><option value="500KB">500KB</option><option value="200KB">200KB</option><option value="100KB">100KB</option><option value="50KB">50KB</option><option value="25KB">25KB</option></select></Field><Range label="质量" value={props.compressQuality} min={10} max={100} onChange={props.setCompressQuality} /><NumberField label="最大宽高" value={props.maxSize} onChange={props.setMaxSize} /><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={props.keepOriginalSize} onChange={(event) => props.setKeepOriginalSize(event.target.checked)} />保留原尺寸</label></Panel>;
   if (props.activeTab === "pdf-images") return <Panel title="PDF 转图片" note="PDF.js 本地渲染。离线版逐页导出会保存到同名文件夹；在线版无法直接创建文件夹时才打包 ZIP。"><PdfPageField value={props.pdfPages} onChange={props.setPdfPages} /><Select label="导出方式" value={props.pdfImageMode} onChange={props.setPdfImageMode} options={[{ value: "pages", label: "逐页导出" }, { value: "combined", label: "合成一页导出" }]} /><Select label="图片格式" value={props.pdfImageFormat} onChange={props.setPdfImageFormat} options={["png", "jpg", "webp"]} /><Select label="清晰度" value={props.pdfScale} onChange={props.setPdfScale} options={["normal", "high", "ultra"]} /></Panel>;
-  if (props.activeTab === "word-images") return <Panel title="Word 转图片" note="支持 .docx 文档。在线版可逐页下载或合成为长图，离线版逐页结果保存到同名文件夹，解析和渲染均在本地完成。"><Select label="导出方式" value={props.officeImageMode} onChange={props.setOfficeImageMode} options={[{ value: "pages", label: "逐页下载" }, { value: "combined", label: "合成一页下载" }]} /><ImageFormat value={props.officeImageFormat} onChange={props.setOfficeImageFormat} /></Panel>;
-  if (props.activeTab === "excel-images") return <Panel title="Excel 转图片" note="支持 xlsx、csv。可按工作表/页面逐页下载，也可合成为长图；旧版 .xls 请先另存为 .xlsx。"><Select label="导出方式" value={props.officeImageMode} onChange={props.setOfficeImageMode} options={[{ value: "pages", label: "逐页下载" }, { value: "combined", label: "合成一页下载" }]} /><ImageFormat value={props.officeImageFormat} onChange={props.setOfficeImageFormat} /></Panel>;
+  if (props.activeTab === "word-images") return <Panel title="Word 转图片" note="支持 .docx 文档。在线版使用本地 WASM；离线版使用随安装包提供的 LibreOffice 生成 PDF 后逐页栅格化，结果保存到同名文件夹。"><Select label="导出方式" value={props.officeImageMode} onChange={props.setOfficeImageMode} options={[{ value: "pages", label: "逐页下载" }, { value: "combined", label: "合成一页下载" }]} /><ImageFormat value={props.officeImageFormat} onChange={props.setOfficeImageFormat} /></Panel>;
+  if (props.activeTab === "excel-images") return <Panel title="Excel 转图片" note="支持 xlsx、csv。在线版使用本地 WASM；离线版使用随安装包提供的 LibreOffice 生成 PDF 后按工作表/页面逐页导出，结果保存到同名文件夹。旧版 .xls 请先另存为 .xlsx。"><Select label="导出方式" value={props.officeImageMode} onChange={props.setOfficeImageMode} options={[{ value: "pages", label: "逐页导出" }, { value: "combined", label: "合成一页导出" }]} /><ImageFormat value={props.officeImageFormat} onChange={props.setOfficeImageFormat} /></Panel>;
   if (props.activeTab === "video-convert") return <Panel title="视频格式转换" note="使用本地 FFmpeg WASM，支持 MP4、MOV、AVI、MKV、WebM，并可选择分辨率、码率和是否清理元数据。">{props.desktopMode ? null : <MediaCapabilityBox report={props.mediaReport} />}<Select label="输出格式" value={props.videoFormat} onChange={props.setVideoFormat} options={[...videoOutputFormats]} /><Quality value={props.mediaQuality} onChange={props.setMediaQuality} /><Select label="视频尺寸" value={props.videoSize} onChange={props.setVideoSize} options={[...videoSizeOptions]} /><MediaAdvancedControls {...props} /></Panel>;
   if (props.activeTab === "audio-convert") return <Panel title="音频格式转换" note="使用本地 FFmpeg WASM，支持 MP3、WAV、AAC、M4A、FLAC，并可选择音频码率。">{props.desktopMode ? null : <MediaCapabilityBox report={props.mediaReport} />}<Select label="输出格式" value={props.audioFormat} onChange={props.setAudioFormat} options={[...audioOutputFormats]} /><Quality value={props.mediaQuality} onChange={props.setMediaQuality} /><MediaAdvancedControls {...props} /></Panel>;
   if (props.activeTab === "video-audio") return <Panel title="视频提取音频" note="只读取视频中的音频轨道，导出 MP3、WAV、M4A、AAC。">{props.desktopMode ? null : <MediaCapabilityBox report={props.mediaReport} />}<Select label="输出格式" value={props.extractedAudioFormat} onChange={props.setExtractedAudioFormat} options={[...extractedAudioOutputFormats]} /><Quality value={props.mediaQuality} onChange={props.setMediaQuality} /><MediaAdvancedControls {...props} /></Panel>;
@@ -2603,6 +2598,67 @@ async function invokeTauri<T>(command: string, args?: Record<string, unknown>): 
   const invoke = tauri?.tauri?.invoke || tauri?.invoke;
   if (typeof invoke !== "function") throw new Error("当前环境不能调用桌面服务。");
   return invoke(command, args);
+}
+
+type NativeOfficePdfResult = {
+  pdfPath: string;
+  backend: "libreoffice";
+  version: string;
+};
+
+async function renderOfficePages(
+  source: File,
+  kind: "word" | "excel",
+  format: ExportImageFormat,
+  onProgress?: (value: number, message?: string) => void,
+  preferNative = false,
+  nativePathOverride?: string
+): Promise<Array<{ pageNumber: number; label: string; blob: Blob }>> {
+  if (!preferNative) {
+    if (kind === "word") return renderDocxToImagePages(source, { format, onProgress });
+    return renderExcelToImagePages(source, { format, onProgress });
+  }
+
+  const sourcePath = nativePathOverride || getNativeFilePath(source);
+  if (!sourcePath) {
+    throw new Error("离线版 Office 转图片需要可访问的本地文件路径，请重新从本机选择文件。");
+  }
+  onProgress?.(0.05, "正在使用 LibreOffice 生成本地 PDF");
+  const nativeResult = await invokeTauri<NativeOfficePdfResult>("convert_office_to_pdf", {
+    request: { inputPath: sourcePath }
+  });
+  const tauri = getTauriApi();
+  if (!tauri?.fs?.readBinaryFile) {
+    await cleanupNativeOfficePdf(nativeResult.pdfPath);
+    throw new Error("当前离线环境无法读取 LibreOffice 转换结果。");
+  }
+
+  try {
+    const bytes = await tauri.fs.readBinaryFile(nativeResult.pdfPath);
+    const pdf = new File([new Uint8Array(bytes)], `${safeBaseName(source.name)}.pdf`, { type: "application/pdf" });
+    const pageCount = await getPdfPageCount(pdf);
+    if (!pageCount) throw new Error("LibreOffice 未生成可读取的 PDF 页面。");
+    const pages = await renderPdfPages(pdf, {
+      pages: Array.from({ length: pageCount }, (_, index) => index + 1),
+      format,
+      scale: 1.2,
+      onProgress: (value, message) => onProgress?.(0.05 + value * 0.95, message || `正在栅格化 LibreOffice 页面（${nativeResult.version}）`)
+    });
+    return pages.map((page) => ({
+      ...page,
+      label: kind === "word" ? `第 ${page.pageNumber} 页` : `工作表/页面 ${page.pageNumber}`
+    }));
+  } finally {
+    await cleanupNativeOfficePdf(nativeResult.pdfPath);
+  }
+}
+
+async function cleanupNativeOfficePdf(pdfPath: string) {
+  try {
+    await invokeTauri<void>("cleanup_office_conversion", { path: pdfPath });
+  } catch {
+    // Rust validates the temp root; cleanup failure must not hide a successful conversion.
+  }
 }
 
 type SidecarExperimentOptions = {
@@ -2798,10 +2854,10 @@ function formatMediaDuration(seconds: number) {
   return `${hours} 小时 ${remainMinutes.toString().padStart(2, "0")} 分 ${remainSeconds.toString().padStart(2, "0")} 秒`;
 }
 
-function getFailureBackend(error: unknown): "wasm" | "sidecar" | undefined {
+function getFailureBackend(error: unknown): "wasm" | "sidecar" | "libreoffice" | undefined {
   if (!error || typeof error !== "object" || !("backend" in error)) return undefined;
   const backend = (error as { backend?: unknown }).backend;
-  return backend === "sidecar" || backend === "wasm" ? backend : undefined;
+  return backend === "sidecar" || backend === "wasm" || backend === "libreoffice" ? backend : undefined;
 }
 
 function parseTargetSize(value: string) {

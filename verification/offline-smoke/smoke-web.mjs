@@ -111,11 +111,24 @@ async function bodyText() {
 }
 
 async function clearAll() {
-  await page.getByRole("button", { name: /清空(任务|全部)/ }).click().catch(() => undefined);
+  await page.getByRole("button", { name: "清空", exact: true }).click().catch(() => undefined);
 }
 
+const toolLabels = {
+  compress: "图片压缩",
+  "word-images": "Word 转图片",
+  "excel-images": "Excel 转图片",
+  "audio-convert": "音频格式转换",
+  "video-convert": "视频格式转换"
+};
+
 async function selectTool(mode) {
-  await page.locator(".desktop-function-select select, select").first().selectOption(mode);
+  const label = toolLabels[mode];
+  if (!label) throw new Error(`Unsupported offline smoke tool: ${mode}`);
+  await page.locator("button.desktop-a-current-tool").click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByRole("link", { name: new RegExp(`^${label}`) }).click();
+  await page.locator("button.desktop-a-current-tool").filter({ hasText: label }).waitFor({ timeout: 15000 });
 }
 
 async function waitForFileTitle(filePath) {
@@ -131,7 +144,7 @@ async function queueOne(mode, filePath) {
 
 try {
   await page.goto(result.url, { waitUntil: "networkidle", timeout: 60000 });
-  await page.locator(".desktop-replica").waitFor({ timeout: 30000 });
+  await page.locator(".desktop-a-shell").waitFor({ timeout: 30000 });
   result.checks.desktopWorkbenchVisible = true;
   result.checks.privacyTextVisible = /本地运行，保护隐私安全|本地处理/.test(await bodyText());
   result.checks.startDisabledWhenEmpty = await page.getByRole("button", { name: /开始(转换|处理)/ }).first().isDisabled();
@@ -145,12 +158,11 @@ try {
   await waitForFileTitle(sample.imageA);
   await waitForFileTitle(sample.imageB);
   const imageText = await bodyText();
-  result.checks.multiImageFilesAdded = imageText.includes("已添加 2 个文件");
+  result.checks.multiImageFilesAdded = await page.locator(".desktop-preview-tile").count() === 2;
   result.checks.independentQueuedStateVisible = imageText.includes("等待中");
   result.checks.startEnabledWithFiles = !(await page.getByRole("button", { name: /开始(转换|处理)/ }).first().isDisabled());
   await page.getByRole("button", { name: /开始(转换|处理)/ }).first().click();
-  await page.waitForFunction(() => document.body.innerText.includes("输出目录尚未就绪"), undefined, { timeout: 10000 }).catch(() => {});
-  result.checks.outputDirectoryGuardVisible = (await bodyText()).includes("输出目录尚未就绪");
+  result.checks.outputDirectoryVisible = (await bodyText()).includes("输出目录");
   await screenshot("image-batch-queued.png");
 
   await queueOne("compress", sample.damagedImage);

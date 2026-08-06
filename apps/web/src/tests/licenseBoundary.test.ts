@@ -30,7 +30,7 @@ describe("offline license boundary", () => {
     const gitignore = readProjectFile(".gitignore");
     const desktopBuildScript = readProjectFile("apps", "web", "scripts", "build-desktop.mjs");
 
-    expect(tauriConfig.tauri.bundle.resources).toEqual(["resources/ffmpeg"]);
+    expect(tauriConfig.tauri.bundle.resources).toEqual(["resources/ffmpeg", "resources/libreoffice"]);
     expect(JSON.stringify(tauriConfig)).not.toContain("admin-license-generator");
     expect(JSON.stringify(tauriConfig)).not.toContain("private_key.pem");
     expect(desktopBuildScript).not.toContain("admin-license-generator");

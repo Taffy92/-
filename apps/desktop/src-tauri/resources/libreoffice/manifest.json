@@ -1,0 +1,8 @@
+{
+  "component": "LibreOffice",
+  "version": "26.2.5",
+  "platform": "Windows x86-64",
+  "source": "https://download.documentfoundation.org/libreoffice/stable/26.2.5/win/x86_64/LibreOffice_26.2.5_Win_x86-64.msi",
+  "license": "MPL-2.0 / LGPL-3.0-or-later",
+  "bundledFor": "Offline Word/Excel to PDF rasterization"
+}

@@ -2,11 +2,11 @@
 // Do not edit it by hand.
 
 export const thirdPartyNoticeMeta = {
-  "generatedAt": "2026-08-06T12:35:58.724Z",
+  "generatedAt": "2026-08-06T15:56:39.161Z",
   "npmPackageCount": 765,
   "directNpmPackageCount": 47,
   "rustCrateCount": 429,
-  "bundledArtifactCount": 3,
+  "bundledArtifactCount": 4,
   "sources": [
     "pnpm-lock.yaml",
     "node_modules/.pnpm/**/package.json",
@@ -18,11 +18,20 @@ export const thirdPartyNoticeMeta = {
 
 export const bundledArtifacts = [
   {
+    "label": "LibreOffice offline conversion component",
+    "path": "apps/desktop/src-tauri/resources/libreoffice",
+    "kind": "目录",
+    "files": 19528,
+    "sizeBytes": 1575850173,
+    "sha256": "",
+    "note": "Bundled with the offline MSI for local Word/Excel to PDF conversion. See the component README for source and license details."
+  },
+  {
     "label": "Next.js 静态网站产物",
     "path": "apps/web/out",
     "kind": "目录",
     "files": 296,
-    "sizeBytes": 62236812,
+    "sizeBytes": 62201103,
     "sha256": "",
     "note": "在线版和离线版共用的静态页面、JS、CSS 和静态资源。"
   },
