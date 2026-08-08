@@ -19,6 +19,7 @@
 发布环境固定为 Node 20 LTS 与 pnpm 9.15.4。
 
 ```powershell
+npm run verify:toolchain
 npm test
 npm run check:privacy
 npm run check:network

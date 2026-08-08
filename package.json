@@ -8,6 +8,7 @@
     "pnpm": "9.15.4"
   },
   "scripts": {
+    "verify:toolchain": "node scripts/verify-toolchain.mjs",
     "dev:web": "node scripts/run-pnpm.cjs --filter web dev",
     "build:web": "node scripts/run-pnpm.cjs --filter web build",
     "build:edgeone": "node scripts/run-pnpm.cjs --filter web build:edgeone",
