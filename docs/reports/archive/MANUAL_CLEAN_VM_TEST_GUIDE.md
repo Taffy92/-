@@ -6,6 +6,19 @@
 
 本指南只用于人工测试执行。不新增功能，不修改代码，不重新打包，不把 sidecar 设置为默认后端。
 
+## 0. v2.0.0 当前验收补充（2026-08-09）
+
+本节是当前正式发布验收口径，优先于本文后续保留的 v1.0.0、EXE 和 sidecar 历史步骤。v2.0.0 的公开交付物只有 ZIP，ZIP 内只包含 MSI：
+
+- 正式下载页：`https://gszhmrx.cn/download/`
+- ZIP：`万能格式转换器_2.0.0_x64_zh-CN.zip`
+- ZIP SHA256：`191767A4402244E58EAE44DA4AFBC516EF7458C83B014C7EB7A21158C1CD87EC`
+- 验收报告：`verification/reliability-2026/windows-10-acceptance.md` 与 `windows-11-acceptance.md`
+
+Windows 10 x64 和 Windows 11 x64 必须分别使用未安装本项目、Node.js、Rust、pnpm、LibreOffice 开发资源或仓库副本的干净虚拟机。每台 VM 都要从正式站点下载 ZIP、核对 SHA256、断网安装 MSI，并完成真实图片、PDF、Word、Excel、音频、视频、9 文件批量、取消、损坏文件、无写入权限、3 天试用、激活码、`license.mrx` 导入和重启后授权持久化。
+
+报告不得记录用户名、完整路径中的个人信息、机器码、激活码、授权文件内容、Cookie、IP 或虚拟机镜像。没有执行的项目必须写“未执行”；环境不具备时必须写“阻塞”及原因，不能以宿主机、开发机或自动化测试代替干净 VM 通过结论。
+
 ## 1. 测试前准备
 
 请准备两台或两个快照：

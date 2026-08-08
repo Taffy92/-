@@ -26,6 +26,8 @@ npm run verify:release
 
 该命令按固定顺序执行工具链、完整测试、隐私与网络、Cargo check/test、真实 Office 转换、EdgeOne 构建、安装包/ZIP/分片/版本/SHA256、秘密泄漏和关键测试 skip 检查。任一阶段失败都会输出阶段、命令和退出码并停止。它不会部署、删除发布产物或修改版本号；只有全部通过后，管理员才单独执行部署命令。
 
+自动门禁通过后仍需在未安装项目开发依赖的 Windows 10 x64 与 Windows 11 x64 干净虚拟机执行断网安装、真实转换、批量输出、预期失败、试用和离线激活验收。按 `docs/reports/archive/MANUAL_CLEAN_VM_TEST_GUIDE.md` 执行，并分别回填 `verification/reliability-2026/windows-10-acceptance.md`、`windows-11-acceptance.md` 和 `final-scorecard.md`。任一必须项未执行或失败时，最终结论只能是“未完成”。
+
 需要分项排查时可运行：
 
 ```powershell
