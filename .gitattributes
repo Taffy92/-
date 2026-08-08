@@ -1,0 +1,10 @@
+apps/web/src/test-fixtures/conversion/**/*.doc binary
+apps/web/src/test-fixtures/conversion/**/*.docx binary
+apps/web/src/test-fixtures/conversion/**/*.flac binary
+apps/web/src/test-fixtures/conversion/**/*.jpg binary
+apps/web/src/test-fixtures/conversion/**/*.mp4 binary
+apps/web/src/test-fixtures/conversion/**/*.pdf binary
+apps/web/src/test-fixtures/conversion/**/*.png binary
+apps/web/src/test-fixtures/conversion/**/*.webm binary
+apps/web/src/test-fixtures/conversion/**/*.xls binary
+apps/web/src/test-fixtures/conversion/**/*.xlsx binary

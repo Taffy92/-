@@ -6,6 +6,7 @@
     "source": "project-generated",
     "license": "project-owned",
     "fixturePath": "apps/web/src/test-fixtures/conversion/image/basic-photo.jpg",
+    "sha256": "78D265299014F670E3C507C8CAD024BC980D1B8FCE6B77ACDB65B367538A18AB",
     "expectedOutcome": "success",
     "stableAssertions": ["width=640", "height=480", "format=jpeg"],
     "surfaces": ["web", "desktop"]
@@ -17,6 +18,7 @@
     "source": "project-generated",
     "license": "project-owned",
     "fixturePath": "apps/web/src/test-fixtures/conversion/image/transparent-layers.png",
+    "sha256": "F3E56482BBECCFE740373A01681097C4E3F2D865B742A2DC32E85C1F72A7F46A",
     "expectedOutcome": "success",
     "stableAssertions": ["width=512", "height=512", "hasAlpha=true"],
     "surfaces": ["web", "desktop"]
@@ -28,6 +30,7 @@
     "source": "project-generated",
     "license": "project-owned",
     "fixturePath": "apps/web/src/test-fixtures/conversion/image/oversized-seed.png",
+    "sha256": "DF41774D2DB1894AA29A0700357464CBADC7D97FF6BCB194F9E2CD803F74B7C7",
     "expectedOutcome": "success",
     "stableAssertions": ["generatedWidth=8000", "generatedHeight=8000", "outputDecodes=true"],
     "surfaces": ["web", "desktop"]
@@ -39,6 +42,7 @@
     "source": "project-generated",
     "license": "project-owned",
     "fixturePath": "apps/web/src/test-fixtures/conversion/image/damaged.jpg",
+    "sha256": "66B43243182E1BE552F6E0E1FF111219AD506324D04275B17E111E4ADAC6DC7C",
     "expectedOutcome": "failure",
     "stableAssertions": ["stage=read", "code=invalid-image", "noOutput=true"],
     "surfaces": ["web", "desktop"]
@@ -50,6 +54,7 @@
     "source": "project-generated",
     "license": "project-owned",
     "fixturePath": "apps/web/src/test-fixtures/conversion/pdf/basic-three-pages.pdf",
+    "sha256": "16F97313592FE83D0D956C8E78AFC4AA68157593127C2ED66A2753445DE3AB15",
     "expectedOutcome": "success",
     "stableAssertions": ["pageCount=3", "pageOutputs=3", "firstPageWidth>0"],
     "surfaces": ["web", "desktop"]
@@ -61,6 +66,7 @@
     "source": "project-generated",
     "license": "project-owned",
     "fixturePath": "apps/web/src/test-fixtures/conversion/pdf/rotated-mixed-pages.pdf",
+    "sha256": "786A0CCED129CDC4B0F574E00A37526CB8A289364C15EFD64C5AA2C35E89CD5E",
     "expectedOutcome": "success",
     "stableAssertions": ["pageCount=4", "rotatedPageLandscape=true", "combinedOutputDecodes=true"],
     "surfaces": ["web", "desktop"]
@@ -72,6 +78,7 @@
     "source": "project-generated",
     "license": "project-owned",
     "fixturePath": "apps/web/src/test-fixtures/conversion/pdf/oversized-seed.pdf",
+    "sha256": "73BCE79BC09DCF8F85763B39A1B8C8D5F7A73364E9FD92845E7B42B54B22CE75",
     "expectedOutcome": "success",
     "stableAssertions": ["generatedPageCount=120", "selectedPageOutputs=5", "noUpload=true"],
     "surfaces": ["desktop"]
@@ -83,6 +90,7 @@
     "source": "project-generated",
     "license": "project-owned",
     "fixturePath": "apps/web/src/test-fixtures/conversion/pdf/damaged-xref.pdf",
+    "sha256": "75A125F6B1F6DCF69F5513CB4BA0929AB3CBDF2DFDCA69B00AB544B2D596E013",
     "expectedOutcome": "failure",
     "stableAssertions": ["stage=read", "code=invalid-pdf", "noOutput=true"],
     "surfaces": ["web", "desktop"]
@@ -94,6 +102,7 @@
     "source": "project-generated",
     "license": "project-owned",
     "fixturePath": "apps/web/src/test-fixtures/conversion/word/basic-two-pages.docx",
+    "sha256": "E5A86A39C814962BA49561AF527ABB9A8E03E92E527A2C2E2FFA04825655E33C",
     "expectedOutcome": "success",
     "stableAssertions": ["firstPageRenders=true", "pageCount=2", "containsChineseText=true"],
     "surfaces": ["web", "desktop"]
@@ -105,6 +114,7 @@
     "source": "project-generated",
     "license": "project-owned",
     "fixturePath": "apps/web/src/test-fixtures/conversion/word/table-pagebreak.docx",
+    "sha256": "723E62175127F70C3F2291E5A2940CBCA8D742B1BE2B3AECCAD58AC3F7EA7467",
     "expectedOutcome": "success",
     "stableAssertions": ["firstPageRenders=true", "tableVisible=true", "pageBreakRespected=true"],
     "surfaces": ["web", "desktop"]
@@ -116,6 +126,7 @@
     "source": "project-generated",
     "license": "project-owned",
     "fixturePath": "apps/web/src/test-fixtures/conversion/word/legacy.doc",
+    "sha256": "E83870F47EE814FBD269EA48B5A10F6E1023324D8E5B07BE4E0148D9B71FC5E2",
     "expectedOutcome": "failure",
     "stableAssertions": ["stage=read", "code=unsupported-format", "action=convert-to-docx"],
     "surfaces": ["web", "desktop"]
@@ -127,6 +138,7 @@
     "source": "project-generated",
     "license": "project-owned",
     "fixturePath": "apps/web/src/test-fixtures/conversion/excel/basic-two-sheets.xlsx",
+    "sha256": "A4FECD364B3C4FD7127BB450E834AA3FC47C00C94B450627125DA0B028DD7E10",
     "expectedOutcome": "success",
     "stableAssertions": ["sheetCount=2", "firstSheetRenders=true", "dateCellVisible=true"],
     "surfaces": ["web", "desktop"]
@@ -138,6 +150,7 @@
     "source": "project-generated",
     "license": "project-owned",
     "fixturePath": "apps/web/src/test-fixtures/conversion/excel/formula-merged.xlsx",
+    "sha256": "B880ED50AFFF6D51D05565BEC6B3AD0F6FA9814BD87F9C88DAA4EB589F2904CB",
     "expectedOutcome": "success",
     "stableAssertions": ["mergedCellVisible=true", "formulaResultVisible=true", "sheetOutputs=2"],
     "surfaces": ["web", "desktop"]
@@ -149,6 +162,7 @@
     "source": "project-generated",
     "license": "project-owned",
     "fixturePath": "apps/web/src/test-fixtures/conversion/excel/legacy.xls",
+    "sha256": "E8845777AD71C9DB1E3DB0B73AB95D6B8C6E0F42C7480B09CD242CC4E3E84FBB",
     "expectedOutcome": "failure",
     "stableAssertions": ["stage=read", "code=unsupported-format", "action=convert-to-xlsx"],
     "surfaces": ["web", "desktop"]
@@ -160,6 +174,7 @@
     "source": "project-generated",
     "license": "project-owned",
     "fixturePath": "apps/web/src/test-fixtures/conversion/media/video-with-audio.mp4",
+    "sha256": "CA4D139B02100FAE65804314F08F01D8D55A9F692F7CCBEF6B1327A38561EE02",
     "expectedOutcome": "success",
     "stableAssertions": ["durationSeconds=3", "videoTrack=true", "audioTrack=true"],
     "surfaces": ["web", "desktop"]
@@ -171,6 +186,7 @@
     "source": "project-generated",
     "license": "project-owned",
     "fixturePath": "apps/web/src/test-fixtures/conversion/media/video-no-audio.webm",
+    "sha256": "8BF22716BFE7E4CC58A66814583404FAF1C5B0EADDB46C51F4076371774E6D19",
     "expectedOutcome": "failure",
     "stableAssertions": ["stage=convert", "code=missing-audio-track", "noOutput=true"],
     "surfaces": ["web", "desktop"]
@@ -182,6 +198,7 @@
     "source": "project-generated",
     "license": "project-owned",
     "fixturePath": "apps/web/src/test-fixtures/conversion/media/stereo.flac",
+    "sha256": "8C309F8D25F26EDCA0FBAD917BC444F98CB513D05881BFB16C163F2B21E11FB3",
     "expectedOutcome": "success",
     "stableAssertions": ["durationSeconds=3", "channelCount=2", "outputDurationToleranceMs=100"],
     "surfaces": ["web", "desktop"]
@@ -193,6 +210,7 @@
     "source": "project-generated",
     "license": "project-owned",
     "fixturePath": "apps/web/src/test-fixtures/conversion/media/damaged.mp4",
+    "sha256": "863CF3CD97F713AAFE86E5A7624520F46E535089EA3EE0EA7D9FA68A3D684B84",
     "expectedOutcome": "failure",
     "stableAssertions": ["stage=read", "code=invalid-media", "noOutput=true"],
     "surfaces": ["web", "desktop"]
@@ -204,6 +222,7 @@
     "source": "project-generated",
     "license": "project-owned",
     "fixturePath": "apps/web/src/test-fixtures/conversion/ocr/chinese-text.png",
+    "sha256": "46D1EADEDAD739C4664DB416DFCACF79F36903527624DAF25855AB1173D0B744",
     "expectedOutcome": "success",
     "stableAssertions": ["containsText=本地处理", "confidenceAbove=60", "pageCount=1"],
     "surfaces": ["web", "desktop"]
@@ -215,6 +234,7 @@
     "source": "project-generated",
     "license": "project-owned",
     "fixturePath": "apps/web/src/test-fixtures/conversion/ocr/bilingual-two-pages.pdf",
+    "sha256": "08DE29E418EF9FB35338DBE26B8B152A862FD3F1ABB5182A22BAA835076DE26E",
     "expectedOutcome": "success",
     "stableAssertions": ["containsText=Local", "containsText=隐私", "pageCount=2"],
     "surfaces": ["web", "desktop"]

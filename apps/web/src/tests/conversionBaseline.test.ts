@@ -1,4 +1,5 @@
-import { existsSync, readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { isAbsolute, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -17,6 +18,7 @@ type SampleEntry = {
   source: string;
   license: string;
   fixturePath: string;
+  sha256: string;
   expectedOutcome: "success" | "failure";
   stableAssertions: string[];
   surfaces: Array<"web" | "desktop">;
@@ -57,6 +59,7 @@ describe("conversion quality baseline", () => {
       expect(isAbsolute(sample.fixturePath)).toBe(false);
       expect(sample.fixturePath).not.toContain("..");
       expect(sample.fixturePath.replaceAll("\\", "/")).toMatch(/^apps\/web\/src\/test-fixtures\/conversion\//);
+      expect(sample.sha256).toMatch(/^[A-F0-9]{64}$/);
       expect(["success", "failure"]).toContain(sample.expectedOutcome);
       expect(sample.stableAssertions.length).toBeGreaterThan(0);
       expect(sample.stableAssertions.every((value) => value.trim().length > 0)).toBe(true);
@@ -67,6 +70,25 @@ describe("conversion quality baseline", () => {
     expect(raw).not.toMatch(/[A-HJ-NP-Z2-9]{4}(?:-[A-HJ-NP-Z2-9]{4}){3}/);
     expect(raw).not.toMatch(/private[_-]?key|license[_-]?code|customer[_-]?name|\.mrx/i);
     expect(raw).not.toMatch(/[A-Za-z]:[\\/]/);
+  });
+
+  it("pins every fixture by size and SHA256 without sensitive material", () => {
+    const samples = JSON.parse(readFileSync(matrixPath, "utf8")) as SampleEntry[];
+
+    for (const sample of samples) {
+      const fixturePath = resolve(projectRoot, sample.fixturePath);
+      expect(existsSync(fixturePath), sample.id).toBe(true);
+      expect(statSync(fixturePath).size, sample.id).toBeGreaterThan(0);
+
+      const content = readFileSync(fixturePath);
+      const digest = createHash("sha256").update(content).digest("hex").toUpperCase();
+      expect(digest, sample.id).toBe(sample.sha256);
+      expect(content.includes(Buffer.from("PRIVATE KEY")), sample.id).toBe(false);
+      expect(content.includes(Buffer.from("license_records")), sample.id).toBe(false);
+      expect(content.includes(Buffer.from("C:\\Users\\")), sample.id).toBe(false);
+      expect(content.includes(Buffer.from("/home/")), sample.id).toBe(false);
+      expect(sample.fixturePath.toLowerCase()).not.toMatch(/\.mrx$|license|customer|private-key/);
+    }
   });
 
   it("records a reproducible, non-release baseline", () => {
