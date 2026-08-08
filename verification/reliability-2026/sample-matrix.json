@@ -1,0 +1,222 @@
+[
+  {
+    "id": "image-basic-jpeg",
+    "category": "image",
+    "caseType": "normal",
+    "source": "project-generated",
+    "license": "project-owned",
+    "fixturePath": "apps/web/src/test-fixtures/conversion/image/basic-photo.jpg",
+    "expectedOutcome": "success",
+    "stableAssertions": ["width=640", "height=480", "format=jpeg"],
+    "surfaces": ["web", "desktop"]
+  },
+  {
+    "id": "image-transparent-png",
+    "category": "image",
+    "caseType": "complex",
+    "source": "project-generated",
+    "license": "project-owned",
+    "fixturePath": "apps/web/src/test-fixtures/conversion/image/transparent-layers.png",
+    "expectedOutcome": "success",
+    "stableAssertions": ["width=512", "height=512", "hasAlpha=true"],
+    "surfaces": ["web", "desktop"]
+  },
+  {
+    "id": "image-oversized-seed",
+    "category": "image",
+    "caseType": "oversized",
+    "source": "project-generated",
+    "license": "project-owned",
+    "fixturePath": "apps/web/src/test-fixtures/conversion/image/oversized-seed.png",
+    "expectedOutcome": "success",
+    "stableAssertions": ["generatedWidth=8000", "generatedHeight=8000", "outputDecodes=true"],
+    "surfaces": ["web", "desktop"]
+  },
+  {
+    "id": "image-damaged-jpeg",
+    "category": "image",
+    "caseType": "damaged",
+    "source": "project-generated",
+    "license": "project-owned",
+    "fixturePath": "apps/web/src/test-fixtures/conversion/image/damaged.jpg",
+    "expectedOutcome": "failure",
+    "stableAssertions": ["stage=read", "code=invalid-image", "noOutput=true"],
+    "surfaces": ["web", "desktop"]
+  },
+  {
+    "id": "pdf-basic-multipage",
+    "category": "pdf",
+    "caseType": "normal",
+    "source": "project-generated",
+    "license": "project-owned",
+    "fixturePath": "apps/web/src/test-fixtures/conversion/pdf/basic-three-pages.pdf",
+    "expectedOutcome": "success",
+    "stableAssertions": ["pageCount=3", "pageOutputs=3", "firstPageWidth>0"],
+    "surfaces": ["web", "desktop"]
+  },
+  {
+    "id": "pdf-rotated-mixed-pages",
+    "category": "pdf",
+    "caseType": "complex",
+    "source": "project-generated",
+    "license": "project-owned",
+    "fixturePath": "apps/web/src/test-fixtures/conversion/pdf/rotated-mixed-pages.pdf",
+    "expectedOutcome": "success",
+    "stableAssertions": ["pageCount=4", "rotatedPageLandscape=true", "combinedOutputDecodes=true"],
+    "surfaces": ["web", "desktop"]
+  },
+  {
+    "id": "pdf-oversized-seed",
+    "category": "pdf",
+    "caseType": "oversized",
+    "source": "project-generated",
+    "license": "project-owned",
+    "fixturePath": "apps/web/src/test-fixtures/conversion/pdf/oversized-seed.pdf",
+    "expectedOutcome": "success",
+    "stableAssertions": ["generatedPageCount=120", "selectedPageOutputs=5", "noUpload=true"],
+    "surfaces": ["desktop"]
+  },
+  {
+    "id": "pdf-damaged-xref",
+    "category": "pdf",
+    "caseType": "damaged",
+    "source": "project-generated",
+    "license": "project-owned",
+    "fixturePath": "apps/web/src/test-fixtures/conversion/pdf/damaged-xref.pdf",
+    "expectedOutcome": "failure",
+    "stableAssertions": ["stage=read", "code=invalid-pdf", "noOutput=true"],
+    "surfaces": ["web", "desktop"]
+  },
+  {
+    "id": "word-basic-docx",
+    "category": "word",
+    "caseType": "normal",
+    "source": "project-generated",
+    "license": "project-owned",
+    "fixturePath": "apps/web/src/test-fixtures/conversion/word/basic-two-pages.docx",
+    "expectedOutcome": "success",
+    "stableAssertions": ["firstPageRenders=true", "pageCount=2", "containsChineseText=true"],
+    "surfaces": ["web", "desktop"]
+  },
+  {
+    "id": "word-table-pagebreak-docx",
+    "category": "word",
+    "caseType": "complex",
+    "source": "project-generated",
+    "license": "project-owned",
+    "fixturePath": "apps/web/src/test-fixtures/conversion/word/table-pagebreak.docx",
+    "expectedOutcome": "success",
+    "stableAssertions": ["firstPageRenders=true", "tableVisible=true", "pageBreakRespected=true"],
+    "surfaces": ["web", "desktop"]
+  },
+  {
+    "id": "word-legacy-doc",
+    "category": "word",
+    "caseType": "unsupported",
+    "source": "project-generated",
+    "license": "project-owned",
+    "fixturePath": "apps/web/src/test-fixtures/conversion/word/legacy.doc",
+    "expectedOutcome": "failure",
+    "stableAssertions": ["stage=read", "code=unsupported-format", "action=convert-to-docx"],
+    "surfaces": ["web", "desktop"]
+  },
+  {
+    "id": "excel-basic-xlsx",
+    "category": "excel",
+    "caseType": "normal",
+    "source": "project-generated",
+    "license": "project-owned",
+    "fixturePath": "apps/web/src/test-fixtures/conversion/excel/basic-two-sheets.xlsx",
+    "expectedOutcome": "success",
+    "stableAssertions": ["sheetCount=2", "firstSheetRenders=true", "dateCellVisible=true"],
+    "surfaces": ["web", "desktop"]
+  },
+  {
+    "id": "excel-formula-merged-xlsx",
+    "category": "excel",
+    "caseType": "complex",
+    "source": "project-generated",
+    "license": "project-owned",
+    "fixturePath": "apps/web/src/test-fixtures/conversion/excel/formula-merged.xlsx",
+    "expectedOutcome": "success",
+    "stableAssertions": ["mergedCellVisible=true", "formulaResultVisible=true", "sheetOutputs=2"],
+    "surfaces": ["web", "desktop"]
+  },
+  {
+    "id": "excel-legacy-xls",
+    "category": "excel",
+    "caseType": "unsupported",
+    "source": "project-generated",
+    "license": "project-owned",
+    "fixturePath": "apps/web/src/test-fixtures/conversion/excel/legacy.xls",
+    "expectedOutcome": "failure",
+    "stableAssertions": ["stage=read", "code=unsupported-format", "action=convert-to-xlsx"],
+    "surfaces": ["web", "desktop"]
+  },
+  {
+    "id": "media-video-with-audio",
+    "category": "media",
+    "caseType": "normal",
+    "source": "project-generated",
+    "license": "project-owned",
+    "fixturePath": "apps/web/src/test-fixtures/conversion/media/video-with-audio.mp4",
+    "expectedOutcome": "success",
+    "stableAssertions": ["durationSeconds=3", "videoTrack=true", "audioTrack=true"],
+    "surfaces": ["web", "desktop"]
+  },
+  {
+    "id": "media-video-no-audio",
+    "category": "media",
+    "caseType": "complex",
+    "source": "project-generated",
+    "license": "project-owned",
+    "fixturePath": "apps/web/src/test-fixtures/conversion/media/video-no-audio.webm",
+    "expectedOutcome": "failure",
+    "stableAssertions": ["stage=convert", "code=missing-audio-track", "noOutput=true"],
+    "surfaces": ["web", "desktop"]
+  },
+  {
+    "id": "media-audio-flac",
+    "category": "media",
+    "caseType": "complex",
+    "source": "project-generated",
+    "license": "project-owned",
+    "fixturePath": "apps/web/src/test-fixtures/conversion/media/stereo.flac",
+    "expectedOutcome": "success",
+    "stableAssertions": ["durationSeconds=3", "channelCount=2", "outputDurationToleranceMs=100"],
+    "surfaces": ["web", "desktop"]
+  },
+  {
+    "id": "media-damaged-mp4",
+    "category": "media",
+    "caseType": "damaged",
+    "source": "project-generated",
+    "license": "project-owned",
+    "fixturePath": "apps/web/src/test-fixtures/conversion/media/damaged.mp4",
+    "expectedOutcome": "failure",
+    "stableAssertions": ["stage=read", "code=invalid-media", "noOutput=true"],
+    "surfaces": ["web", "desktop"]
+  },
+  {
+    "id": "ocr-chinese-image",
+    "category": "ocr",
+    "caseType": "normal",
+    "source": "project-generated",
+    "license": "project-owned",
+    "fixturePath": "apps/web/src/test-fixtures/conversion/ocr/chinese-text.png",
+    "expectedOutcome": "success",
+    "stableAssertions": ["containsText=本地处理", "confidenceAbove=60", "pageCount=1"],
+    "surfaces": ["web", "desktop"]
+  },
+  {
+    "id": "ocr-bilingual-pdf",
+    "category": "ocr",
+    "caseType": "complex",
+    "source": "project-generated",
+    "license": "project-owned",
+    "fixturePath": "apps/web/src/test-fixtures/conversion/ocr/bilingual-two-pages.pdf",
+    "expectedOutcome": "success",
+    "stableAssertions": ["containsText=Local", "containsText=隐私", "pageCount=2"],
+    "surfaces": ["web", "desktop"]
+  }
+]
