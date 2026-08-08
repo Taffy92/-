@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import type { ComponentType, RefObject } from "react";
 import Cropper from "cropperjs";
-import { CheckCircle2, ChevronRight, Crop, Download, FileImage, FilePlus2, FileText, FolderPlus, HardDrive, HeartHandshake, Image, Loader2, Maximize2, Music, Play, Scissors, ShieldCheck, Square, Table2, Trash2, Type, Video } from "lucide-react";
+import { ChevronRight, Crop, Download, FileImage, FilePlus2, FileText, FolderPlus, HardDrive, HeartHandshake, Image, Loader2, Maximize2, Music, Play, Scissors, ShieldCheck, Square, Table2, Trash2, Type, Video } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -13,18 +13,23 @@ import { getPdfPageCount, parsePageSelection, renderPdfPageToBlob, renderPdfPage
 import { audioBitrateOptions, audioOutputFormats, convertAudioFormat, convertVideoFormat, extractAudioFromVideo, extractedAudioOutputFormats, getMediaCapabilityReport, videoOutputFormats, videoSizeOptions } from "@doctool/media-core";
 import type { AudioBitrateOption, AudioOutputFormat, ExtractedAudioOutputFormat, MediaCapabilityReport, MediaQuality, VideoOutputFormat, VideoSizeOption } from "@doctool/media-core";
 import { audioAccept, excelAccept, fileNameWithSuffix, formatBytes, imageAccept, isAudioFile, isExcelFile, isImageFile, isPdfFile, isVideoFile, isWordFile, maxOnlineFileSize, pdfAccept, safeBaseName, videoAccept, wordAccept } from "@doctool/shared";
-import type { ExportImageFormat, FileSummary, PdfOutputFormat, ProcessState } from "@doctool/shared";
+import type { ExportImageFormat, FileSummary, PdfOutputFormat } from "@doctool/shared";
 import { isDesktopApp } from "@/config/appMode";
 import { currentReleaseVersion } from "@/config/version";
 import { GsapScene } from "@/components/motion/GsapScene";
 import { MatrixLogo } from "@/components/layout/MatrixLogo";
 import { SupportDialog } from "@/components/support/SupportDialog";
+import { ConversionResultView } from "@/components/tools/ConversionResultView";
+import { DesktopTaskWorkspace } from "@/components/tools/DesktopTaskWorkspace";
 import { UnifiedDesktopSidebar, UnifiedToolDialog } from "@/components/tools/UnifiedToolCatalog";
+import { friendlyError, useConversionController } from "@/components/tools/useConversionController";
+import type { DocumentPreviewState, ResultPreviewState } from "@/components/tools/useConversionController";
 import { getUnifiedToolCategory, getUnifiedToolHref } from "@/config/toolCatalog";
 import type { UnifiedToolItem } from "@/config/toolCatalog";
 import { batchModeLabel, batchTaskStatusLabel, createBatchTask, defaultOutputDirectory, getBatchCounts, getSupportedExtensions, isSupportedBatchName, sanitizeLocalPath } from "@/lib/batchQueue";
 import type { BatchMode, BatchOutputDirectory, BatchTask, BatchTaskStatus } from "@/lib/batchQueue";
 import type { DesktopLicenseStatus } from "@/lib/desktopLicense";
+import { createOutputSubdirectory, saveBlobToOutputDirectory, saveFilesToOutputDirectory } from "@/lib/conversion/desktopOutput";
 import { getSidecarExperimentMode, isSidecarReady, shouldUseSidecarExperiment, sidecarExperimentStorageKey, sidecarStatusText, sidecarUnsupportedReason } from "@/lib/sidecarFfmpeg";
 import type { SidecarCheckResult, SidecarCommandMode, SidecarCommandResult } from "@/lib/sidecarFfmpeg";
 
@@ -99,12 +104,6 @@ const onlineFileSizeLimits = {
   media: 200 * 1024 * 1024
 };
 
-type DocumentPreviewState = {
-  url: string;
-  title: string;
-  message: string;
-};
-
 type DesktopTilePreview = {
   taskId: string;
   name: string;
@@ -115,13 +114,6 @@ type DesktopTilePreview = {
   fileSize: number;
   status: BatchTaskStatus;
   progress: number;
-};
-
-type ResultPreviewState = {
-  name: string;
-  kind: "video" | "audio";
-  url: string;
-  objectUrl: boolean;
 };
 
 type DesktopLicenseGateComponent = ComponentType<{
@@ -170,26 +162,46 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   const folderInputRef = useRef<HTMLInputElement | null>(null);
   const cropImageRef = useRef<HTMLImageElement | null>(null);
   const cropperRef = useRef<Cropper | null>(null);
-  const cancelRef = useRef(false);
-  const mediaAbortRef = useRef<AbortController | null>(null);
+
+  const {
+    cancelRef,
+    mediaAbortRef,
+    file,
+    setFile,
+    fileUrl,
+    setFileUrl,
+    summary,
+    setSummary,
+    status,
+    setStatus,
+    progress,
+    setProgress,
+    progressMessage,
+    setProgressMessage,
+    error,
+    setError,
+    resultBlob,
+    setResultBlob,
+    resultName,
+    setResultName,
+    resultFiles,
+    setResultFiles,
+    resultFolderPath,
+    setResultFolderPath,
+    resultPreview,
+    setResultPreview,
+    previewUrl,
+    setPreviewUrl,
+    previewMessage,
+    setPreviewMessage,
+    documentPreview,
+    setDocumentPreview,
+    compressionStats,
+    setCompressionStats,
+    cancelTask
+  } = useConversionController();
 
   const [activeTab, setActiveTab] = useState<TabId>(initialTab);
-  const [file, setFile] = useState<File | null>(null);
-  const [fileUrl, setFileUrl] = useState("");
-  const [summary, setSummary] = useState<FileSummary | null>(null);
-  const [status, setStatus] = useState<ProcessState>("idle");
-  const [progress, setProgress] = useState(0);
-  const [progressMessage, setProgressMessage] = useState("");
-  const [error, setError] = useState("");
-  const [resultBlob, setResultBlob] = useState<Blob | null>(null);
-  const [resultName, setResultName] = useState("");
-  const [resultFiles, setResultFiles] = useState<Array<{ blob: Blob; name: string }>>([]);
-  const [resultFolderPath, setResultFolderPath] = useState("");
-  const [resultPreview, setResultPreview] = useState<ResultPreviewState | null>(null);
-  const [previewUrl, setPreviewUrl] = useState("");
-  const [previewMessage, setPreviewMessage] = useState("");
-  const [documentPreview, setDocumentPreview] = useState<DocumentPreviewState>({ url: "", title: "", message: "" });
-  const [compressionStats, setCompressionStats] = useState("");
   const [supportOpen, setSupportOpen] = useState(false);
   const [catalogOpen, setCatalogOpen] = useState(false);
 
@@ -782,12 +794,6 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     } finally {
       if (isDesktopSurface || activeTab === "batch") setActiveTaskId("");
     }
-  }
-
-  function cancelTask() {
-    cancelRef.current = true;
-    mediaAbortRef.current?.abort();
-    setProgressMessage("已请求取消，当前任务会在安全节点停止。");
   }
 
   async function selectOutputDirectory() {
@@ -1595,24 +1601,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
   }
 
   async function saveBatchResult(blob: Blob, name: string, destination: BatchOutputDirectory = outputDirectory) {
-    if (destination.kind === "tauri") {
-      const tauri = getTauriApi();
-      if (!tauri?.fs?.writeBinaryFile) return "";
-      const outputPath = joinLocalPath(destination.path, name);
-      const bytes = new Uint8Array(await blob.arrayBuffer());
-      await tauri.fs.writeBinaryFile({ path: outputPath, contents: bytes });
-      return outputPath;
-    }
-
-    if (destination.kind === "browser") {
-      const fileHandle = await destination.handle.getFileHandle(name, { create: true });
-      const writable = await fileHandle.createWritable();
-      await writable.write(blob);
-      await writable.close();
-      return `${destination.label}/${name}`;
-    }
-
-    return "";
+    return saveBlobToOutputDirectory(blob, name, destination, getTauriApi());
   }
 
   async function saveFilesToOutputFolder(
@@ -1620,50 +1609,11 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     files: Array<{ blob: Blob; name: string }>,
     destination: BatchOutputDirectory = outputDirectory
   ) {
-    if (!files.length) return "";
-
-    if (destination.kind === "tauri") {
-      const tauri = getTauriApi();
-      if (!tauri?.fs?.createDir || !tauri?.fs?.writeBinaryFile) return "";
-      const folderPath = joinLocalPath(destination.path, folderName);
-      await tauri.fs.createDir(folderPath, { recursive: true });
-      for (const item of files) {
-        const outputPath = joinLocalPath(folderPath, item.name);
-        const bytes = new Uint8Array(await item.blob.arrayBuffer());
-        await tauri.fs.writeBinaryFile({ path: outputPath, contents: bytes });
-      }
-      return folderPath;
-    }
-
-    if (destination.kind === "browser" && typeof destination.handle?.getDirectoryHandle === "function") {
-      const directory = await destination.handle.getDirectoryHandle(folderName, { create: true });
-      for (const item of files) {
-        const fileHandle = await directory.getFileHandle(item.name, { create: true });
-        const writable = await fileHandle.createWritable();
-        await writable.write(item.blob);
-        await writable.close();
-      }
-      return `${destination.label}/${folderName}`;
-    }
-
-    return "";
+    return saveFilesToOutputDirectory(folderName, files, destination, getTauriApi());
   }
 
   async function createOutputSubfolder(folderName: string, destination: BatchOutputDirectory): Promise<BatchOutputDirectory | null> {
-    if (destination.kind === "tauri") {
-      const tauri = getTauriApi();
-      if (!tauri?.fs?.createDir) return null;
-      const folderPath = joinLocalPath(destination.path, folderName);
-      await tauri.fs.createDir(folderPath, { recursive: true });
-      return { kind: "tauri", path: folderPath, label: sanitizeLocalPath(folderPath) };
-    }
-
-    if (destination.kind === "browser" && typeof destination.handle?.getDirectoryHandle === "function") {
-      const handle = await destination.handle.getDirectoryHandle(folderName, { create: true });
-      return { kind: "browser", handle, label: `${destination.label}/${folderName}` };
-    }
-
-    return null;
+    return createOutputSubdirectory(folderName, destination, getTauriApi());
   }
 
   async function handleDownload() {
@@ -1855,82 +1805,6 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     return <LicenseGateComponent status={desktopLicenseStatus} onStatusChange={setDesktopLicenseStatus} />;
   }
 
-  const onlineTaskActionBar = (
-    <div className={`a2-task-status is-${status}`} data-animate="tools-actions" aria-live="polite">
-      <div className="a2-task-status-copy">
-        <div>
-          <strong>
-            {status === "running"
-              ? `正在处理 · ${Math.round(progress * 100)}%`
-              : status === "done"
-                ? "转换完成"
-                : status === "error"
-                  ? "处理失败"
-                  : status === "cancelled"
-                    ? "已取消"
-                    : file
-                      ? "文件已就绪"
-                      : "等待选择文件"}
-          </strong>
-          <span>{progressText}</span>
-        </div>
-        {status === "running" ? <span>{Math.round(progress * 100)}%</span> : null}
-      </div>
-      <div className="a2-progress-track" aria-label={progressText}>
-        <span style={{ width: `${Math.round(progress * 100)}%` }} />
-      </div>
-      {compressionStats ? <p className="a2-status-note">{compressionStats}</p> : null}
-      {error ? <p className="a2-status-error">处理失败：{error}。请检查文件格式或重新选择文件后再试。</p> : null}
-      {resultName ? (
-        <p className="a2-status-result">
-          <CheckCircle2 aria-hidden="true" size={17} />
-          <span title={resultName}>已生成：{resultName}</span>
-        </p>
-      ) : null}
-      {resultFiles.length > 1 ? (
-        <div className="a2-page-download-list" aria-label="逐页下载结果">
-          {resultFiles.map((item) => (
-            <button type="button" key={item.name} onClick={() => downloadResultFile(item)}>
-              <Download aria-hidden="true" size={14} />
-              <span title={item.name}>{item.name}</span>
-            </button>
-          ))}
-        </div>
-      ) : null}
-      <div className="a2-task-actions">
-        <button
-          className="a2-button-secondary"
-          type="button"
-          disabled={!resultBlob}
-          onClick={handleDownload}
-          title={resultBlob ? undefined : "转换完成后可下载结果"}
-        >
-          <Download aria-hidden="true" size={16} />
-          下载结果
-        </button>
-        <button
-          className="a2-button-danger"
-          type="button"
-          disabled={status !== "running"}
-          onClick={cancelTask}
-        >
-          <Square aria-hidden="true" size={15} />
-          停止
-        </button>
-        <button
-          className="a2-button-primary"
-          type="button"
-          disabled={!canStartTask}
-          onClick={() => void runCurrentTask()}
-          title={canStartTask ? undefined : "请先添加文件后再开始"}
-        >
-          {status === "running" ? <Loader2 className="animate-spin" aria-hidden="true" size={16} /> : <Play aria-hidden="true" size={16} />}
-          开始转换
-        </button>
-      </div>
-    </div>
-  );
-
   if (isDesktopSurface) {
     return (
       <>
@@ -2000,41 +1874,35 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
           <div className="desktop-a-body">
             <UnifiedDesktopSidebar currentToolId={activeTab} onSelectTool={selectDesktopTool} />
 
-            <section className="desktop-a-task-canvas">
-              <header>
-                <div>
-                  <h1>任务画布{taskCount ? `（${taskCount}）` : ""}</h1>
-                  <p>{currentTab.label} · 文件仅在本机处理</p>
-                </div>
-                <div>
-                  <button type="button" disabled={!resultBlob && !resultFolderPath} onClick={handleDownload}>保存结果</button>
-                </div>
-              </header>
-              <div className="desktop-a-preview-area">
-                {desktopTilePreviews.length > 1 ? (
-                  <DesktopTiledPreview
-                    previews={desktopTilePreviews}
-                    activeTaskId={selectedDesktopTask?.id || ""}
-                    onSelect={setActiveTaskId}
-                  />
-                ) : (
-                  <DesktopInspectorPreview
-                    mode={desktopPreviewMode}
-                    modeLabel={activeTab === "batch" ? batchModeLabel(batchMode) : currentTab.label}
-                    file={desktopInspectorFile}
-                    fileUrl={desktopInspectorPreviewUrl}
-                    previewUrl={desktopInspectorFile === file ? previewUrl : ""}
-                    resultPreview={resultPreview}
-                    previewMessage={previewMessage}
-                    documentPreview={desktopInspectorFile === file ? documentPreview : { url: "", title: "", message: "" }}
-                    summary={desktopInspectorFile === file ? summary : null}
-                    cropImageRef={desktopInspectorFile === file ? cropImageRef : undefined}
-                    onImageLoad={() => setCropPreviewKey((value) => value + 1)}
-                    onPickFile={() => inputRef.current?.click()}
-                  />
-                )}
-              </div>
-            </section>
+            <DesktopTaskWorkspace
+              taskCount={taskCount}
+              toolLabel={currentTab.label}
+              canSave={Boolean(resultBlob || resultFolderPath)}
+              onSave={handleDownload}
+            >
+              {desktopTilePreviews.length > 1 ? (
+                <DesktopTiledPreview
+                  previews={desktopTilePreviews}
+                  activeTaskId={selectedDesktopTask?.id || ""}
+                  onSelect={setActiveTaskId}
+                />
+              ) : (
+                <DesktopInspectorPreview
+                  mode={desktopPreviewMode}
+                  modeLabel={activeTab === "batch" ? batchModeLabel(batchMode) : currentTab.label}
+                  file={desktopInspectorFile}
+                  fileUrl={desktopInspectorPreviewUrl}
+                  previewUrl={desktopInspectorFile === file ? previewUrl : ""}
+                  resultPreview={resultPreview}
+                  previewMessage={previewMessage}
+                  documentPreview={desktopInspectorFile === file ? documentPreview : { url: "", title: "", message: "" }}
+                  summary={desktopInspectorFile === file ? summary : null}
+                  cropImageRef={desktopInspectorFile === file ? cropImageRef : undefined}
+                  onImageLoad={() => setCropPreviewKey((value) => value + 1)}
+                  onPickFile={() => inputRef.current?.click()}
+                />
+              )}
+            </DesktopTaskWorkspace>
 
             <aside className="desktop-a-inspector">
               <header>
@@ -2175,7 +2043,24 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
                   参数和文件仅在当前页面内存中使用。文件本地处理，广告与转换数据隔离。
                 </p>
               </aside>
-              <div className="a2-workbench-actions">{onlineTaskActionBar}</div>
+              <div className="a2-workbench-actions">
+                <ConversionResultView
+                  status={status}
+                  progress={progress}
+                  progressText={progressText}
+                  fileReady={Boolean(file)}
+                  compressionStats={compressionStats}
+                  error={error}
+                  resultName={resultName}
+                  resultFiles={resultFiles}
+                  canDownload={Boolean(resultBlob)}
+                  canStartTask={canStartTask}
+                  onDownload={handleDownload}
+                  onCancel={cancelTask}
+                  onStart={runCurrentTask}
+                  onDownloadResultFile={downloadResultFile}
+                />
+              </div>
             </div>
           </section>
         </GsapScene>
@@ -2835,11 +2720,6 @@ function getResultPreviewKind(name: string, mime = ""): ResultPreviewState["kind
   return null;
 }
 
-function joinLocalPath(directory: string, name: string) {
-  const separator = directory.includes("\\") ? "\\" : "/";
-  return `${directory.replace(/[\\/]+$/, "")}${separator}${name.replace(/[\\/:*?"<>|]+/g, "_")}`;
-}
-
 function isLocalFilePath(pathValue: string) {
   return /^[A-Za-z]:[\\/]/.test(pathValue) || pathValue.startsWith("\\\\") || pathValue.startsWith("/");
 }
@@ -2875,14 +2755,5 @@ function isBatchFileAllowed(file: File, mode: BatchMode) {
   if (mode === "video-convert" || mode === "video-audio") return isVideoFile(file);
   if (mode === "audio-convert") return isAudioFile(file);
   return false;
-}
-
-function friendlyError(error: unknown) {
-  const message = error instanceof Error ? error.message : String(error || "");
-  if (/withResolvers/i.test(message)) return "当前运行环境缺少 Promise.withResolvers，已内置兼容层；请重新打开离线版后再试。";
-  if (/password|encrypted/i.test(message)) return "PDF 可能已加密，请先使用无密码版本再转换。";
-  if (/memory|allocation/i.test(message)) return "浏览器内存不足，请降低清晰度、缩小图片或使用离线安装版。";
-  if (/cancel|abort/i.test(message)) return "任务已取消。";
-  return message || "处理失败，请更换文件或使用离线安装版重试。";
 }
 

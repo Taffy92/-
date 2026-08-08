@@ -172,6 +172,10 @@ describe("offline P0 release checks", () => {
   it("keeps generated desktop media results previewable", () => {
     const toolsClientPath = resolve(projectRoot, "apps", "web", "src", "components", "tools", "ToolsClient.tsx");
     const source = readFileSync(toolsClientPath, "utf8");
+    const controllerSource = readFileSync(
+      resolve(projectRoot, "apps", "web", "src", "components", "tools", "useConversionController.ts"),
+      "utf8"
+    );
     const finishTaskBlock = source.slice(
       source.indexOf("function finishTask"),
       source.indexOf("async function runCrop")
@@ -185,7 +189,7 @@ describe("offline P0 release checks", () => {
       source.indexOf("function DesktopTiledPreview")
     );
 
-    expect(source).toContain("type ResultPreviewState");
+    expect(controllerSource).toContain("type ResultPreviewState");
     expect(source).toContain("function getLocalFilePreviewUrl");
     expect(source).toContain("convertFileSrc(pathValue)");
     expect(source).toContain("function getResultPreviewKind");
@@ -216,6 +220,10 @@ describe("offline P0 release checks", () => {
     const globalsPath = resolve(projectRoot, "apps", "web", "src", "app", "globals.css");
     const homePagePath = resolve(projectRoot, "apps", "web", "src", "app", "page.tsx");
     const source = readFileSync(toolsClientPath, "utf8");
+    const workspaceSource = readFileSync(
+      resolve(projectRoot, "apps", "web", "src", "components", "tools", "DesktopTaskWorkspace.tsx"),
+      "utf8"
+    );
     const globals = readFileSync(globalsPath, "utf8");
     const homeSource = readFileSync(homePagePath, "utf8");
     const desktopBranchStart = source.indexOf('className={`desktop-a-shell');
@@ -230,8 +238,8 @@ describe("offline P0 release checks", () => {
     expect(source).not.toContain("本地任务");
     expect(source).not.toContain("DesktopBatchTaskRow");
     expect(source).not.toContain("DesktopEmptyQueue");
-    expect(source).toContain("desktop-a-task-canvas");
-    expect(source).toContain("desktop-a-preview-area");
+    expect(workspaceSource).toContain("desktop-a-task-canvas");
+    expect(workspaceSource).toContain("desktop-a-preview-area");
     expect(source).toContain("desktop-file-pick-cta");
     expect(source).toContain("desktop-preview-file-name");
     expect(source).toContain("DesktopTiledPreview");

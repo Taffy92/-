@@ -44,4 +44,28 @@ All four runs reported zero browser console errors and zero warnings.
 
 ## Current result
 
-Baseline accepted. No P0, P1, or P2 visual issue was found. Final post-extraction evidence is pending.
+Task 8 accepted. No P0, P1, or P2 visual issue was found.
+
+## Final evidence
+
+Final screenshots are stored under the Playwright artifact directory required by the browser-verification workflow:
+
+| Surface | Viewport | Final screenshot | SHA-256 result |
+| --- | ---: | --- | --- |
+| Online | 1440×900 | `D:\万能格式转换器项目\output\playwright\task8\final-online-1440x900.png` | Exact baseline match |
+| Online | 390×844 | `D:\万能格式转换器项目\output\playwright\task8\final-online-390x844.png` | Exact baseline match |
+| Desktop | 1280×820 | `D:\万能格式转换器项目\output\playwright\task8\final-desktop-1280x820.png` | Exact baseline match |
+| Desktop | 1120×720 | `D:\万能格式转换器项目\output\playwright\task8\final-desktop-1120x720.png` | Exact baseline match |
+
+All four baseline/final pairs have identical SHA-256 hashes. Each viewport also reported no horizontal overflow and zero browser console errors or warnings.
+
+## Verification result
+
+- Focused architecture, offline P0, privacy, license, output, media, and batch tests: 52 passed.
+- Full web suite: 34 files, 169 tests passed, zero skipped or failed.
+- Privacy gate: 11 passed.
+- Network guard: 4 passed.
+- Rust desktop tests: 6 passed.
+- Online production build: passed under Node 20.20.2 and pnpm 9.15.4.
+- Desktop release build: passed and produced the MSI bundle.
+- No CSS, layout, advertising, permission, license, conversion, naming, or output-folder behavior was changed by the extraction.

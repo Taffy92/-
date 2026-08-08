@@ -1,3 +1,99 @@
+import { sanitizeLocalPath } from "../batchQueue";
+import type { BatchOutputDirectory } from "../batchQueue";
+
+type OutputFile = { blob: Blob; name: string };
+
+type OutputTauriApi = {
+  fs?: {
+    createDir?: (path: string, options: { recursive: boolean }) => Promise<void>;
+    writeBinaryFile?: (options: { path: string; contents: Uint8Array }) => Promise<void>;
+  };
+};
+
+export async function saveBlobToOutputDirectory(
+  blob: Blob,
+  name: string,
+  destination: BatchOutputDirectory,
+  tauri?: OutputTauriApi
+) {
+  if (destination.kind === "tauri") {
+    if (!tauri?.fs?.writeBinaryFile) return "";
+    const outputPath = joinOutputPath(destination.path, name);
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+    await tauri.fs.writeBinaryFile({ path: outputPath, contents: bytes });
+    return outputPath;
+  }
+
+  if (destination.kind === "browser") {
+    const fileHandle = await destination.handle.getFileHandle(name, { create: true });
+    const writable = await fileHandle.createWritable();
+    await writable.write(blob);
+    await writable.close();
+    return `${destination.label}/${name}`;
+  }
+
+  return "";
+}
+
+export async function saveFilesToOutputDirectory(
+  folderName: string,
+  files: OutputFile[],
+  destination: BatchOutputDirectory,
+  tauri?: OutputTauriApi
+) {
+  if (!files.length) return "";
+
+  if (destination.kind === "tauri") {
+    if (!tauri?.fs?.createDir || !tauri?.fs?.writeBinaryFile) return "";
+    const folderPath = joinOutputPath(destination.path, folderName);
+    await tauri.fs.createDir(folderPath, { recursive: true });
+    for (const item of files) {
+      const outputPath = joinOutputPath(folderPath, item.name);
+      const bytes = new Uint8Array(await item.blob.arrayBuffer());
+      await tauri.fs.writeBinaryFile({ path: outputPath, contents: bytes });
+    }
+    return folderPath;
+  }
+
+  if (destination.kind === "browser" && typeof destination.handle?.getDirectoryHandle === "function") {
+    const directory = await destination.handle.getDirectoryHandle(folderName, { create: true });
+    for (const item of files) {
+      const fileHandle = await directory.getFileHandle(item.name, { create: true });
+      const writable = await fileHandle.createWritable();
+      await writable.write(item.blob);
+      await writable.close();
+    }
+    return `${destination.label}/${folderName}`;
+  }
+
+  return "";
+}
+
+export async function createOutputSubdirectory(
+  folderName: string,
+  destination: BatchOutputDirectory,
+  tauri?: OutputTauriApi
+): Promise<BatchOutputDirectory | null> {
+  if (destination.kind === "tauri") {
+    if (!tauri?.fs?.createDir) return null;
+    const folderPath = joinOutputPath(destination.path, folderName);
+    await tauri.fs.createDir(folderPath, { recursive: true });
+    return { kind: "tauri", path: folderPath, label: sanitizeLocalPath(folderPath) };
+  }
+
+  if (destination.kind === "browser" && typeof destination.handle?.getDirectoryHandle === "function") {
+    const handle = await destination.handle.getDirectoryHandle(folderName, { create: true });
+    return { kind: "browser", handle, label: `${destination.label}/${folderName}` };
+  }
+
+  return null;
+}
+
+function joinOutputPath(directory: string, name: string) {
+  const separator = directory.includes("\\") ? "\\" : "/";
+  return `${directory.replace(/[\\/]+$/, "")}${separator}${name.replace(/[\\/:*?"<>|]+/g, "_")}`;
+}
+
 type DesktopInvoke = (command: string, args: Record<string, string>) => Promise<unknown>;
 
 export type DesktopOutputPlan = Readonly<{
