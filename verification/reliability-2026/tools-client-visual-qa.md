@@ -1,0 +1,47 @@
+# ToolsClient visual QA
+
+## Scope and invariant
+
+Task 8 is an architecture-only extraction. It must not change conversion behavior, output naming, permissions, license checks, advertising, the Logo, or the visible online/desktop product shells. The target is the current reviewed interface, not a visual redesign.
+
+## Baseline environment
+
+- Date: 2026-08-08
+- Runtime: Node 20.20.2, pnpm 9.15.4
+- Browser: Playwright Chromium
+- Online build: `npm run build:web`
+- Desktop build: `pnpm --filter web build:desktop`
+- State: empty task, image crop online; video conversion desktop
+
+## Baseline evidence
+
+Generated screenshots are intentionally ignored by Git and remain local verification evidence:
+
+| Surface | Viewport | Screenshot |
+| --- | ---: | --- |
+| Online | 1440×900 | `D:\万能格式转换器项目\verification\reliability-2026\baseline-online-1440x900.png` |
+| Online | 390×844 | `D:\万能格式转换器项目\verification\reliability-2026\baseline-online-390x844.png` |
+| Desktop | 1280×820 | `D:\万能格式转换器项目\verification\reliability-2026\baseline-desktop-1280x820.png` |
+| Desktop | 1120×720 | `D:\万能格式转换器项目\verification\reliability-2026\baseline-desktop-1120x720.png` |
+
+All four runs reported zero browser console errors and zero warnings.
+
+## Reviewed target
+
+- Preserve the existing online header, mobile menu, local-processing message, tool workspace, parameter panel, and bottom result actions.
+- Preserve the desktop command bar, category navigation, independent task canvas, inspector, output directory, diagnostics disclosure, and status bar.
+- Preserve the desktop absence of online header, footer, and advertisement containers.
+- Keep existing typography, spacing, colors, borders, radii, shadows, control dimensions, icons, status language, and responsive/window behavior.
+- Do not add tokens or visual components during the responsibility extraction.
+
+## Acceptance gates
+
+- Capture final screenshots at the same four viewports and states.
+- Compare baseline and final screenshots for unintended layout or styling drift.
+- Check horizontal overflow, clipped controls, long Chinese copy, and minimum-window visibility.
+- Confirm desktop multi-file preview, output directory, batch folder, document child-folder, authorization, and no-ad boundaries through existing tests and E2E.
+- Run console checks, TypeScript, privacy/network tests, affected conversion tests, and the full Node 20 test suite.
+
+## Current result
+
+Baseline accepted. No P0, P1, or P2 visual issue was found. Final post-extraction evidence is pending.
