@@ -53,6 +53,7 @@ describe("offline license boundary", () => {
   it("keeps the license gate desktop-only and leaves online tabs unchanged", () => {
     const toolsSource = readProjectFile("apps", "web", "src", "components", "tools", "ToolsClient.tsx");
     const localToolsSource = readProjectFile("apps", "web", "src", "components", "tools", "LocalToolsClient.tsx");
+    const localToolControllerSource = readProjectFile("apps", "web", "src", "components", "tools", "useLocalToolController.ts");
     const gateSource = readProjectFile("apps", "web", "src", "components", "tools", "LicenseGate.tsx");
 
     const tabBlock = toolsSource.slice(toolsSource.indexOf("const webTabs"), toolsSource.indexOf("const desktopTabs"));
@@ -71,7 +72,7 @@ describe("offline license boundary", () => {
     expect(localToolsSource).toContain('import("@/components/tools/LicenseGate")');
     expect(localToolsSource).toContain('import("@/lib/desktopLicense")');
     expect(localToolsSource).toContain("const nextStatus = await api.getDesktopLicenseStatus()");
-    expect(localToolsSource).toContain("if (!nextStatus.allowed) throw new Error");
+    expect(localToolControllerSource).toContain("if (!nextStatus.allowed) throw new Error");
     expect(localToolsSource).toContain("desktop && desktopLicenseStatus && !desktopLicenseStatus.allowed");
     expect(gateSource).toContain("activation_request.mrx");
     expect(gateSource).toContain("license.mrx");
@@ -90,6 +91,7 @@ describe("offline license boundary", () => {
   it("keeps background authorization checks from replacing the workbench during tool switches", () => {
     const toolsSource = readProjectFile("apps", "web", "src", "components", "tools", "ToolsClient.tsx");
     const localToolsSource = readProjectFile("apps", "web", "src", "components", "tools", "LocalToolsClient.tsx");
+    const localToolControllerSource = readProjectFile("apps", "web", "src", "components", "tools", "useLocalToolController.ts");
     const catalogSource = readProjectFile("apps", "web", "src", "components", "tools", "UnifiedToolCatalog.tsx");
     const licenseSource = readProjectFile("apps", "web", "src", "lib", "desktopLicense.ts");
 
@@ -101,7 +103,7 @@ describe("offline license boundary", () => {
     expect(licenseSource).toContain("cachedLicenseStatus");
     expect(licenseSource).toContain("licenseStatusRequest");
     expect(toolsSource).toContain("getDesktopLicenseStatus({ force: true })");
-    expect(localToolsSource).toContain("getDesktopLicenseStatus({ force: true })");
+    expect(localToolControllerSource).toContain("getDesktopLicenseStatus({ force: true })");
   });
 
   it("documents the complete offline activation flow in the install guide", () => {

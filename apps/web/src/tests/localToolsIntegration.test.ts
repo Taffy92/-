@@ -5,6 +5,11 @@ import { resolve } from "node:path";
 const projectRoot = resolve(process.cwd(), "..", "..");
 const localToolsPath = resolve(projectRoot, "apps", "web", "src", "components", "tools", "LocalToolsClient.tsx");
 const localToolsSource = readFileSync(localToolsPath, "utf8");
+const localToolControllerSource = readFileSync(
+  resolve(projectRoot, "apps", "web", "src", "components", "tools", "useLocalToolController.ts"),
+  "utf8"
+);
+const localToolsProcessingSource = `${localToolsSource}\n${localToolControllerSource}`;
 
 describe("online and offline local tools integration", () => {
   it("exposes the approved image, PDF, media and OCR tools", () => {
@@ -40,15 +45,15 @@ describe("online and offline local tools integration", () => {
   });
 
   it("writes offline batches and multi-page outputs to folders without archives", () => {
-    expect(localToolsSource).toContain("saveDesktopOutputs");
-    expect(localToolsSource).toContain("createDir(batchRoot");
-    expect(localToolsSource).toContain("folder: safeBaseName(first.name)");
-    expect(localToolsSource).not.toMatch(/\.zip|\.7z|JSZip/);
+    expect(localToolControllerSource).toContain("saveDesktopOutputs");
+    expect(localToolControllerSource).toContain("createDir(batchRoot");
+    expect(localToolControllerSource).toContain("folder: safeBaseName(first.name)");
+    expect(localToolsProcessingSource).not.toMatch(/\.zip|\.7z|JSZip/);
   });
 
   it("does not add file upload code to the new processing surface", () => {
-    expect(localToolsSource).not.toContain("FormData");
-    expect(localToolsSource).not.toMatch(/fetch\(["'`]https?:\/\//);
-    expect(localToolsSource).not.toContain("XMLHttpRequest");
+    expect(localToolsProcessingSource).not.toContain("FormData");
+    expect(localToolsProcessingSource).not.toMatch(/fetch\(["'`]https?:\/\//);
+    expect(localToolsProcessingSource).not.toContain("XMLHttpRequest");
   });
 });

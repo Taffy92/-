@@ -5,6 +5,8 @@ import path from "node:path";
 const root = process.cwd();
 const toolsSource = readFileSync(path.join(root, "src/components/tools/ToolsClient.tsx"), "utf8");
 const localToolsSource = readFileSync(path.join(root, "src/components/tools/LocalToolsClient.tsx"), "utf8");
+const localToolControllerSource = readFileSync(path.join(root, "src/components/tools/useLocalToolController.ts"), "utf8");
+const localToolsProcessingSource = `${localToolsSource}\n${localToolControllerSource}`;
 const pdfCoreSource = readFileSync(path.join(root, "../../packages/pdf-core/src/pdf.ts"), "utf8");
 const exportCoreSource = readFileSync(path.join(root, "../../packages/export-core/src/officeImages.ts"), "utf8");
 const mediaCoreSource = readFileSync(path.join(root, "../../packages/media-core/src/index.ts"), "utf8");
@@ -30,9 +32,9 @@ describe("privacy and product boundary checks", () => {
     expect(tabBlock).not.toContain('id: "pdf-excel"');
     expect(tabBlock).not.toContain('id: "image-word"');
     expect(tabBlock).not.toContain('id: "image-excel"');
-    expect(localToolsSource).toContain("exportEditableOcrWord(document.pages)");
-    expect(localToolsSource).not.toContain("createOcrTextBlob");
-    expect(localToolsSource).not.toContain("exportImageOcrWord");
+    expect(localToolControllerSource).toContain("exportEditableOcrWord(document.pages)");
+    expect(localToolsProcessingSource).not.toContain("createOcrTextBlob");
+    expect(localToolsProcessingSource).not.toContain("exportImageOcrWord");
     expect(tabBlock).not.toContain("PDF 编辑");
     expect(tabBlock).not.toContain("PDF 精准编辑");
     expect(tabBlock).not.toContain("PDF 局部修改");
@@ -42,7 +44,7 @@ describe("privacy and product boundary checks", () => {
   });
 
   it("keeps local file processing code free of upload endpoints", () => {
-    for (const source of [toolsSource, localToolsSource, pdfCoreSource, pdfToolsSource, exportCoreSource, mediaCoreSource, ocrCoreSource]) {
+    for (const source of [toolsSource, localToolsProcessingSource, pdfCoreSource, pdfToolsSource, exportCoreSource, mediaCoreSource, ocrCoreSource]) {
       expect(source).not.toMatch(/fetch\(["'`]https?:\/\/.+upload/i);
       expect(source).not.toMatch(/new\s+FormData\(/);
     }
