@@ -31,6 +31,7 @@ import { useLocalToolController } from "@/components/tools/useLocalToolControlle
 import type { LocalToolId } from "@/components/tools/useLocalToolController";
 import { getUnifiedToolCategory, getUnifiedToolHref } from "@/config/toolCatalog";
 import type { UnifiedToolItem } from "@/config/toolCatalog";
+import { formatDesktopLicenseLabel } from "@/lib/desktopLicense";
 import type { DesktopLicenseStatus } from "@/lib/desktopLicense";
 
 const tools: Array<{
@@ -414,7 +415,7 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
             <span>{message}</span>
             <span>任务 {files.length}</span>
             <span>结果 {outputs.length}</span>
-            <span>本地授权：{desktopLicenseStatus?.mode === "trial" ? "试用中" : "已授权"}</span>
+            <span>本地授权：{formatDesktopLicenseLabel(desktopLicenseStatus)}</span>
           </footer>
         </main>
         <SupportDialog open={supportOpen} onClose={() => setSupportOpen(false)} desktop />

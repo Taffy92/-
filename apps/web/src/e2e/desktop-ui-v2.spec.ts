@@ -1,6 +1,27 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 
 test.skip(process.env.DESKTOP_UI_CHECK !== "1", "Only runs against a Desktop-mode static export.");
+
+const licenseContact = {
+  wechat: "___Skyblue",
+  phone: "15588261515",
+  email: "370298218@qq.com"
+};
+
+async function mockDesktopLicense(page: Page, initialStatus: Record<string, unknown>, activatedStatus?: Record<string, unknown>) {
+  await page.addInitScript(({ initial, activated }) => {
+    (window as unknown as { __TAURI__: unknown }).__TAURI__ = {
+      tauri: {
+        invoke: async (command: string) => {
+          if (command === "get_license_status") return initial;
+          if (command === "activate_license_code" || command === "activate_license_file_content") return activated || initial;
+          if (command === "create_activation_request") return {};
+          throw new Error(`Unexpected command: ${command}`);
+        }
+      }
+    };
+  }, { initial: initialStatus, activated: activatedStatus });
+}
 
 test("offline main workbench is usable and contains no online ads", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -68,4 +89,62 @@ test("offline tool switches stay responsive without reloading the workbench", as
   await page.locator('.desktop-a-current-tools a[href*="video-audio"]').click();
   await expect(page.getByRole("heading", { level: 2, name: "视频提取音频" })).toBeVisible();
   expect(await page.locator("body").getAttribute("data-offline-switch-marker")).toBe("keep");
+});
+
+test("offline trial shows remaining days without covering the workbench", async ({ page }) => {
+  await mockDesktopLicense(page, {
+    allowed: true,
+    mode: "trial",
+    reasonCode: "trial_active",
+    reason: "3 天试用中。",
+    product: "UNIVERSAL_FORMAT_CONVERTER_OFFLINE_PRO",
+    softwareName: "万能格式转换器离线专业版",
+    machineId: "TEST-TEST-TEST-TEST",
+    nowUtc: 1_700_000_000,
+    trialExpiresAt: 1_700_172_800,
+    trialRemainingSeconds: 172_800,
+    license: null,
+    contact: licenseContact
+  });
+  await page.setViewportSize({ width: 1280, height: 820 });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+
+  await expect(page.getByText("本地授权：试用剩余 2 天", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "任务画布" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "试用已结束" })).toHaveCount(0);
+});
+
+test("offline activation returns to the same task without restarting", async ({ page }) => {
+  const lockedStatus = {
+    allowed: false,
+    mode: "locked",
+    reasonCode: "trial_expired",
+    reason: "3 天试用已结束，请联系管理员获取正式授权。",
+    product: "UNIVERSAL_FORMAT_CONVERTER_OFFLINE_PRO",
+    softwareName: "万能格式转换器离线专业版",
+    machineId: "TEST-TEST-TEST-TEST",
+    nowUtc: 1_700_259_200,
+    trialExpiresAt: 1_700_172_800,
+    trialRemainingSeconds: 0,
+    license: null,
+    contact: licenseContact
+  };
+  await mockDesktopLicense(page, lockedStatus, {
+    ...lockedStatus,
+    allowed: true,
+    mode: "license",
+    reasonCode: "license_active",
+    reason: "授权有效。"
+  });
+  await page.setViewportSize({ width: 1120, height: 720 });
+  await page.goto("/tools/?tool=video-convert", { waitUntil: "domcontentloaded" });
+
+  await expect(page.getByRole("heading", { name: "试用已结束" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "导入 license.mrx" })).toBeVisible();
+  await page.getByPlaceholder("UFC1-...").fill("UFC1-TEST");
+  await page.getByRole("button", { name: "激活", exact: true }).click();
+
+  await expect(page.getByRole("heading", { level: 2, name: "视频格式转换" })).toBeVisible();
+  await expect(page.getByText("本地授权：已授权", { exact: true })).toBeVisible();
+  expect(page.url()).toContain("tool=video-convert");
 });

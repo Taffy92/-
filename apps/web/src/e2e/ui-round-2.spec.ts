@@ -2,6 +2,7 @@ import { expect, type Page, test } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import ExcelJS from "exceljs";
 import JSZip from "jszip";
+import { downloadsConfig } from "../config/downloads";
 import { getUnifiedToolHref, unifiedTools } from "../config/toolCatalog";
 
 test.beforeAll(() => {
@@ -20,9 +21,11 @@ const labels = {
   start: "\u5f00\u59cb\u8f6c\u6362",
   stop: "\u505c\u6b62",
   downloadHeading: "\u4e0b\u8f7d\u79bb\u7ebf\u5b89\u88c5\u7248",
-  trialDownloadCopy: "\u79bb\u7ebf\u4e13\u4e1a\u7248\u73b0\u5728\u53ef\u4ee5\u76f4\u63a5\u4e0b\u8f7d\u8bd5\u7528",
-  trialRunCopy: "\u8f6f\u4ef6\u9996\u6b21\u8fd0\u884c\u540e\u81ea\u52a8\u5f00\u542f\u672c\u673a 3 \u5929\u8bd5\u7528",
+  trialDownloadCopy: "\u79bb\u7ebf\u4e13\u4e1a\u7248\u9762\u5411\u6279\u91cf\u5904\u7406\u3001\u654f\u611f\u6587\u4ef6\u548c\u65ad\u7f51\u529e\u516c\u3002",
+  trialRunCopy: "\u65e0\u9700\u767b\u5f55\uff0c\u9996\u6b21\u8fd0\u884c\u81ea\u52a8\u5f00\u542f 3 \u5929\u5b8c\u6574\u8bd5\u7528",
   zipTrialDownload: "\u4e0b\u8f7d ZIP 3 \u5929\u8bd5\u7528\u7248",
+  smartScreen: "\u5f53\u524d\u5b89\u88c5\u5305\u5c1a\u672a\u4ee3\u7801\u7b7e\u540d",
+  integrity: "\u67e5\u770b SHA256 \u4e0e\u5206\u7247\u5b8c\u6574\u6027\u8bf4\u660e",
   releaseNotes: "\u53d1\u5e03\u8bf4\u660e",
   installGuide: "\u5b89\u88c5\u6307\u5357",
   siteReading: "\u7ad9\u5185\u9605\u8bfb\u7248",
@@ -193,16 +196,33 @@ test("local processing tools use the same unified workbench", async ({ page }) =
 });
 
 test("download page keeps trial download copy clear and local-processing promise visible", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/download/", { waitUntil: "domcontentloaded" });
 
   await expect(page.locator("h1").first()).toContainText(labels.downloadHeading);
   await expect(page.getByText(labels.trialDownloadCopy).first()).toBeVisible();
   await expect(page.getByText(labels.trialRunCopy).first()).toBeVisible();
   await expect(page.getByRole("button", { name: labels.zipTrialDownload, exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: labels.smartScreen })).toBeVisible();
+  await page.getByText(labels.integrity, { exact: true }).click();
+  await expect(page.getByText(downloadsConfig.sha256)).toBeVisible();
   await expect(page.locator('a[href*="github.com"]')).toHaveCount(0);
   await expect(page.getByRole("link", { name: labels.releaseNotes })).toHaveAttribute("href", "/release/v2.0.0/docs/release-notes/");
   await expect(page.getByRole("link", { name: labels.installGuide })).toHaveAttribute("href", "/release/v2.0.0/docs/install-guide/");
   await expect(page.locator("#ad-container")).toHaveCount(0);
+
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
+  expect(overflow).toBe(false);
+});
+
+test("download primary action remains visible on a 375px viewport", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto("/download/", { waitUntil: "domcontentloaded" });
+
+  await expect(page.getByRole("button", { name: labels.zipTrialDownload, exact: true })).toBeVisible();
+  await expect(page.getByText("Windows 10 / 11 x64", { exact: true }).first()).toBeVisible();
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
+  expect(overflow).toBe(false);
 });
 
 test("release compliance documents render as site pages instead of raw markdown", async ({ page }) => {

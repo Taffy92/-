@@ -52,7 +52,6 @@ type Props = {
   manifestUrl: string;
   label: string;
   detail?: string;
-  compact?: boolean;
 };
 
 export default function InstallerDownloadButton({
@@ -60,8 +59,7 @@ export default function InstallerDownloadButton({
   fileName,
   manifestUrl,
   label,
-  detail,
-  compact = false
+  detail
 }: Props) {
   const [progress, setProgress] = useState<number | null>(null);
   const [message, setMessage] = useState("");
@@ -130,24 +128,6 @@ export default function InstallerDownloadButton({
     }
   }
 
-  if (compact) {
-    return (
-      <div className="rounded-sm border border-cyan-300/20 bg-slate-900/70 p-4 transition hover:border-cyan-300/50 hover:bg-cyan-400/10">
-        <button
-          type="button"
-          onClick={startDownload}
-          disabled={downloading}
-          className="w-full text-left disabled:cursor-wait disabled:opacity-70"
-        >
-          <span className="block text-sm font-semibold text-slate-50">{downloading ? `正在下载 ${progress}%` : label}</span>
-          <span className="mt-1 block break-words text-xs text-slate-400">{fileName}</span>
-          <span className="mt-2 block text-xs text-cyan-200">{detail}</span>
-        </button>
-        <DownloadProgress progress={progress} message={message} />
-      </div>
-    );
-  }
-
   return (
     <div className="mt-5">
       <button
@@ -158,6 +138,7 @@ export default function InstallerDownloadButton({
       >
         {downloading ? `正在下载 ${progress}%` : label}
       </button>
+      {detail ? <p className="mt-2 text-xs leading-5 text-cyan-100">{detail}</p> : null}
       <DownloadProgress progress={progress} message={message} />
     </div>
   );

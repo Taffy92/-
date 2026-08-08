@@ -7,6 +7,7 @@ export const downloadsConfig = {
   fileName: zipFileName,
   fileSize: "272.80 MB",
   releaseDate: "2026-08-05",
+  windowsCodeSigned: false,
   sha256: "191767A4402244E58EAE44DA4AFBC516EF7458C83B014C7EB7A21158C1CD87EC",
   manifestUrl: edgeOneManifestUrl,
   packages: [

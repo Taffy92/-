@@ -12,59 +12,69 @@ export const metadata: Metadata = createPageMetadata({
 });
 
 export default function DownloadPage() {
+  const primaryPackage = downloadsConfig.packages[0];
+
   return (
     <main className="document-page apple-document-page mx-auto max-w-5xl px-4 py-12 text-slate-900 sm:px-6 lg:px-8">
       <section className="document-hero rounded-sm tech-panel p-6 sm:p-10">
         <p className="text-sm font-semibold text-cyan-300">离线专业版</p>
         <h1 className="mt-2 text-3xl font-bold text-slate-50">下载离线安装版</h1>
-        <p className="mt-3 text-slate-300">{downloadsConfig.appName}</p>
-        <div className="mt-6 rounded-sm border border-cyan-300/20 bg-cyan-950/25 p-5 text-sm leading-7 text-cyan-50">
-          <p className="font-semibold text-slate-50">
-            离线专业版面向需要批量处理、敏感文件处理和断网办公的用户。
-          </p>
-          <p className="mt-2">
-            在线版保持轻量单文件处理，不提供批量处理能力。离线专业版的批量导入跟随当前转换工具，覆盖图片尺寸调整、
-            图片加水印、图片压缩、PDF/Word/Excel 转图片、视频格式转换、音频格式转换和视频提取音频，并可在无互联网连接的电脑上安装和使用核心功能。
-          </p>
-          <p className="mt-2">
-            离线专业版改为直接下载 3 天试用版。安装后首次运行会在本机开启试用期，试用结束后需要输入激活码或导入授权文件继续使用。
-          </p>
+        <p className="mt-3 text-slate-300">{downloadsConfig.appName} · 文件只在当前设备处理，不上传服务器</p>
+
+        <div className="mt-7 grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+          <div className="text-sm leading-7 text-slate-300">
+            <p className="text-base font-semibold text-slate-50">离线专业版面向批量处理、敏感文件和断网办公。</p>
+            <ul className="mt-3 space-y-2">
+              <li>· 安装后可断网处理图片、PDF、Office、音频和视频</li>
+              <li>· 批量结果写入独立文件夹，不上传用户文件</li>
+              <li>· 无需登录，首次运行自动开启 3 天完整试用</li>
+            </ul>
+          </div>
+
+          <div className="border border-cyan-300/20 bg-slate-950/70 p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-cyan-200">Windows 10 / 11 x64</p>
+            <h2 className="mt-2 text-lg font-semibold text-slate-50">{downloadsConfig.appName}</h2>
+            <p className="mt-1 break-all text-xs text-slate-400">{primaryPackage.fileName}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-300">{primaryPackage.note}</p>
+            <InstallerDownloadButton
+              packageType={primaryPackage.type}
+              fileName={primaryPackage.fileName}
+              manifestUrl={downloadsConfig.manifestUrl}
+              label="下载 ZIP 3 天试用版"
+              detail="无需口令；下载完成后会自动校验文件完整性"
+            />
+          </div>
         </div>
+
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Info label="当前版本" value={downloadsConfig.version} />
           <Info label="文件大小" value={downloadsConfig.fileSize} />
-          <Info label="更新日期" value={downloadsConfig.releaseDate} />
-          <Info label="SHA256" value={downloadsConfig.sha256} />
+          <Info label="支持系统" value="Windows 10 / 11 x64" />
+          <Info label="试用期" value="3 天完整试用" />
         </div>
       </section>
 
       <section className="mt-8 grid gap-5 md:grid-cols-2">
-        {downloadsConfig.packages.map((item) => (
-          <div key={item.type} className="rounded-sm tech-panel p-6">
-            <p className="text-sm font-semibold text-cyan-300">{item.label}</p>
-            <h2 className="mt-2 break-words text-xl font-bold text-slate-50">{item.fileName}</h2>
-            <p className="mt-3 text-sm leading-6 text-slate-300">{item.note}</p>
-            <dl className="mt-5 space-y-3 text-sm">
-              <div>
-                <dt className="text-slate-400">文件大小</dt>
-                <dd className="mt-1 font-semibold text-slate-100">{item.fileSize}</dd>
-              </div>
-              <div>
-                <dt className="text-slate-400">SHA256</dt>
-                <dd className="mt-1 break-all font-mono text-xs text-slate-200">{item.sha256}</dd>
-              </div>
-            </dl>
-            <InstallerDownloadButton
-              packageType={item.type}
-              fileName={item.fileName}
-              manifestUrl={downloadsConfig.manifestUrl}
-              label={`下载 ${item.type.toUpperCase()} 3 天试用版`}
-            />
+        {!downloadsConfig.windowsCodeSigned ? (
+          <div className="rounded-sm border border-amber-300/25 bg-amber-950/20 p-6">
+            <p className="text-sm font-semibold text-amber-200">安装前请注意</p>
+            <h2 className="mt-2 text-xl font-bold text-slate-50">当前安装包尚未代码签名</h2>
+            <p className="mt-3 text-sm leading-7 text-slate-300">
+              Windows 可能显示 Microsoft Defender SmartScreen 提示。请先核对本页 SHA256；确认一致后，在提示中选择“更多信息”，再选择“仍要运行”。
+            </p>
           </div>
-        ))}
-      </section>
+        ) : null}
 
-      <TrialDownloadPanel />
+        <details className="rounded-sm tech-panel p-6 text-slate-100">
+          <summary className="cursor-pointer text-sm font-semibold text-cyan-200">查看 SHA256 与分片完整性说明</summary>
+          <div className="mt-4 text-sm leading-7 text-slate-300">
+            <p>下载器会从两个同源域名并行读取分片，逐片校验后按顺序写入 ZIP，并在完成后再次校验整个文件。</p>
+            <p className="mt-3 text-xs text-slate-400">ZIP SHA256</p>
+            <code className="mt-1 block break-all font-mono text-xs text-slate-100">{downloadsConfig.sha256}</code>
+            <p className="mt-3">发布日期：{downloadsConfig.releaseDate}</p>
+          </div>
+        </details>
+      </section>
 
       <section className="mt-8 grid gap-5 md:grid-cols-2">
         <Card title="支持系统" items={["Windows 10 x64", "Windows 11 x64"]} />
@@ -127,7 +137,7 @@ export default function DownloadPage() {
       <section id="install-tips" className="mt-8 rounded-sm tech-panel p-6 sm:p-8">
         <h2 className="text-xl font-bold text-slate-50">安装和校验提示</h2>
         <ol className="mt-4 space-y-3 text-sm leading-7 text-slate-300">
-          <li>1. 下载 ZIP 后，先核对页面展示的 SHA256 与本地文件是否一致。</li>
+          <li>1. 下载 ZIP 后，展开完整性说明并核对页面展示的 SHA256 与本地文件是否一致。</li>
           <li>2. Windows 10 / 11 均可安装；离线专业版安装包内置 WebView2 离线安装支持。</li>
           <li>3. 解压 ZIP 后运行其中的 MSI 安装包，按向导完成离线专业版安装。</li>
           <li>4. 离线专业版支持断网使用；授权只控制桌面端继续使用，不接触用户处理文件。</li>
@@ -135,37 +145,6 @@ export default function DownloadPage() {
         </ol>
       </section>
     </main>
-  );
-}
-
-function TrialDownloadPanel() {
-  return (
-    <section id="trial-download" className="mt-8 rounded-sm border border-cyan-300/15 bg-slate-950/70 p-5 text-slate-100 sm:p-7">
-      <p className="inline-flex items-center rounded-sm border border-cyan-300/25 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-200">
-        3 天试用 · 离线激活
-      </p>
-      <h2 className="mt-3 text-xl font-bold text-slate-50">离线专业版现在可以直接下载试用</h2>
-      <p className="mt-2 max-w-3xl text-sm leading-7 text-slate-300">
-        下载和安装不再需要口令。软件首次运行后自动开启本机 3 天试用；试用结束后，用户把机器码发给管理员，再输入激活码或导入
-        license.mrx 授权文件即可继续使用。授权流程不要求登录，也不会上传用户处理的图片、PDF、Word、Excel、音频或视频。
-      </p>
-      <div className="mt-6 grid gap-3 sm:grid-cols-2">
-        {downloadsConfig.packages.map((item) => (
-          <InstallerDownloadButton
-            key={item.type}
-            packageType={item.type}
-            fileName={item.fileName}
-            manifestUrl={downloadsConfig.manifestUrl}
-            label={`下载 ${item.label}`}
-            detail="无需口令，安装后自动试用 3 天"
-            compact
-          />
-        ))}
-      </div>
-      <div className="mt-5 rounded-sm border border-cyan-300/12 bg-slate-900/70 p-4 text-sm leading-7 text-slate-300">
-        试用结束或需要正式授权时，联系管理员：微信 ___Skyblue，电话 15588261515，邮箱 370298218@qq.com。
-      </div>
-    </section>
   );
 }
 

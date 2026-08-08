@@ -28,6 +28,7 @@ import { getUnifiedToolCategory, getUnifiedToolHref } from "@/config/toolCatalog
 import type { UnifiedToolItem } from "@/config/toolCatalog";
 import { batchModeLabel, batchTaskStatusLabel, createBatchTask, defaultOutputDirectory, getBatchCounts, getSupportedExtensions, isSupportedBatchName, sanitizeLocalPath } from "@/lib/batchQueue";
 import type { BatchMode, BatchOutputDirectory, BatchTask, BatchTaskStatus } from "@/lib/batchQueue";
+import { formatDesktopLicenseLabel } from "@/lib/desktopLicense";
 import type { DesktopLicenseStatus } from "@/lib/desktopLicense";
 import { createOutputSubdirectory, saveBlobToOutputDirectory, saveFilesToOutputDirectory } from "@/lib/conversion/desktopOutput";
 import { getSidecarExperimentMode, isSidecarReady, shouldUseSidecarExperiment, sidecarExperimentStorageKey, sidecarStatusText, sidecarUnsupportedReason } from "@/lib/sidecarFfmpeg";
@@ -1940,7 +1941,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
               </button>
               {desktopLicenseStatus ? (
                 <p className="desktop-a-license-status">
-                  本地授权：{desktopLicenseStatus.mode === "trial" ? "试用中" : "已授权"}
+                  本地授权：{formatDesktopLicenseLabel(desktopLicenseStatus)}
                 </p>
               ) : null}
             </aside>

@@ -2,7 +2,12 @@
 
 import { useRef, useState } from "react";
 import { AlertTriangle, Copy, Download, KeyRound, Loader2, ShieldCheck, Upload } from "lucide-react";
-import { activateLicenseCode, activateLicenseFileContent, createActivationRequest } from "@/lib/desktopLicense";
+import {
+  activateLicenseCode,
+  activateLicenseFileContent,
+  createActivationRequest,
+  formatActivationStatusMessage
+} from "@/lib/desktopLicense";
 import type { DesktopLicenseStatus } from "@/lib/desktopLicense";
 
 type LicenseGateProps = {
@@ -17,7 +22,13 @@ export function LicenseGate({ status, onStatusChange }: LicenseGateProps) {
   const [busy, setBusy] = useState(false);
 
   const contact = status.contact;
-  const title = status.reasonCode === "time_rollback" ? "系统时间异常" : status.reasonCode === "license_expired" ? "授权已过期" : "试用已结束";
+  const title = status.reasonCode === "time_rollback"
+    ? "系统时间异常"
+    : status.reasonCode === "license_expired"
+      ? "授权已过期"
+      : status.reasonCode === "trial_expired"
+        ? "试用已结束"
+        : "需要重新激活";
 
   async function copyMachineId() {
     await navigator.clipboard?.writeText(status.machineId);
@@ -48,7 +59,7 @@ export function LicenseGate({ status, onStatusChange }: LicenseGateProps) {
     try {
       const nextStatus = await activateLicenseCode(licenseCode.trim());
       onStatusChange(nextStatus);
-      setMessage(nextStatus.allowed ? "激活成功。" : nextStatus.reason);
+      setMessage(formatActivationStatusMessage(nextStatus, "code"));
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "激活失败。");
     } finally {
@@ -64,7 +75,7 @@ export function LicenseGate({ status, onStatusChange }: LicenseGateProps) {
       const content = await file.text();
       const nextStatus = await activateLicenseFileContent(content);
       onStatusChange(nextStatus);
-      setMessage(nextStatus.allowed ? "授权文件激活成功。" : nextStatus.reason);
+      setMessage(formatActivationStatusMessage(nextStatus, "file"));
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "授权文件激活失败。");
     } finally {
@@ -85,6 +96,7 @@ export function LicenseGate({ status, onStatusChange }: LicenseGateProps) {
               <p className="text-sm text-[#9FACB4]">万能格式转换器离线专业版</p>
               <h1 className="mt-2 text-2xl font-semibold leading-tight">{title}</h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-[#CAD5DC]">{status.reason}</p>
+              <p className="mt-2 text-sm leading-6 text-[#9FACB4]">激活成功后会自动返回当前任务，无需重启软件。</p>
             </div>
           </div>
 

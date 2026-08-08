@@ -94,3 +94,38 @@ export async function activateLicenseFileContent(content: string) {
 export function createActivationRequest() {
   return invokeLicense<ActivationRequest>("create_activation_request");
 }
+
+export function formatDesktopLicenseLabel(status: DesktopLicenseStatus | null) {
+  if (!status) return "未检测";
+  if (status.mode === "trial") {
+    const remainingSeconds = status.trialRemainingSeconds;
+    if (typeof remainingSeconds === "number" && remainingSeconds > 0) {
+      return `试用剩余 ${Math.max(1, Math.ceil(remainingSeconds / 86_400))} 天`;
+    }
+    return "试用中";
+  }
+  if (status.allowed) return "已授权";
+  return "待激活";
+}
+
+export function formatActivationStatusMessage(
+  status: DesktopLicenseStatus,
+  source: "code" | "file"
+) {
+  if (status.allowed) {
+    return source === "file" ? "授权文件激活成功，无需重启。" : "激活成功，无需重启。";
+  }
+
+  const labels: Record<string, string> = {
+    license_format_error: "格式错误",
+    license_invalid: "签名无效",
+    machine_mismatch: "机器码不匹配",
+    license_expired: "授权已过期",
+    time_rollback: "系统时间异常",
+    trial_tampered: "文件损坏或本地记录异常",
+    product_mismatch: "授权产品不匹配",
+    features_invalid: "授权内容无效"
+  };
+  const label = labels[status.reasonCode] || "激活失败";
+  return `${label}：${status.reason}`;
+}
