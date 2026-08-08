@@ -1,4 +1,5 @@
 import type { BatchMode, BatchOutputDirectory } from "./batchQueue";
+import { ConversionFailure, selectConversionBackend } from "./conversion";
 
 export type SidecarBackend = "wasm" | "sidecar";
 
@@ -27,6 +28,18 @@ export type SidecarCommandResult = {
 export type SidecarExperimentMode = "convert-video-sidecar" | "convert-wav-to-flac-poc" | "convert-mp4-to-webm-poc";
 export type SidecarProbeMode = "probe-duration";
 export type SidecarCommandMode = SidecarExperimentMode | SidecarProbeMode;
+
+type MediaBackendSelection = Readonly<{
+  isDesktopSurface: boolean;
+  enabled: boolean;
+  status?: SidecarCheckResult;
+  outputDirectory: BatchOutputDirectory;
+  sourcePath?: string;
+  mode: BatchMode;
+  fileName: string;
+  videoFormat?: string;
+  audioFormat?: string;
+}>;
 
 export const sidecarExperimentStorageKey = "format-converter.desktop.sidecar-ffmpeg-experiment.v1";
 const sidecarVideoFormats = ["mp4", "mov", "avi", "mkv", "webm"];
@@ -59,25 +72,41 @@ export function getSidecarExperimentMode(options: {
   return null;
 }
 
-export function shouldUseSidecarExperiment(options: {
-  isDesktopSurface: boolean;
-  enabled: boolean;
-  status?: SidecarCheckResult;
-  outputDirectory: BatchOutputDirectory;
-  sourcePath?: string;
-  mode: BatchMode;
-  fileName: string;
-  videoFormat?: string;
-  audioFormat?: string;
-}) {
-  return Boolean(
-    options.isDesktopSurface
-      && options.enabled
-      && isSidecarReady(options.status)
-      && options.outputDirectory.kind === "tauri"
-      && options.sourcePath
-      && getSidecarExperimentMode(options)
+export function selectMediaConversionBackend(
+  options: MediaBackendSelection
+): SidecarBackend {
+  const sidecarEligible = Boolean(
+    options.enabled
+    && isSidecarReady(options.status)
+    && options.outputDirectory.kind === "tauri"
+    && getSidecarExperimentMode(options)
   );
+  const backend = selectConversionBackend({
+    family: "media",
+    surface: options.isDesktopSurface ? "desktop" : "web",
+    hasLocalPath: Boolean(options.sourcePath),
+    sidecarReady: sidecarEligible
+  });
+  return backend === "sidecar" ? "sidecar" : "wasm";
+}
+
+export function shouldUseSidecarExperiment(options: MediaBackendSelection) {
+  return selectMediaConversionBackend(options) === "sidecar";
+}
+
+export function createSidecarConversionFailure(result: SidecarCommandResult) {
+  const backendUnavailable = result.status === "sidecar_missing"
+    || result.status === "sidecar_checksum_failed";
+  return new ConversionFailure({
+    code: backendUnavailable ? "backend-unavailable" : "conversion-failed",
+    stage: "conversion",
+    backend: "sidecar",
+    message: backendUnavailable ? "本地媒体引擎不可用" : "本地媒体转换失败",
+    action: backendUnavailable
+      ? "请检查本地组件后重试，或改用 FFmpeg WASM"
+      : "请关闭 sidecar 优先处理并改用 FFmpeg WASM 重试",
+    cause: result
+  });
 }
 
 export function sidecarUnsupportedReason(options: {
