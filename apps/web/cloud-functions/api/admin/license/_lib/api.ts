@@ -84,7 +84,6 @@ export function createLicenseAdminApi(
 
     async generate(request: Request): Promise<Response> {
       try {
-        assertSameOrigin(request);
         const { config, records } = authorize(request, dependencies);
         const body = await readJsonBody<GenerateRequest>(request);
         const customerName = cleanText(body.customerName, "客户名称", 120, true);
@@ -214,6 +213,7 @@ function authorize(
   request: Request,
   dependencies: LicenseAdminApiDependencies
 ): { config: LicenseAdminConfig; records: LicenseRecordStore } {
+  assertSameOrigin(request);
   const config = dependencies.getConfig();
   if (!hasValidSession(request, config.sessionSecret, dependencies.now())) {
     throw new HttpError(401, "请重新登录。");

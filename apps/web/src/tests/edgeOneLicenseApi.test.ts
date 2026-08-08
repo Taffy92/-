@@ -79,6 +79,24 @@ describe("EdgeOne license admin API", () => {
     expect(foreign.status).toBe(403);
   });
 
+  it("rejects cross-origin access to protected records and backups", async () => {
+    const { api } = await createFixture();
+    const cookie = await login(api);
+    const foreignOptions = { origin: "https://example.com", cookie };
+
+    const listed = await api.listRecords(request("/records", foreignOptions));
+    expect(listed.status).toBe(403);
+
+    const downloaded = await api.downloadFile(
+      request("/records/REC-20231114-TEST/file", foreignOptions),
+      "REC-20231114-TEST"
+    );
+    expect(downloaded.status).toBe(403);
+
+    const backup = await api.backup(request("/backup", foreignOptions));
+    expect(backup.status).toBe(403);
+  });
+
   it("issues, lists, renews, and downloads a recorded license", async () => {
     const { api } = await createFixture();
     const cookie = await login(api);
