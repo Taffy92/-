@@ -12,6 +12,8 @@ fn main() {
       license::activate_license_code,
       license::activate_license_file_content,
       license::create_activation_request,
+      local_paths::cleanup_task_temporary_file,
+      local_paths::finalize_task_output,
       local_paths::open_output_path,
       libreoffice::check_libreoffice,
       libreoffice::convert_office_to_pdf,
