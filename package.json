@@ -9,6 +9,7 @@
   },
   "scripts": {
     "verify:toolchain": "node scripts/verify-toolchain.mjs",
+    "verify:release": "node scripts/verify-release.mjs",
     "dev:web": "node scripts/run-pnpm.cjs --filter web dev",
     "build:web": "node scripts/run-pnpm.cjs --filter web build",
     "build:edgeone": "node scripts/run-pnpm.cjs --filter web build:edgeone",

@@ -18,6 +18,16 @@
 
 发布环境固定为 Node 20 LTS 与 pnpm 9.15.4。
 
+正式发布前先运行统一门禁：
+
+```powershell
+npm run verify:release
+```
+
+该命令按固定顺序执行工具链、完整测试、隐私与网络、Cargo check/test、真实 Office 转换、EdgeOne 构建、安装包/ZIP/分片/版本/SHA256、秘密泄漏和关键测试 skip 检查。任一阶段失败都会输出阶段、命令和退出码并停止。它不会部署、删除发布产物或修改版本号；只有全部通过后，管理员才单独执行部署命令。
+
+需要分项排查时可运行：
+
 ```powershell
 npm run verify:toolchain
 npm test

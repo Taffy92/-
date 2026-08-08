@@ -15,6 +15,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
+    "verify:office": "vitest run src/tests/officeImages.test.ts src/tests/officeDesktopIntegration.test.ts src/tests/libreofficeIntegration.test.ts src/tests/pdfExpansion.test.ts",
     "check:privacy": "vitest run src/tests/privacy.test.ts",
     "check:network": "vitest run src/tests/networkGuard.test.ts",
     "check:network:browser": "node scripts/run-playwright-static.mjs"

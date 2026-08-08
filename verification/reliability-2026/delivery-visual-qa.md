@@ -10,7 +10,7 @@ No Logo, advertisement placement, conversion behavior, file output, network boun
 
 | State | Viewport | Baseline | Final |
 | --- | ---: | --- | --- |
-| Download page | 1440x900 | `D:\万能格式转换器项目\output\playwright\task11\baseline-download-1440x900.png`<br>`A17EFFA046FEA5A341418DD94DF1C8B652B9415F630EE63B917159473C8773B9` | `D:\万能格式转换器项目\output\playwright\task11\final-download-1440x900.png`<br>`397DC6E8895838AC41DEAB4AF4B2A0ADFD875B6E45FB1543AE1AC6362AE29A0A` |
+| Download page | 1440x900 | `D:\万能格式转换器项目\output\playwright\task11\baseline-download-1440x900.png`<br>`A17EFFA046FEA5A341418DD94DF1C8B652B9415F630EE63B917159473C8773B9` | `D:\万能格式转换器项目\output\playwright\task11\final-download-1440x900.png`<br>`3B6B0E7550DF8589B55CC895F3BD7829F22EA93219677FE08F0D7CA35CC9C528` |
 | Download page | 375x812 | `D:\万能格式转换器项目\output\playwright\task11\baseline-download-375x812.png`<br>`AD260568F3D895ED1E3AC37BF924086B1B17E2E04AE11005A8646C519450DCEA` | `D:\万能格式转换器项目\output\playwright\task11\final-download-375x812.png`<br>`3CBE4A5E355292F21FEA050F1A7834BA367B9825CD9C987BFCA1CA2FCDEF49B9` |
 | Desktop trial workbench | 1280x820 | `D:\万能格式转换器项目\output\playwright\task11\baseline-desktop-trial-1280x820.png`<br>`FA0E4C6524418EF7F83CCC1B06E32BF26576C484EE3C6B25BC69E3BFD86B27B3` | `D:\万能格式转换器项目\output\playwright\task11\final-desktop-trial-1280x820.png`<br>`86E757DA672AD48BCE296B0BB79DDAF7005D2822BFFD65603A306AFF1F898349` |
 | Desktop trial-expired gate | 1120x720 | `D:\万能格式转换器项目\output\playwright\task11\baseline-desktop-locked-1120x720.png`<br>`A6579CF1C285C7B32E84AF30C16E1397BBCBA06D4B0A5B64A5395DCA407DD987` | `D:\万能格式转换器项目\output\playwright\task11\final-desktop-locked-1120x720.png`<br>`779CF3B67F5E82A6C8A88F6D8C041132A53BA39BDD5F6DAF0D7AB6871077512A` |
@@ -21,6 +21,7 @@ All final states reported no horizontal overflow and zero browser console errors
 
 - The download page now presents one primary ZIP action in the hero instead of repeating equivalent download cards.
 - Version, file size, Windows support, and the three-day trial remain visible in the first task area.
+- The displayed ZIP size is derived from the verified 795,439,103-byte release artifact and reads `758.59 MB`.
 - SHA256 and part-download mechanics moved into an accessible disclosure below the primary action.
 - The unsigned package warning explicitly names Microsoft Defender SmartScreen and the verification step.
 - The Desktop workbench changes only `试用中` to the calculated remaining-day label.
@@ -31,7 +32,7 @@ No P0, P1, or P2 visual or usability issue remains in the reviewed states.
 ## Verification
 
 - Focused license/privacy suite: 3 files, 28 tests passed.
-- Full web suite: 36 files, 182 tests passed.
+- Full web suite: 37 files, 187 tests passed in the unified release gate.
 - Online Playwright suite: 13 tests passed.
 - Desktop Playwright suite: 5 tests passed, including trial-day visibility and same-task activation return.
 - Privacy boundary: 11 tests passed.

@@ -5,7 +5,7 @@ export const downloadsConfig = {
   appName: "万能格式转换器离线专业版",
   version: "2.0.0",
   fileName: zipFileName,
-  fileSize: "272.80 MB",
+  fileSize: "758.59 MB",
   releaseDate: "2026-08-05",
   windowsCodeSigned: false,
   sha256: "191767A4402244E58EAE44DA4AFBC516EF7458C83B014C7EB7A21158C1CD87EC",
@@ -15,7 +15,7 @@ export const downloadsConfig = {
       type: "zip",
       label: "ZIP 安装包",
       fileName: zipFileName,
-      fileSize: "272.80 MB",
+      fileSize: "758.59 MB",
       sha256: "191767A4402244E58EAE44DA4AFBC516EF7458C83B014C7EB7A21158C1CD87EC",
       note: "ZIP 内仅包含 MSI 安装包，解压后运行 MSI 即可安装离线专业版。"
     }
