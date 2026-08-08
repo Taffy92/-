@@ -54,6 +54,7 @@ describe("unified release gate", () => {
     expect(source).toContain("hashFile");
     expect(source).toContain("verifyReleaseArtifacts");
     expect(source).toContain("verifyInstallerParts");
+    expect(source).toContain("verifyPublishedCloudFunctions");
   });
 
   it("rejects leaked private material and skipped critical conversion tests", () => {

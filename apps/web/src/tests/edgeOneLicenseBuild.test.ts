@@ -15,12 +15,15 @@ const edgeOneFunctionRoot = resolve(
 );
 
 describe("EdgeOne private license admin build", () => {
-  it("keeps function source outside the public static output", () => {
+  it("copies the private admin functions into the direct-upload root", () => {
     const buildSource = readFileSync(edgeOneBuildPath, "utf8");
     const rootPackage = JSON.parse(readFileSync(rootPackagePath, "utf8"));
 
-    expect(buildSource).not.toContain("edgeOneCloudFunctionsDir");
-    expect(buildSource).not.toContain("writeFunctionRuntimePackage");
+    expect(buildSource).toContain("copyCloudFunctionSources");
+    expect(buildSource).toContain('path.join(outDir, "cloud-functions")');
+    expect(buildSource).toContain("rewritePublishedFunctionImports");
+    expect(buildSource).not.toContain('path.join(outDir, "apps", "web", "cloud-functions")');
+    expect(buildSource).toContain("writeFunctionRuntimePackage");
     expect(rootPackage.dependencies?.["@edgeone/pages-blob"]).toBe("0.0.14");
   });
 

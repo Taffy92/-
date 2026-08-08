@@ -1,4 +1,4 @@
-import { mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import path from "node:path";
@@ -7,6 +7,7 @@ import JSZip from "jszip";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const appRoot = path.resolve(__dirname, "..");
+const repoRoot = path.resolve(appRoot, "..", "..");
 const outDir = path.join(appRoot, "out");
 const nextBin = path.join(appRoot, "node_modules", "next", "dist", "bin", "next");
 const maxEdgeOneFileSize = 25 * 1024 * 1024;
@@ -60,6 +61,7 @@ const code = await new Promise((resolve) => {
 
 if (code !== 0) process.exit(Number(code) || 1);
 
+await copyCloudFunctionSources();
 const wasmPath = path.join(outDir, "ffmpeg", "ffmpeg-core.wasm");
 const wasmBytes = await readFile(wasmPath);
 const wasmParts = [];
@@ -161,12 +163,57 @@ async function writeInstallerParts() {
 }
 
 async function writeDirectUploadConfig() {
-  const sourcePath = path.resolve(appRoot, "..", "..", "edgeone.json");
+  const sourcePath = path.join(repoRoot, "edgeone.json");
   const config = JSON.parse(await readFile(sourcePath, "utf8"));
   delete config.buildCommand;
   delete config.installCommand;
   delete config.outputDirectory;
   await writeFile(path.join(outDir, "edgeone.json"), `${JSON.stringify(config, null, 2)}\n`);
+}
+
+async function copyCloudFunctionSources() {
+  const publishedFunctionRoot = path.join(outDir, "cloud-functions");
+  await cp(
+    path.join(repoRoot, "cloud-functions"),
+    publishedFunctionRoot,
+    { recursive: true, force: true }
+  );
+  await cp(
+    path.join(appRoot, "cloud-functions", "api", "admin", "license", "_lib"),
+    path.join(publishedFunctionRoot, "api", "admin", "license", "_lib"),
+    { recursive: true, force: true }
+  );
+  await rewritePublishedFunctionImports(publishedFunctionRoot);
+  await writeFunctionRuntimePackage();
+}
+
+async function rewritePublishedFunctionImports(publishedFunctionRoot) {
+  const apiPath = path.join(publishedFunctionRoot, "api", "admin", "license", "_lib", "api.ts");
+  const functionFiles = (await collectFiles(publishedFunctionRoot)).filter((filePath) =>
+    filePath.endsWith(".ts")
+  );
+  for (const filePath of functionFiles) {
+    const source = await readFile(filePath, "utf8");
+    if (!source.includes("apps/web/cloud-functions/api/admin/license/_lib/api")) continue;
+    let importPath = path.relative(path.dirname(filePath), apiPath).replaceAll(path.sep, "/");
+    importPath = importPath.replace(/\.ts$/, "");
+    if (!importPath.startsWith(".")) importPath = `./${importPath}`;
+    const rewritten = source.replace(
+      /(?:\.\.\/)+apps\/web\/cloud-functions\/api\/admin\/license\/_lib\/api/,
+      importPath
+    );
+    await writeFile(filePath, rewritten);
+  }
+}
+
+async function writeFunctionRuntimePackage() {
+  const rootPackage = JSON.parse(await readFile(path.join(repoRoot, "package.json"), "utf8"));
+  const pagesBlobVersion = rootPackage.dependencies?.["@edgeone/pages-blob"];
+  if (!pagesBlobVersion) throw new Error("Missing @edgeone/pages-blob runtime dependency.");
+  await writeFile(
+    path.join(outDir, "package.json"),
+    `${JSON.stringify({ private: true, dependencies: { "@edgeone/pages-blob": pagesBlobVersion } }, null, 2)}\n`
+  );
 }
 
 async function fetchPublishedInstallerManifest() {

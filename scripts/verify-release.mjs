@@ -144,6 +144,7 @@ async function verifyReleaseArtifacts() {
   assertEqual(zipPackage.size, zipStat.size, "EdgeOne ZIP size");
   assertEqual(zipPackage.sha256, zipHash, "EdgeOne ZIP SHA256");
   await verifyInstallerParts(zipPackage, path.dirname(manifestPath), zipHash, zipStat.size);
+  await verifyPublishedCloudFunctions(path.join(webRoot, "out"), rootPackage);
 
   const outputFiles = await collectFiles(path.join(webRoot, "out"));
   const rawInstallers = outputFiles.filter((filePath) => /\.(?:msi|zip)$/i.test(filePath));
@@ -157,6 +158,32 @@ async function verifyReleaseArtifacts() {
   } else if (windowsSigning?.timestampUrl) {
     throw new Error("Unsigned Windows builds must keep timestampUrl empty.");
   }
+}
+
+async function verifyPublishedCloudFunctions(outputRoot, rootPackage) {
+  const requiredFiles = [
+    "cloud-functions/api/admin/license/health.ts",
+    "cloud-functions/api/admin/license/session.ts",
+    "cloud-functions/api/admin/license/generate.ts",
+    "cloud-functions/api/admin/license/backup.ts",
+    "cloud-functions/api/admin/license/records/index.ts",
+    "cloud-functions/api/admin/license/records/[id]/file.ts",
+    "cloud-functions/api/admin/license/_lib/api.ts",
+    "cloud-functions/api/admin/license/_lib/record-store.ts"
+  ];
+  for (const relativePath of requiredFiles) {
+    const fileStat = await stat(path.join(outputRoot, ...relativePath.split("/")));
+    if (!fileStat.isFile() || fileStat.size === 0) {
+      throw new Error(`EdgeOne direct-upload function file is missing: ${relativePath}`);
+    }
+  }
+
+  const runtimePackage = JSON.parse(await readFile(path.join(outputRoot, "package.json"), "utf8"));
+  assertEqual(
+    runtimePackage.dependencies?.["@edgeone/pages-blob"],
+    rootPackage.dependencies?.["@edgeone/pages-blob"],
+    "EdgeOne function runtime dependency"
+  );
 }
 
 async function verifyInstallerParts(packageInfo, manifestDirectory, expectedHash, expectedSize) {
