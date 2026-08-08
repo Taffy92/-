@@ -1,23 +1,9 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { beforeAll, describe, expect, it, vi } from "vitest";
-import JSZip from "jszip";
-import ExcelJS from "exceljs";
-
-vi.mock("docx-preview", () => ({
-  renderAsync: vi.fn(async (_data: ArrayBuffer, host: HTMLElement) => {
-    const page = document.createElement("section");
-    page.className = "docx";
-    page.style.width = "200px";
-    page.style.height = "100px";
-    page.textContent = "fixture";
-    host.appendChild(page);
-  })
-}));
-
-vi.mock("html2canvas", () => ({
-  default: vi.fn(async () => document.createElement("canvas"))
-}));
 
 const pngDataUrl = `data:image/png;base64,${btoa("image")}`;
+const rasterize = vi.fn(async () => document.createElement("canvas"));
 
 beforeAll(() => {
   const context = {
@@ -52,53 +38,36 @@ beforeAll(() => {
 });
 
 describe("office document to image conversion", () => {
-  it.skip("renders a docx document into local image pages", async () => {
+  it("renders a real docx document into local image pages", async () => {
     const { renderDocxToImagePages } = await import("@doctool/export-core");
-    const zip = new JSZip();
-    zip.file("word/document.xml", `<?xml version="1.0" encoding="UTF-8"?>
-      <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-        <w:body>
-          <w:p><w:r><w:t>测试标题</w:t></w:r></w:p>
-          <w:p><w:r><w:t>这是一个本地 Word 转图片测试。</w:t></w:r></w:p>
-          <w:tbl>
-            <w:tr><w:tc><w:p><w:r><w:t>姓名</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r><w:t>数量</w:t></w:r></w:p></w:tc></w:tr>
-            <w:tr><w:tc><w:p><w:r><w:t>示例</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r><w:t>12</w:t></w:r></w:p></w:tc></w:tr>
-          </w:tbl>
-        </w:body>
-      </w:document>`);
-    const file = fileFromArrayBuffer(await zip.generateAsync({ type: "arraybuffer" }), "sample.docx");
+    const file = fixtureFile("word/basic-two-pages.docx");
 
-    const pages = await renderDocxToImagePages(file, { format: "png" });
+    const pages = await renderDocxToImagePages(file, { format: "png", rasterize });
 
-    expect(pages.length).toBeGreaterThanOrEqual(1);
+    expect(pages).toHaveLength(2);
+    expect(pages.map((page) => page.pageNumber)).toEqual([1, 2]);
     expect(pages[0].blob.type).toBe("image/png");
   });
 
-  it.skip("renders excel sheets and combines them into one local image", async () => {
+  it("renders every sheet in a real xlsx document and combines the pages", async () => {
     const { combineImagePages, renderExcelToImagePages } = await import("@doctool/export-core");
-    const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet("清单");
-    sheet.addRows([
-      ["名称", "金额"],
-      ["项目 A", "100"],
-      ["项目 B", "230"]
-    ]);
-    const buffer = await workbook.xlsx.writeBuffer();
-    const file = fileFromArrayBuffer(buffer, "sample.xlsx");
+    const file = fixtureFile("excel/basic-two-sheets.xlsx");
 
-    const pages = await renderExcelToImagePages(file, { format: "png" });
+    const pages = await renderExcelToImagePages(file, { format: "png", rasterize });
     const combined = await combineImagePages(pages, "png");
 
-    expect(pages.length).toBeGreaterThanOrEqual(1);
+    expect(pages).toHaveLength(2);
+    expect(pages.map((page) => page.pageNumber)).toEqual([1, 2]);
+    expect(pages.map((page) => page.label)).toEqual(["Summary 1", "Details 1"]);
     expect(combined.type).toBe("image/png");
   });
 });
 
-function fileFromArrayBuffer(buffer: ArrayBuffer | Buffer, name: string) {
-  const bytes = buffer instanceof ArrayBuffer ? new Uint8Array(buffer) : new Uint8Array(buffer);
+function fixtureFile(relativePath: string) {
+  const bytes = new Uint8Array(readFileSync(resolve(process.cwd(), "src/test-fixtures/conversion", relativePath)));
   const arrayBuffer = bytes.slice().buffer;
   return {
-    name,
+    name: relativePath.split("/").at(-1) || "fixture",
     type: "",
     size: arrayBuffer.byteLength,
     lastModified: Date.now(),

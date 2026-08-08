@@ -12,6 +12,7 @@ export interface ImagePage {
 export interface OfficeImageOptions {
   format: ExportImageFormat;
   onProgress?: ProgressReporter;
+  rasterize?: typeof html2canvas;
 }
 
 const maxExcelFileBytes = 30 * 1024 * 1024;
@@ -43,9 +44,10 @@ export async function renderDocxToImagePages(file: File, options: OfficeImageOpt
     await nextFrame();
     const pages = Array.from(host.querySelectorAll<HTMLElement>("section.docx"));
     const targets = pages.length ? pages : [host.querySelector<HTMLElement>(".docx") || host];
+    const rasterize = options.rasterize ?? html2canvas;
     const result: ImagePage[] = [];
     for (const [index, target] of targets.entries()) {
-      const canvas = await html2canvas(target, {
+      const canvas = await rasterize(target, {
         backgroundColor: "#ffffff",
         scale: renderScale(target.scrollWidth || host.scrollWidth),
         useCORS: false,
@@ -76,6 +78,7 @@ export async function renderExcelToImagePages(file: File, options: OfficeImageOp
   }
 
   const pages: ImagePage[] = [];
+  const rasterize = options.rasterize ?? html2canvas;
   const lowerName = file.name.toLowerCase();
   if (lowerName.endsWith(".xls")) {
     throw new Error("Legacy .xls files are not supported. Save the file as .xlsx first.");
@@ -85,7 +88,7 @@ export async function renderExcelToImagePages(file: File, options: OfficeImageOp
   if (lowerName.endsWith(".csv") || /csv/i.test(file.type)) {
     const rows = normalizeRows(parseCsv(await file.text()));
     validateSheetLimits("CSV 数据", rows);
-    pages.push(...await renderWorksheetPages(createCsvWorksheet(rows), "CSV 数据", html2canvas, options));
+    pages.push(...await renderWorksheetPages(createCsvWorksheet(rows), "CSV 数据", rasterize, options, pages.length));
   } else {
     await workbook.xlsx.load(new Uint8Array(await file.arrayBuffer()) as any);
     if (workbook.worksheets.length > maxExcelSheets) {
@@ -95,7 +98,13 @@ export async function renderExcelToImagePages(file: File, options: OfficeImageOp
       const rows = worksheetToRows(sheet);
       if (!rows.length) continue;
       validateSheetLimits(sheet.name, rows);
-      pages.push(...await renderWorksheetPages(sheet, sheet.name || `工作表 ${sheetIndex + 1}`, html2canvas, options));
+      pages.push(...await renderWorksheetPages(
+        sheet,
+        sheet.name || `工作表 ${sheetIndex + 1}`,
+        rasterize,
+        options,
+        pages.length
+      ));
     }
   }
 
@@ -138,7 +147,8 @@ async function renderWorksheetPages(
   sheet: ExcelJS.Worksheet,
   sheetName: string,
   html2canvas: typeof import("html2canvas").default,
-  options: OfficeImageOptions
+  options: OfficeImageOptions,
+  pageOffset: number
 ): Promise<ImagePage[]> {
   const maxRow = Math.max(sheet.rowCount, 1);
   const maxColumn = Math.max(sheet.columnCount, 1);
@@ -160,7 +170,7 @@ async function renderWorksheetPages(
         windowHeight: Math.max(window.innerHeight, host.scrollHeight)
       });
       pages.push({
-        pageNumber: optionsPageNumber(pages),
+        pageNumber: pageOffset + pages.length + 1,
         label: `${sheetName} ${pages.length + 1}`,
         blob: await canvasToBlob(canvas, options.format)
       });
@@ -334,10 +344,6 @@ function countRenderedRows(host: HTMLElement) {
 
 function renderScale(width: number) {
   return Math.min(3, Math.max(2, 2400 / Math.max(1, width)));
-}
-
-function optionsPageNumber(pages: ImagePage[]) {
-  return pages.length + 1;
 }
 
 function validateSheetLimits(sheetName: string, rows: string[][]) {
