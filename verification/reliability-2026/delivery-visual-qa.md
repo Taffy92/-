@@ -21,7 +21,7 @@ All final states reported no horizontal overflow and zero browser console errors
 
 - The download page now presents one primary ZIP action in the hero instead of repeating equivalent download cards.
 - Version, file size, Windows support, and the three-day trial remain visible in the first task area.
-- The displayed ZIP size is derived from the verified 795,439,103-byte release artifact and reads `758.59 MB`.
+- The displayed ZIP size is derived from the verified 796,317,069-byte release artifact and reads `759.43 MB`.
 - SHA256 and part-download mechanics moved into an accessible disclosure below the primary action.
 - The unsigned package warning explicitly names Microsoft Defender SmartScreen and the verification step.
 - The Desktop workbench changes only `试用中` to the calculated remaining-day label.
@@ -32,7 +32,7 @@ No P0, P1, or P2 visual or usability issue remains in the reviewed states.
 ## Verification
 
 - Focused license/privacy suite: 3 files, 28 tests passed.
-- Full web suite: 37 files, 187 tests passed in the unified release gate.
+- Full web suite: 38 files, 190 tests passed in the unified release gate.
 - Online Playwright suite: 13 tests passed.
 - Desktop Playwright suite: 5 tests passed, including trial-day visibility and same-task activation return.
 - Privacy boundary: 11 tests passed.

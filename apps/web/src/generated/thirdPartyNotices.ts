@@ -2,7 +2,7 @@
 // Do not edit it by hand.
 
 export const thirdPartyNoticeMeta = {
-  "generatedAt": "2026-08-06T15:56:39.161Z",
+  "generatedAt": "2026-08-09T13:28:44.447Z",
   "npmPackageCount": 765,
   "directNpmPackageCount": 47,
   "rustCrateCount": 429,
@@ -21,17 +21,17 @@ export const bundledArtifacts = [
     "label": "LibreOffice offline conversion component",
     "path": "apps/desktop/src-tauri/resources/libreoffice",
     "kind": "目录",
-    "files": 19528,
-    "sizeBytes": 1575850173,
+    "files": 19538,
+    "sizeBytes": 1577887460,
     "sha256": "",
-    "note": "Bundled with the offline MSI for local Word/Excel to PDF conversion. See the component README for source and license details."
+    "note": "Bundled with the offline MSI for local Word/Excel to PDF conversion, including the application-local Microsoft Visual C++ v14 Runtime required on clean Windows installations. See the component README and manifest for source, checksum, and license details."
   },
   {
     "label": "Next.js 静态网站产物",
     "path": "apps/web/out",
     "kind": "目录",
-    "files": 296,
-    "sizeBytes": 62201103,
+    "files": 360,
+    "sizeBytes": 859447438,
     "sha256": "",
     "note": "在线版和离线版共用的静态页面、JS、CSS 和静态资源。"
   },
@@ -48,7 +48,7 @@ export const bundledArtifacts = [
     "label": "FFmpeg WASM 静态资源",
     "path": "apps/web/out/ffmpeg",
     "kind": "目录",
-    "files": 2,
+    "files": 3,
     "sizeBytes": 32344478,
     "sha256": "",
     "note": "来自 @ffmpeg/core 的 ffmpeg-core.js 和 ffmpeg-core.wasm。"

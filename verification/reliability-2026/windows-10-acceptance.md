@@ -1,38 +1,62 @@
-# Windows 10 clean-VM acceptance
+# Windows 10 干净虚拟机验收
 
-## Status
+## 结论
 
-**BLOCKED — not executed.** This is not a passing acceptance record.
+**通过（PASS）— 2026-08-09。**
 
-## Environment audit
+正式站点下载、ZIP/分片校验、断网 MSI 安装、真实文件转换、批处理、异常路径、3 天试用、离线授权和重启持久化均在独立 Hyper-V 虚拟机中完成。报告未记录用户名、机器码、激活码、授权文件内容、客户信息或私钥。
 
-- Audit date: 2026-08-09.
-- Available host: Windows 10 Pro x64, version 10.0.19045.
-- The available host contains the project workspace and development dependencies, so it is not a clean acceptance machine.
-- Hyper-V is available, but it has 0 registered virtual machines.
-- Windows Sandbox is disabled; VirtualBox, VMware and QEMU launch tools are unavailable.
+## 环境
 
-No qualifying clean Windows 10 VM could therefore be started in this environment. No username, machine code, activation code, license file, IP address or VM image was recorded.
+- 虚拟机：第 2 代 Hyper-V，Windows 10 专业版 x64，版本 10.0.19045。
+- 基线：`Clean Windows 10 22H2 baseline`，系统中没有项目源码、Node.js、Rust、pnpm 或 LibreOffice 开发环境。
+- 安装前系统目录中不存在 `msvcp140.dll` 和 `vcruntime140.dll`。
+- 验收包来自正式站点 `https://gszhmrx.cn`，不是工作区直接复制的 MSI。
+- 安装和转换阶段断开虚拟机网络；Microsoft Defender 检测数为 0。
 
-## Required flow
+## 制品校验
 
-| Required check | Result |
+| 检查项 | 结果 |
 | --- | --- |
-| Download the release ZIP from the production site | Not executed |
-| Verify ZIP SHA256 `191767A4402244E58EAE44DA4AFBC516EF7458C83B014C7EB7A21158C1CD87EC` | Not executed on VM |
-| Disconnect networking; extract ZIP and install MSI | Not executed |
-| Start the three-day trial | Not executed |
-| Convert real image, PDF, Word, Excel, audio and video fixtures | Not executed |
-| Run the nine-file batch and inspect independent/multi-page folders | Not executed |
-| Verify cancel, corrupt-file and unwritable-output errors | Not executed |
-| Test activation code and `license.mrx` import without recording secrets | Not executed |
-| Restart and verify license persistence | Not executed |
-| Confirm no user-file upload while offline and after reconnecting | Not executed |
+| EdgeOne 分片 | 32/32 逐片大小和 SHA256 通过 |
+| 正式 ZIP 大小 | `796,317,069` 字节 |
+| 正式 ZIP SHA256 | `D919C927B95C0B571E8ACC4C0F242E970A0B4705D135592316C0F29E6A0DDA67` |
+| 内含 MSI SHA256 | `1D61074CADE53EAE323198C6EB611988C610A93EE4F2C629B2781A3660C962B0` |
+| MSI 静默安装 | 退出码 0 |
+| 应用本地 VC++ 运行库 | 10 个文件均存在；未向系统目录写入运行库 |
 
-## Non-VM evidence available
+## 功能与错误路径
 
-The Node 20 / pnpm 9.15.4 unified release gate passed 11/11 stages, including real Office and media automation, local ZIP/MSI/part SHA256 verification, privacy checks and critical-test skip scanning. That evidence reduces risk but does not satisfy the clean-VM requirement.
+| 必测项 | 结果 |
+| --- | --- |
+| JPG → PNG | 通过 |
+| 透明 PNG → JPG | 通过 |
+| 两个 DOCX → PDF | 通过 |
+| 两个 XLSX → PDF | 通过 |
+| FLAC → WAV → FLAC | 通过 |
+| MP4 → WebM | 通过 |
+| 九文件批处理 | 9/9 通过，生成 9 个独立结果 |
+| Office 多页输出结构 | 4 个同名独立子文件夹 |
+| 三页 PDF 样本 | 识别为 3 页 |
+| 损坏视频 | 被拒绝，后续有效任务继续成功 |
+| 无写入权限目录 | 被拒绝，未静默回退 |
+| 取消长任务 | 子进程被终止 |
+| 用户文件外连 | 0 个已建立外部连接 |
+| 断网可用性 | 转换通过，互联网不可达 |
 
-## Unblock condition
+## 试用与授权
 
-Provision a clean Windows 10 x64 VM with no project development dependencies, restore a pre-install snapshot, follow the v2.0.0 section of `MANUAL_CLEAN_VM_TEST_GUIDE.md`, and replace every “Not executed” entry with timestamped, redacted evidence. Until then this acceptance remains blocked.
+- 首次运行生成两份本地试用记录和注册表记录。
+- 两份记录的产品、机器、版本和 259,200 秒试用期一致，状态均为 `active`。
+- 正式 `license.mrx` 在本机验证为 `license_active`，应用返回 `allowed=true`。
+- UI DOM 明确显示“本地授权：已授权”。
+- 干净重启后再次读取仍为 `license_active`，授权文件保持有效。
+- 验收结束后移除了临时调试/启动任务，清除了 WebView 调试参数，关闭 RDP，并禁用了来宾文件复制服务。
+
+## 运行证据
+
+关键截图保存在宿主机 `D:\CleanVMs\evidence`，包括正式试用界面、无调试参数冷启动界面、正式授权界面和重启后界面。首次运行时 WebView2 配置文件初始化出现短暂白屏；等待初始化后直接冷启动成功，页面资源、渲染进程和 Tauri 命令均正常。该现象未影响安装、转换、试用或授权结果。
+
+## 结果
+
+Windows 10 强制发布验收通过。此次验收同时发现并修复了干净系统缺少 Microsoft Visual C++ v14 Runtime 时 LibreOffice 以 `0xC0000135` 退出的问题；正式 MSI 现采用应用本地运行库，不要求用户预装 VC++ Redistributable。

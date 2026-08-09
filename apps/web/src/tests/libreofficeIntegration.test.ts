@@ -18,7 +18,22 @@ describe("offline LibreOffice integration", () => {
     expect(config.tauri.bundle.targets).toEqual(["msi"]);
     expect(manifest.component).toBe("LibreOffice");
     expect(manifest.version).toBe("26.2.5");
+    expect(manifest.visualCppRuntime).toMatchObject({
+      component: "Microsoft Visual C++ v14 Runtime",
+      version: "14.51.36247.0",
+      architecture: "x64"
+    });
+    expect(manifest.visualCppRuntime.files).toEqual(expect.arrayContaining([
+      "msvcp140.dll",
+      "msvcp140_1.dll",
+      "msvcp140_2.dll",
+      "vcruntime140.dll",
+      "vcruntime140_1.dll"
+    ]));
     expect(prepareScript).toContain("download.documentfoundation.org/libreoffice/stable/${version}");
+    expect(prepareScript).toContain("aka.ms/vc14/vc_redist.x64.exe");
+    expect(prepareScript).toContain("vcRedistSha256");
+    expect(prepareScript).toContain("WixTools");
     expect(prepareScript).toContain("msiexec.exe");
     expect(existsSync(resolve(projectRoot, "apps", "desktop", "src-tauri", "resources", "libreoffice", "README.md"))).toBe(true);
   });

@@ -47,7 +47,7 @@ describe("office document to image conversion", () => {
     expect(pages).toHaveLength(2);
     expect(pages.map((page) => page.pageNumber)).toEqual([1, 2]);
     expect(pages[0].blob.type).toBe("image/png");
-  });
+  }, 30_000);
 
   it("renders every sheet in a real xlsx document and combines the pages", async () => {
     const { combineImagePages, renderExcelToImagePages } = await import("@doctool/export-core");

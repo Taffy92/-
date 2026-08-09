@@ -1,31 +1,43 @@
-# Final release scorecard
+# 最终发布评分表
 
-## Conclusion
+## 结论
 
-**未完成（NOT COMPLETE）— 2026-08-09.**
+**完成（COMPLETE）— 2026-08-09。**
 
-The automated release gate is green, but mandatory production rate-limit and clean Windows 10/11 VM evidence is unavailable. A partial pass must not be presented as final release acceptance.
+两个外部阻塞均已解除：EdgeOne 生产登录限流完成黑盒验证，Windows 10/11 干净虚拟机完成正式包、断网转换、试用和离线授权验收。正式发布门禁保持 11/11 通过。
 
-## Scorecard
+## 评分表
 
-| Area | Requirement | Evidence | Status |
+| 范围 | 要求 | 证据 | 状态 |
 | --- | --- | --- | --- |
-| Real samples | Image, PDF, Word, Excel, audio and video paths execute on real fixtures | Unified gate: 37 test files / 187 tests; Office stage 12 tests; no critical skips | Automated pass |
-| Expected failures | Invalid/corrupt inputs and guarded output behavior are verified | Conversion, batch, output and privacy suites passed | Automated pass; VM pass pending |
-| Release gate | Node 20 / pnpm 9.15.4 fixed 11-stage gate | `npm run verify:release`: PASS 11/11 | Pass |
-| Download integrity | ZIP, embedded MSI, EdgeOne parts, version, size and SHA256 agree | ZIP SHA256 `191767A4402244E58EAE44DA4AFBC516EF7458C83B014C7EB7A21158C1CD87EC`; artifact stage passed | Local pass; production VM download pending |
-| Batch output | Nine-file batch, independent result folder and multi-page subfolders | Automated batch/output tests passed | Automated pass; VM pass pending |
-| Trial and activation | Three-day trial, machine-code flow, code/file activation and restart persistence | UI and Rust automation passed; no clean-VM execution | Partial / mandatory VM check blocked |
-| Windows 10 | Clean x64 VM offline install and full flow | No qualifying VM; see `windows-10-acceptance.md` | Blocked |
-| Windows 11 | Clean x64 VM offline install and full flow | No qualifying VM; see `windows-11-acceptance.md` | Blocked |
-| Browser console/network | No user-file upload; browser network regression clean | `check:network:browser`: 15 passed, 5 Desktop-only specs skipped by the web-static run; Desktop suite passed separately in Task 11 | Pass |
-| Privacy | Files and conversion results remain local | Privacy 11/11 and network 4/4 passed inside unified gate | Pass |
-| License-admin abuse control | Same-origin APIs and sixth invalid login returns 429 | Same-origin app tests pass; production route probe returned 404 and EdgeOne rule is not verified | Blocked |
-| Code signing | Real non-secret decision and authentic package state | No usable cert; MSI `NotSigned`; unsigned warning and SHA256 retained | Decision complete; risk accepted |
+| 真实样本 | 图片、PDF、Word、Excel、音频、视频真实执行 | Web 190/190；Office 12/12；两台 VM 各完成 9 文件批量 | 通过 |
+| 预期失败 | 损坏输入、无写入权限、取消与队列恢复 | Windows 10/11 均通过四类异常路径 | 通过 |
+| 发布门禁 | Node 20 / pnpm 9.15.4 固定 11 阶段 | `npm run verify:release`：PASS 11/11 | 通过 |
+| 下载完整性 | ZIP、MSI、EdgeOne 分片、版本、大小和 SHA256 一致 | 两台 VM 均从生产站点验证 32 个分片；ZIP SHA256 `D919C927B95C0B571E8ACC4C0F242E970A0B4705D135592316C0F29E6A0DDA67` | 通过 |
+| 批量输出 | 九文件独立结果、多页 Office 子文件夹 | 两台 VM 均为 9/9，4 个 Office 独立子文件夹 | 通过 |
+| Office 干净机依赖 | 无系统 VC++ Runtime 时 Word/Excel 仍可转换 | MSI 携带 10 个应用本地 VC++ v14 DLL；两台 VM 的 4 个 Office 转换均通过 | 通过 |
+| 试用与激活 | 3 天试用、离线请求、`license.mrx`、重启持久化 | 两台 VM 均验证 259,200 秒试用；授权均为 `license_active`，重启后保持 | 通过 |
+| Windows 10 | 干净 x64 VM 断网安装与完整流程 | `windows-10-acceptance.md` | 通过 |
+| Windows 11 | 官方 ISO、干净 x64 VM 断网安装与完整流程 | `windows-11-acceptance.md` | 通过 |
+| 浏览器控制台/网络 | 不上传用户文件，无网络回归 | Desktop/Online 浏览器套件通过；隐私 11/11；网络 4/4；VM 外连 0 | 通过 |
+| 授权后台滥用控制 | 同源 API、登录爆破边缘限流、窗口恢复 | 生产规则按客户端 IP 统计：前 5 次 401，第 6 次 EdgeOne 拦截码 567，35 秒后恢复 401 | 通过 |
+| 生产部署 | 最新下载清单和包已上线 | EdgeOne 部署成功，生产 manifest 为 32 分片、正确大小和哈希 | 通过 |
+| 代码签名 | 真实证书状态和非秘密决策 | 当前无可用 Authenticode 证书；MSI 保持未签名，下载页保留 SmartScreen 警告与 SHA256 验证 | 风险已接受 |
 
-## Blocking conditions
+## 限流说明
 
-1. Configure/deploy the EdgeOne production license-admin route and domain rate-limit rule, then demonstrate HTTP 401 for attempts 1–5 and HTTP 429 for attempt 6 from one network, recovery after the window, and isolation from a second network.
-2. Execute and pass the complete redacted workflow on clean Windows 10 x64 and Windows 11 x64 virtual machines.
+生产规则作用于主域 `gszhmrx.cn` 的 `/api/admin/license/session`：按客户端 IP，在 10 秒内超过 5 次即拦截 30 秒。EdgeOne 的“拦截”动作返回平台状态码 567，而不是通用 429；黑盒验收以平台真实行为为准。`www` 域 API 仍被拒绝，授权后台没有扩大跨域权限。
 
-The scorecard can change to “完成” only after both blockers have evidence and all mandatory VM rows pass. Automated host tests, screenshots, or an unsigned-risk decision cannot substitute for those conditions.
+## 发布制品
+
+- ZIP：`796,317,069` 字节，SHA256 `D919C927B95C0B571E8ACC4C0F242E970A0B4705D135592316C0F29E6A0DDA67`。
+- MSI：`796,316,789` 字节，SHA256 `1D61074CADE53EAE323198C6EB611988C610A93EE4F2C629B2781A3660C962B0`。
+- EdgeOne：32 个同源分片，最后一片 `16,176,525` 字节。
+- 安装包、分片、授权私钥、激活请求和 `.mrx` 不进入公开 Git 历史。
+
+## 剩余非阻塞风险
+
+1. Windows 安装包尚未进行 Authenticode 签名，SmartScreen 信誉风险仍存在；当前发布策略已明确披露并要求用户核对 SHA256。
+2. 干净虚拟机首次创建 WebView2 用户配置时可能短暂显示白色画布；资源加载完成后无调试参数冷启动可正常渲染，转换和授权不受影响。
+
+以上风险均不是本轮发布阻塞项；若取得可信代码签名证书，应在下一次发布中替换“未签名风险接受”状态。

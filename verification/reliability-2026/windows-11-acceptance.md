@@ -1,38 +1,70 @@
-# Windows 11 clean-VM acceptance
+# Windows 11 干净虚拟机验收
 
-## Status
+## 结论
 
-**BLOCKED — not executed.** This is not a passing acceptance record.
+**通过（PASS）— 2026-08-09。**
 
-## Environment audit
+Windows 11 官方镜像安装、纯净快照、正式站点下载、断网 MSI 安装、真实文件转换、异常路径、3 天试用、签名激活请求、`license.mrx` 激活和重启持久化全部完成。报告未记录用户名、机器码、激活码、授权文件内容、客户信息或私钥。
 
-- Audit date: 2026-08-09.
-- No Windows 11 environment is available on the current host.
-- Hyper-V is available, but it has 0 registered virtual machines.
-- Windows Sandbox is disabled; VirtualBox, VMware and QEMU launch tools are unavailable.
+## 环境与镜像
 
-No qualifying clean Windows 11 VM could therefore be started in this environment. No username, machine code, activation code, license file, IP address or VM image was recorded.
+- 虚拟机：第 2 代 Hyper-V，安全启动和虚拟 TPM 开启。
+- 操作系统：Microsoft Windows 11 企业评估版 x64，版本 10.0.26200（25H2）。
+- 官方 ISO：Windows 11 Enterprise Evaluation 简体中文。
+- ISO SHA256：`7B4AC87391B659F7724229682B642256289A1C00504056249F0F12029157D3D2`，与微软官方哈希文档一致。
+- 安装完成后卸载两个 ISO、固定系统盘为第一启动项，并建立 `Clean Windows 11 25H2 baseline` 快照。
+- 基线中没有项目源码、Node.js、Rust、pnpm 或 LibreOffice 开发环境；系统目录中不存在 `msvcp140.dll` 和 `vcruntime140.dll`。
 
-## Required flow
+## 制品校验
 
-| Required check | Result |
+| 检查项 | 结果 |
 | --- | --- |
-| Record Windows version and existing WebView2 state | Not executed |
-| Download the release ZIP from the production site | Not executed |
-| Verify ZIP SHA256 `191767A4402244E58EAE44DA4AFBC516EF7458C83B014C7EB7A21158C1CD87EC` | Not executed on VM |
-| Disconnect networking; extract ZIP and install MSI | Not executed |
-| Start the three-day trial | Not executed |
-| Convert real image, PDF, Word, Excel, audio and video fixtures | Not executed |
-| Run the nine-file batch and inspect independent/multi-page folders | Not executed |
-| Verify cancel, corrupt-file and unwritable-output errors | Not executed |
-| Test activation code and `license.mrx` import without recording secrets | Not executed |
-| Restart and verify license persistence | Not executed |
-| Confirm no user-file upload while offline and after reconnecting | Not executed |
+| 正式域名下载 | 通过 `https://gszhmrx.cn` 下载 |
+| EdgeOne 分片 | 32/32 逐片大小和 SHA256 通过 |
+| 正式 ZIP 大小 | `796,317,069` 字节 |
+| 正式 ZIP SHA256 | `D919C927B95C0B571E8ACC4C0F242E970A0B4705D135592316C0F29E6A0DDA67` |
+| 内含 MSI SHA256 | `1D61074CADE53EAE323198C6EB611988C610A93EE4F2C629B2781A3660C962B0` |
+| 断网 MSI 安装 | 退出码 0 |
+| 应用本地 VC++ 运行库 | 10 个文件均存在；未向系统目录写入运行库 |
+| Microsoft Defender | 0 个检测 |
 
-## Non-VM evidence available
+下载阶段使用 6 路并发加速，但未改变验收规则：已有分片复用前先校验，新增分片逐个校验，合并后再次验证完整 ZIP 大小和 SHA256，再解压 MSI。
 
-The Node 20 / pnpm 9.15.4 unified release gate passed 11/11 stages, including real Office and media automation, local ZIP/MSI/part SHA256 verification, privacy checks and critical-test skip scanning. That evidence reduces risk but does not satisfy the clean-VM requirement.
+## 功能与错误路径
 
-## Unblock condition
+| 必测项 | 结果 |
+| --- | --- |
+| JPG → PNG | 通过 |
+| 透明 PNG → JPG | 通过 |
+| 两个 DOCX → PDF | 通过 |
+| 两个 XLSX → PDF | 通过 |
+| FLAC → WAV → FLAC | 通过 |
+| MP4 → WebM | 通过 |
+| 九文件批处理 | 9/9 通过，生成 9 个独立结果 |
+| Office 多页输出结构 | 4 个同名独立子文件夹 |
+| 三页 PDF 样本 | 识别为 3 页 |
+| 损坏视频 | 被拒绝，后续有效任务继续成功 |
+| 无写入权限目录 | 被拒绝，未静默回退 |
+| 取消长任务 | 子进程被终止 |
+| 用户文件外连 | 0 个已建立外部连接 |
+| 断网可用性 | 转换通过，互联网不可达 |
 
-Provision a clean Windows 11 x64 VM with no project development dependencies, record whether WebView2 already exists, restore a pre-install snapshot, follow the v2.0.0 section of `MANUAL_CLEAN_VM_TEST_GUIDE.md`, and replace every “Not executed” entry with timestamped, redacted evidence. Until then this acceptance remains blocked.
+## 试用与授权
+
+- 首次运行成功生成 ProgramData、AppData 和注册表三处本地试用记录。
+- 两份文件记录的产品、机器、版本和 259,200 秒试用期一致，状态均为 `active`。
+- UI DOM 显示“本地授权：试用剩余 3 天”，Tauri 状态为 `trial_active`。
+- 通过产品自带 `create_activation_request` 生成签名离线请求；真实机器标识未输出到终端或报告。
+- 私有授权后台根据请求生成 `license.mrx`，应用校验结果为 `license_active`、`allowed=true`，UI 显示“本地授权：已授权”。
+- 干净重启后再次校验仍为 `license_active`，UI 授权状态保持。
+
+## 清理与隔离
+
+- 安装、转换、试用和激活验证期间虚拟机网络保持断开。
+- 验收结束后移除了临时调试/启动任务，清除了 WebView 调试参数，关闭 RDP，并禁用了来宾文件复制服务。
+- 两台验收虚拟机最终均为关机、无虚拟交换机连接状态。
+- 宿主机上的激活请求、测试授权码和 `license.mrx` 已在验收后删除；虚拟机仅保留用于证明重启持久化的隔离验收状态，不进入 Git、在线站点、安装包或公开报告。
+
+## 结果
+
+Windows 11 强制发布验收通过。该系统同样证明应用本地 VC++ 运行库修复在没有系统级 VC++ Runtime 的干净环境中有效。

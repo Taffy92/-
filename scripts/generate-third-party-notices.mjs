@@ -215,7 +215,7 @@ async function readCargoManifest(name, version) {
 
 async function collectBundledArtifacts() {
   const artifacts = [];
-  await addDirArtifact(artifacts, "LibreOffice offline conversion component", "apps/desktop/src-tauri/resources/libreoffice", "Bundled with the offline MSI for local Word/Excel to PDF conversion. See the component README for source and license details.");
+  await addDirArtifact(artifacts, "LibreOffice offline conversion component", "apps/desktop/src-tauri/resources/libreoffice", "Bundled with the offline MSI for local Word/Excel to PDF conversion, including the application-local Microsoft Visual C++ v14 Runtime required on clean Windows installations. See the component README and manifest for source, checksum, and license details.");
   await addDirArtifact(artifacts, "Next.js 静态网站产物", "apps/web/out", "在线版和离线版共用的静态页面、JS、CSS 和静态资源。");
   await addDirArtifact(artifacts, "PDF.js 静态资源", "apps/web/out/pdfjs", "来自 pdfjs-dist 的主模块、worker、CMaps 和字体资源。");
   await addDirArtifact(artifacts, "FFmpeg WASM 静态资源", "apps/web/out/ffmpeg", "来自 @ffmpeg/core 的 ffmpeg-core.js 和 ffmpeg-core.wasm。");

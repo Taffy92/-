@@ -12,7 +12,7 @@
 
 - 正式下载页：`https://gszhmrx.cn/download/`
 - ZIP：`万能格式转换器_2.0.0_x64_zh-CN.zip`
-- ZIP SHA256：`191767A4402244E58EAE44DA4AFBC516EF7458C83B014C7EB7A21158C1CD87EC`
+- ZIP SHA256：`D919C927B95C0B571E8ACC4C0F242E970A0B4705D135592316C0F29E6A0DDA67`
 - 验收报告：`verification/reliability-2026/windows-10-acceptance.md` 与 `windows-11-acceptance.md`
 
 Windows 10 x64 和 Windows 11 x64 必须分别使用未安装本项目、Node.js、Rust、pnpm、LibreOffice 开发资源或仓库副本的干净虚拟机。每台 VM 都要从正式站点下载 ZIP、核对 SHA256、断网安装 MSI，并完成真实图片、PDF、Word、Excel、音频、视频、9 文件批量、取消、损坏文件、无写入权限、3 天试用、激活码、`license.mrx` 导入和重启后授权持久化。

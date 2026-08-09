@@ -16,7 +16,7 @@ const installerPartSize = 24 * 1024 * 1024;
 const publishedPartDownloadConcurrency = 6;
 const releaseVersion = "2.0.0";
 const msiFileName = "万能格式转换器_2.0.0_x64_zh-CN.msi";
-const msiSha256 = "120FF8C66BA7EFD38280EE01985886EC4C925B32BAA7CE899736E55EB2131F9C";
+const msiSha256 = "1D61074CADE53EAE323198C6EB611988C610A93EE4F2C629B2781A3660C962B0";
 const releaseInstallerDir = path.resolve(appRoot, "..", "..", "release", `v${releaseVersion}`, "installers");
 const edgeOneInstallerDirectory = "edgeone-v24";
 const edgeOneReleaseDir = path.join(outDir, "release", `v${releaseVersion}`, edgeOneInstallerDirectory);
@@ -30,7 +30,7 @@ const installerPackages = [
     type: "zip",
     fileName: "万能格式转换器_2.0.0_x64_zh-CN.zip",
     assetName: "format-converter_2.0.0_x64_zh-CN.zip",
-    sha256: "191767A4402244E58EAE44DA4AFBC516EF7458C83B014C7EB7A21158C1CD87EC",
+    sha256: "D919C927B95C0B571E8ACC4C0F242E970A0B4705D135592316C0F29E6A0DDA67",
     contentType: "application/zip"
   }
 ];
