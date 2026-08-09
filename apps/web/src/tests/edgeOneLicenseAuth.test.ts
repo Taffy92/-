@@ -50,7 +50,7 @@ describe("EdgeOne license admin authentication", () => {
     expect(clearSessionCookie()).toContain("Max-Age=0");
   });
 
-  it("requires state-changing requests to be same-origin", () => {
+  it("requires state-changing requests to use the canonical admin origin", () => {
     const valid = new Request("https://gszhmrx.cn/api/admin/license/generate", {
       method: "POST",
       headers: { Origin: "https://gszhmrx.cn" }
@@ -63,13 +63,19 @@ describe("EdgeOne license admin authentication", () => {
     });
     expect(() => assertSameOrigin(proxied)).not.toThrow();
 
-    const presetDomain = new Request("http://internal-function/session", {
+    const wwwDomain = new Request("https://www.gszhmrx.cn/api/admin/license/session", {
+      method: "POST",
+      headers: { Origin: "https://www.gszhmrx.cn" }
+    });
+    expect(() => assertSameOrigin(wwwDomain)).toThrow("请求来源");
+
+    const presetDomain = new Request("https://format-converter-web-upload-bnsgopdb.edgeone.cool/session", {
       method: "POST",
       headers: {
         Origin: "https://format-converter-web-upload-bnsgopdb.edgeone.cool"
       }
     });
-    expect(() => assertSameOrigin(presetDomain)).not.toThrow();
+    expect(() => assertSameOrigin(presetDomain)).toThrow("请求来源");
 
     const missing = new Request("https://gszhmrx.cn/api/admin/license/generate", {
       method: "POST"

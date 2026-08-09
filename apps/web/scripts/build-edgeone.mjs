@@ -62,6 +62,11 @@ const code = await new Promise((resolve) => {
 if (code !== 0) process.exit(Number(code) || 1);
 
 await copyCloudFunctionSources();
+await cp(
+  path.join(appRoot, "edgeone", "middleware.ts"),
+  path.join(outDir, "middleware.ts"),
+  { force: true }
+);
 const wasmPath = path.join(outDir, "ffmpeg", "ffmpeg-core.wasm");
 const wasmBytes = await readFile(wasmPath);
 const wasmParts = [];

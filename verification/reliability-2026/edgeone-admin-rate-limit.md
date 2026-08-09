@@ -2,39 +2,47 @@
 
 ## Status
 
-Blocked on production EdgeOne configuration and deployment. The application-layer same-origin hardening is complete, but the required production 401/429 sequence has not been demonstrated.
+Passed on 2026-08-09 with the documented EdgeOne Makers plan limits. The production login route is rate-limited and non-canonical host bypasses are closed.
 
-## Application evidence
+## Production configuration
 
-- Protected issuance, record listing, license-file download, backup, and session requests enforce same-origin access.
-- `authorize` performs the shared same-origin check before session authorization.
-- No process-local `Map` or other in-memory production rate limiter was added.
-- `edgeOneLicenseAuth`, `edgeOneLicenseApi`, and `edgeOneLicenseRecords`: 19 tests passed on 2026-08-09.
+- EdgeOne rule name: `license-admin-login`
+- EdgeOne rule ID: `2181144935`
+- Protected domain: `gszhmrx.cn`
+- Match: request path equals `/api/admin/license/session`
+- Counting dimension: client IP
+- Counting window: 10 seconds
+- Threshold: more than 5 requests
+- Action: block for 30 seconds
+- Observed block status: HTTP 567
 
-## Required EdgeOne rule
+The Makers plan exposes one precise rate-limit rule, a maximum 10-second counting window, a maximum 30-second action duration, and only the block action. It does not expose the originally planned 15-minute windows or a custom HTTP 429 response.
 
-Apply the same domain-level Web Protection rule to `gszhmrx.cn` and `www.gszhmrx.cn`:
+## Canonical-host enforcement
 
-| Setting | Required value |
-| --- | --- |
-| Method | `POST` |
-| Path | `/api/admin/license/session` |
-| Counting dimension | Client IP |
-| Counting window | 15 minutes |
-| Threshold | 5 requests |
-| Action duration | 15 minutes |
-| Action | Custom response, HTTP 429 |
+- `www.gszhmrx.cn/admin/license/` returns HTTP 308 to `https://gszhmrx.cn/admin/license/`.
+- `www.gszhmrx.cn/api/admin/license/*` returns HTTP 403 before reaching the Cloud Function.
+- The EdgeOne preset deployment domain requires platform authorization and returned HTTP 401.
+- The Cloud Function accepts state-changing production requests only when the Origin is `https://gszhmrx.cn`.
+- No process-local in-memory rate limiter was added.
 
-## Production probe
+## Production verification
 
-At `2026-08-08T16:15:32Z` through `2026-08-08T16:15:33Z`, six same-origin requests with a fixed invalid probe value were submitted from one test network. All six returned HTTP 404 from `edgeone-pages`; no password, Cookie, authorization material, or IP address was recorded.
+After production deployment `dpdfgftr2uov` on 2026-08-09:
 
-This result means the production function route was unavailable at the tested deployment, so neither the expected first-five HTTP 401 responses nor the sixth HTTP 429 response could be verified.
+1. Six invalid same-origin login requests were sent from one test network in 2.25 seconds.
+2. Requests 1 through 5 returned HTTP 401.
+3. Request 6 returned EdgeOne HTTP 567.
+4. After 35 seconds, the same request returned HTTP 401 again, confirming recovery.
+5. The `www` API returned HTTP 403 and the `www` admin page redirected to the canonical host.
+6. A redirected browser visit rendered the login page with no console or page errors.
 
-## External blocker
+The probes used fixed non-secret invalid values. No production password, Cookie, authorization material, customer record, license data, or complete client IP was recorded.
 
-- EdgeOne CLI 1.6.17 is installed but not authenticated in this environment.
-- The installed CLI exposes Makers/Pages deployment commands and no domain Web Protection rule-management command.
-- A console operator with access to both production domains must create the rule and deploy the license-admin function route.
+## Regression evidence
 
-After configuration, repeat the six-attempt test, record the non-secret EdgeOne rule ID and status codes, wait for the 15-minute window to expire, verify recovery, and confirm a second network is unaffected. Until then this gate remains **blocked**.
+- Node 20 unit/integration tests: 190 passed.
+- Privacy tests: 11 passed.
+- Network guard tests: 4 passed.
+- Playwright browser checks: 15 passed, 5 offline-only cases skipped by their existing environment gate.
+- EdgeOne production build and deployment succeeded.

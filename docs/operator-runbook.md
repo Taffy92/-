@@ -65,19 +65,18 @@ powershell -ExecutionPolicy Bypass -File tools\admin-license-generator\setup-edg
 
 ### 授权后台登录限流
 
-在 `gszhmrx.cn` 和 `www.gszhmrx.cn` 的域名级 Web 防护中创建相同规则：
+Makers 基础套餐仅提供一条精准速率限制规则，并将计数和处置时长限制在秒级。规则配置在主域名 `gszhmrx.cn`；`www.gszhmrx.cn` 的后台页面由 EdgeOne 中间件跳转到主域名，非主域名管理 API 直接拒绝，避免换域名绕过限流。
 
 ```text
-请求方法 = POST
 请求路径 = /api/admin/license/session
 统计维度 = 客户端 IP
-计数周期 = 15 分钟
+计数周期 = 10 秒
 速率阈值 = 5 次
-处置持续时间 = 15 分钟
-处置 = 自定义响应 HTTP 429
+处置持续时间 = 30 秒
+处置 = 拦截（当前平台实际返回 HTTP 567）
 ```
 
-发布验收必须从同一测试网络确认前 5 次错误登录返回 401、第 6 次返回 429，窗口结束后恢复，并从另一网络确认互不影响。报告只记录时间、状态码和 EdgeOne 规则 ID，不记录密码、Cookie 或完整 IP。当前验证状态见 `verification/reliability-2026/edgeone-admin-rate-limit.md`；该报告未通过时不得声称登录防暴力措施完成。
+发布验收必须从同一测试网络确认前 5 次错误登录返回 401、第 6 次返回 567，30 秒处置期结束后恢复；同时确认 `www` 后台页面跳转主域名、非主域名管理 API 不可直达。报告只记录时间、状态码和 EdgeOne 规则 ID，不记录密码、Cookie 或完整 IP。当前验证状态见 `verification/reliability-2026/edgeone-admin-rate-limit.md`；该报告未通过时不得声称登录防暴力措施完成。
 
 ## 上线检查
 
