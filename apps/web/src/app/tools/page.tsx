@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { isDesktopApp } from "@/config/appMode";
+import { DesktopToolsEntry } from "@/components/tools/DesktopToolsEntry";
 import { OnlineToolsEntry } from "@/components/tools/OnlineToolsEntry";
-import { ToolsClient } from "@/components/tools/ToolsClient";
 import { createPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
@@ -17,7 +17,7 @@ export default function ToolsPage() {
   if (isDesktopApp) {
     return (
       <Suspense fallback={<main className="online-tool-directory-loading" aria-busy="true">正在加载工具...</main>}>
-        <ToolsClient surface="desktop" />
+        <DesktopToolsEntry />
       </Suspense>
     );
   }

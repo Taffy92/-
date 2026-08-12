@@ -41,7 +41,7 @@ export default function DownloadPage() {
               fileName={primaryPackage.fileName}
               manifestUrl={downloadsConfig.manifestUrl}
               label="下载 ZIP 3 天试用版"
-              detail="无需口令；下载完成后会自动校验文件完整性"
+              detail="无需口令；分片会自动校验，连接中断会自动重试"
             />
           </div>
         </div>
@@ -68,7 +68,7 @@ export default function DownloadPage() {
         <details className="rounded-sm tech-panel p-6 text-slate-100">
           <summary className="cursor-pointer text-sm font-semibold text-cyan-200">查看 SHA256 与分片完整性说明</summary>
           <div className="mt-4 text-sm leading-7 text-slate-300">
-            <p>下载器会从两个同源域名并行读取分片，逐片校验后按顺序写入 ZIP，并在完成后再次校验整个文件。</p>
+            <p>下载器会以有界并行方式读取分片；连接长时间无数据时自动重试，逐片校验后按顺序写入 ZIP，避免一次性把完整安装包载入内存。</p>
             <p className="mt-3 text-xs text-slate-400">ZIP SHA256</p>
             <code className="mt-1 block break-all font-mono text-xs text-slate-100">{downloadsConfig.sha256}</code>
             <p className="mt-3">发布日期：{downloadsConfig.releaseDate}</p>

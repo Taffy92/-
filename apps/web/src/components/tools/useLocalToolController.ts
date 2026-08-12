@@ -40,6 +40,7 @@ import {
 } from "@doctool/shared";
 import type { ExportImageFormat } from "@doctool/shared";
 import type { DesktopLicenseStatus } from "@/lib/desktopLicense";
+import { sanitizeWindowsPathSegment } from "@/lib/conversion/desktopOutput";
 
 export type LocalToolId =
   | "image-convert"
@@ -660,7 +661,7 @@ async function readBlobBytes(blob: Blob): Promise<Uint8Array> {
 
 function joinLocalPath(directory: string, name: string) {
   const separator = directory.includes("\\") ? "\\" : "/";
-  return `${directory.replace(/[\\/]+$/, "")}${separator}${name.replace(/[\\/:*?"<>|]+/g, "_")}`;
+  return `${directory.replace(/[\\/]+$/, "")}${separator}${sanitizeWindowsPathSegment(name)}`;
 }
 
 function batchFolderName(now = new Date()) {

@@ -68,7 +68,7 @@ describe("offline P0 release checks", () => {
     expect(readFileSync(workerAssetPath, "utf8")).toContain("browser-image-compression");
   });
 
-  it("keeps release downloads on the two official EdgeOne hosts without raw installers", () => {
+  it("keeps release downloads on the official EdgeOne origin without raw installers", () => {
     const downloadsConfigPath = resolve(projectRoot, "apps", "web", "src", "config", "downloads.ts");
     const downloadsConfigSource = readFileSync(downloadsConfigPath, "utf8");
     const downloadPageSource = readFileSync(resolve(projectRoot, "apps", "web", "src", "app", "download", "page.tsx"), "utf8");
@@ -90,17 +90,21 @@ describe("offline P0 release checks", () => {
     expect(downloadPageSource).not.toContain("下载 EXE");
     expect(downloadButtonSource).toContain("showSaveFilePicker");
     expect(downloadButtonSource).toContain("getFile()");
-    expect(downloadButtonSource).toContain("fetchVerifiedPart");
+    expect(downloadButtonSource).toContain("downloadInstallerParts");
     expect(downloadButtonSource).toContain("当前浏览器不支持安全保存安装包");
-    expect(downloadButtonSource).toContain("downloadPartsInOrder");
+    expect(downloadButtonSource).toContain("activeDownload.current?.abort()");
     expect(downloadButtonSource).not.toContain("saveBufferedFile");
-    expect(downloadButtonSource).toContain("DOWNLOAD_CONCURRENCY = 12");
-    expect(downloadButtonSource).toContain("DOWNLOAD_MIRROR_HOSTS");
-    expect(downloadButtonSource).toContain("response.body.getReader()");
+    expect(downloadButtonSource).not.toContain("savedFile.arrayBuffer()");
+    expect(downloadButtonSource).not.toContain("DOWNLOAD_MIRROR_HOSTS");
+    expect(downloadButtonSource).toContain("下载未完成");
+    const installerDownloadSource = readFileSync(resolve(projectRoot, "apps", "web", "src", "lib", "installerDownload.ts"), "utf8");
+    expect(installerDownloadSource).toContain("DOWNLOAD_CONCURRENCY = 3");
+    expect(installerDownloadSource).toContain("PART_STALL_TIMEOUT_MS = 20_000");
+    expect(installerDownloadSource).toContain("response.body.getReader()");
     expect(edgeOneConfigSource).toContain('"key": "Access-Control-Allow-Origin"');
     expect(downloadButtonSource).not.toContain("EXE");
     expect(downloadButtonSource).toContain("下载后的安装包完整性校验失败");
-    expect(downloadButtonSource).toContain('crypto.subtle.digest("SHA-256"');
+    expect(installerDownloadSource).toContain('crypto.subtle.digest("SHA-256"');
     expect(edgeOneBuildSource).toContain("installerPartSize");
     expect(edgeOneBuildSource).toContain("usesCurrentInstallerPartLayout");
     expect(edgeOneBuildSource).toContain("writeInstallerParts");

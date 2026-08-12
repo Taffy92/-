@@ -3,7 +3,8 @@ import {
   cleanupDesktopTemporaryOutput,
   createDesktopOutputPlan,
   createMultiPageOutputDirectory,
-  finalizeDesktopOutput
+  finalizeDesktopOutput,
+  sanitizeWindowsPathSegment
 } from "../lib/conversion/desktopOutput";
 import { createConversionResourceScope } from "../lib/conversion/resources";
 import { createWebOutput } from "../lib/conversion/webOutput";
@@ -58,6 +59,28 @@ describe("conversion output contract", () => {
       directoryName: "annual-report",
       directoryPath: "D:\\Exports\\annual-report"
     });
+  });
+
+  it("avoids Windows device names and trailing dots in output paths", () => {
+    expect(sanitizeWindowsPathSegment("CON.pdf")).toBe("_CON.pdf");
+    expect(sanitizeWindowsPathSegment(".. ")).toBe("_");
+    expect(createMultiPageOutputDirectory({
+      outputRoot: "D:\\Exports",
+      sourceName: "CON.pdf",
+      existingNames: []
+    })).toEqual({
+      directoryName: "_CON",
+      directoryPath: "D:\\Exports\\_CON"
+    });
+
+    const plan = createDesktopOutputPlan({
+      outputRoot: "D:\\Exports",
+      taskId: "task-1",
+      requestedName: "NUL.txt... ",
+      existingNames: []
+    });
+    expect(plan.finalName).toBe("_NUL.txt");
+    expect(plan.finalPath).toBe("D:\\Exports\\_NUL.txt");
   });
 
   it("finalizes and cleans only the planned temporary file", async () => {

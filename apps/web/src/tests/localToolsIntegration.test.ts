@@ -48,6 +48,7 @@ describe("online and offline local tools integration", () => {
     expect(localToolControllerSource).toContain("saveDesktopOutputs");
     expect(localToolControllerSource).toContain("createDir(batchRoot");
     expect(localToolControllerSource).toContain("folder: safeBaseName(first.name)");
+    expect(localToolControllerSource).toContain("sanitizeWindowsPathSegment(name)");
     expect(localToolsProcessingSource).not.toMatch(/\.zip|\.7z|JSZip/);
   });
 

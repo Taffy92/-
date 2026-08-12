@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { createHash } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import ExcelJS from "exceljs";
 import JSZip from "jszip";
@@ -223,6 +224,74 @@ test("download primary action remains visible on a 375px viewport", async ({ pag
   await expect(page.getByText("Windows 10 / 11 x64", { exact: true }).first()).toBeVisible();
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
   expect(overflow).toBe(false);
+});
+
+test("download retries a damaged part and completes without reloading the whole file", async ({ page }) => {
+  const browserErrors: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") browserErrors.push(message.text());
+  });
+  page.on("pageerror", (error) => browserErrors.push(error.message));
+  const bytes = Buffer.from([1, 2, 3]);
+  const sha256 = createHash("sha256").update(bytes).digest("hex").toUpperCase();
+  const packageInfo = downloadsConfig.packages[0];
+  let partRequests = 0;
+
+  await page.addInitScript(() => {
+    const savedParts: ArrayBuffer[] = [];
+    Object.defineProperty(window, "showSaveFilePicker", {
+      configurable: true,
+      value: async () => ({
+        createWritable: async () => ({
+          write: async (data: ArrayBuffer) => { savedParts.push(data); },
+          close: async () => undefined,
+          abort: async () => { savedParts.length = 0; }
+        }),
+        getFile: async () => ({
+          size: savedParts.reduce((total, part) => total + part.byteLength, 0)
+        })
+      })
+    });
+  });
+  await page.route("**/release/v2.0.0/edgeone-v24/manifest.json", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        version: 1,
+        packages: {
+          zip: {
+            fileName: packageInfo.fileName,
+            size: bytes.byteLength,
+            sha256,
+            contentType: "application/zip",
+            parts: [{
+              url: "/release/v2.0.0/edgeone-v24/zip/part-001.bin",
+              size: bytes.byteLength,
+              sha256
+            }]
+          }
+        }
+      })
+    });
+  });
+  await page.route("**/release/v2.0.0/edgeone-v24/zip/part-001.bin", async (route) => {
+    partRequests += 1;
+    await route.fulfill({
+      contentType: "application/octet-stream",
+      body: partRequests === 1 ? Buffer.from([1]) : bytes
+    });
+  });
+
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/download/", { waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: labels.zipTrialDownload, exact: true }).click();
+
+  await expect(page.getByText(/正在自动重试/)).toBeVisible();
+  await expect(page.getByRole("button", { name: /取消下载/ })).toBeVisible();
+  await page.screenshot({ path: "../../verification/download-retry-recovery.png", fullPage: true });
+  await expect(page.getByText(/下载完成；文件 SHA256 应为/)).toBeVisible();
+  expect(partRequests).toBe(2);
+  expect(browserErrors).toEqual([]);
 });
 
 test("release compliance documents render as site pages instead of raw markdown", async ({ page }) => {

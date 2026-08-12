@@ -53,4 +53,15 @@ describe("ToolsClient responsibility boundaries", () => {
     expect(output).toContain("saveFilesToOutputDirectory");
     expect(output).toContain("createOutputSubdirectory");
   });
+
+  it("loads the desktop workbench only when an online route actually needs it", () => {
+    const desktopEntry = readSource("components/tools/DesktopToolsEntry.tsx");
+    const onlineEntry = readSource("components/tools/OnlineToolsEntry.tsx");
+    expect(desktopEntry).toContain('lazy(() =>');
+    expect(desktopEntry).toContain('import("@/components/tools/ToolsClient")');
+    expect(onlineEntry).toContain('lazy(() =>');
+    expect(onlineEntry).toContain('import("@/components/tools/ToolsClient")');
+    expect(readSource("app/page.tsx")).not.toContain('from "@/components/tools/ToolsClient"');
+    expect(readSource("app/tools/page.tsx")).not.toContain('from "@/components/tools/ToolsClient"');
+  });
 });

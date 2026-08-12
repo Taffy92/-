@@ -30,7 +30,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { AdSlot } from "@doctool/ui";
 import { adsConfig } from "@/config/ads";
 import { siteConfig } from "@/config/site";
@@ -41,7 +41,10 @@ import {
   unifiedTools
 } from "@/config/toolCatalog";
 import type { UnifiedToolCategoryId, UnifiedToolId } from "@/config/toolCatalog";
-import { ToolsClient } from "@/components/tools/ToolsClient";
+
+const ToolsClient = lazy(() =>
+  import("@/components/tools/ToolsClient").then((module) => ({ default: module.ToolsClient }))
+);
 
 type DirectoryFilter = "all" | UnifiedToolCategoryId;
 
@@ -82,7 +85,13 @@ const toolIcons: Partial<Record<UnifiedToolId, LucideIcon>> = {
 
 export function OnlineToolsEntry() {
   const searchParams = useSearchParams();
-  if (searchParams.has("tool")) return <ToolsClient surface="web" />;
+  if (searchParams.has("tool")) {
+    return (
+      <Suspense fallback={<main className="online-tool-directory-loading" aria-busy="true">正在加载工具...</main>}>
+        <ToolsClient surface="web" />
+      </Suspense>
+    );
+  }
   return <OnlineToolDirectory />;
 }
 

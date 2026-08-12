@@ -25,11 +25,12 @@ export async function saveBlobToOutputDirectory(
   }
 
   if (destination.kind === "browser") {
-    const fileHandle = await destination.handle.getFileHandle(name, { create: true });
+    const safeName = sanitizeWindowsPathSegment(name);
+    const fileHandle = await destination.handle.getFileHandle(safeName, { create: true });
     const writable = await fileHandle.createWritable();
     await writable.write(blob);
     await writable.close();
-    return `${destination.label}/${name}`;
+    return `${destination.label}/${safeName}`;
   }
 
   return "";
@@ -56,14 +57,15 @@ export async function saveFilesToOutputDirectory(
   }
 
   if (destination.kind === "browser" && typeof destination.handle?.getDirectoryHandle === "function") {
-    const directory = await destination.handle.getDirectoryHandle(folderName, { create: true });
+    const safeFolderName = sanitizeWindowsPathSegment(folderName);
+    const directory = await destination.handle.getDirectoryHandle(safeFolderName, { create: true });
     for (const item of files) {
-      const fileHandle = await directory.getFileHandle(item.name, { create: true });
+      const fileHandle = await directory.getFileHandle(sanitizeWindowsPathSegment(item.name), { create: true });
       const writable = await fileHandle.createWritable();
       await writable.write(item.blob);
       await writable.close();
     }
-    return `${destination.label}/${folderName}`;
+    return `${destination.label}/${safeFolderName}`;
   }
 
   return "";
@@ -82,8 +84,9 @@ export async function createOutputSubdirectory(
   }
 
   if (destination.kind === "browser" && typeof destination.handle?.getDirectoryHandle === "function") {
-    const handle = await destination.handle.getDirectoryHandle(folderName, { create: true });
-    return { kind: "browser", handle, label: `${destination.label}/${folderName}` };
+    const safeFolderName = sanitizeWindowsPathSegment(folderName);
+    const handle = await destination.handle.getDirectoryHandle(safeFolderName, { create: true });
+    return { kind: "browser", handle, label: `${destination.label}/${safeFolderName}` };
   }
 
   return null;
@@ -91,7 +94,7 @@ export async function createOutputSubdirectory(
 
 function joinOutputPath(directory: string, name: string) {
   const separator = directory.includes("\\") ? "\\" : "/";
-  return `${directory.replace(/[\\/]+$/, "")}${separator}${name.replace(/[\\/:*?"<>|]+/g, "_")}`;
+  return `${directory.replace(/[\\/]+$/, "")}${separator}${sanitizeWindowsPathSegment(name)}`;
 }
 
 type DesktopInvoke = (command: string, args: Record<string, string>) => Promise<unknown>;
@@ -190,10 +193,19 @@ function sanitizeFileName(value: string) {
 }
 
 function sanitizeNamePart(value: string) {
-  return value
+  return sanitizeWindowsPathSegment(value);
+}
+
+export function sanitizeWindowsPathSegment(value: string) {
+  const cleaned = value
     .replace(/[<>:"/\\|?*\u0000-\u001f]/g, "_")
     .trim()
-    .slice(0, 160);
+    .replace(/[. ]+$/g, "");
+  const nonEmpty = cleaned === "." || cleaned === ".." || !cleaned ? "_" : cleaned;
+  const windowsSafe = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(nonEmpty)
+    ? `_${nonEmpty}`
+    : nonEmpty;
+  return windowsSafe.slice(0, 160).replace(/[. ]+$/g, "") || "_";
 }
 
 function joinDesktopPath(root: string, name: string) {

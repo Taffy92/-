@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { HomeFlowDemo } from "@/components/home/HomeFlowDemo";
 import { GsapScene } from "@/components/motion/GsapScene";
-import { ToolsClient } from "@/components/tools/ToolsClient";
+import { DesktopToolsEntry } from "@/components/tools/DesktopToolsEntry";
 import { adsConfig } from "@/config/ads";
 import { isDesktopApp } from "@/config/appMode";
 import { siteConfig } from "@/config/site";
@@ -73,7 +73,7 @@ export default function HomePage() {
   if (isDesktopApp) {
     return (
       <Suspense fallback={<main className="online-tool-directory-loading" aria-busy="true">正在加载工具...</main>}>
-        <ToolsClient surface="desktop" />
+        <DesktopToolsEntry />
       </Suspense>
     );
   }
