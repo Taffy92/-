@@ -16,6 +16,7 @@ describe("unified release gate", () => {
     const webPackage = JSON.parse(readProjectFile("apps", "web", "package.json"));
 
     expect(rootPackage.scripts["verify:release"]).toBe("node scripts/verify-release.mjs");
+    expect(rootPackage.scripts["audit:dependencies"]).toContain("scripts/run-pnpm.cjs audit --audit-level high");
     expect(webPackage.scripts["verify:office"]).toContain("officeDesktopIntegration.test.ts");
     expect(webPackage.scripts["verify:office"]).not.toContain("--passWithNoTests");
   });
@@ -30,6 +31,7 @@ describe("unified release gate", () => {
     const stageIds = result.stdout.trim().split(/\r?\n/).map((line) => line.split("\t")[0]);
     expect(stageIds).toEqual([
       "toolchain",
+      "dependency-audit",
       "tests",
       "privacy",
       "network",
@@ -37,6 +39,7 @@ describe("unified release gate", () => {
       "cargo-test",
       "office",
       "edgeone-build",
+      "browser-privacy",
       "artifacts",
       "secret-scan",
       "skip-scan"

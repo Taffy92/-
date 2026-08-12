@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { middleware } from "../../edgeone/middleware";
+import { config, middleware } from "../../edgeone/middleware";
 
 function createContext(url: string) {
   return {
@@ -28,6 +28,23 @@ describe("EdgeOne canonical license-admin middleware", () => {
     expect(response.headers.get("Location")).toBe(
       "https://gszhmrx.cn/admin/license/?source=test"
     );
+  });
+
+  it.each([
+    "http://gszhmrx.cn/",
+    "http://gszhmrx.cn/admin/license/",
+    "http://gszhmrx.cn/release/v2.0.0/edgeone-v24/manifest.json"
+  ])("redirects every plaintext route to HTTPS", (url) => {
+    const context = createContext(url);
+    const response = middleware(context);
+
+    expect(response.status).toBe(308);
+    expect(response.headers.get("Location")).toBe(url.replace("http://", "https://"));
+    expect(context.next).not.toHaveBeenCalled();
+  });
+
+  it("runs on every route so plaintext content cannot bypass the redirect", () => {
+    expect(config.matcher).toEqual(["/:path*"]);
   });
 
   it("rejects non-canonical admin API requests", async () => {

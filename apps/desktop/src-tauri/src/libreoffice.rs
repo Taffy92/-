@@ -6,7 +6,7 @@ use std::{
   process::{Command, Stdio},
   time::{SystemTime, UNIX_EPOCH}
 };
-use tauri::AppHandle;
+use tauri::{AppHandle, Manager};
 
 const SUPPORTED_EXTENSIONS: &[&str] = &["docx", "xlsx", "csv"];
 
@@ -58,7 +58,7 @@ pub fn check_libreoffice(app: AppHandle) -> LibreOfficeCheck {
 #[tauri::command]
 pub fn convert_office_to_pdf(app: AppHandle, request: OfficePdfRequest) -> Result<OfficePdfResult, String> {
   license::require_license_allowed(&app)?;
-  let input = validate_input_path(&request.input_path)?;
+  let input = validate_input_path(&app, &request.input_path)?;
   let executable = resolve_libreoffice_file(&app, "program/soffice.com")
     .ok_or_else(|| "离线版缺少 LibreOffice 组件，请重新安装完整版本。".to_string())?;
   let version = check_libreoffice(app.clone()).version.unwrap_or_else(|| "unknown".to_string());
@@ -101,6 +101,10 @@ pub fn convert_office_to_pdf(app: AppHandle, request: OfficePdfRequest) -> Resul
     let _ = fs::remove_dir_all(&work_dir);
     return Err("LibreOffice 无法将当前 Office 文件转换为 PDF，请检查文件是否损坏或受密码保护。".to_string());
   }
+  app
+    .fs_scope()
+    .allow_file(&output_path)
+    .map_err(|_| "无法授权读取 LibreOffice 本地转换结果。".to_string())?;
 
   Ok(OfficePdfResult {
     pdf_path: output_path.to_string_lossy().to_string(),
@@ -110,7 +114,7 @@ pub fn convert_office_to_pdf(app: AppHandle, request: OfficePdfRequest) -> Resul
 }
 
 #[tauri::command]
-pub fn cleanup_office_conversion(path: String) -> Result<(), String> {
+pub fn cleanup_office_conversion(app: AppHandle, path: String) -> Result<(), String> {
   let target = PathBuf::from(path.trim());
   if !target.is_absolute() || target.components().any(|item| matches!(item, Component::ParentDir)) {
     return Err("LibreOffice 临时路径无效。".to_string());
@@ -123,10 +127,13 @@ pub fn cleanup_office_conversion(path: String) -> Result<(), String> {
   if !canonical_target.starts_with(&canonical_root) || parent.parent() != Some(canonical_root.as_path()) {
     return Err("拒绝清理非 LibreOffice 临时目录中的文件。".to_string());
   }
-  fs::remove_dir_all(parent).map_err(|_| "无法清理 LibreOffice 临时文件。".to_string())
+  let parent = parent.to_path_buf();
+  fs::remove_dir_all(&parent).map_err(|_| "无法清理 LibreOffice 临时文件。".to_string())?;
+  let _ = app.fs_scope().forbid_file(&target);
+  Ok(())
 }
 
-fn validate_input_path(value: &str) -> Result<PathBuf, String> {
+fn validate_input_path(app: &AppHandle, value: &str) -> Result<PathBuf, String> {
   let raw = value.trim();
   if raw.is_empty() {
     return Err("缺少 Office 输入文件。".to_string());
@@ -138,6 +145,9 @@ fn validate_input_path(value: &str) -> Result<PathBuf, String> {
   let canonical = fs::canonicalize(&path).map_err(|_| "Office 输入文件不存在，请重新选择。".to_string())?;
   if !canonical.is_file() {
     return Err("Office 输入路径不是文件。".to_string());
+  }
+  if !app.fs_scope().is_allowed(&canonical) {
+    return Err("Office 输入文件未通过本机选择授权，请重新选择。".to_string());
   }
   let extension = canonical.extension().and_then(|value| value.to_str()).unwrap_or("").to_ascii_lowercase();
   if !SUPPORTED_EXTENSIONS.iter().any(|item| *item == extension) {

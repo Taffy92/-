@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const expectedNodeMajor = 20;
+const expectedNodeMajor = 24;
 const expectedPnpmVersion = "9.15.4";
 const scriptPath = fileURLToPath(import.meta.url);
 const projectRoot = resolve(dirname(scriptPath), "..");
@@ -11,7 +11,7 @@ const projectRoot = resolve(dirname(scriptPath), "..");
 export function validateToolchain({ nodeVersion, pnpmVersion }) {
   const errors = [];
   if (!new RegExp(`^v?${expectedNodeMajor}\\.`).test(nodeVersion.trim())) {
-    errors.push(`Node.js 必须为 20.x，当前为 ${nodeVersion || "未知"}。`);
+    errors.push(`Node.js 必须为 24.x，当前为 ${nodeVersion || "未知"}。`);
   }
   if (pnpmVersion.trim() !== expectedPnpmVersion) {
     errors.push(`pnpm 必须为 ${expectedPnpmVersion}，当前为 ${pnpmVersion || "未知"}。`);
@@ -53,7 +53,7 @@ function run() {
     nodeVersion: process.version,
     pnpmVersion
   });
-  console.log(`Node.js ${process.version}（要求 20.x）`);
+  console.log(`Node.js ${process.version}（要求 24.x）`);
   console.log(`pnpm ${pnpmVersion}（要求 ${expectedPnpmVersion}）`);
   if (!result.ok) {
     for (const error of result.errors) console.error(error);

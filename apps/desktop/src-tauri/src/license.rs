@@ -16,6 +16,13 @@ use std::{
 };
 #[cfg(target_os = "windows")]
 use std::os::windows::process::CommandExt;
+#[cfg(target_os = "windows")]
+use windows_sys::Win32::{
+  Foundation::LocalFree,
+  Security::Cryptography::{
+    CryptProtectData, CryptUnprotectData, CRYPTPROTECT_UI_FORBIDDEN, CRYPT_INTEGER_BLOB
+  }
+};
 use tauri::AppHandle;
 use winreg::{enums::*, RegKey};
 
@@ -29,7 +36,7 @@ const REGISTRY_TRIAL_RECORD_VALUE: &str = "record";
 const TRIAL_SECONDS: u64 = 3 * 24 * 60 * 60;
 const TIME_ROLLBACK_GRACE: u64 = 5 * 60;
 const LICENSE_CODE_PREFIX: &str = "UFC1-";
-const LOCAL_TRIAL_KEY_CONTEXT: &str = "ufc-local-trial-v1";
+const LOCAL_REQUEST_KEY_CONTEXT: &str = "ufc-local-trial-v1";
 #[cfg(target_os = "windows")]
 const CREATE_NO_WINDOW: u32 = 0x08000000;
 
@@ -107,15 +114,7 @@ struct TrialPayload {
 #[derive(Debug, Serialize, Deserialize)]
 struct TrialRecord {
   version: String,
-  data: String,
-  hmac: String
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct LegacyTrialRecord {
-  version: String,
-  payload: TrialPayload,
-  hmac: String
+  data: String
 }
 
 #[derive(Debug, Serialize)]
@@ -431,37 +430,15 @@ fn read_trial_sources(machine_id: &str) -> Vec<TrialSource> {
 }
 
 fn parse_trial_record(text: &str, machine_id: &str) -> Option<TrialPayload> {
-  let record: TrialRecord = match serde_json::from_str(text) {
-    Ok(value) => value,
-    Err(_) => return parse_legacy_trial_record(text, machine_id)
-  };
-  if record.version != "ufc-trial-v1" {
+  let record: TrialRecord = serde_json::from_str(text).ok()?;
+  if record.version != "ufc-trial-v2" {
     return None;
   }
   let payload = decode_trial_payload(&record.data, machine_id)?;
   if payload.product != PRODUCT || payload.machine_id != machine_id {
     return None;
   }
-  let expected = trial_hmac(&payload);
-  if !constant_time_eq(expected.as_bytes(), record.hmac.as_bytes()) {
-    return None;
-  }
   Some(payload)
-}
-
-fn parse_legacy_trial_record(text: &str, machine_id: &str) -> Option<TrialPayload> {
-  let record: LegacyTrialRecord = serde_json::from_str(text).ok()?;
-  if record.version != "ufc-trial-v1" {
-    return None;
-  }
-  if record.payload.product != PRODUCT || record.payload.machine_id != machine_id {
-    return None;
-  }
-  let expected = trial_hmac(&record.payload);
-  if !constant_time_eq(expected.as_bytes(), record.hmac.as_bytes()) {
-    return None;
-  }
-  Some(record.payload)
 }
 
 fn merge_trial_payloads(payloads: Vec<TrialPayload>) -> TrialPayload {
@@ -532,10 +509,12 @@ fn read_valid_trial_payloads(machine_id: &str) -> Vec<TrialPayload> {
 }
 
 fn write_trial_payload(payload: &TrialPayload) {
+  let Some(data) = encode_trial_payload(payload) else {
+    return;
+  };
   let record = TrialRecord {
-    version: "ufc-trial-v1".to_string(),
-    data: encode_trial_payload(payload),
-    hmac: trial_hmac(payload)
+    version: "ufc-trial-v2".to_string(),
+    data
   };
   let Ok(text) = serde_json::to_string(&record) else {
     return;
@@ -545,13 +524,6 @@ fn write_trial_payload(payload: &TrialPayload) {
     let _ = write_text_file(&path, &text);
   }
   let _ = write_trial_registry(&text);
-}
-
-fn trial_hmac(payload: &TrialPayload) -> String {
-  let mut mac = HmacSha256::new_from_slice(trial_hmac_key(&payload.machine_id).as_slice())
-    .expect("HMAC accepts keys of any size");
-  mac.update(canonical_trial_payload(payload).as_bytes());
-  to_upper_hex(&mac.finalize().into_bytes())
 }
 
 fn activation_request_hmac(request: &ActivationRequest, machine_id: &str) -> String {
@@ -567,60 +539,87 @@ fn trial_hmac_key(machine_id: &str) -> Vec<u8> {
   hasher.update(b"|trial|");
   hasher.update(machine_id.as_bytes());
   hasher.update(b"|");
-  hasher.update(LOCAL_TRIAL_KEY_CONTEXT.as_bytes());
+  hasher.update(LOCAL_REQUEST_KEY_CONTEXT.as_bytes());
   hasher.finalize().to_vec()
 }
 
-fn encode_trial_payload(payload: &TrialPayload) -> String {
+fn encode_trial_payload(payload: &TrialPayload) -> Option<String> {
   let plaintext = serde_json::to_vec(payload).unwrap_or_default();
-  let keystream = local_keystream(&payload.machine_id, plaintext.len());
-  let encoded: Vec<u8> = plaintext
-    .iter()
-    .zip(keystream.iter())
-    .map(|(left, right)| left ^ right)
-    .collect();
-  URL_SAFE_NO_PAD.encode(encoded)
+  protect_local_data(&plaintext, &payload.machine_id).map(|data| URL_SAFE_NO_PAD.encode(data))
 }
 
 fn decode_trial_payload(data: &str, machine_id: &str) -> Option<TrialPayload> {
-  let encrypted = URL_SAFE_NO_PAD.decode(data).ok()?;
-  let keystream = local_keystream(machine_id, encrypted.len());
-  let plaintext: Vec<u8> = encrypted
-    .iter()
-    .zip(keystream.iter())
-    .map(|(left, right)| left ^ right)
-    .collect();
+  let protected = URL_SAFE_NO_PAD.decode(data).ok()?;
+  let plaintext = unprotect_local_data(&protected, machine_id)?;
   serde_json::from_slice(&plaintext).ok()
 }
 
-fn local_keystream(machine_id: &str, len: usize) -> Vec<u8> {
-  let mut stream = Vec::with_capacity(len);
-  let mut counter = 0_u64;
-  while stream.len() < len {
-    let mut hasher = Sha256::new();
-    hasher.update(PRODUCT.as_bytes());
-    hasher.update(b"|trial-stream|");
-    hasher.update(machine_id.as_bytes());
-    hasher.update(b"|");
-    hasher.update(LOCAL_TRIAL_KEY_CONTEXT.as_bytes());
-    hasher.update(counter.to_le_bytes());
-    stream.extend_from_slice(&hasher.finalize());
-    counter += 1;
-  }
-  stream.truncate(len);
-  stream
+#[cfg(target_os = "windows")]
+fn protect_local_data(data: &[u8], machine_id: &str) -> Option<Vec<u8>> {
+  dpapi_transform(data, machine_id, true)
 }
 
-fn canonical_trial_payload(payload: &TrialPayload) -> String {
-  format!(
-    "product={}\nmachine_id={}\nfirst_run_time={}\ntrial_expires_at={}\nlast_success_run_time={}\ntrial_status={}",
-    payload.product,
-    payload.machine_id,
-    payload.first_run_time,
-    payload.trial_expires_at,
-    payload.last_success_run_time,
-    payload.trial_status
-  )
+#[cfg(target_os = "windows")]
+fn unprotect_local_data(data: &[u8], machine_id: &str) -> Option<Vec<u8>> {
+  dpapi_transform(data, machine_id, false)
+}
+
+#[cfg(target_os = "windows")]
+fn dpapi_transform(data: &[u8], machine_id: &str, protect: bool) -> Option<Vec<u8>> {
+  let mut input = data.to_vec();
+  let mut entropy = Sha256::digest(format!("{PRODUCT}|trial-v2|{machine_id}").as_bytes()).to_vec();
+  let input_blob = CRYPT_INTEGER_BLOB {
+    cbData: input.len().try_into().ok()?,
+    pbData: input.as_mut_ptr()
+  };
+  let entropy_blob = CRYPT_INTEGER_BLOB {
+    cbData: entropy.len().try_into().ok()?,
+    pbData: entropy.as_mut_ptr()
+  };
+  let mut output_blob = CRYPT_INTEGER_BLOB::default();
+  let success = unsafe {
+    if protect {
+      CryptProtectData(
+        &input_blob,
+        std::ptr::null(),
+        &entropy_blob,
+        std::ptr::null(),
+        std::ptr::null(),
+        CRYPTPROTECT_UI_FORBIDDEN,
+        &mut output_blob
+      )
+    } else {
+      CryptUnprotectData(
+        &input_blob,
+        std::ptr::null_mut(),
+        &entropy_blob,
+        std::ptr::null(),
+        std::ptr::null(),
+        CRYPTPROTECT_UI_FORBIDDEN,
+        &mut output_blob
+      )
+    }
+  };
+  if success == 0 || output_blob.pbData.is_null() {
+    return None;
+  }
+  let output = unsafe {
+    std::slice::from_raw_parts(output_blob.pbData, output_blob.cbData as usize).to_vec()
+  };
+  unsafe {
+    LocalFree(output_blob.pbData as _);
+  }
+  Some(output)
+}
+
+#[cfg(not(target_os = "windows"))]
+fn protect_local_data(_data: &[u8], _machine_id: &str) -> Option<Vec<u8>> {
+  None
+}
+
+#[cfg(not(target_os = "windows"))]
+fn unprotect_local_data(_data: &[u8], _machine_id: &str) -> Option<Vec<u8>> {
+  None
 }
 
 fn canonical_activation_request(request: &ActivationRequest) -> String {
@@ -875,27 +874,6 @@ fn now_utc() -> u64 {
     .unwrap_or(0)
 }
 
-fn to_upper_hex(bytes: &[u8]) -> String {
-  const HEX: &[u8; 16] = b"0123456789ABCDEF";
-  let mut output = String::with_capacity(bytes.len() * 2);
-  for byte in bytes {
-    output.push(HEX[(byte >> 4) as usize] as char);
-    output.push(HEX[(byte & 0x0F) as usize] as char);
-  }
-  output
-}
-
-fn constant_time_eq(left: &[u8], right: &[u8]) -> bool {
-  if left.len() != right.len() {
-    return false;
-  }
-  let mut diff = 0u8;
-  for (a, b) in left.iter().zip(right.iter()) {
-    diff |= a ^ b;
-  }
-  diff == 0
-}
-
 #[cfg(test)]
 mod tests {
   use super::*;
@@ -941,9 +919,8 @@ mod tests {
       trial_status: "active".to_string()
     };
     let record = TrialRecord {
-      version: "ufc-trial-v1".to_string(),
-      data: encode_trial_payload(&payload),
-      hmac: trial_hmac(&payload)
+      version: "ufc-trial-v2".to_string(),
+      data: encode_trial_payload(&payload).expect("Windows DPAPI protects trial payload")
     };
 
     let text = serde_json::to_string(&record).expect("trial record serializes");
@@ -951,5 +928,11 @@ mod tests {
     assert!(!text.contains("first_run_time"));
     assert!(!text.contains("1700000000"));
     assert_eq!(parse_trial_record(&text, &payload.machine_id), Some(payload));
+  }
+
+  #[test]
+  fn rejects_untrusted_v1_trial_records() {
+    let legacy = r#"{"version":"ufc-trial-v1","data":"forged","hmac":"forged"}"#;
+    assert_eq!(parse_trial_record(legacy, "TEST-TEST-TEST-TEST"), None);
   }
 }

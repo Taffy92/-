@@ -12,11 +12,9 @@ interface EdgeOneMiddlewareContext {
 
 export function middleware(context: EdgeOneMiddlewareContext): Response {
   const url = new URL(context.request.url);
-  if (!NON_CANONICAL_ADMIN_HOSTS.has(url.hostname)) {
-    return context.next();
-  }
+  const nonCanonicalHost = NON_CANONICAL_ADMIN_HOSTS.has(url.hostname);
 
-  if (url.pathname.startsWith("/api/admin/license/")) {
+  if (nonCanonicalHost && url.pathname.startsWith("/api/admin/license/")) {
     return new Response(
       JSON.stringify({ ok: false, error: "管理接口仅允许从主域名访问。" }),
       {
@@ -29,10 +27,15 @@ export function middleware(context: EdgeOneMiddlewareContext): Response {
     );
   }
 
-  const destination = new URL(`${url.pathname}${url.search}`, CANONICAL_ADMIN_ORIGIN);
-  return context.redirect(destination.toString(), 308);
+  if (url.protocol !== "https:" || nonCanonicalHost) {
+    const destinationOrigin = nonCanonicalHost ? CANONICAL_ADMIN_ORIGIN : `https://${url.host}`;
+    const destination = new URL(`${url.pathname}${url.search}`, destinationOrigin);
+    return context.redirect(destination.toString(), 308);
+  }
+
+  return context.next();
 }
 
 export const config = {
-  matcher: ["/admin/license/:path*", "/api/admin/license/:path*"]
+  matcher: ["/:path*"]
 };

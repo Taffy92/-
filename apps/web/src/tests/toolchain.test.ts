@@ -16,15 +16,15 @@ describe("release toolchain", () => {
       scripts?: Record<string, string>;
     };
 
-    expect(nvmrc).toBe("20");
-    expect(packageJson.engines).toEqual({ node: "20.x", pnpm: "9.15.4" });
+    expect(nvmrc).toBe("24");
+    expect(packageJson.engines).toEqual({ node: "24.x", pnpm: "9.15.4" });
     expect(packageJson.packageManager).toBe("pnpm@9.15.4");
     expect(packageJson.scripts?.["verify:toolchain"]).toBe(
       "node scripts/verify-toolchain.mjs"
     );
   });
 
-  it("accepts only Node 20 and pnpm 9.15.4", async () => {
+  it("accepts only Node 24 and pnpm 9.15.4", async () => {
     const moduleUrl = pathToFileURL(
       resolve(projectRoot, "scripts", "verify-toolchain.mjs")
     ).href;
@@ -36,7 +36,7 @@ describe("release toolchain", () => {
     };
 
     expect(validateToolchain({
-      nodeVersion: "v20.20.2",
+      nodeVersion: "v24.5.0",
       pnpmVersion: "9.15.4"
     })).toEqual({ ok: true, errors: [] });
 
@@ -46,7 +46,7 @@ describe("release toolchain", () => {
     })).toMatchObject({ ok: false });
 
     expect(validateToolchain({
-      nodeVersion: "v20.20.2",
+      nodeVersion: "v24.5.0",
       pnpmVersion: "11.16.0"
     })).toMatchObject({ ok: false });
   });

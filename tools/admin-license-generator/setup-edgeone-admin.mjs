@@ -24,8 +24,8 @@ const desktopLicensePath = path.join(
 const outputPath = path.join(toolDir, ".tmp", "edgeone-admin-secrets.env");
 const password = process.env.UFC_EDGEONE_ADMIN_PASSWORD ?? "";
 
-if (Number.parseInt(process.versions.node.split(".")[0], 10) !== 20) {
-  throw new Error("请使用项目规定的 Node.js 20 运行此工具。");
+if (Number.parseInt(process.versions.node.split(".")[0], 10) !== 24) {
+  throw new Error("请使用项目规定的 Node.js 24 运行此工具。");
 }
 if (!password) {
   throw new Error("管理员密码不能为空。");

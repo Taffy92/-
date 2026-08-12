@@ -54,7 +54,7 @@ DocToolPlatform/
 
 ## 本地开发
 
-运行时版本：发布和打包环境固定为 Node.js 20 LTS 与 pnpm 9.15.4。根目录 `.nvmrc`、`package.json` 的 `engines` 和 `packageManager` 是准绳。
+运行时版本：发布和打包环境固定为 Node.js 24 LTS 与 pnpm 9.15.4。根目录 `.nvmrc`、`package.json` 的 `engines` 和 `packageManager` 是准绳。
 
 Windows 工作区优先运行 npm 脚本，脚本会调用本地 `.pnpm-home\pnpm.CMD`。
 
@@ -211,7 +211,7 @@ Excel 转图片：支持 `.xlsx`、`.csv`。旧版 `.xls` 请先用 Excel/WPS �
 
 ## 发布新版本
 
-1. 确认 `node -v` 为 `v20.x`，`.\.pnpm-home\pnpm.CMD --version` 为 `9.15.4`。
+1. 确认 `node -v` 为 `v24.x`，`.\.pnpm-home\pnpm.CMD --version` 为 `9.15.4`。
 2. 更新 `apps/web/src/config/downloads.ts` 的版本号、文件名、大小、日期和 SHA256。
 3. 更新 `apps/web/src/app/changelog/page.tsx`。
 4. 运行 `npm test`。

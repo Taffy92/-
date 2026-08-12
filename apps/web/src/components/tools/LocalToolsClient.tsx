@@ -33,6 +33,7 @@ import { getUnifiedToolCategory, getUnifiedToolHref } from "@/config/toolCatalog
 import type { UnifiedToolItem } from "@/config/toolCatalog";
 import { formatDesktopLicenseLabel } from "@/lib/desktopLicense";
 import type { DesktopLicenseStatus } from "@/lib/desktopLicense";
+import { pickTauriFiles } from "@/lib/tauriFilePicker";
 
 const tools: Array<{
   id: LocalToolId;
@@ -195,11 +196,22 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
     accept,
     resetToolState,
     handleFiles,
+    reportError,
     selectOutputFolder,
     run,
     cancel,
     clear
   } = localToolController;
+
+  async function selectDesktopInputFiles() {
+    try {
+      const selected = await pickTauriFiles({ accept, multiple, title: "选择需要处理的本地文件" });
+      if (selected === undefined) inputRef.current?.click();
+      else if (selected?.length) await handleFiles(selected);
+    } catch (reason) {
+      reportError(reason);
+    }
+  }
 
   useEffect(() => {
     const applyToolFromUrl = () => {
@@ -346,7 +358,7 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
               </div>
             </div>
             <div className="desktop-a-title-actions">
-              <button type="button" onClick={() => inputRef.current?.click()}>
+              <button type="button" onClick={() => void selectDesktopInputFiles()}>
                 <FilePlus2 aria-hidden="true" size={15} />添加文件
               </button>
               <button type="button" onClick={clear}>
@@ -383,7 +395,7 @@ export function LocalToolsClient({ surface = isDesktopApp ? "desktop" : "web" }:
                   files={files}
                   desktop
                   multiple={multiple}
-                  onPickFile={() => inputRef.current?.click()}
+                  onPickFile={() => void selectDesktopInputFiles()}
                   onFilesChange={setFiles}
                 />
                 {metadata ? <LocalMetadataView metadata={metadata} /> : null}

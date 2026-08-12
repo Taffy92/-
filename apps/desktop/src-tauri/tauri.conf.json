@@ -31,23 +31,14 @@
         "removeDir": false,
         "removeFile": false,
         "renameFile": false,
-        "scope": [
-          "$HOME/**",
-          "$DESKTOP/**",
-          "$DOCUMENT/**",
-          "$DOWNLOAD/**",
-          "$PICTURE/**",
-          "$VIDEO/**",
-          "$AUDIO/**",
-          "D:/**"
-        ],
+        "scope": [],
         "writeFile": true
       },
       "os": {
         "all": false
       },
       "path": {
-        "all": true
+        "all": false
       },
       "process": {
         "all": false,

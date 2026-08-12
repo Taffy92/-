@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef } from "react";
+import { useId } from "react";
 import { PlaceholderAdSlot } from "./PlaceholderAdSlot";
 
 export type AdProvider = "baidu" | "placeholder" | "none";
@@ -32,24 +32,23 @@ export function AdSlot({ config, name, className = "" }: AdSlotProps) {
 
 function BaiduAdSlot({ enabled = false, slot, className = "" }: { enabled?: boolean; slot: string; className?: string }) {
   const id = useId().replace(/:/g, "");
-  const ref = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (!enabled || !slot || process.env.NODE_ENV !== "production" || !ref.current) return;
-    const script = document.createElement("script");
-    script.async = true;
-    script.src = "https://cpro.baidustatic.com/cpro/ui/cm.js";
-    script.dataset.slot = slot;
-    ref.current.appendChild(script);
-    return () => {
-      script.remove();
-    };
-  }, [enabled, slot]);
 
   if (process.env.NODE_ENV !== "production") {
     return <PlaceholderAdSlot className={className} label="百度广告位" />;
   }
-  if (!enabled || !slot) return null;
+  if (!enabled || !/^[A-Za-z0-9_-]+$/.test(slot)) return null;
 
-  return <div id={`baidu-ad-${id}`} ref={ref} className={`min-h-[100px] w-full rounded-sm bg-white ${className}`} />;
+  const source = `<!doctype html><html><head><meta charset="utf-8"><meta name="referrer" content="strict-origin-when-cross-origin"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src https://cpro.baidustatic.com https://*.baidu.com https://*.bdstatic.com 'unsafe-inline'; style-src 'unsafe-inline' https://*.bdstatic.com; img-src data: https://*.baidu.com https://*.bdstatic.com; connect-src https://*.baidu.com https://*.bdstatic.com; frame-src https://*.baidu.com https://*.bdstatic.com"></head><body style="margin:0"><script async src="https://cpro.baidustatic.com/cpro/ui/cm.js" data-slot="${slot}"></script></body></html>`;
+
+  return (
+    <iframe
+      id={`baidu-ad-${id}`}
+      title="百度联盟广告"
+      srcDoc={source}
+      sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
+      referrerPolicy="strict-origin-when-cross-origin"
+      loading="lazy"
+      className={`min-h-[100px] w-full rounded-sm border-0 bg-white ${className}`}
+    />
+  );
 }

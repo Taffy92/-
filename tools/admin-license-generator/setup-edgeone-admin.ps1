@@ -4,18 +4,18 @@ $toolDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $nodeCommand = Get-Command node -ErrorAction SilentlyContinue
 $nodePath = if ($nodeCommand) { $nodeCommand.Source } else { $null }
 
-function Test-Node20([string]$candidate) {
+function Test-Node24([string]$candidate) {
     if (-not $candidate -or -not (Test-Path -LiteralPath $candidate)) {
         return $false
     }
     try {
-        return (& $candidate -p "process.versions.node.split('.')[0]" 2>$null) -eq "20"
+        return (& $candidate -p "process.versions.node.split('.')[0]" 2>$null) -eq "24"
     } catch {
         return $false
     }
 }
 
-if (-not (Test-Node20 $nodePath)) {
+if (-not (Test-Node24 $nodePath)) {
     $cachedNodes = Get-ChildItem `
         -Path (Join-Path $env:LOCALAPPDATA "npm-cache\_npx") `
         -Filter "node.exe" `
@@ -25,12 +25,12 @@ if (-not (Test-Node20 $nodePath)) {
         Sort-Object LastWriteTime -Descending
 
     $nodePath = $cachedNodes |
-        Where-Object { Test-Node20 $_.FullName } |
+        Where-Object { Test-Node24 $_.FullName } |
         Select-Object -First 1 -ExpandProperty FullName
 }
 
-if (-not (Test-Node20 $nodePath)) {
-    throw "Node.js 20 was not found. Install the project-required Node.js 20 LTS first."
+if (-not (Test-Node24 $nodePath)) {
+    throw "Node.js 24 was not found. Install the project-required Node.js 24 LTS first."
 }
 
 $securePassword = Read-Host "Enter the license admin password (input is hidden)" -AsSecureString

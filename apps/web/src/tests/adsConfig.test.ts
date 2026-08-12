@@ -6,12 +6,14 @@ const projectRoot = resolve(__dirname, "..", "..", "..", "..");
 const adsConfigPath = resolve(projectRoot, "apps", "web", "src", "config", "ads.ts");
 const homePagePath = resolve(projectRoot, "apps", "web", "src", "app", "page.tsx");
 const toolsClientPath = resolve(projectRoot, "apps", "web", "src", "components", "tools", "ToolsClient.tsx");
+const adSlotPath = resolve(projectRoot, "packages", "ui", "src", "components", "ads", "AdSlot.tsx");
 const edgeOneConfigPath = resolve(projectRoot, "edgeone.json");
 const rootVercelConfigPath = resolve(projectRoot, "vercel.json");
 const appVercelConfigPath = resolve(projectRoot, "apps", "web", "vercel.json");
 const adsConfigSource = readFileSync(adsConfigPath, "utf8");
 const homePageSource = readFileSync(homePagePath, "utf8");
 const toolsClientSource = readFileSync(toolsClientPath, "utf8");
+const adSlotSource = readFileSync(adSlotPath, "utf8");
 const deploymentConfigSources = [
   readFileSync(edgeOneConfigPath, "utf8"),
   readFileSync(rootVercelConfigPath, "utf8"),
@@ -32,6 +34,13 @@ describe("adsConfig", () => {
 
   it("does not render the tool page ad slot in the online tools panel", () => {
     expect(toolsClientSource).not.toContain('<AdSlot config={adsConfig} name="toolBottom" />');
+  });
+
+  it("runs third-party ad code in a sandbox without parent-document access", () => {
+    expect(adSlotSource).toContain('sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"');
+    expect(adSlotSource).not.toContain("allow-same-origin");
+    expect(adSlotSource).toContain("srcDoc={source}");
+    expect(adSlotSource).not.toContain('document.createElement("script")');
   });
 
   it("keeps every deployment policy free of retired Google ad domains", () => {

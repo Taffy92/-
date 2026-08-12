@@ -29,7 +29,7 @@ describe("networkGuard", () => {
     expect(isSafeLocalUrl("https://third-party.test/upload")).toBe(false);
   });
 
-  it("blocks suspicious external fetch uploads in development", () => {
+  it("blocks suspicious external fetch uploads in every build mode", () => {
     const originalFetch = vi.fn(() => Promise.resolve(new Response("ok")));
     Object.defineProperty(window, "fetch", { value: originalFetch, writable: true });
     installNetworkGuard();
@@ -47,7 +47,7 @@ describe("networkGuard", () => {
     expect(originalFetch).toHaveBeenCalledTimes(2);
   });
 
-  it("blocks suspicious external XMLHttpRequest uploads in development", () => {
+  it("blocks suspicious external XMLHttpRequest uploads in every build mode", () => {
     installNetworkGuard();
     const xhr = new XMLHttpRequest();
     xhr.open("POST", "https://third-party.test/upload");

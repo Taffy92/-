@@ -36,24 +36,11 @@ describe("Tauri permission hardening", () => {
     expect(allowlist.fs.renameFile).toBe(false);
   });
 
-  it("keeps fs scope bounded to user and project directories", () => {
+  it("starts with an empty fs scope and relies on user-selected dynamic paths", () => {
     const config = readTauriConfig();
     const scope: string[] = config.tauri.allowlist.fs.scope;
 
-    expect(scope).not.toContain("C:/**");
-    expect(scope).not.toContain("**");
-    expect(scope).toEqual(
-      expect.arrayContaining([
-        "$HOME/**",
-        "$DESKTOP/**",
-        "$DOCUMENT/**",
-        "$DOWNLOAD/**",
-        "$PICTURE/**",
-        "$VIDEO/**",
-        "$AUDIO/**",
-        "D:/**"
-      ])
-    );
+    expect(scope).toEqual([]);
   });
 
   it("keeps shell, path, process, updater and WebView2 install behavior stable", () => {
@@ -64,7 +51,7 @@ describe("Tauri permission hardening", () => {
     const localPaths = readFileSync(localPathsPath, "utf8");
 
     expect(config.build.withGlobalTauri).toBe(true);
-    expect(allowlist.path.all).toBe(true);
+    expect(allowlist.path.all).toBe(false);
     expect(allowlist.shell.all).toBe(false);
     expect(allowlist.shell.open).toBe(false);
     expect(allowlist.shell.scope).toEqual([]);
@@ -72,6 +59,10 @@ describe("Tauri permission hardening", () => {
     expect(toolsSource).toContain('invokeTauri<void>("open_output_path"');
     expect(rustMain).toContain("local_paths::open_output_path");
     expect(localPaths).toContain("Command::new(\"explorer.exe\")");
+    expect(localPaths).toContain("app.fs_scope().is_allowed");
+    expect(localPaths).toContain("allow_directory(&canonical, true)");
+    expect(localPaths).not.toContain('PathBuf::from("D:\\\\")');
+    expect(toolsSource).toContain("recursive: true");
     expect(allowlist.process.all).toBe(false);
     expect(allowlist.process.exit).toBe(false);
     expect(allowlist.process.relaunch).toBe(false);

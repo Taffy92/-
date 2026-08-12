@@ -76,9 +76,15 @@ describe("EdgeOne private license admin build", () => {
     expect(config.buildCommand).toBe("npm run build:edgeone");
     expect(config.installCommand).toBe("pnpm install --frozen-lockfile");
     expect(config.outputDirectory).toBe("apps/web/out");
-    expect(config.nodeVersion).toBe("20.18.0");
+    expect(config.nodeVersion).toBe("24.5.0");
     expect(config.cloudFunctions?.mainlandRegions).toEqual(["ap-guangzhou"]);
     expect(config.headers).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        source: "/*",
+        headers: expect.arrayContaining([
+          { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" }
+        ])
+      }),
       expect.objectContaining({
         source: "/admin/license/*",
         headers: expect.arrayContaining([

@@ -1,13 +1,27 @@
 use std::{
-  env,
   fs,
   path::{Component, Path, PathBuf},
   process::Command
 };
+use tauri::{AppHandle, Manager};
 
 #[tauri::command]
-pub fn open_output_path(path: String) -> Result<(), String> {
-  let path = checked_existing_path(&path)?;
+pub fn default_output_directory(app: AppHandle) -> Result<String, String> {
+  let directory = tauri::api::path::download_dir()
+    .ok_or_else(|| "无法定位系统下载目录，请手动选择输出目录。".to_string())?;
+  let canonical = directory
+    .canonicalize()
+    .map_err(|_| "无法访问系统下载目录，请手动选择输出目录。".to_string())?;
+  app
+    .fs_scope()
+    .allow_directory(&canonical, true)
+    .map_err(|_| "无法授权系统下载目录，请手动选择输出目录。".to_string())?;
+  Ok(canonical.to_string_lossy().to_string())
+}
+
+#[tauri::command]
+pub fn open_output_path(app: AppHandle, path: String) -> Result<(), String> {
+  let path = checked_existing_path(&app, &path)?;
   let mut command = Command::new("explorer.exe");
 
   if path.is_file() {
@@ -24,11 +38,12 @@ pub fn open_output_path(path: String) -> Result<(), String> {
 
 #[tauri::command]
 pub fn finalize_task_output(
+  app: AppHandle,
   output_root: String,
   temporary_path: String,
   final_name: String
 ) -> Result<String, String> {
-  let root = checked_output_root(&output_root)?;
+  let root = checked_output_root(&app, &output_root)?;
   let temporary = checked_task_temporary_file(&root, &temporary_path)?;
   let final_name = checked_final_name(&final_name)?;
   let destination = unique_output_path(&root, &final_name);
@@ -40,10 +55,11 @@ pub fn finalize_task_output(
 
 #[tauri::command]
 pub fn cleanup_task_temporary_file(
+  app: AppHandle,
   output_root: String,
   temporary_path: String
 ) -> Result<(), String> {
-  let root = checked_output_root(&output_root)?;
+  let root = checked_output_root(&app, &output_root)?;
   let requested = PathBuf::from(temporary_path.trim());
   reject_parent_components(&requested)?;
   if !requested.exists() {
@@ -55,7 +71,7 @@ pub fn cleanup_task_temporary_file(
     .map_err(|_| "无法清理任务临时文件。".to_string())
 }
 
-fn checked_existing_path(path_text: &str) -> Result<PathBuf, String> {
+fn checked_existing_path(app: &AppHandle, path_text: &str) -> Result<PathBuf, String> {
   let path_text = path_text.trim();
   if path_text.is_empty() {
     return Err("output path is empty".to_string());
@@ -70,15 +86,15 @@ fn checked_existing_path(path_text: &str) -> Result<PathBuf, String> {
     .canonicalize()
     .map_err(|_| "output path does not exist".to_string())?;
 
-  if is_allowed_output_path(&canonical) {
+  if app.fs_scope().is_allowed(&canonical) {
     Ok(canonical)
   } else {
     Err("output path is outside the allowed local output scope".to_string())
   }
 }
 
-fn checked_output_root(path_text: &str) -> Result<PathBuf, String> {
-  let root = checked_existing_path(path_text)?;
+fn checked_output_root(app: &AppHandle, path_text: &str) -> Result<PathBuf, String> {
+  let root = checked_existing_path(app, path_text)?;
   if !root.is_dir() {
     return Err("输出根路径必须是文件夹。".to_string());
   }
@@ -154,30 +170,6 @@ fn unique_output_path(root: &Path, requested_name: &str) -> PathBuf {
     }
     suffix += 1;
   }
-}
-
-fn is_allowed_output_path(path: &Path) -> bool {
-  allowed_roots()
-    .into_iter()
-    .any(|root| is_same_or_child(path, &root))
-}
-
-fn allowed_roots() -> Vec<PathBuf> {
-  let mut roots = Vec::new();
-
-  if let Some(home) = env::var_os("USERPROFILE").map(PathBuf::from) {
-    roots.push(home);
-  }
-  if let (Some(drive), Some(path)) = (env::var_os("HOMEDRIVE"), env::var_os("HOMEPATH")) {
-    roots.push(PathBuf::from(format!("{}{}", drive.to_string_lossy(), path.to_string_lossy())));
-  }
-
-  roots.push(PathBuf::from("D:\\"));
-
-  roots
-    .into_iter()
-    .filter_map(|root| root.canonicalize().ok())
-    .collect()
 }
 
 fn is_same_or_child(path: &Path, root: &Path) -> bool {

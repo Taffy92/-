@@ -8,7 +8,7 @@ use std::{
   process::{Command, Stdio},
   time::{Instant, SystemTime, UNIX_EPOCH}
 };
-use tauri::AppHandle;
+use tauri::{AppHandle, Manager};
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -242,7 +242,7 @@ fn build_whitelisted_command(
     }),
     PocMode::ProbeDuration => {
       let probe = ffprobe.ok_or_else(|| "sidecar 未配置：未找到 ffprobe.exe，无法读取媒体信息。".to_string())?;
-      let input = validate_input_path(request.input_path.as_deref(), &["mp4", "mov", "avi", "mkv", "webm", "mp3", "wav", "aac", "m4a", "flac"])?;
+      let input = validate_input_path(app, request.input_path.as_deref(), &["mp4", "mov", "avi", "mkv", "webm", "mp3", "wav", "aac", "m4a", "flac"])?;
       Ok(BuiltCommand {
         program: probe,
         args: vec![
@@ -258,7 +258,7 @@ fn build_whitelisted_command(
       })
     },
     PocMode::ConvertVideo => {
-      let input = validate_input_path(request.input_path.as_deref(), &["mp4", "mov", "avi", "mkv", "webm"])?;
+      let input = validate_input_path(app, request.input_path.as_deref(), &["mp4", "mov", "avi", "mkv", "webm"])?;
       let format = validate_output_format(request.output_format.as_deref(), &["mp4", "mov", "avi", "mkv", "webm"])?;
       let output = validate_output_path(app, request.output_dir.as_deref(), request.output_name.as_deref(), &input, &format)?;
       Ok(BuiltCommand {
@@ -268,7 +268,7 @@ fn build_whitelisted_command(
       })
     },
     PocMode::ConvertMp4ToWebm => {
-      let input = validate_input_path(request.input_path.as_deref(), &["mp4"])?;
+      let input = validate_input_path(app, request.input_path.as_deref(), &["mp4"])?;
       let output = validate_output_path(app, request.output_dir.as_deref(), request.output_name.as_deref(), &input, "webm")?;
       Ok(BuiltCommand {
         program: ffmpeg,
@@ -277,7 +277,7 @@ fn build_whitelisted_command(
       })
     },
     PocMode::ConvertWavToFlac => {
-      let input = validate_input_path(request.input_path.as_deref(), &["wav"])?;
+      let input = validate_input_path(app, request.input_path.as_deref(), &["wav"])?;
       let output = validate_output_path(app, request.output_dir.as_deref(), request.output_name.as_deref(), &input, "flac")?;
       Ok(BuiltCommand {
         program: ffmpeg,
@@ -417,13 +417,16 @@ fn validate_output_format(value: Option<&str>, allowed_extensions: &[&str]) -> R
   }
 }
 
-fn validate_input_path(value: Option<&str>, allowed_extensions: &[&str]) -> Result<PathBuf, String> {
+fn validate_input_path(app: &AppHandle, value: Option<&str>, allowed_extensions: &[&str]) -> Result<PathBuf, String> {
   let raw = value.ok_or_else(|| "缺少输入文件，请使用用户主动选择的本地文件。".to_string())?;
   let path = PathBuf::from(raw);
   reject_parent_components(&path)?;
   let canonical = fs::canonicalize(&path).map_err(|_| "输入文件不存在，请重新选择文件。".to_string())?;
   if !canonical.is_file() {
     return Err("输入路径不是文件，请重新选择文件。".to_string());
+  }
+  if !app.fs_scope().is_allowed(&canonical) {
+    return Err("输入文件未通过本机选择授权，请重新选择文件。".to_string());
   }
   let extension = canonical.extension().and_then(|value| value.to_str()).unwrap_or("").to_ascii_lowercase();
   if !allowed_extensions.iter().any(|item| *item == extension) {
@@ -445,6 +448,9 @@ fn validate_output_path(
   let canonical_dir = fs::canonicalize(&dir).map_err(|_| "输出目录不存在，请重新选择输出目录。".to_string())?;
   if !canonical_dir.is_dir() {
     return Err("输出路径不是目录，请重新选择输出目录。".to_string());
+  }
+  if !app.fs_scope().is_allowed(&canonical_dir) {
+    return Err("输出目录未通过本机选择授权，请重新选择输出目录。".to_string());
   }
   reject_install_or_system_dir(app, &canonical_dir)?;
   let stem = output_name

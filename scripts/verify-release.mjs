@@ -22,6 +22,7 @@ class ReleaseStageError extends Error {
 
 const stages = [
   externalStage("toolchain", "Verify Node and pnpm toolchain", npmCommand, ["run", "verify:toolchain"]),
+  externalStage("dependency-audit", "Reject high and critical JavaScript dependency vulnerabilities", npmCommand, ["run", "audit:dependencies"]),
   externalStage("tests", "Run the complete web test suite", npmCommand, ["test"]),
   externalStage("privacy", "Verify the local-processing privacy boundary", npmCommand, ["run", "check:privacy"]),
   externalStage("network", "Verify the network-upload boundary", npmCommand, ["run", "check:network"]),
@@ -34,6 +35,7 @@ const stages = [
     "verify:office"
   ]),
   externalStage("edgeone-build", "Build and validate the EdgeOne release output", npmCommand, ["run", "build:edgeone"]),
+  externalStage("browser-privacy", "Verify the browser local-file network boundary", npmCommand, ["run", "check:network:browser"]),
   internalStage("artifacts", "Verify installer, ZIP, version, SHA256, and EdgeOne parts", verifyReleaseArtifacts),
   internalStage("secret-scan", "Scan tracked and published files for private release material", verifyNoPrivateMaterial),
   internalStage("skip-scan", "Reject skipped critical conversion verification", verifyCriticalTests)

@@ -11,7 +11,7 @@ edition = "2021"
 tauri-build = { version = "1.5", features = [] }
 
 [dependencies]
-tauri = { version = "1.6", features = [ "dialog-confirm", "fs-read-dir", "fs-create-dir", "fs-write-file", "fs-exists", "dialog-ask", "fs-read-file", "dialog-save", "dialog-message", "dialog-open", "path-all"] }
+tauri = { version = "1.6", features = [ "dialog-confirm", "fs-read-dir", "fs-create-dir", "fs-write-file", "fs-exists", "dialog-ask", "fs-read-file", "dialog-save", "dialog-message", "dialog-open"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha2 = "0.10"
@@ -19,6 +19,9 @@ base64 = "0.22"
 ed25519-dalek = "2"
 hmac = "0.12"
 winreg = "0.52"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Security_Cryptography"] }
 
 [features]
 custom-protocol = ["tauri/custom-protocol"]

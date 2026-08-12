@@ -26,6 +26,17 @@ test("local processing page does not upload user files while ads and download au
   await page.locator(".online-tool-directory-grid > a").first().click();
   await expect(page.getByText(localPrivacyText, { exact: false })).toBeVisible();
 
+  const fileInput = page.locator('input[type="file"]').first();
+  await fileInput.setInputFiles({
+    name: "privacy-network-test.png",
+    mimeType: "image/png",
+    buffer: Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9Z7mAAAAAASUVORK5CYII=",
+      "base64",
+    ),
+  });
+  await expect(page.getByText("privacy-network-test.png", { exact: false })).toBeVisible();
+
   await page.waitForTimeout(500);
   expect(fileUploadRequests).toEqual([]);
   expect(allowedNetworkRequests.every((url) => !/private|sample|blob:/i.test(url))).toBe(true);

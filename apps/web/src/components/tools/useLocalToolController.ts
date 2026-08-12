@@ -68,7 +68,7 @@ export type LocalToolStatus = "idle" | "running" | "done" | "error" | "cancelled
 
 type TauriApi = {
   dialog?: {
-    open(options: { directory: true; multiple: false; title: string }): Promise<string | string[] | null>;
+    open(options: { directory: true; multiple: false; recursive: true; title: string }): Promise<string | string[] | null>;
   };
   fs?: {
     createDir(path: string, options: { recursive: boolean }): Promise<void>;
@@ -210,7 +210,7 @@ export function useLocalToolController(options: UseLocalToolControllerOptions) {
     setError("");
   }
 
-  async function handleFiles(list: FileList | null) {
+  async function handleFiles(list: FileList | File[] | null) {
     const selected = list ? Array.from(list) : [];
     if (!selected.length) return;
     const accepted = multiple ? selected : selected.slice(0, 1);
@@ -246,6 +246,7 @@ export function useLocalToolController(options: UseLocalToolControllerOptions) {
       const selected = await tauri.dialog.open({
         directory: true,
         multiple: false,
+        recursive: true,
         title: "选择新增工具输出目录"
       });
       if (typeof selected === "string" && selected) {
@@ -562,6 +563,7 @@ export function useLocalToolController(options: UseLocalToolControllerOptions) {
     accept,
     resetToolState,
     handleFiles,
+    reportError: (reason: unknown) => setError(friendlyLocalToolError(reason)),
     selectOutputFolder,
     run,
     cancel,

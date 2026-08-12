@@ -30,6 +30,7 @@ import { batchModeLabel, batchTaskStatusLabel, createBatchTask, defaultOutputDir
 import type { BatchMode, BatchOutputDirectory, BatchTask, BatchTaskStatus } from "@/lib/batchQueue";
 import { formatDesktopLicenseLabel } from "@/lib/desktopLicense";
 import type { DesktopLicenseStatus } from "@/lib/desktopLicense";
+import { pickTauriFiles } from "@/lib/tauriFilePicker";
 import { createOutputSubdirectory, saveBlobToOutputDirectory, saveFilesToOutputDirectory } from "@/lib/conversion/desktopOutput";
 import { getSidecarExperimentMode, isSidecarReady, shouldUseSidecarExperiment, sidecarExperimentStorageKey, sidecarStatusText, sidecarUnsupportedReason } from "@/lib/sidecarFfmpeg";
 import type { SidecarCheckResult, SidecarCommandMode, SidecarCommandResult } from "@/lib/sidecarFfmpeg";
@@ -356,9 +357,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     if (!isDesktopSurface) return;
     setSidecarExperimentEnabled(window.localStorage.getItem(sidecarExperimentStorageKey) === "enabled");
     void refreshSidecarStatus();
-    const tauri = getTauriApi();
-    if (!tauri?.path?.downloadDir) return;
-    void tauri.path.downloadDir().then((pathValue: string) => {
+    void invokeTauri<string>("default_output_directory").then((pathValue) => {
       if (!pathValue) return;
       setOutputDirectory({ kind: "tauri", path: pathValue, label: sanitizeLocalPath(pathValue) });
     }).catch(() => {
@@ -652,7 +651,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     return activeBatchMode || (activeTab === "batch" ? batchMode : undefined);
   }
 
-  function handleBatchFiles(fileList?: FileList | null) {
+  function handleBatchFiles(fileList?: FileList | File[] | null) {
     if (!fileList?.length) return;
     const mode = getCurrentBatchMode();
     if (!mode) {
@@ -802,7 +801,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     const tauri = getTauriApi();
     if (tauri?.dialog?.open) {
       try {
-        const selected = await tauri.dialog.open({ directory: true, multiple: false, title: "选择批量结果输出目录" });
+        const selected = await tauri.dialog.open({ directory: true, multiple: false, recursive: true, title: "选择批量结果输出目录" });
         if (typeof selected === "string" && selected) {
           setOutputDirectory({ kind: "tauri", path: selected, label: sanitizeLocalPath(selected) });
           setProgressMessage(`输出目录已设置为：${sanitizeLocalPath(selected)}`);
@@ -826,6 +825,20 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     }
 
     setError("当前环境不支持直接选择输出目录。下一步：处理完成后请使用下载结果按钮保存文件。");
+  }
+
+  async function selectDesktopInputFiles() {
+    try {
+      const selected = await pickTauriFiles({ accept, multiple: true, title: "选择需要处理的本地文件" });
+      if (selected === undefined) {
+        inputRef.current?.click();
+      } else if (selected?.length) {
+        if (activeBatchMode) handleBatchFiles(selected);
+        else await handleFile(selected[0]);
+      }
+    } catch (reason) {
+      setError(friendlyError(reason));
+    }
   }
 
   async function ensureFolderOutputDirectory(): Promise<BatchOutputDirectory> {
@@ -865,7 +878,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
     }
     const tauri = getTauriApi();
     if (tauri?.dialog?.open && tauri?.fs?.readDir && tauri?.fs?.readBinaryFile) {
-      const selected = await tauri.dialog.open({ directory: true, multiple: false, title: "选择需要导入的文件夹" });
+      const selected = await tauri.dialog.open({ directory: true, multiple: false, recursive: true, title: "选择需要导入的文件夹" });
       if (typeof selected !== "string" || !selected) return;
       const result = await readTauriFolderFiles(selected, mode);
       if (!result.files.length) {
@@ -1845,7 +1858,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
               </div>
             </div>
             <div className="desktop-a-title-actions">
-              <button type="button" onClick={() => inputRef.current?.click()}>
+              <button type="button" onClick={() => void selectDesktopInputFiles()}>
                 <FilePlus2 aria-hidden="true" size={15} />
                 添加文件
               </button>
@@ -1900,7 +1913,7 @@ export function ToolsClient({ surface = isDesktopApp ? "desktop" : "web" }: { su
                   summary={desktopInspectorFile === file ? summary : null}
                   cropImageRef={desktopInspectorFile === file ? cropImageRef : undefined}
                   onImageLoad={() => setCropPreviewKey((value) => value + 1)}
-                  onPickFile={() => inputRef.current?.click()}
+                  onPickFile={() => void selectDesktopInputFiles()}
                 />
               )}
             </DesktopTaskWorkspace>

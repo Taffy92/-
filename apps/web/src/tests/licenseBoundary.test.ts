@@ -50,6 +50,16 @@ describe("offline license boundary", () => {
     expect(licenseSource).not.toContain("REGISTRY_MACHINE_ID_VALUE");
   });
 
+  it("protects trial records with Windows DPAPI and rejects forgeable v1 records", () => {
+    const licenseSource = readProjectFile("apps", "desktop", "src-tauri", "src", "license.rs");
+
+    expect(licenseSource).toContain("CryptProtectData");
+    expect(licenseSource).toContain("CryptUnprotectData");
+    expect(licenseSource).toContain('record.version != "ufc-trial-v2"');
+    expect(licenseSource).not.toContain("fn local_keystream");
+    expect(licenseSource).not.toContain("fn trial_hmac(payload");
+  });
+
   it("keeps the license gate desktop-only and leaves online tabs unchanged", () => {
     const toolsSource = readProjectFile("apps", "web", "src", "components", "tools", "ToolsClient.tsx");
     const localToolsSource = readProjectFile("apps", "web", "src", "components", "tools", "LocalToolsClient.tsx");

@@ -39,7 +39,6 @@ function isRequestLike(input: RequestInfo | URL): input is Request {
 
 export function installNetworkGuard(): void {
   if (typeof window === "undefined") return;
-  if (process.env.NODE_ENV === "production") return;
   const marker = "__docToolNetworkGuardInstalled";
   const target = window as Window & { [marker]?: boolean };
   if (target[marker]) return;
@@ -53,7 +52,6 @@ export function installNetworkGuard(): void {
       console.error(`[privacy] ${message}`, input);
       throw new Error(message);
     }
-    console.info("[privacy] fetch 请求通过隐私检查", typeof input === "string" ? input : input.toString());
     return originalFetch(input, init);
   }) as typeof window.fetch;
 
@@ -69,7 +67,6 @@ export function installNetworkGuard(): void {
       console.error(`[privacy] ${message}`, this.__docToolUrl);
       throw new Error(message);
     }
-    console.info("[privacy] XMLHttpRequest 请求通过隐私检查", this.__docToolUrl || "");
     return originalSend.call(this, body);
   } as typeof XMLHttpRequest.prototype.send;
 }
